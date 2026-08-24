@@ -1,0 +1,148 @@
+/* BayesStack UI Design System — Text Component Styles */
+
+.bs-text {
+  margin: 0;
+  padding: 0;
+  font-family: "Manrope", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  box-sizing: border-box;
+}
+
+/* Roles */
+.bs-text--role-expressive {
+  letter-spacing: -0.01em;
+}
+
+.bs-text--role-productive {
+  font-family: "Manrope", sans-serif;
+  letter-spacing: 0em;
+}
+
+.bs-text--role-inherit {
+  font-family: inherit;
+  letter-spacing: inherit;
+}
+
+/* Sizes */
+.bs-text--size-xs {
+  font-size: 0.75rem; /* 12px */
+  line-height: 1.35;
+}
+
+.bs-text--size-sm {
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.4;
+}
+
+.bs-text--size-md {
+  font-size: 1rem; /* 16px */
+  line-height: 1.5;
+}
+
+.bs-text--size-lg {
+  font-size: 1.125rem; /* 18px */
+  line-height: 1.5;
+}
+
+.bs-text--size-xl {
+  font-size: 1.25rem; /* 20px */
+  line-height: 1.4;
+}
+
+/* Colors */
+.bs-text--color-primary {
+  color: #123333;
+}
+
+.bs-text--color-secondary {
+  color: #59716E;
+}
+
+.bs-text--color-tertiary {
+  color: #889E9B;
+}
+
+.bs-text--color-quartiary {
+  color: #AEC2BF;
+}
+
+.bs-text--color-interactive {
+  color: #0B6763;
+}
+
+.bs-text--color-soft {
+  color: #68807D;
+}
+
+.bs-text--color-success {
+  color: #0E8345;
+}
+
+.bs-text--color-warning {
+  color: #D97706;
+}
+
+.bs-text--color-error {
+  color: #DC2626;
+}
+
+/* Weights */
+.bs-text--strong {
+  font-weight: 600;
+}
+
+.bs-text--stronger {
+  font-weight: 800;
+}
+
+/* Text Transforms */
+.bs-text--transform-capitalize {
+  text-transform: capitalize;
+}
+
+.bs-text--transform-uppercase {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.bs-text--transform-lowercase {
+  text-transform: lowercase;
+}
+
+.bs-text--transform-none {
+  text-transform: none;
+}
+
+/* Alignment */
+.bs-text--align-left {
+  text-align: left;
+}
+
+.bs-text--align-center {
+  text-align: center;
+}
+
+.bs-text--align-right {
+  text-align: right;
+}
+
+.bs-text--align-justify {
+  text-align: justify;
+}
+
+/* Truncated */
+.bs-text--truncated {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+}
+
+/* Highlighted */
+.bs-text--highlighted {
+  background-color: rgba(11, 103, 99, 0.12);
+  color: #0B6763;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
