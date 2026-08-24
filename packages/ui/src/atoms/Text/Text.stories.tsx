@@ -83,14 +83,14 @@ export default meta;
 type Story = StoryObj<typeof Text>;
 
 /**
- * **Canvas Playground**: Use the Storybook controls panel below to dynamically test sizes, colors, roles, transforms, and weights.
+ * **Canvas Playground**: Use the Storybook controls panel below to dynamically test sizes, colors, roles, transforms, weights, alignment, and formatting.
  */
 export const Playground: Story = {
   args: {
     children:
-      "BayesStack Design Studio enables rapid, reliable UI composition with enterprise-grade typography tokens.",
-    size: "md",
-    color: "primary",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In vel augue sed ante molestie pharetra. Aliquam facilisis venenatis iaculis.",
+    size: "sm",
+    color: "secondary",
     role: "expressive",
     transform: "none",
     align: "left",
@@ -98,7 +98,7 @@ export const Playground: Story = {
     stronger: false,
     truncated: false,
     highlighted: false,
-    as: "p",
+    as: "span",
   },
   render: (args) => (
     <div style={{ maxWidth: 480, padding: 16 }}>
@@ -107,117 +107,3 @@ export const Playground: Story = {
   ),
 };
 
-/**
- * **Text Sizes**: Displays the 5 font size scale steps from `xs` (12px) to `xl` (20px).
- */
-export const Sizes: Story = {
-  render: () => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-      <Text size="xs">Extra Small (xs - 12px)</Text>
-      <Text size="sm">Small (sm - 14px) [Default]</Text>
-      <Text size="md">Medium (md - 16px)</Text>
-      <Text size="lg">Large (lg - 18px)</Text>
-      <Text size="xl">Extra Large (xl - 20px)</Text>
-    </div>
-  ),
-};
-
-/**
- * **Semantic Colors**: Demonstrates brand text color tokens for interactive, primary, secondary, and feedback states.
- */
-export const Colors: Story = {
-  render: () => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      <Text color="interactive" size="md" strong>
-        Interactive (#0B6763)
-      </Text>
-      <Text color="primary" size="md">
-        Primary (#123333)
-      </Text>
-      <Text color="secondary" size="md">
-        Secondary (#59716E)
-      </Text>
-      <Text color="tertiary" size="md">
-        Tertiary (#889E9B)
-      </Text>
-      <Text color="quartiary" size="md">
-        Quartiary (#AEC2BF)
-      </Text>
-      <Text color="soft" size="md">
-        Soft Muted (#68807D)
-      </Text>
-      <Text color="success" size="md" strong>
-        Success (#0E8345)
-      </Text>
-      <Text color="warning" size="md" strong>
-        Warning (#D97706)
-      </Text>
-      <Text color="error" size="md" strong>
-        Error (#DC2626)
-      </Text>
-    </div>
-  ),
-};
-
-/**
- * **Text Weights**: Highlights standard, `strong` (600), and `stronger` (800) font weights.
- */
-export const Weights: Story = {
-  render: () => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      <Text size="md">Regular Text (400 weight)</Text>
-      <Text size="md" strong>
-        Semi-Bold Text (600 weight - `strong`)
-      </Text>
-      <Text size="md" stronger color="interactive">
-        Extra-Bold Text (800 weight - `stronger`)
-      </Text>
-    </div>
-  ),
-};
-
-/**
- * **Text Transforms**: Demonstrates text casing transformations (`capitalize`, `uppercase`, `lowercase`).
- */
-export const Transforms: Story = {
-  render: () => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      <Text transform="capitalize" size="md">
-        capitalized text transformation
-      </Text>
-      <Text transform="uppercase" size="md">
-        uppercase text transformation
-      </Text>
-      <Text transform="lowercase" size="md">
-        LOWERCASE TEXT TRANSFORMATION
-      </Text>
-    </div>
-  ),
-};
-
-/**
- * **Truncated & Highlighted**: Shows multi-line text truncation and background brand highlighting.
- */
-export const TruncatedAndHighlighted: Story = {
-  render: () => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 360 }}>
-      <div>
-        <Text size="xs" color="secondary" style={{ display: "block", marginBottom: 4 }}>
-          Truncated Single Line:
-        </Text>
-        <Text truncated size="md">
-          This is a very long text string that exceeds container bounds and is truncated cleanly with an ellipsis.
-        </Text>
-      </div>
-
-      <div>
-        <Text size="xs" color="secondary" style={{ display: "block", marginBottom: 4 }}>
-          Highlighted Inline Text:
-        </Text>
-        <Text size="md">
-          Important terms like <Text highlighted>BayesStack Studio</Text> can be highlighted inline.
-        </Text>
-      </div>
-    </div>
-  ),
-};
