@@ -1,0 +1,6 @@
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; background: #0c1222; color: #f7f8fb; font-family: Arial, sans-serif; }
+main { display: grid; min-height: 100vh; place-content: center; gap: 1rem; padding: 2rem; text-align: center; }
+h1 { margin: 0; font-size: clamp(2.5rem, 7vw, 5rem); letter-spacing: -0.05em; }
+p { margin: 0; color: #aeb8cf; font-size: 1.125rem; }
+.eyebrow { color: #8ba8ff; font-size: .8rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; }

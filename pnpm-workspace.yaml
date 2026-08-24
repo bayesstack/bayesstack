@@ -1,0 +1,27 @@
+packages:
+  - apps/*
+  - packages/*
+  - studios/*/frontend
+
+allowBuilds:
+  sharp: true
+
+supportedArchitectures:
+  os:
+    - current
+  cpu:
+    - current
+  libc:
+    - current
+
+catalog:
+  "@types/node": "^22.10.0"
+  "@types/react": "^19.0.0"
+  "@types/react-dom": "^19.0.0"
+  next: "^15.5.23"
+  react: "^19.1.0"
+  react-dom: "^19.1.0"
+  typescript: "^5.7.0"
+
+minimumReleaseAgeExclude:
+  - pnpm@11.23.0

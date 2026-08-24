@@ -1,0 +1,14 @@
+.git
+.next
+**/.next
+.turbo
+**/.turbo
+node_modules
+**/node_modules
+*.tsbuildinfo
+*.log
+.venv
+__pycache__
+*.py[cod]
+dist
+out

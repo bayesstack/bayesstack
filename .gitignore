@@ -1,0 +1,22 @@
+node_modules/
+.next/
+out/
+dist/
+*.log
+.env*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+*.tsbuildinfo
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Local tooling
+.turbo/
+.DS_Store

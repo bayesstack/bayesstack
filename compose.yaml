@@ -1,0 +1,76 @@
+name: bayesstack
+
+services:
+  api:
+    build:
+      context: ./services/api
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      BAYESSTACK_ENV: development
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  landing:
+    build:
+      context: .
+      dockerfile: infra/docker/next.Dockerfile
+      args:
+        APP_NAME: landing
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    depends_on:
+      api:
+        condition: service_healthy
+
+  learner:
+    build:
+      context: .
+      dockerfile: infra/docker/next.Dockerfile
+      args:
+        APP_NAME: learner
+    ports:
+      - "3001:3000"
+    environment:
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    depends_on:
+      api:
+        condition: service_healthy
+
+  faculty:
+    build:
+      context: .
+      dockerfile: infra/docker/next.Dockerfile
+      args:
+        APP_NAME: faculty
+    ports:
+      - "3002:3000"
+    environment:
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    depends_on:
+      api:
+        condition: service_healthy
+
+  admin:
+    build:
+      context: .
+      dockerfile: infra/docker/next.Dockerfile
+      args:
+        APP_NAME: admin
+    ports:
+      - "3003:3000"
+    environment:
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    depends_on:
+      api:
+        condition: service_healthy
