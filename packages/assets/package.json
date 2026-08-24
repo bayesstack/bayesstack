@@ -1,0 +1,27 @@
+{
+  "name": "@bayesstack/assets",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./colors": "./src/tokens/colors.ts",
+    "./logo": "./src/components/BayesStackLogo.tsx",
+    "./mark": "./src/components/BayesStackMark.tsx",
+    "./palette.json": "./brand-palette.json"
+  },
+  "scripts": {
+    "sync": "node scripts/sync-public.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "typescript": "catalog:"
+  }
+}
