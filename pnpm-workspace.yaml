@@ -4,6 +4,7 @@ packages:
   - studios/*/frontend
 
 allowBuilds:
+  esbuild: true
   sharp: true
 
 supportedArchitectures:

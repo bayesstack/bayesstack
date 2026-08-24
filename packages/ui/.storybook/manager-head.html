@@ -1,0 +1,134 @@
+<meta name="theme-color" content="#0B6763" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
+
+<script>
+  document.title = "BayesStack Design Studio";
+
+  function injectBrandText() {
+    const brandElement = document.querySelector('a.sidebar-brand') ||
+      document.querySelector('[title="BayesStack Design Studio"]');
+    if (brandElement && !brandElement.querySelector('.brand-text-wrapper')) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'brand-text-wrapper';
+      wrapper.innerHTML = `
+        <span class="brand-title">BayesStack</span>
+        <span class="brand-subtitle">Design Studio</span>
+      `;
+      brandElement.appendChild(wrapper);
+    }
+  }
+
+  const observer = new MutationObserver(injectBrandText);
+  document.addEventListener('DOMContentLoaded', () => {
+    injectBrandText();
+    observer.observe(document.body, { childList: true, subtree: true });
+  });
+</script>
+
+<style>
+  /* Sidebar Navbar Pure White Background */
+  .sidebar-container,
+  nav.sidebar-container,
+  #aria-sidebar,
+  [data-aria-label="Sidebar"],
+  #storybook-explorer-tree,
+  div[aria-label="Sidebar"] {
+    background-color: #FFFFFF !important;
+    background: #FFFFFF !important;
+  }
+
+  /* Sidebar Brand Link Layout */
+  a.sidebar-brand,
+  .sidebar-header a {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    text-decoration: none !important;
+    padding: 6px 0 !important;
+  }
+
+  /* Original Logo Primary Image Styling */
+  img[src*="logo-primary"],
+  img[src*="brand"],
+  a.sidebar-brand img,
+  .sidebar-header img {
+    height: 36px !important;
+    width: auto !important;
+    max-height: 36px !important;
+    object-fit: contain !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Formatted Text Beside Original Logo */
+  .brand-text-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    text-align: left !important;
+    line-height: 1.15 !important;
+    font-family: 'Manrope', 'Segoe UI', -apple-system, sans-serif !important;
+  }
+
+  .brand-title {
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    color: #0B6763 !important;
+    letter-spacing: -0.3px !important;
+  }
+
+  .brand-subtitle {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    color: #59716E !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.8px !important;
+    margin-top: 1px !important;
+  }
+
+  /* Sidebar Nav Tree Item Hover Styling (Transparent #0B6763) */
+  a.sidebar-item:hover,
+  button.sidebar-item:hover,
+  div[data-item-id]:hover,
+  [data-nodetype="group"]:hover,
+  [data-nodetype="component"]:hover,
+  [data-nodetype="story"]:hover,
+  .sidebar-container [role="treeitem"]:hover,
+  .sidebar-container a:hover,
+  .sidebar-container button:hover {
+    background-color: rgba(11, 103, 99, 0.05) !important;
+    color: #0B6763 !important;
+    border-radius: 6px !important;
+    transition: background-color 0.15s ease, color 0.15s ease !important;
+  }
+
+  a.sidebar-item:hover *,
+  button.sidebar-item:hover *,
+  div[data-item-id]:hover *,
+  [data-nodetype]:hover *,
+  .sidebar-container [role="treeitem"]:hover *,
+  .sidebar-container a:hover *,
+  .sidebar-container button:hover * {
+    color: #0B6763 !important;
+    fill: #0B6763 !important;
+  }
+
+  /* Storybook Controls Panel - Target exact toggle switch spans (False / True) inside label[for="control-disabled"] */
+  label[for="control-disabled"] span,
+  label:has(input[role="switch"]) span,
+  label:has(input[type="checkbox"][role="switch"]) span,
+  input[role="switch"]~span,
+  input[type="checkbox"][role="switch"]~span,
+  label[for*="control-"] input[role="switch"]+span,
+  label[for*="control-"] span[aria-hidden="true"] {
+    color: #e1f4f1 !important;
+  }
+
+  /* Component Tests Toolbar - ONLY "Scroll to end" text button (excluding icon buttons with aria-label) */
+  nav[aria-label="Component tests toolbar"] button:not([aria-label]),
+  button.css-1plp90 {
+    color: #e1f4f1 !important;
+  }
+</style>

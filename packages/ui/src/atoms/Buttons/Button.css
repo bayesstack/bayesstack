@@ -1,0 +1,65 @@
+.bs-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 7rem;
+  border: 1px solid transparent;
+  border-radius: 0.7rem;
+  cursor: pointer;
+  font: 700 0.875rem/1.1 "Manrope", "Segoe UI", sans-serif;
+  letter-spacing: -0.01em;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.bs-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.bs-button:focus-visible {
+  outline: 3px solid rgba(11, 103, 99, 0.28);
+  outline-offset: 2px;
+}
+
+.bs-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+
+.bs-button--sm {
+  min-height: 2.25rem;
+  padding: 0 0.9rem;
+}
+
+.bs-button--md {
+  min-height: 2.75rem;
+  padding: 0 1.15rem;
+}
+
+.bs-button--lg {
+  min-height: 3.15rem;
+  padding: 0 1.4rem;
+  font-size: 0.95rem;
+}
+
+.bs-button--primary {
+  color: #ffffff;
+  background: #0b6763;
+  box-shadow: 0 0.55rem 1.15rem rgba(11, 103, 99, 0.2);
+}
+
+.bs-button--primary:hover:not(:disabled) {
+  background: #084c49;
+  box-shadow: 0 0.7rem 1.4rem rgba(11, 103, 99, 0.24);
+}
+
+.bs-button--secondary {
+  color: #0b6763;
+  border-color: #a9cfca;
+  background: #e4f2ef;
+}
+
+.bs-button--secondary:hover:not(:disabled) {
+  border-color: #0b6763;
+  background: #d3eae6;
+}

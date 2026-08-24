@@ -1,3 +1,27 @@
-# Shared UI
+# BayesStack UI
 
-Reserved for the shared UI library used by application shells and studio frontends. No components are defined yet.
+The shared UI library for every BayesStack application and studio frontend.
+
+## Component taxonomy
+
+Components are organized by composition level:
+
+- `src/atoms` — the smallest reusable building blocks
+- `src/molecules` — focused combinations of atoms
+- `src/organisms` — complete, reusable interface sections and workflows
+
+Each component should live with its implementation, tests, and Storybook stories. The
+package's public exports belong in `src/index.ts`, so consuming apps never import from
+component internals.
+
+## UI catalog
+
+Run the local Storybook from the monorepo root:
+
+```bash
+pnpm --filter @bayesstack/ui dev
+```
+
+Then open [http://localhost:6001](http://localhost:6001). The sidebar is intentionally
+ordered as `Atoms`, `Molecules`, and `Organisms`; the first story in each section is an
+empty shelf until the first real component is added.

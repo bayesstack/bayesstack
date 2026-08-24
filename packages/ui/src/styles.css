@@ -1,0 +1,11 @@
+/* Shared UI foundations will live here as the first components are introduced. */
+:root {
+  --bs-ui-brand: #0b6763;
+  --bs-ui-brand-deep: #084c49;
+  --bs-ui-brand-soft: #e4f2ef;
+  --bs-ui-ink: #123333;
+  --bs-ui-muted: #68807d;
+  --bs-ui-line: #d7e8e4;
+  --bs-ui-surface: #ffffff;
+  --bs-ui-canvas: #f1f8f6;
+}

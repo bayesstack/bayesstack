@@ -1,0 +1,35 @@
+import { addons } from "storybook/manager-api";
+import { create } from "storybook/theming";
+
+addons.setConfig({
+  theme: create({
+    base: "light",
+    brandTitle: "BayesStack Design Studio",
+    brandUrl: "/",
+    brandImage: "/brand/logo-primary.svg",
+    colorPrimary: "#0B6763",
+    colorSecondary: "#0B6763",
+    appBg: "#FFFFFF",
+    appContentBg: "#FFFFFF",
+    appPreviewBg: "#F8FCFB",
+    appBorderColor: "#D7E8E4",
+    appBorderRadius: 12,
+    fontBase: '"Manrope", "Segoe UI", sans-serif',
+    fontCode: '"DM Mono", "SFMono-Regular", monospace',
+    textColor: "#123333",
+    textInverseColor: "#FFFFFF",
+    textMutedColor: "#68807D",
+    barTextColor: "#59716E",
+    barHoverColor: "#0B6763aa",
+    barSelectedColor: "#0B6763",
+    barBg: "#F1F8F6",
+    buttonBg: "#0B6763",
+    buttonBorder: "#0B6763",
+    booleanBg: "#0B6763",
+    booleanSelectedBg: "#084C49",
+    inputBg: "#FFFFFF",
+    inputBorder: "#C7DEDA",
+    inputTextColor: "#123333",
+    inputBorderRadius: 8,
+  }),
+});

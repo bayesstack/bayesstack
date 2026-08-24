@@ -31,18 +31,27 @@ Choose either setup path:
 
 You do not need to understand pnpm, Turborepo, FastAPI, or Docker before starting. The scripts below are the supported entry points.
 
-## Start everything
+## Start services
 
-The recommended command is automatic mode. It uses Docker if Docker is installed and running; otherwise it starts the applications directly on your machine.
+The start script prompts interactively for which service you want to start (`landing`, `learner`, `faculty`, `admin`, `ui`, `api`, or `all`). Running a single service saves CPU and memory.
 
 ```bash
+# Interactive menu (asks which service to start)
 ./scripts/start-local.sh
+
+# Start a specific service
+./scripts/start-local.sh landing
+
+# Start all services simultaneously
+./scripts/start-local.sh --all
 ```
 
 On Windows PowerShell:
 
 ```powershell
 .\scripts\start-local.ps1
+.\scripts\start-local.ps1 -Landing
+.\scripts\start-local.ps1 -All
 ```
 
 On Windows Command Prompt:
@@ -51,17 +60,18 @@ On Windows Command Prompt:
 scripts\start-local.cmd
 ```
 
-To choose explicitly:
+To choose mode explicitly:
 
 ```bash
-./scripts/start-local.sh --docker
-./scripts/start-local.sh --local
+./scripts/start-local.sh --docker landing
+./scripts/start-local.sh --local landing
 ```
 
 ```powershell
-.\scripts\start-local.ps1 -Docker
-.\scripts\start-local.ps1 -Local
+.\scripts\start-local.ps1 -Docker -Service landing
+.\scripts\start-local.ps1 -Local -Service landing
 ```
+
 
 The first native startup creates `services/api/.venv` and installs the API's small Python dependency set. It also installs JavaScript dependencies with pnpm. These generated directories are ignored by Git.
 
@@ -73,6 +83,7 @@ The first native startup creates `services/api/.venv` and installs the API's sma
 | Learner | <http://localhost:3001> |
 | Faculty | <http://localhost:3002> |
 | Admin | <http://localhost:3003> |
+| Design Studio / Storybook | <http://localhost:6001> |
 | API health | <http://localhost:8000/health> |
 
 ## Docker commands
@@ -102,6 +113,12 @@ Run one app:
 
 ```bash
 pnpm --filter @bayesstack/learner dev
+```
+
+Run only the shared UI catalog:
+
+```bash
+corepack pnpm --filter @bayesstack/ui dev
 ```
 
 Run only the API natively:

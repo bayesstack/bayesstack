@@ -4,8 +4,17 @@
   "private": true,
   "packageManager": "pnpm@11.23.0",
   "scripts": {
+    "start": "./scripts/start-local.sh",
+    "stop": "./scripts/start-local.sh --stop",
+    "dev": "./scripts/start-local.sh",
+    "dev:all": "turbo run dev --parallel",
+    "dev:landing": "turbo run dev --filter=@bayesstack/landing",
+    "dev:learner": "turbo run dev --filter=@bayesstack/learner",
+    "dev:faculty": "turbo run dev --filter=@bayesstack/faculty",
+    "dev:admin": "turbo run dev --filter=@bayesstack/admin",
+    "dev:ui": "turbo run dev --filter=@bayesstack/ui",
+    "dev:api": "./scripts/start-local.sh --api --local",
     "build": "turbo run build",
-    "dev": "turbo run dev --parallel",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck"
   },
@@ -13,3 +22,4 @@
     "turbo": "^2.5.6"
   }
 }
+
