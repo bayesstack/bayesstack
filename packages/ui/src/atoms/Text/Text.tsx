@@ -13,7 +13,7 @@ export type TextColor =
   | "warning"
   | "error";
 export type TextTransform = "capitalize" | "uppercase" | "lowercase" | "none";
-export type TextStyle = "default" | "handwritten" | "cursive" | "serif" | "monospace";
+export type TextStyle = "default" | "handwritten" | "serif" | "monospace";
 export type TextDecoration = "none" | "italic" | "underline" | "line-through" | "underline-italic";
 export type TextAlign = "left" | "center" | "right" | "justify";
 
@@ -31,7 +31,7 @@ export interface TextProps extends Omit<React.HTMLAttributes<HTMLElement>, "styl
   size?: TextSize;
 
   /**
-   * Font style variant (changes font family dynamically to Outfit, Caveat, EB Garamond, JetBrains Mono)
+   * Font style variant (changes font family dynamically to Outfit, Cedarville Cursive, EB Garamond, JetBrains Mono)
    * @default 'default'
    */
   styleVariant?: TextStyle;

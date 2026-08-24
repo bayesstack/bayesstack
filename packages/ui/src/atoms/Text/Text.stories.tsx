@@ -27,8 +27,8 @@ const meta: Meta<typeof Text> = {
     },
     style: {
       control: { type: "select" },
-      options: ["default", "handwritten", "cursive", "serif", "monospace"],
-      description: "Transformative font family style (Outfit, Caveat handwriting, EB Garamond serif, JetBrains Mono)",
+      options: ["default", "handwritten", "serif", "monospace"],
+      description: "Transformative font family style (Outfit, Cedarville Cursive handwritten, EB Garamond serif, JetBrains Mono)",
     },
     decoration: {
       control: { type: "select" },

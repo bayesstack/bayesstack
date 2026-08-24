@@ -12,10 +12,9 @@
   font-family: "Outfit", "Inter", -apple-system, sans-serif;
 }
 
-.bs-text--style-handwritten,
-.bs-text--style-cursive {
-  font-family: "Caveat", cursive, sans-serif;
-  font-size: 1.25em;
+.bs-text--style-handwritten {
+  font-family: "Cedarville Cursive", cursive;
+  font-size: 1.15em;
 }
 
 .bs-text--style-serif {
