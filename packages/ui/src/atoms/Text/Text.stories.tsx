@@ -1,5 +1,5 @@
 import React from "react";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Text } from "./Text";
 
 const meta: Meta<typeof Text> = {
@@ -17,7 +17,7 @@ const meta: Meta<typeof Text> = {
   argTypes: {
     as: {
       control: { type: "select" },
-      options: ["span", "p", "div", "label", "h1", "h2", "h3", "h4", "h5", "h6"],
+      options: ["span", "div", "label"],
       description: "Underlying HTML tag to render",
     },
     size: {
@@ -68,9 +68,9 @@ const meta: Meta<typeof Text> = {
       control: { type: "boolean" },
       description: "Extra-bold font weight (800)",
     },
-    truncated: {
-      control: { type: "boolean" },
-      description: "Truncates overflow text with ellipsis",
+    truncate: {
+      control: { type: "number", min: 1 },
+      description: "Truncates text content to N characters with an ellipsis",
     },
     highlighted: {
       control: { type: "boolean" },
@@ -102,7 +102,6 @@ export const Playground: Story = {
     align: "left",
     strong: false,
     stronger: false,
-    truncated: false,
     highlighted: false,
     as: "span",
   },

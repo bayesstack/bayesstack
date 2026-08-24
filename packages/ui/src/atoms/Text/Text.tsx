@@ -17,12 +17,14 @@ export type TextStyle = "default" | "handwritten" | "serif" | "monospace";
 export type TextDecoration = "none" | "italic" | "underline" | "line-through" | "underline-italic";
 export type TextAlign = "left" | "center" | "right" | "justify";
 
+export type TextAs = "span" | "div" | "label";
+
 export interface TextProps extends Omit<React.HTMLAttributes<HTMLElement>, "style"> {
   /**
-   * The underlying HTML tag to render
+   * The underlying HTML tag to render ('span', 'div', 'label')
    * @default 'span'
    */
-  as?: React.ElementType;
+  as?: TextAs | React.ElementType;
 
   /**
    * Text size variant
@@ -31,13 +33,7 @@ export interface TextProps extends Omit<React.HTMLAttributes<HTMLElement>, "styl
   size?: TextSize;
 
   /**
-   * Font style variant (changes font family dynamically to Outfit, Cedarville Cursive, EB Garamond, JetBrains Mono)
-   * @default 'default'
-   */
-  styleVariant?: TextStyle;
-
-  /**
-   * Font style variant shorthand / inline CSS style object
+   * Font style variant (changes font family dynamically to Outfit, Cedarville Cursive, EB Garamond, JetBrains Mono) or inline CSS style object
    * @default 'default'
    */
   style?: TextStyle | React.CSSProperties;
@@ -79,10 +75,9 @@ export interface TextProps extends Omit<React.HTMLAttributes<HTMLElement>, "styl
   stronger?: boolean;
 
   /**
-   * Truncates text with an ellipsis if it overflows its container
-   * @default false
+   * Truncates text content to N characters and appends an ellipsis
    */
-  truncated?: boolean;
+  truncate?: number;
 
   /**
    * Applies subtle brand background highlight tint
@@ -101,7 +96,6 @@ export const Text = forwardRef<HTMLElement, TextProps>(
     {
       as: Component = "span",
       size = "sm",
-      styleVariant = "default",
       style,
       decoration = "none",
       color = "primary",
@@ -109,7 +103,7 @@ export const Text = forwardRef<HTMLElement, TextProps>(
       align = "left",
       strong = false,
       stronger = false,
-      truncated = false,
+      truncate,
       highlighted = false,
       className = "",
       children,
@@ -117,13 +111,40 @@ export const Text = forwardRef<HTMLElement, TextProps>(
     },
     ref
   ) => {
-    let computedStyleVariant: TextStyle = styleVariant;
+    let computedStyleVariant: TextStyle = "default";
     let computedInlineStyle: React.CSSProperties | undefined = undefined;
 
     if (typeof style === "string") {
       computedStyleVariant = style as TextStyle;
     } else if (typeof style === "object") {
       computedInlineStyle = style;
+    }
+
+    let displayChildren = children;
+
+    const numericTruncate =
+      typeof truncate === "number"
+        ? truncate
+        : typeof truncate === "string" && !isNaN(Number(truncate)) && String(truncate).trim() !== ""
+          ? parseInt(truncate, 10)
+          : undefined;
+
+    if (numericTruncate !== undefined && numericTruncate > 0) {
+      const textContent =
+        typeof children === "string"
+          ? children
+          : typeof children === "number"
+            ? String(children)
+            : null;
+
+      if (textContent !== null) {
+        if (textContent.length > numericTruncate) {
+          // Slice to N chars and append ellipsis
+          displayChildren = textContent.slice(0, numericTruncate) + "\u2026";
+        } else {
+          displayChildren = textContent;
+        }
+      }
     }
 
     const classNames = [
@@ -136,7 +157,6 @@ export const Text = forwardRef<HTMLElement, TextProps>(
       `bs-text--align-${align}`,
       strong ? "bs-text--strong" : "",
       stronger ? "bs-text--stronger" : "",
-      truncated ? "bs-text--truncated" : "",
       highlighted ? "bs-text--highlighted" : "",
       className,
     ]
@@ -145,7 +165,7 @@ export const Text = forwardRef<HTMLElement, TextProps>(
 
     return (
       <Component ref={ref} className={classNames} style={computedInlineStyle} {...props}>
-        {children}
+        {displayChildren}
       </Component>
     );
   }

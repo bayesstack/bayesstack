@@ -143,18 +143,22 @@
 
 /* Alignment */
 .bs-text--align-left {
+  display: block;
   text-align: left;
 }
 
 .bs-text--align-center {
+  display: block;
   text-align: center;
 }
 
 .bs-text--align-right {
+  display: block;
   text-align: right;
 }
 
 .bs-text--align-justify {
+  display: block;
   text-align: justify;
 }
 

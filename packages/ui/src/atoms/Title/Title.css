@@ -1,0 +1,90 @@
+/* Title Base Atom Styles */
+.bs-title {
+  margin: 0;
+  padding: 0;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-family: var(--bs-font-primary, "Outfit", -apple-system, sans-serif);
+}
+
+/* Heading Sizes */
+.bs-title--h1 {
+  font-size: var(--bs-title-h1-size, 2.5rem); /* 40px */
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.bs-title--h2 {
+  font-size: var(--bs-title-h2-size, 2rem); /* 32px */
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+.bs-title--h3 {
+  font-size: var(--bs-title-h3-size, 1.5rem); /* 24px */
+  line-height: 1.2;
+}
+
+.bs-title--h4 {
+  font-size: var(--bs-title-h4-size, 1.25rem); /* 20px */
+  line-height: 1.25;
+}
+
+.bs-title--h5 {
+  font-size: var(--bs-title-h5-size, 1.125rem); /* 18px */
+  line-height: 1.3;
+}
+
+.bs-title--h6 {
+  font-size: var(--bs-title-h6-size, 1rem); /* 16px */
+  line-height: 1.35;
+}
+
+/* Style Variants (Font Families) */
+.bs-title--style-default {
+  font-family: var(--bs-font-primary, "Outfit", -apple-system, sans-serif);
+}
+
+.bs-title--style-serif {
+  font-family: var(--bs-font-serif, "EB Garamond", Georgia, serif);
+}
+
+.bs-title--style-handwritten {
+  font-family: var(--bs-font-handwritten, "Cedarville Cursive", cursive);
+  letter-spacing: 0;
+}
+
+.bs-title--style-monospace {
+  font-family: var(--bs-font-mono, "JetBrains Mono", monospace);
+  letter-spacing: -0.01em;
+}
+
+/* Font Weight Variants */
+.bs-title--weight-normal { font-weight: 400; }
+.bs-title--weight-medium { font-weight: 500; }
+.bs-title--weight-semibold { font-weight: 600; }
+.bs-title--weight-bold { font-weight: 700; }
+.bs-title--weight-extrabold { font-weight: 800; }
+
+/* Color Token Mapping */
+.bs-title--color-primary { color: var(--bs-color-text-primary, #123333); }
+.bs-title--color-secondary { color: var(--bs-color-text-secondary, #59716E); }
+.bs-title--color-tertiary { color: var(--bs-color-text-tertiary, #889E9B); }
+.bs-title--color-interactive { color: var(--bs-color-interactive, #0B6763); }
+.bs-title--color-error { color: var(--bs-color-danger, #DC2626); }
+.bs-title--color-success { color: var(--bs-color-success, #0E8345); }
+.bs-title--color-warning { color: var(--bs-color-warning, #D97706); }
+
+/* Alignments */
+.bs-title--align-left { text-align: left; }
+.bs-title--align-center { text-align: center; }
+.bs-title--align-right { text-align: right; }
+
+/* Truncation */
+.bs-title--truncated {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
