@@ -8,4 +8,6 @@
   --bs-ui-line: #d7e8e4;
   --bs-ui-surface: #ffffff;
   --bs-ui-canvas: #f1f8f6;
+  --bs-ui-font-sans: "Outfit", "Inter", sans-serif;
+  --bs-ui-font-mono: "JetBrains Mono", "DM Mono", monospace;
 }
