@@ -7,19 +7,48 @@
   box-sizing: border-box;
 }
 
-/* Roles */
-.bs-text--role-expressive {
-  letter-spacing: -0.01em;
+/* Styles / Font Variants */
+.bs-text--style-default {
+  font-family: "Outfit", "Inter", -apple-system, sans-serif;
 }
 
-.bs-text--role-productive {
-  font-family: "Manrope", sans-serif;
-  letter-spacing: 0em;
+.bs-text--style-handwritten,
+.bs-text--style-cursive {
+  font-family: "Caveat", cursive, sans-serif;
+  font-size: 1.25em;
 }
 
-.bs-text--role-inherit {
-  font-family: inherit;
-  letter-spacing: inherit;
+.bs-text--style-serif {
+  font-family: "Playfair Display", Georgia, serif;
+}
+
+.bs-text--style-monospace {
+  font-family: "JetBrains Mono", "DM Mono", monospace;
+}
+
+/* Decorations */
+.bs-text--decoration-none {
+  text-decoration: none;
+  font-style: normal;
+}
+
+.bs-text--decoration-italic {
+  font-style: italic;
+}
+
+.bs-text--decoration-underline {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.bs-text--decoration-line-through {
+  text-decoration: line-through;
+}
+
+.bs-text--decoration-underline-italic {
+  font-style: italic;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 /* Sizes */

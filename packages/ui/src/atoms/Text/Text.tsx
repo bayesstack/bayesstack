@@ -13,10 +13,11 @@ export type TextColor =
   | "warning"
   | "error";
 export type TextTransform = "capitalize" | "uppercase" | "lowercase" | "none";
-export type TextRole = "expressive" | "productive" | "inherit";
+export type TextStyle = "default" | "handwritten" | "cursive" | "serif" | "monospace";
+export type TextDecoration = "none" | "italic" | "underline" | "line-through" | "underline-italic";
 export type TextAlign = "left" | "center" | "right" | "justify";
 
-export interface TextProps extends React.HTMLAttributes<HTMLElement> {
+export interface TextProps extends Omit<React.HTMLAttributes<HTMLElement>, "style"> {
   /**
    * The underlying HTML tag to render
    * @default 'span'
@@ -30,10 +31,22 @@ export interface TextProps extends React.HTMLAttributes<HTMLElement> {
   size?: TextSize;
 
   /**
-   * Typography role tuning
-   * @default 'expressive'
+   * Font style variant (changes font family dynamically to Outfit, Caveat, Playfair, JetBrains Mono)
+   * @default 'default'
    */
-  role?: TextRole;
+  styleVariant?: TextStyle;
+
+  /**
+   * Font style variant shorthand / inline CSS style object
+   * @default 'default'
+   */
+  style?: TextStyle | React.CSSProperties;
+
+  /**
+   * Visual text decoration (italic, underline, line-through, etc.)
+   * @default 'none'
+   */
+  decoration?: TextDecoration;
 
   /**
    * Semantic color token
@@ -88,7 +101,9 @@ export const Text = forwardRef<HTMLElement, TextProps>(
     {
       as: Component = "span",
       size = "sm",
-      role = "expressive",
+      styleVariant = "default",
+      style,
+      decoration = "none",
       color = "primary",
       transform = "none",
       align = "left",
@@ -102,10 +117,20 @@ export const Text = forwardRef<HTMLElement, TextProps>(
     },
     ref
   ) => {
+    let computedStyleVariant: TextStyle = styleVariant;
+    let computedInlineStyle: React.CSSProperties | undefined = undefined;
+
+    if (typeof style === "string") {
+      computedStyleVariant = style as TextStyle;
+    } else if (typeof style === "object") {
+      computedInlineStyle = style;
+    }
+
     const classNames = [
       "bs-text",
       `bs-text--size-${size}`,
-      `bs-text--role-${role}`,
+      `bs-text--style-${computedStyleVariant}`,
+      `bs-text--decoration-${decoration}`,
       `bs-text--color-${color}`,
       `bs-text--transform-${transform}`,
       `bs-text--align-${align}`,
@@ -119,7 +144,7 @@ export const Text = forwardRef<HTMLElement, TextProps>(
       .join(" ");
 
     return (
-      <Component ref={ref} className={classNames} {...props}>
+      <Component ref={ref} className={classNames} style={computedInlineStyle} {...props}>
         {children}
       </Component>
     );

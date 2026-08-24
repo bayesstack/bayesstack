@@ -10,7 +10,7 @@ const meta: Meta<typeof Text> = {
     docs: {
       description: {
         component:
-          "Text is a core typography Atom used across BayesStack applications to render consistent, token-driven text elements with polymorphic tag support (`span`, `p`, `div`, `label`, etc.).",
+          "Text is a core typography Atom used across BayesStack applications to render consistent, token-driven text elements with dynamic font style variants (`default`, `handwritten`, `cursive`, `serif`, `monospace`) and decoration controls (`italic`, `underline`, `line-through`).",
       },
     },
   },
@@ -25,10 +25,15 @@ const meta: Meta<typeof Text> = {
       options: ["xs", "sm", "md", "lg", "xl"],
       description: "Font size scale",
     },
-    role: {
-      control: { type: "inline-radio" },
-      options: ["expressive", "productive", "inherit"],
-      description: "Typography role tuning",
+    style: {
+      control: { type: "select" },
+      options: ["default", "handwritten", "cursive", "serif", "monospace"],
+      description: "Transformative font family style (Outfit, Caveat handwriting, Playfair serif, JetBrains Mono)",
+    },
+    decoration: {
+      control: { type: "select" },
+      options: ["none", "italic", "underline", "line-through", "underline-italic"],
+      description: "Visual text decoration (italics, underline, line-through)",
     },
     color: {
       control: { type: "select" },
@@ -83,15 +88,16 @@ export default meta;
 type Story = StoryObj<typeof Text>;
 
 /**
- * **Canvas Playground**: Use the Storybook controls panel below to dynamically test sizes, colors, roles, transforms, weights, alignment, and formatting.
+ * **Canvas Playground**: Single interactive playground with full controls for font style (Outfit, Handwritten/Cursive, Serif, Monospace), decorations (italic, underline), size, color, weights, and alignment.
  */
 export const Playground: Story = {
   args: {
     children:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In vel augue sed ante molestie pharetra. Aliquam facilisis venenatis iaculis.",
     size: "sm",
+    style: "default",
+    decoration: "none",
     color: "secondary",
-    role: "expressive",
     transform: "none",
     align: "left",
     strong: false,
@@ -106,4 +112,3 @@ export const Playground: Story = {
     </div>
   ),
 };
-
