@@ -14,7 +14,7 @@ addons.setConfig({
     appPreviewBg: "#F8FCFB",
     appBorderColor: "#D7E8E4",
     appBorderRadius: 12,
-    fontBase: '"Manrope", "Segoe UI", sans-serif',
+    fontBase: '"Geneva", Verdana, sans-serif',
     fontCode: '"DM Mono", "SFMono-Regular", monospace',
     textColor: "#123333",
     textInverseColor: "#FFFFFF",
