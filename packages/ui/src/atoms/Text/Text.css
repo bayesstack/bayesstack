@@ -19,7 +19,8 @@
 }
 
 .bs-text--style-serif {
-  font-family: "Playfair Display", Georgia, serif;
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: 1.08em;
 }
 
 .bs-text--style-monospace {

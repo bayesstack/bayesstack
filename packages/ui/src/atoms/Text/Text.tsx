@@ -31,7 +31,7 @@ export interface TextProps extends Omit<React.HTMLAttributes<HTMLElement>, "styl
   size?: TextSize;
 
   /**
-   * Font style variant (changes font family dynamically to Outfit, Caveat, Playfair, JetBrains Mono)
+   * Font style variant (changes font family dynamically to Outfit, Caveat, EB Garamond, JetBrains Mono)
    * @default 'default'
    */
   styleVariant?: TextStyle;
