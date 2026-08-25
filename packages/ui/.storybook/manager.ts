@@ -5,8 +5,9 @@ addons.setConfig({
   theme: create({
     base: "light",
     brandTitle: "BayesStack Design Studio",
-    brandUrl: "/",
-    brandImage: "/brand/logo-primary.svg",
+    brandUrl: "/?path=/story/welcome--introduction",
+    brandTarget: "_self",
+    brandImage: "/brand/logo-primary.png",
     colorPrimary: "#0B6763",
     colorSecondary: "#0B6763",
     appBg: "#FFFFFF",

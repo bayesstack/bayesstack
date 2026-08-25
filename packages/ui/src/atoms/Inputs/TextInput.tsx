@@ -1,0 +1,111 @@
+import React, { type ReactNode, type InputHTMLAttributes } from "react";
+import { Icon, type IconName } from "../Icons";
+import "./Inputs.css";
+
+export interface TextInputProps
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "size"> {
+  size?: "sm" | "md" | "lg";
+  prefixIcon?: IconName | ReactNode;
+  suffixIcon?: IconName | ReactNode;
+  clearable?: boolean;
+  onClear?: () => void;
+  /** Convenience callback returning raw string value */
+  onValueChange?: (value: string) => void;
+  /** Convenience callback fired when Enter key is pressed */
+  onEnter?: (value: string) => void;
+  error?: boolean | string;
+  className?: string;
+  wrapperStyle?: React.CSSProperties;
+}
+
+export const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(
+  (
+    {
+      size = "md",
+      prefixIcon,
+      suffixIcon,
+      clearable = false,
+      onClear,
+      onValueChange,
+      onEnter,
+      error = false,
+      value,
+      onChange,
+      onKeyDown,
+      disabled = false,
+      className = "",
+      wrapperStyle,
+      ...props
+    },
+    ref
+  ) => {
+    const hasPrefix = Boolean(prefixIcon);
+    const hasSuffix = Boolean(suffixIcon || (clearable && value));
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (onChange) onChange(e);
+      if (onValueChange) onValueChange(e.target.value);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (onKeyDown) onKeyDown(e);
+      if (e.key === "Enter" && onEnter) {
+        onEnter(e.currentTarget.value);
+      }
+    };
+
+    const renderIcon = (icon?: IconName | ReactNode) => {
+      if (!icon) return null;
+      if (typeof icon === "string") {
+        return <Icon name={icon as IconName} size={size === "sm" ? 14 : size === "lg" ? 18 : 16} />;
+      }
+      return icon;
+    };
+
+    return (
+      <div className="bs-input-wrapper" style={wrapperStyle}>
+        {prefixIcon && <span className="bs-input-prefix">{renderIcon(prefixIcon)}</span>}
+
+        <input
+          ref={ref}
+          type="text"
+          value={value}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          disabled={disabled}
+          className={[
+            "bs-input",
+            `bs-input--${size}`,
+            hasPrefix && "bs-input--has-prefix",
+            hasSuffix && "bs-input--has-suffix",
+            Boolean(error) && "bs-input--error",
+            className,
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          {...props}
+        />
+
+        {clearable && value && !disabled ? (
+          <span className="bs-input-suffix">
+            <button
+              type="button"
+              className="bs-input-action-btn"
+              onClick={() => {
+                if (onClear) onClear();
+                if (onValueChange) onValueChange("");
+              }}
+              title="Clear text"
+            >
+              <Icon name="Close" size={14} />
+            </button>
+          </span>
+        ) : suffixIcon ? (
+          <span className="bs-input-suffix">{renderIcon(suffixIcon)}</span>
+        ) : null}
+      </div>
+    );
+  }
+);
+
+TextInput.displayName = "TextInput";

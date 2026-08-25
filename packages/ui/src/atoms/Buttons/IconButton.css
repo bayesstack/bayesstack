@@ -1,0 +1,168 @@
+/* IconButton Atom Primitive Styles */
+
+.bs-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background-color: transparent;
+  color: var(--bs-color-text-primary, #123333);
+  font-family: inherit;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  vertical-align: middle;
+  outline: none;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease, transform 100ms ease;
+}
+
+.bs-icon-button:focus-visible {
+  box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4px #0B6763;
+}
+
+.bs-icon-button:active:not(.bs-icon-button--disabled) {
+  transform: scale(0.96);
+}
+
+/* ==========================================================================
+   Size Variants
+   ========================================================================== */
+
+.bs-icon-button--size-xs {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+}
+
+.bs-icon-button--size-sm {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+}
+
+.bs-icon-button--size-md {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+.bs-icon-button--size-lg {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+}
+
+.bs-icon-button--size-xl {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+}
+
+/* Rounded Circle Pill Option */
+.bs-icon-button--rounded {
+  border-radius: 9999px !important;
+}
+
+/* ==========================================================================
+   Visual Style Variants
+   ========================================================================== */
+
+/* Primary Variant */
+.bs-icon-button--variant-primary {
+  background-color: var(--bs-color-primary, #0B6763);
+  color: #FFFFFF;
+  border-color: transparent;
+}
+
+.bs-icon-button--variant-primary:hover:not(.bs-icon-button--disabled) {
+  background-color: #084C49;
+  box-shadow: 0 2px 8px rgba(11, 103, 99, 0.25);
+}
+
+/* Secondary / Positive Default Variant */
+.bs-icon-button--variant-secondary {
+  background-color: #F0F7F6;
+  color: #0B6763;
+  border-color: #E0EFEF;
+}
+
+.bs-icon-button--variant-secondary:hover:not(.bs-icon-button--disabled) {
+  background-color: #E2ECEB;
+  color: #084C49;
+  border-color: #C2DAD8;
+}
+
+/* Outline Variant */
+.bs-icon-button--variant-outline {
+  background-color: #FFFFFF;
+  color: #123333;
+  border-color: #D7E8E4;
+}
+
+.bs-icon-button--variant-outline:hover:not(.bs-icon-button--disabled) {
+  background-color: #F0F7F6;
+  color: #0B6763;
+  border-color: #0B6763;
+}
+
+/* Transparent Variant */
+.bs-icon-button--variant-transparent {
+  background-color: transparent;
+  color: #68807D;
+  border-color: transparent;
+}
+
+.bs-icon-button--variant-transparent:hover:not(.bs-icon-button--disabled) {
+  background-color: rgba(11, 103, 99, 0.08);
+  color: #0B6763;
+}
+
+/* Danger / Negative Variant */
+.bs-icon-button--variant-danger {
+  background-color: #FDF2F2;
+  color: #D9381E;
+  border-color: #F8D7D7;
+}
+
+.bs-icon-button--variant-danger:hover:not(.bs-icon-button--disabled) {
+  background-color: #FCE8E8;
+  color: #B91C1C;
+  border-color: #F4AAAA;
+}
+
+/* ==========================================================================
+   Disabled & Loading States
+   ========================================================================== */
+
+.bs-icon-button--disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+  box-shadow: none !important;
+}
+
+.bs-icon-button--loading {
+  cursor: wait;
+}
+
+.bs-icon-button__spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: bs-icon-button-spin 750ms linear infinite;
+}
+
+@keyframes bs-icon-button-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

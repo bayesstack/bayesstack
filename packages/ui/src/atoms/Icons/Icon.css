@@ -1,0 +1,52 @@
+/* Icon Atom Base Styles */
+.bs-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+  vertical-align: middle;
+  color: var(--bs-color-text-primary, currentColor);
+  transition: color 150ms ease, transform 150ms ease, opacity 150ms ease;
+}
+
+.bs-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Optional Interactive Hover */
+.bs-icon--interactive {
+  cursor: pointer;
+}
+
+.bs-icon--interactive:hover {
+  color: var(--bs-color-interactive, #0B6763);
+}
+
+/* Size Utilities (if size prop is not explicitly passed as number) */
+.bs-icon--size-xs {
+  width: 14px;
+  height: 14px;
+}
+
+.bs-icon--size-sm {
+  width: 16px;
+  height: 16px;
+}
+
+.bs-icon--size-md {
+  width: 20px;
+  height: 20px;
+}
+
+.bs-icon--size-lg {
+  width: 24px;
+  height: 24px;
+}
+
+.bs-icon--size-xl {
+  width: 32px;
+  height: 32px;
+}

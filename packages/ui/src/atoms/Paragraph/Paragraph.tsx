@@ -14,12 +14,14 @@ export type ParagraphStyle = "default" | "serif" | "handwritten" | "monospace";
 export type ParagraphDecoration = "none" | "italic" | "underline" | "line-through" | "underline-italic";
 export type ParagraphAlign = "left" | "center" | "right" | "justify";
 
+export type ParagraphAs = "p" | "div" | "span" | "article" | "section";
+
 export interface ParagraphProps extends Omit<React.HTMLAttributes<HTMLParagraphElement>, "style"> {
   /**
    * The underlying HTML tag to render
    * @default 'p'
    */
-  as?: "p" | "div" | "span" | React.ElementType;
+  as?: ParagraphAs;
 
   /**
    * Paragraph size scale

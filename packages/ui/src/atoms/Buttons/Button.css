@@ -1,65 +1,179 @@
+/* Button Atom Base Styles */
 .bs-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 7rem;
+  gap: 0.5rem;
+  position: relative;
+  white-space: nowrap;
+  font-family: var(--bs-font-primary, "Outfit", -apple-system, sans-serif);
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
   border: 1px solid transparent;
-  border-radius: 0.7rem;
+  border-radius: var(--bs-radius-md, 6px);
   cursor: pointer;
-  font: 700 0.875rem/1.1 "Manrope", "Segoe UI", sans-serif;
-  letter-spacing: -0.01em;
-  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease,
-    transform 160ms ease;
-}
-
-.bs-button:hover:not(:disabled) {
-  transform: translateY(-1px);
+  user-select: none;
+  outline: none;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease, opacity 150ms ease;
 }
 
 .bs-button:focus-visible {
-  outline: 3px solid rgba(11, 103, 99, 0.28);
+  outline: 2px solid var(--bs-color-interactive, #0B6763);
   outline-offset: 2px;
 }
 
-.bs-button:disabled {
+.bs-button:disabled,
+.bs-button--disabled,
+.bs-button--loading {
   cursor: not-allowed;
-  opacity: 0.52;
+  opacity: 0.55;
+  pointer-events: none;
 }
 
-.bs-button--sm {
-  min-height: 2.25rem;
-  padding: 0 0.9rem;
+/* Full Width Variant */
+.bs-button--full-width {
+  width: 100%;
 }
 
-.bs-button--md {
-  min-height: 2.75rem;
-  padding: 0 1.15rem;
+/* Border Radius Variants */
+.bs-button--rounded-full {
+  border-radius: 9999px;
 }
 
-.bs-button--lg {
-  min-height: 3.15rem;
-  padding: 0 1.4rem;
-  font-size: 0.95rem;
+/* Size Variants */
+.bs-button--size-xs {
+  height: 1.75rem; /* 28px */
+  padding: 0 0.625rem;
+  font-size: 0.75rem; /* 12px */
 }
 
-.bs-button--primary {
+.bs-button--size-sm {
+  height: 2rem; /* 32px */
+  padding: 0 0.75rem;
+  font-size: 0.8125rem; /* 13px */
+}
+
+.bs-button--size-md {
+  height: 2.375rem; /* 38px */
+  padding: 0 1rem;
+  font-size: 0.875rem; /* 14px */
+}
+
+.bs-button--size-lg {
+  height: 2.75rem; /* 44px */
+  padding: 0 1.25rem;
+  font-size: 0.9375rem; /* 15px */
+}
+
+/* Variant Styles - Enterprise Sleek Palette */
+
+/* 1. Primary */
+.bs-button--variant-primary {
+  background-color: var(--bs-color-interactive, #0B6763);
   color: #ffffff;
-  background: #0b6763;
-  box-shadow: 0 0.55rem 1.15rem rgba(11, 103, 99, 0.2);
+  border-color: var(--bs-color-interactive, #0B6763);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-.bs-button--primary:hover:not(:disabled) {
-  background: #084c49;
-  box-shadow: 0 0.7rem 1.4rem rgba(11, 103, 99, 0.24);
+.bs-button--variant-primary:hover:not(:disabled):not(.bs-button--loading) {
+  background-color: #084F4C;
+  border-color: #084F4C;
 }
 
-.bs-button--secondary {
-  color: #0b6763;
-  border-color: #a9cfca;
-  background: #e4f2ef;
+.bs-button--variant-primary:active:not(:disabled):not(.bs-button--loading) {
+  background-color: #063C3A;
+  border-color: #063C3A;
 }
 
-.bs-button--secondary:hover:not(:disabled) {
-  border-color: #0b6763;
-  background: #d3eae6;
+/* 2. Secondary */
+.bs-button--variant-secondary {
+  background-color: var(--bs-color-bg-subtle, #F0F4F4);
+  color: var(--bs-color-text-primary, #123333);
+  border-color: var(--bs-color-border-subtle, #D6E0DF);
+}
+
+.bs-button--variant-secondary:hover:not(:disabled):not(.bs-button--loading) {
+  background-color: #E2ECEB;
+  border-color: #C0D1CF;
+  color: var(--bs-color-text-primary, #123333);
+}
+
+.bs-button--variant-secondary:active:not(:disabled):not(.bs-button--loading) {
+  background-color: #D4E4E2;
+}
+
+/* 3. Outline */
+.bs-button--variant-outline {
+  background-color: transparent;
+  color: var(--bs-color-text-primary, #123333);
+  border-color: var(--bs-color-border-subtle, #D6E0DF);
+}
+
+.bs-button--variant-outline:hover:not(:disabled):not(.bs-button--loading) {
+  background-color: var(--bs-color-bg-subtle, #F0F4F4);
+  border-color: var(--bs-color-interactive, #0B6763);
+  color: var(--bs-color-interactive, #0B6763);
+}
+
+.bs-button--variant-outline:active:not(:disabled):not(.bs-button--loading) {
+  background-color: #E2ECEB;
+}
+
+/* 5. Danger */
+.bs-button--variant-danger {
+  background-color: var(--bs-color-danger, #DC2626);
+  color: #ffffff;
+  border-color: var(--bs-color-danger, #DC2626);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.bs-button--variant-danger:hover:not(:disabled):not(.bs-button--loading) {
+  background-color: #B91C1C;
+  border-color: #B91C1C;
+}
+
+.bs-button--variant-danger:active:not(:disabled):not(.bs-button--loading) {
+  background-color: #991B1B;
+  border-color: #991B1B;
+}
+
+/* 6. Link */
+.bs-button--variant-link {
+  background-color: transparent;
+  color: var(--bs-color-interactive, #0B6763);
+  border-color: transparent;
+  padding-left: 0;
+  padding-right: 0;
+  height: auto;
+}
+
+.bs-button--variant-link:hover:not(:disabled):not(.bs-button--loading) {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Icon Elements */
+.bs-button__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+/* Inline Loading Spinner */
+.bs-button__spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: bs-button-spin 0.65s linear infinite;
+}
+
+@keyframes bs-button-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

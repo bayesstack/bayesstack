@@ -14,9 +14,9 @@ export type TitleStyle = "default" | "serif" | "handwritten" | "monospace";
 export type TitleWeight = "normal" | "medium" | "semibold" | "bold" | "extrabold";
 export type TitleAlign = "left" | "center" | "right";
 
-export interface TitleProps extends Omit<React.HTMLAttributes<HTMLHeadingElement>, "style"> {
+export interface TitleProps extends Omit<React.HTMLAttributes<HTMLElement>, "style"> {
   /**
-   * The underlying HTML heading tag to render ('h1' to 'h6') which dictates heading scale and semantic structure
+   * The underlying HTML heading tag to render ('h1' to 'h6')
    * @default 'h1'
    */
   as?: TitleTag;
@@ -46,9 +46,9 @@ export interface TitleProps extends Omit<React.HTMLAttributes<HTMLHeadingElement
   align?: TitleAlign;
 
   /**
-   * Truncates heading content to N characters and appends an ellipsis
+   * Truncates heading content: pass `true` for single-line CSS truncation, or a `number` to truncate to N characters
    */
-  truncate?: number;
+  truncate?: boolean | number;
 
   /**
    * Children content
@@ -56,7 +56,7 @@ export interface TitleProps extends Omit<React.HTMLAttributes<HTMLHeadingElement
   children?: React.ReactNode;
 }
 
-export const Title = forwardRef<HTMLHeadingElement, TitleProps>(
+export const Title = forwardRef<HTMLElement, TitleProps>(
   (
     {
       as = "h1",
@@ -83,6 +83,7 @@ export const Title = forwardRef<HTMLHeadingElement, TitleProps>(
     }
 
     let displayChildren = children;
+    const isBooleanTruncate = truncate === true;
 
     const numericTruncate =
       typeof truncate === "number"
@@ -101,10 +102,8 @@ export const Title = forwardRef<HTMLHeadingElement, TitleProps>(
 
       if (textContent !== null) {
         if (textContent.length > numericTruncate) {
-          // Slice to N chars — CSS truncation class NOT applied
           displayChildren = textContent.slice(0, numericTruncate) + "\u2026";
         } else {
-          // String fits within threshold — show in full
           displayChildren = textContent;
         }
       }
@@ -112,18 +111,19 @@ export const Title = forwardRef<HTMLHeadingElement, TitleProps>(
 
     const classNames = [
       "bs-title",
-      `bs-title--${as}`,
+      typeof as === "string" && `bs-title--${as}`,
       `bs-title--style-${computedStyleVariant}`,
       `bs-title--weight-${weight}`,
       `bs-title--color-${color}`,
       `bs-title--align-${align}`,
+      isBooleanTruncate && "bs-title--truncate",
       className,
     ]
       .filter(Boolean)
       .join(" ");
 
     return (
-      <Component ref={ref} className={classNames} style={computedInlineStyle} {...props}>
+      <Component ref={ref as any} className={classNames} style={computedInlineStyle} {...props}>
         {displayChildren}
       </Component>
     );

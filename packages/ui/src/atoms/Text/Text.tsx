@@ -17,14 +17,14 @@ export type TextStyle = "default" | "handwritten" | "serif" | "monospace";
 export type TextDecoration = "none" | "italic" | "underline" | "line-through" | "underline-italic";
 export type TextAlign = "left" | "center" | "right" | "justify";
 
-export type TextAs = "span" | "div" | "label";
+export type TextAs = "span" | "div" | "label" | "p" | "strong" | "em" | "small" | "code" | "b" | "i";
 
 export interface TextProps extends Omit<React.HTMLAttributes<HTMLElement>, "style"> {
   /**
-   * The underlying HTML tag to render ('span', 'div', 'label')
+   * The underlying HTML tag to render
    * @default 'span'
    */
-  as?: TextAs | React.ElementType;
+  as?: TextAs;
 
   /**
    * Text size variant
@@ -164,7 +164,7 @@ export const Text = forwardRef<HTMLElement, TextProps>(
       .join(" ");
 
     return (
-      <Component ref={ref} className={classNames} style={computedInlineStyle} {...props}>
+      <Component ref={ref as any} className={classNames} style={computedInlineStyle} {...(props as any)}>
         {displayChildren}
       </Component>
     );

@@ -1,0 +1,477 @@
+import {
+  // Navigation & Map (No Chevrons)
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
+  ArrowUp01Icon,
+  ArrowDown01Icon,
+  Home01Icon,
+  Home02Icon,
+  Menu01Icon,
+  Menu02Icon,
+  Compass01Icon,
+  Location01Icon,
+  Navigation01Icon,
+  RouteIcon,
+  MapIcon,
+  Globe02Icon,
+  Link01Icon,
+  Unlink01Icon,
+  Redo01Icon,
+  UndoIcon,
+  PinIcon,
+
+  // Education & Learning
+  BookOpen01Icon,
+  Book01Icon,
+  GraduationCapIcon,
+  TeacherIcon,
+  StudentIcon,
+  PencilEdit01Icon,
+  NotebookIcon,
+  DiplomaIcon,
+  LicenseIcon,
+  QuizIcon,
+  RulerIcon,
+  AbacusIcon,
+  CalculatorIcon,
+  Idea01Icon,
+  Brain01Icon,
+  SchoolIcon,
+  Certificate01Icon,
+  BookBookmark01Icon,
+  LibraryIcon,
+
+  // AI, Tech & Science
+  AiBrain01Icon,
+  AiChat01Icon,
+  AiSearch01Icon,
+  SparklesIcon,
+  CpuIcon,
+  DeveloperIcon,
+  TerminalIcon,
+  SourceCodeIcon,
+  AtomIcon,
+  DnaIcon,
+  MicroscopeIcon,
+  FlaskConicalIcon,
+  PhysicsIcon,
+  Robot01Icon,
+  ChipIcon,
+  Database01Icon,
+  ServerIcon,
+  GitBranchIcon,
+  Bug01Icon,
+
+  // Data & Analytics
+  BarChartIcon,
+  BarChartHorizontalIcon,
+  PieChart01Icon,
+  AnalyticsUpIcon,
+  AnalyticsDownIcon,
+  Chart01Icon,
+  Chart02Icon,
+  TableIcon,
+  GridTableIcon,
+  PresentationLineChartIcon,
+  DatabaseIcon,
+  Target01Icon,
+  Flowchart01Icon,
+
+  // Actions & Controls
+  Add01Icon,
+  Delete02Icon,
+  Edit02Icon,
+  Copy01Icon,
+  Download01Icon,
+  Upload01Icon,
+  FilterIcon,
+  SaveIcon,
+  SentIcon,
+  RefreshIcon,
+  CheckmarkCircle01Icon,
+  Tick02Icon,
+  Cancel01Icon,
+  Search01Icon,
+  Share01Icon,
+  ZoomInAreaIcon,
+  ZoomOutAreaIcon,
+  Attachment01Icon,
+  CloudUploadIcon,
+  CloudDownloadIcon,
+  PaintBrush01Icon,
+
+  // Interface & Layout
+  DashboardSquare01Icon,
+  SidebarLeftIcon,
+  SidebarRightIcon,
+  Grid02Icon,
+  LayoutListIcon,
+  Layers01Icon,
+  StructureIcon,
+  PanelLeftIcon,
+  ViewIcon,
+  ViewOffIcon,
+  Maximize01Icon,
+  Minimize01Icon,
+  ChartColumnIcon,
+  ScreenShareIcon,
+
+  // Users & Roles
+  UserIcon,
+  UserGroupIcon,
+  UserAdd01Icon,
+  UserCheck01Icon,
+  AccountSetting01Icon,
+  UserSearch01Icon,
+  IdCardIcon,
+
+  // Security & Access
+  SecurityLockIcon,
+  SecurityPasswordIcon,
+  SecurityCheckIcon,
+  Key01Icon,
+  ShieldCheckIcon,
+  Shield01Icon,
+  AccessIcon,
+  FingerPrintIcon,
+
+  // Communication
+  Comment01Icon,
+  Notification01Icon,
+  Mail01Icon,
+  CallIcon,
+  Chat01Icon,
+  InboxIcon,
+  BellIcon,
+  BellOffIcon,
+  ThumbsUpIcon,
+  ThumbsDownIcon,
+  Flag01Icon,
+
+  // Media & Content
+  PlayIcon,
+  PauseIcon,
+  PlayCircleIcon,
+  VolumeHighIcon,
+  Volume01Icon,
+  Image01Icon,
+  Video01Icon,
+  Mic01Icon,
+  Camera01Icon,
+  Music01Icon,
+  SubtitleIcon,
+  HeadphonesIcon,
+
+  // Files & Folders
+  File01Icon,
+  Folder01Icon,
+  FileValidationIcon,
+  CodeFolderIcon,
+  ClipboardIcon,
+  Archive01Icon,
+  FileCodeIcon,
+  FolderTreeIcon,
+
+  // Status & Alerts
+  CheckmarkCircle02Icon,
+  CancelCircleIcon,
+  Alert01Icon,
+  AlertCircleIcon,
+  InformationCircleIcon,
+  HelpCircleIcon,
+  Clock01Icon,
+  HourglassIcon,
+
+  // Time & Schedule
+  Calendar01Icon,
+  Calendar02Icon,
+  Clock02Icon,
+  Timer01Icon,
+
+  // Badges & Gamification
+  StarIcon,
+  FavouriteIcon,
+  Bookmark01Icon,
+  Tag01Icon,
+  Award01Icon,
+  Medal01Icon,
+  TrophyIcon,
+  CrownIcon,
+  FlameIcon,
+
+  // Settings & Tools
+  Settings01Icon,
+  Settings02Icon,
+  Wrench01Icon,
+  SlidersHorizontalIcon,
+  ZapIcon,
+  Moon01Icon,
+  Sun01Icon,
+  CreditCardIcon,
+  Wallet01Icon,
+} from "@hugeicons/core-free-icons";
+
+export interface IconDefinition {
+  name: string;
+  component: any;
+  category: IconCategory;
+  tags: string[];
+}
+
+export type IconCategory =
+  | "Navigation & Map"
+  | "Education & Learning"
+  | "AI, Tech & Science"
+  | "Data & Analytics"
+  | "Actions & Controls"
+  | "Interface & Layout"
+  | "Users & Roles"
+  | "Security & Access"
+  | "Communication"
+  | "Media & Content"
+  | "Files & Folders"
+  | "Status & Alerts"
+  | "Time & Schedule"
+  | "Badges & Gamification"
+  | "Settings & Tools";
+
+export const ICON_CATEGORIES: IconCategory[] = [
+  "Navigation & Map",
+  "Education & Learning",
+  "AI, Tech & Science",
+  "Data & Analytics",
+  "Actions & Controls",
+  "Interface & Layout",
+  "Users & Roles",
+  "Security & Access",
+  "Communication",
+  "Media & Content",
+  "Files & Folders",
+  "Status & Alerts",
+  "Time & Schedule",
+  "Badges & Gamification",
+  "Settings & Tools",
+];
+
+export const ICON_CATALOGUE: IconDefinition[] = [
+  // Navigation & Map
+  { name: "ArrowLeft", component: ArrowLeft01Icon, category: "Navigation & Map", tags: ["arrow", "left", "back"] },
+  { name: "ArrowRight", component: ArrowRight01Icon, category: "Navigation & Map", tags: ["arrow", "right", "forward"] },
+  { name: "ArrowUp", component: ArrowUp01Icon, category: "Navigation & Map", tags: ["arrow", "up", "top"] },
+  { name: "ArrowDown", component: ArrowDown01Icon, category: "Navigation & Map", tags: ["arrow", "down", "bottom"] },
+  { name: "Home", component: Home01Icon, category: "Navigation & Map", tags: ["home", "main"] },
+  { name: "HomeAlt", component: Home02Icon, category: "Navigation & Map", tags: ["home", "house"] },
+  { name: "Menu", component: Menu01Icon, category: "Navigation & Map", tags: ["menu", "hamburger"] },
+  { name: "MenuAlt", component: Menu02Icon, category: "Navigation & Map", tags: ["menu", "list"] },
+  { name: "Compass", component: Compass01Icon, category: "Navigation & Map", tags: ["compass", "explore"] },
+  { name: "Location", component: Location01Icon, category: "Navigation & Map", tags: ["location", "pin"] },
+  { name: "Navigation", component: Navigation01Icon, category: "Navigation & Map", tags: ["navigation", "gps"] },
+  { name: "Route", component: RouteIcon, category: "Navigation & Map", tags: ["route", "path"] },
+  { name: "Map", component: MapIcon, category: "Navigation & Map", tags: ["map", "location"] },
+  { name: "Globe", component: Globe02Icon, category: "Navigation & Map", tags: ["globe", "world", "web"] },
+  { name: "Link", component: Link01Icon, category: "Navigation & Map", tags: ["link", "url"] },
+  { name: "Unlink", component: Unlink01Icon, category: "Navigation & Map", tags: ["unlink", "break"] },
+  { name: "Redo", component: Redo01Icon, category: "Navigation & Map", tags: ["redo", "forward"] },
+  { name: "Undo", component: UndoIcon, category: "Navigation & Map", tags: ["undo", "back"] },
+  { name: "Pin", component: PinIcon, category: "Navigation & Map", tags: ["pin", "marker"] },
+
+  // Education & Learning
+  { name: "BookOpen", component: BookOpen01Icon, category: "Education & Learning", tags: ["book", "read", "course"] },
+  { name: "Book", component: Book01Icon, category: "Education & Learning", tags: ["book", "library"] },
+  { name: "GraduationCap", component: GraduationCapIcon, category: "Education & Learning", tags: ["graduation", "cap", "academic"] },
+  { name: "Teacher", component: TeacherIcon, category: "Education & Learning", tags: ["teacher", "instructor", "faculty"] },
+  { name: "Student", component: StudentIcon, category: "Education & Learning", tags: ["student", "learner"] },
+  { name: "Pencil", component: PencilEdit01Icon, category: "Education & Learning", tags: ["pencil", "write"] },
+  { name: "Notebook", component: NotebookIcon, category: "Education & Learning", tags: ["notebook", "notes"] },
+  { name: "Diploma", component: DiplomaIcon, category: "Education & Learning", tags: ["diploma", "degree"] },
+  { name: "License", component: LicenseIcon, category: "Education & Learning", tags: ["license", "certificate"] },
+  { name: "Quiz", component: QuizIcon, category: "Education & Learning", tags: ["quiz", "test"] },
+  { name: "Ruler", component: RulerIcon, category: "Education & Learning", tags: ["ruler", "measure"] },
+  { name: "Abacus", component: AbacusIcon, category: "Education & Learning", tags: ["abacus", "math"] },
+  { name: "Calculator", component: CalculatorIcon, category: "Education & Learning", tags: ["calculator", "math"] },
+  { name: "Idea", component: Idea01Icon, category: "Education & Learning", tags: ["idea", "bulb"] },
+  { name: "Brain", component: Brain01Icon, category: "Education & Learning", tags: ["brain", "think"] },
+  { name: "School", component: SchoolIcon, category: "Education & Learning", tags: ["school", "university"] },
+  { name: "Certificate", component: Certificate01Icon, category: "Education & Learning", tags: ["certificate", "verified"] },
+  { name: "BookBookmark", component: BookBookmark01Icon, category: "Education & Learning", tags: ["book", "bookmark"] },
+  { name: "Library", component: LibraryIcon, category: "Education & Learning", tags: ["library", "books"] },
+
+  // AI, Tech & Science
+  { name: "AiBrain", component: AiBrain01Icon, category: "AI, Tech & Science", tags: ["ai", "brain", "smart"] },
+  { name: "AiChat", component: AiChat01Icon, category: "AI, Tech & Science", tags: ["ai", "chat", "bot"] },
+  { name: "AiSearch", component: AiSearch01Icon, category: "AI, Tech & Science", tags: ["ai", "search", "lookup"] },
+  { name: "Sparkles", component: SparklesIcon, category: "AI, Tech & Science", tags: ["sparkles", "ai", "magic"] },
+  { name: "Cpu", component: CpuIcon, category: "AI, Tech & Science", tags: ["cpu", "chip", "processor"] },
+  { name: "Developer", component: DeveloperIcon, category: "AI, Tech & Science", tags: ["developer", "code"] },
+  { name: "Terminal", component: TerminalIcon, category: "AI, Tech & Science", tags: ["terminal", "cmd", "cli"] },
+  { name: "SourceCode", component: SourceCodeIcon, category: "AI, Tech & Science", tags: ["code", "source"] },
+  { name: "Atom", component: AtomIcon, category: "AI, Tech & Science", tags: ["atom", "science"] },
+  { name: "Dna", component: DnaIcon, category: "AI, Tech & Science", tags: ["dna", "biology", "genetics"] },
+  { name: "Microscope", component: MicroscopeIcon, category: "AI, Tech & Science", tags: ["microscope", "lab"] },
+  { name: "Flask", component: FlaskConicalIcon, category: "AI, Tech & Science", tags: ["flask", "chemistry"] },
+  { name: "Physics", component: PhysicsIcon, category: "AI, Tech & Science", tags: ["physics", "science"] },
+  { name: "Robot", component: Robot01Icon, category: "AI, Tech & Science", tags: ["robot", "automation"] },
+  { name: "Chip", component: ChipIcon, category: "AI, Tech & Science", tags: ["chip", "hardware"] },
+  { name: "DatabaseAlt", component: Database01Icon, category: "AI, Tech & Science", tags: ["database", "storage"] },
+  { name: "Server", component: ServerIcon, category: "AI, Tech & Science", tags: ["server", "cloud"] },
+  { name: "GitBranch", component: GitBranchIcon, category: "AI, Tech & Science", tags: ["git", "branch", "vcs"] },
+  { name: "Bug", component: Bug01Icon, category: "AI, Tech & Science", tags: ["bug", "issue", "debug"] },
+
+  // Data & Analytics
+  { name: "BarChart", component: BarChartIcon, category: "Data & Analytics", tags: ["bar", "chart"] },
+  { name: "BarChartHorizontal", component: BarChartHorizontalIcon, category: "Data & Analytics", tags: ["chart", "horizontal"] },
+  { name: "PieChart", component: PieChart01Icon, category: "Data & Analytics", tags: ["pie", "chart"] },
+  { name: "AnalyticsUp", component: AnalyticsUpIcon, category: "Data & Analytics", tags: ["trending", "up"] },
+  { name: "AnalyticsDown", component: AnalyticsDownIcon, category: "Data & Analytics", tags: ["trending", "down"] },
+  { name: "Chart", component: Chart01Icon, category: "Data & Analytics", tags: ["chart", "metrics"] },
+  { name: "ChartLine", component: Chart02Icon, category: "Data & Analytics", tags: ["chart", "line"] },
+  { name: "Table", component: TableIcon, category: "Data & Analytics", tags: ["table", "grid"] },
+  { name: "GridTable", component: GridTableIcon, category: "Data & Analytics", tags: ["table", "matrix"] },
+  { name: "PresentationChart", component: PresentationLineChartIcon, category: "Data & Analytics", tags: ["presentation", "chart"] },
+  { name: "Database", component: DatabaseIcon, category: "Data & Analytics", tags: ["database", "sql"] },
+  { name: "Target", component: Target01Icon, category: "Data & Analytics", tags: ["target", "goal", "kpi"] },
+  { name: "Flowchart", component: Flowchart01Icon, category: "Data & Analytics", tags: ["flowchart", "process", "diagram"] },
+
+  // Actions & Controls
+  { name: "Add", component: Add01Icon, category: "Actions & Controls", tags: ["add", "plus", "create"] },
+  { name: "Delete", component: Delete02Icon, category: "Actions & Controls", tags: ["delete", "trash", "remove"] },
+  { name: "Edit", component: Edit02Icon, category: "Actions & Controls", tags: ["edit", "pencil"] },
+  { name: "Copy", component: Copy01Icon, category: "Actions & Controls", tags: ["copy", "duplicate"] },
+  { name: "Download", component: Download01Icon, category: "Actions & Controls", tags: ["download", "export"] },
+  { name: "Upload", component: Upload01Icon, category: "Actions & Controls", tags: ["upload", "import"] },
+  { name: "Filter", component: FilterIcon, category: "Actions & Controls", tags: ["filter", "funnel"] },
+  { name: "Save", component: SaveIcon, category: "Actions & Controls", tags: ["save", "disk"] },
+  { name: "Send", component: SentIcon, category: "Actions & Controls", tags: ["send", "submit"] },
+  { name: "Refresh", component: RefreshIcon, category: "Actions & Controls", tags: ["refresh", "reload"] },
+  { name: "Checkmark", component: CheckmarkCircle01Icon, category: "Actions & Controls", tags: ["check", "done"] },
+  { name: "Check", component: Tick02Icon, category: "Actions & Controls", tags: ["check", "tick", "done"] },
+  { name: "Tick", component: Tick02Icon, category: "Actions & Controls", tags: ["check", "tick"] },
+  { name: "Close", component: Cancel01Icon, category: "Actions & Controls", tags: ["close", "cancel", "x"] },
+  { name: "Search", component: Search01Icon, category: "Actions & Controls", tags: ["search", "find"] },
+  { name: "Share", component: Share01Icon, category: "Actions & Controls", tags: ["share", "export"] },
+  { name: "ZoomIn", component: ZoomInAreaIcon, category: "Actions & Controls", tags: ["zoom", "in"] },
+  { name: "ZoomOut", component: ZoomOutAreaIcon, category: "Actions & Controls", tags: ["zoom", "out"] },
+  { name: "Attachment", component: Attachment01Icon, category: "Actions & Controls", tags: ["attachment", "paperclip"] },
+  { name: "CloudUpload", component: CloudUploadIcon, category: "Actions & Controls", tags: ["cloud", "upload"] },
+  { name: "CloudDownload", component: CloudDownloadIcon, category: "Actions & Controls", tags: ["cloud", "download"] },
+  { name: "PaintBrush", component: PaintBrush01Icon, category: "Actions & Controls", tags: ["paint", "brush", "canvas"] },
+
+  // Interface & Layout
+  { name: "Dashboard", component: DashboardSquare01Icon, category: "Interface & Layout", tags: ["dashboard", "overview"] },
+  { name: "SidebarLeft", component: SidebarLeftIcon, category: "Interface & Layout", tags: ["sidebar", "left"] },
+  { name: "SidebarRight", component: SidebarRightIcon, category: "Interface & Layout", tags: ["sidebar", "right"] },
+  { name: "Grid", component: Grid02Icon, category: "Interface & Layout", tags: ["grid", "layout"] },
+  { name: "LayoutList", component: LayoutListIcon, category: "Interface & Layout", tags: ["list", "rows"] },
+  { name: "Layers", component: Layers01Icon, category: "Interface & Layout", tags: ["layers", "stack"] },
+  { name: "Structure", component: StructureIcon, category: "Interface & Layout", tags: ["structure", "tree"] },
+  { name: "PanelLeft", component: PanelLeftIcon, category: "Interface & Layout", tags: ["panel", "drawer"] },
+  { name: "View", component: ViewIcon, category: "Interface & Layout", tags: ["view", "eye"] },
+  { name: "ViewOff", component: ViewOffIcon, category: "Interface & Layout", tags: ["view", "hide", "eye"] },
+  { name: "Eye", component: ViewIcon, category: "Interface & Layout", tags: ["eye", "view"] },
+  { name: "EyeOff", component: ViewOffIcon, category: "Interface & Layout", tags: ["eye", "off", "hide"] },
+  { name: "Maximize", component: Maximize01Icon, category: "Interface & Layout", tags: ["maximize", "expand"] },
+  { name: "Minimize", component: Minimize01Icon, category: "Interface & Layout", tags: ["minimize", "collapse"] },
+  { name: "ChartColumn", component: ChartColumnIcon, category: "Interface & Layout", tags: ["column", "layout"] },
+  { name: "ScreenShare", component: ScreenShareIcon, category: "Interface & Layout", tags: ["screen", "share", "presentation"] },
+
+  // Users & Roles
+  { name: "User", component: UserIcon, category: "Users & Roles", tags: ["user", "person", "profile"] },
+  { name: "UserGroup", component: UserGroupIcon, category: "Users & Roles", tags: ["group", "team", "users"] },
+  { name: "UserAdd", component: UserAdd01Icon, category: "Users & Roles", tags: ["user", "add", "invite"] },
+  { name: "UserCheck", component: UserCheck01Icon, category: "Users & Roles", tags: ["user", "check", "verify"] },
+  { name: "AccountSetting", component: AccountSetting01Icon, category: "Users & Roles", tags: ["account", "setting"] },
+  { name: "UserSearch", component: UserSearch01Icon, category: "Users & Roles", tags: ["user", "search"] },
+  { name: "IdCard", component: IdCardIcon, category: "Users & Roles", tags: ["id", "card", "identity"] },
+
+  // Security & Access
+  { name: "Lock", component: SecurityLockIcon, category: "Security & Access", tags: ["lock", "security"] },
+  { name: "Password", component: SecurityPasswordIcon, category: "Security & Access", tags: ["password", "key"] },
+  { name: "SecurityCheck", component: SecurityCheckIcon, category: "Security & Access", tags: ["security", "verified"] },
+  { name: "Key", component: Key01Icon, category: "Security & Access", tags: ["key", "auth"] },
+  { name: "ShieldCheck", component: ShieldCheckIcon, category: "Security & Access", tags: ["shield", "check"] },
+  { name: "Shield", component: Shield01Icon, category: "Security & Access", tags: ["shield", "protect"] },
+  { name: "Access", component: AccessIcon, category: "Security & Access", tags: ["access", "entry"] },
+  { name: "FingerPrint", component: FingerPrintIcon, category: "Security & Access", tags: ["fingerprint", "biometric"] },
+
+  // Communication
+  { name: "Comment", component: Comment01Icon, category: "Communication", tags: ["comment", "message"] },
+  { name: "Notification", component: Notification01Icon, category: "Communication", tags: ["notification", "bell"] },
+  { name: "Mail", component: Mail01Icon, category: "Communication", tags: ["mail", "email"] },
+  { name: "Call", component: CallIcon, category: "Communication", tags: ["phone", "call"] },
+  { name: "Chat", component: Chat01Icon, category: "Communication", tags: ["chat", "talk"] },
+  { name: "Inbox", component: InboxIcon, category: "Communication", tags: ["inbox", "mail"] },
+  { name: "Bell", component: BellIcon, category: "Communication", tags: ["bell", "alert"] },
+  { name: "BellOff", component: BellOffIcon, category: "Communication", tags: ["bell", "mute"] },
+  { name: "ThumbsUp", component: ThumbsUpIcon, category: "Communication", tags: ["thumbs", "up", "like", "agree"] },
+  { name: "ThumbsDown", component: ThumbsDownIcon, category: "Communication", tags: ["thumbs", "down", "dislike"] },
+  { name: "Flag", component: Flag01Icon, category: "Communication", tags: ["flag", "report", "mark"] },
+
+  // Media & Content
+  { name: "Play", component: PlayIcon, category: "Media & Content", tags: ["play", "media"] },
+  { name: "Pause", component: PauseIcon, category: "Media & Content", tags: ["pause", "stop"] },
+  { name: "PlayCircle", component: PlayCircleIcon, category: "Media & Content", tags: ["play", "circle", "video"] },
+  { name: "VolumeHigh", component: VolumeHighIcon, category: "Media & Content", tags: ["volume", "speaker"] },
+  { name: "VolumeMute", component: Volume01Icon, category: "Media & Content", tags: ["volume", "mute"] },
+  { name: "Image", component: Image01Icon, category: "Media & Content", tags: ["image", "photo"] },
+  { name: "Video", component: Video01Icon, category: "Media & Content", tags: ["video", "film"] },
+  { name: "Mic", component: Mic01Icon, category: "Media & Content", tags: ["mic", "audio"] },
+  { name: "Camera", component: Camera01Icon, category: "Media & Content", tags: ["camera", "photo"] },
+  { name: "Music", component: Music01Icon, category: "Media & Content", tags: ["music", "audio"] },
+  { name: "Subtitle", component: SubtitleIcon, category: "Media & Content", tags: ["subtitle", "cc", "captions"] },
+  { name: "Headphones", component: HeadphonesIcon, category: "Media & Content", tags: ["headphones", "audio", "listen"] },
+
+  // Files & Folders
+  { name: "File", component: File01Icon, category: "Files & Folders", tags: ["file", "document"] },
+  { name: "Folder", component: Folder01Icon, category: "Files & Folders", tags: ["folder", "dir"] },
+  { name: "FileCheck", component: FileValidationIcon, category: "Files & Folders", tags: ["file", "validated"] },
+  { name: "CodeFolder", component: CodeFolderIcon, category: "Files & Folders", tags: ["folder", "code"] },
+  { name: "Clipboard", component: ClipboardIcon, category: "Files & Folders", tags: ["clipboard", "paste"] },
+  { name: "Archive", component: Archive01Icon, category: "Files & Folders", tags: ["archive", "zip"] },
+  { name: "FileCode", component: FileCodeIcon, category: "Files & Folders", tags: ["file", "code"] },
+  { name: "FolderTree", component: FolderTreeIcon, category: "Files & Folders", tags: ["folder", "tree", "hierarchy"] },
+
+  // Status & Alerts
+  { name: "CheckCircle", component: CheckmarkCircle02Icon, category: "Status & Alerts", tags: ["check", "success"] },
+  { name: "CancelCircle", component: CancelCircleIcon, category: "Status & Alerts", tags: ["cancel", "error"] },
+  { name: "Alert", component: Alert01Icon, category: "Status & Alerts", tags: ["alert", "warning"] },
+  { name: "AlertCircle", component: AlertCircleIcon, category: "Status & Alerts", tags: ["alert", "info"] },
+  { name: "InfoCircle", component: InformationCircleIcon, category: "Status & Alerts", tags: ["info", "help"] },
+  { name: "HelpCircle", component: HelpCircleIcon, category: "Status & Alerts", tags: ["help", "question"] },
+  { name: "Clock", component: Clock01Icon, category: "Status & Alerts", tags: ["clock", "time"] },
+  { name: "Hourglass", component: HourglassIcon, category: "Status & Alerts", tags: ["hourglass", "wait"] },
+
+  // Time & Schedule
+  { name: "Calendar", component: Calendar01Icon, category: "Time & Schedule", tags: ["calendar", "date"] },
+  { name: "CalendarAlt", component: Calendar02Icon, category: "Time & Schedule", tags: ["calendar", "event"] },
+  { name: "ClockAlt", component: Clock02Icon, category: "Time & Schedule", tags: ["clock", "recent"] },
+  { name: "Timer", component: Timer01Icon, category: "Time & Schedule", tags: ["timer", "stopwatch"] },
+
+  // Badges & Gamification
+  { name: "Star", component: StarIcon, category: "Badges & Gamification", tags: ["star", "rating"] },
+  { name: "Heart", component: FavouriteIcon, category: "Badges & Gamification", tags: ["heart", "like"] },
+  { name: "Bookmark", component: Bookmark01Icon, category: "Badges & Gamification", tags: ["bookmark", "save"] },
+  { name: "Tag", component: Tag01Icon, category: "Badges & Gamification", tags: ["tag", "label"] },
+  { name: "Award", component: Award01Icon, category: "Badges & Gamification", tags: ["award", "trophy"] },
+  { name: "Medal", component: Medal01Icon, category: "Badges & Gamification", tags: ["medal", "rank"] },
+  { name: "Trophy", component: TrophyIcon, category: "Badges & Gamification", tags: ["trophy", "winner"] },
+  { name: "Crown", component: CrownIcon, category: "Badges & Gamification", tags: ["crown", "vip"] },
+  { name: "Flame", component: FlameIcon, category: "Badges & Gamification", tags: ["flame", "streak", "hot"] },
+
+  // Settings & Tools
+  { name: "Settings", component: Settings01Icon, category: "Settings & Tools", tags: ["settings", "gear"] },
+  { name: "SettingsAlt", component: Settings02Icon, category: "Settings & Tools", tags: ["settings", "options"] },
+  { name: "Wrench", component: Wrench01Icon, category: "Settings & Tools", tags: ["wrench", "tool"] },
+  { name: "Sliders", component: SlidersHorizontalIcon, category: "Settings & Tools", tags: ["sliders", "controls"] },
+  { name: "Zap", component: ZapIcon, category: "Settings & Tools", tags: ["zap", "bolt", "power"] },
+  { name: "Moon", component: Moon01Icon, category: "Settings & Tools", tags: ["moon", "dark"] },
+  { name: "Sun", component: Sun01Icon, category: "Settings & Tools", tags: ["sun", "light"] },
+  { name: "CreditCard", component: CreditCardIcon, category: "Settings & Tools", tags: ["card", "payment", "billing"] },
+  { name: "Wallet", component: Wallet01Icon, category: "Settings & Tools", tags: ["wallet", "billing", "account"] },
+];
+
+export const ICON_MAP: Record<string, any> = ICON_CATALOGUE.reduce((acc, curr) => {
+  acc[curr.name] = curr.component;
+  return acc;
+}, {} as Record<string, any>);
+
+export type IconName = keyof typeof ICON_MAP | (string & {});

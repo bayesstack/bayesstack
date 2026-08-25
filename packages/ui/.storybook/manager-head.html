@@ -11,14 +11,19 @@
   function injectBrandText() {
     const brandElement = document.querySelector('a.sidebar-brand') ||
       document.querySelector('[title="BayesStack Design Studio"]');
-    if (brandElement && !brandElement.querySelector('.brand-text-wrapper')) {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'brand-text-wrapper';
-      wrapper.innerHTML = `
-        <span class="brand-title">BayesStack</span>
-        <span class="brand-subtitle">Design Studio</span>
-      `;
-      brandElement.appendChild(wrapper);
+    if (brandElement) {
+      brandElement.setAttribute('href', '/?path=/story/welcome--introduction');
+      brandElement.setAttribute('target', '_self');
+
+      if (!brandElement.querySelector('.brand-text-wrapper')) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'brand-text-wrapper';
+        wrapper.innerHTML = `
+          <span class="brand-title">BayesStack</span>
+          <span class="brand-subtitle">Design Studio</span>
+        `;
+        brandElement.appendChild(wrapper);
+      }
     }
   }
 

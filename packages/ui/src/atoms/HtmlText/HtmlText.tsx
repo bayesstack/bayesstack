@@ -56,9 +56,9 @@ export interface HtmlTextProps extends Omit<React.HTMLAttributes<HTMLElement>, "
   align?: HtmlTextAlign;
 
   /**
-   * Truncates visible text content to N characters while preserving HTML tags, styling & text decorations
+   * Truncates HTML content: pass `true` for single-line CSS truncation, or a `number` to truncate visible text to N characters
    */
-  truncate?: number;
+  truncate?: boolean | number;
 }
 
 /**
@@ -143,13 +143,14 @@ export const HtmlText = forwardRef<HTMLElement, HtmlTextProps>(
     const rawHtml = typeof html === "string" ? html : typeof children === "string" ? children : "";
 
     let finalHtmlContent = rawHtml;
+    const isBooleanTruncate = truncate === true;
 
     const numericTruncate =
       typeof truncate === "number"
         ? truncate
         : typeof truncate === "string" && !isNaN(Number(truncate)) && String(truncate).trim() !== ""
-        ? parseInt(truncate, 10)
-        : undefined;
+          ? parseInt(truncate, 10)
+          : undefined;
 
     if (numericTruncate !== undefined && numericTruncate > 0) {
       finalHtmlContent = truncateHtml(rawHtml, numericTruncate);
@@ -170,6 +171,7 @@ export const HtmlText = forwardRef<HTMLElement, HtmlTextProps>(
       `bs-html-text--color-${color}`,
       `bs-html-text--style-${computedStyleVariant}`,
       `bs-html-text--align-${align}`,
+      isBooleanTruncate && "bs-html-text--truncate",
       className,
     ]
       .filter(Boolean)

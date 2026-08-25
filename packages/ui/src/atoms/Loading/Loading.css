@@ -1,0 +1,168 @@
+/* ==========================================================================
+   Loading Suite (Loader, LoadingBar & Skeleton)
+   ========================================================================== */
+
+/* Circular Spinner Loader */
+.bs-loader-spin {
+  display: inline-block;
+  border-radius: 50%;
+  border-style: solid;
+  border-color: currentColor;
+  border-right-color: transparent;
+  animation: bsSpin 650ms linear infinite;
+  box-sizing: border-box;
+}
+
+@keyframes bsSpin {
+  to { transform: rotate(360deg); }
+}
+
+.bs-loader--sm { width: 16px; height: 16px; border-width: 2px; }
+.bs-loader--md { width: 24px; height: 24px; border-width: 2.5px; }
+.bs-loader--lg { width: 36px; height: 36px; border-width: 3px; }
+
+.bs-loader--primary { color: #0B6763; }
+.bs-loader--neutral { color: #68807D; }
+.bs-loader--white   { color: #FFFFFF; }
+
+/* Linear Loading Bar */
+.bs-loading-bar-track {
+  width: 100%;
+  height: 4px;
+  background: #E6F0EE;
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.bs-loading-bar-fill {
+  height: 100%;
+  background: #0B6763;
+  border-radius: 2px;
+  transition: width 200ms ease;
+}
+
+.bs-loading-bar-indeterminate {
+  width: 40%;
+  position: absolute;
+  left: -40%;
+  animation: bsIndeterminateBar 1.2s infinite ease-in-out;
+}
+
+@keyframes bsIndeterminateBar {
+  0% { left: -40%; width: 30%; }
+  50% { left: 30%; width: 50%; }
+  100% { left: 100%; width: 30%; }
+}
+
+/* ==========================================================================
+   Skeleton Wireframe Suite (Ant Design Inspired Primitives & Compounds)
+   ========================================================================== */
+.bs-skeleton {
+  background: linear-gradient(90deg, #E6F0EE 25%, #F4F9F8 37%, #E6F0EE 63%);
+  background-size: 400% 100%;
+  border-radius: 6px;
+  animation: bsSkeletonShimmer 1.4s ease infinite;
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+}
+
+.bs-skeleton--static {
+  animation: none !important;
+  background: #E6F0EE !important;
+}
+
+@keyframes bsSkeletonShimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+/* Atomic Variants */
+.bs-skeleton--circle { border-radius: 50%; }
+.bs-skeleton--rect   { border-radius: 6px; }
+.bs-skeleton--text   { height: 14px; width: 100%; border-radius: 4px; }
+
+/* Sub-Component: Avatar */
+.bs-skeleton-avatar {
+  flex-shrink: 0;
+}
+.bs-skeleton-avatar--circle { border-radius: 50%; }
+.bs-skeleton-avatar--square { border-radius: 8px; }
+
+/* Sub-Component: Button */
+.bs-skeleton-button {
+  display: inline-block;
+}
+.bs-skeleton-button--sm { height: 32px; width: 80px; border-radius: 6px; }
+.bs-skeleton-button--md { height: 40px; width: 100px; border-radius: 6px; }
+.bs-skeleton-button--lg { height: 48px; width: 120px; border-radius: 8px; }
+
+.bs-skeleton-button--rounded { border-radius: 6px; }
+.bs-skeleton-button--pill    { border-radius: 9999px; }
+.bs-skeleton-button--circle  { border-radius: 50%; width: 40px; }
+.bs-skeleton-button--square  { border-radius: 6px; width: 40px; }
+.bs-skeleton-button--block   { width: 100%; }
+
+/* Sub-Component: Input */
+.bs-skeleton-input {
+  display: inline-block;
+}
+.bs-skeleton-input--sm { height: 32px; width: 160px; border-radius: 6px; }
+.bs-skeleton-input--md { height: 40px; width: 200px; border-radius: 6px; }
+.bs-skeleton-input--lg { height: 48px; width: 240px; border-radius: 8px; }
+.bs-skeleton-input--block { width: 100%; }
+
+/* Sub-Component: Image */
+.bs-skeleton-image {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.bs-skeleton-image-icon {
+  z-index: 1;
+}
+
+/* Sub-Component: Title & Paragraph */
+.bs-skeleton-title {
+  height: 18px;
+  margin-top: 4px;
+  margin-bottom: 16px;
+  border-radius: 4px;
+}
+
+.bs-skeleton-paragraph {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.bs-skeleton-paragraph-row {
+  height: 14px;
+  border-radius: 4px;
+}
+
+/* Round Modifier */
+.bs-skeleton--round .bs-skeleton-title,
+.bs-skeleton--round .bs-skeleton-paragraph-row {
+  border-radius: 9999px;
+}
+
+/* Compound Layout Container */
+.bs-skeleton-compound {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.bs-skeleton-compound-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
