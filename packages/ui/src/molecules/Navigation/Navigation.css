@@ -1,0 +1,247 @@
+/* Navigation Molecule Styles - BayesStack UI */
+
+/* ==========================================================================
+   1. Tabs Component
+   ========================================================================== */
+.bs-tabs {
+  display: flex;
+  box-sizing: border-box;
+  font-family: var(--bs-font-family, 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif);
+}
+
+.bs-tabs--row {
+  flex-direction: row;
+  align-items: center;
+}
+
+.bs-tabs--column {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Line Variant */
+.bs-tabs--line.bs-tabs--row {
+  border-bottom: 2px solid var(--bs-color-border-subtle, #E2E8F0);
+  gap: 20px;
+}
+
+.bs-tabs--line.bs-tabs--column {
+  border-left: 2px solid var(--bs-color-border-subtle, #E2E8F0);
+  gap: 4px;
+}
+
+.bs-tab-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--bs-color-text-secondary, #59716E);
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  position: relative;
+  transition: color 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+  user-select: none;
+}
+
+.bs-tab-item:hover:not(.bs-tab-item--disabled) {
+  color: var(--bs-color-text-primary, #123333);
+}
+
+.bs-tab-item--active {
+  color: var(--bs-color-teal-primary, #0B6763) !important;
+  font-weight: 600;
+}
+
+/* Line active indicator */
+.bs-tabs--line.bs-tabs--row .bs-tab-item--active::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--bs-color-teal-primary, #0B6763);
+}
+
+.bs-tabs--line.bs-tabs--column .bs-tab-item--active::after {
+  content: "";
+  position: absolute;
+  left: -2px;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background-color: var(--bs-color-teal-primary, #0B6763);
+}
+
+/* Pill Variant */
+.bs-tabs--pill {
+  gap: 6px;
+  background-color: var(--bs-color-bg-subtle, #F1F5F9);
+  padding: 4px;
+  border-radius: var(--bs-radius-md, 8px);
+}
+
+.bs-tabs--pill .bs-tab-item {
+  border-radius: var(--bs-radius-sm, 6px);
+}
+
+.bs-tabs--pill .bs-tab-item--active {
+  background-color: var(--bs-color-bg-surface, #FFFFFF);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Card Variant */
+.bs-tabs--card {
+  gap: 4px;
+}
+
+.bs-tabs--card .bs-tab-item {
+  border: 1px solid var(--bs-color-border-subtle, #E2E8F0);
+  border-radius: var(--bs-radius-md, 8px);
+  background-color: var(--bs-color-bg-surface, #FFFFFF);
+}
+
+.bs-tabs--card .bs-tab-item--active {
+  border-color: var(--bs-color-teal-primary, #0B6763);
+  background-color: var(--bs-color-teal-subtle, #EBF5F5);
+}
+
+.bs-tab-item--disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   2. Breadcrumbs Component
+   ========================================================================== */
+.bs-breadcrumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-family: var(--bs-font-family, 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif);
+  font-size: 13.5px;
+  color: var(--bs-color-text-secondary, #59716E);
+}
+
+.bs-breadcrumb-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--bs-color-text-secondary, #59716E);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.bs-breadcrumb-item:hover:not(.bs-breadcrumb-item--active) {
+  color: var(--bs-color-teal-primary, #0B6763);
+}
+
+.bs-breadcrumb-item--active {
+  color: var(--bs-color-text-primary, #123333);
+  font-weight: 600;
+  cursor: default;
+}
+
+.bs-breadcrumb-separator {
+  color: var(--bs-color-text-muted, #94A3B8);
+  display: flex;
+  align-items: center;
+}
+
+/* ==========================================================================
+   3. Stepper Component
+   ========================================================================== */
+.bs-stepper {
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--bs-font-family, 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif);
+}
+
+.bs-stepper--horizontal {
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.bs-stepper--vertical {
+  flex-direction: column;
+  gap: 20px;
+}
+
+.bs-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+  flex: 1 1 auto;
+}
+
+.bs-step-icon-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 13px;
+  background-color: var(--bs-color-bg-subtle, #F1F5F9);
+  color: var(--bs-color-text-muted, #64748B);
+  border: 2px solid var(--bs-color-border-subtle, #CBD5E1);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.bs-step--active .bs-step-icon-circle {
+  background-color: var(--bs-color-teal-primary, #0B6763);
+  color: #FFFFFF;
+  border-color: var(--bs-color-teal-primary, #0B6763);
+  box-shadow: 0 0 0 4px rgba(11, 103, 99, 0.15);
+}
+
+.bs-step--completed .bs-step-icon-circle {
+  background-color: var(--bs-color-success, #22C55E);
+  color: #FFFFFF;
+  border-color: var(--bs-color-success, #22C55E);
+}
+
+.bs-step--error .bs-step-icon-circle {
+  background-color: var(--bs-color-error, #EF4444);
+  color: #FFFFFF;
+  border-color: var(--bs-color-error, #EF4444);
+}
+
+.bs-step-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bs-step-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--bs-color-text-primary, #123333);
+}
+
+.bs-step-description {
+  font-size: 12.5px;
+  color: var(--bs-color-text-muted, #64748B);
+}
+
+.bs-step-line {
+  flex: 1 1 auto;
+  height: 2px;
+  background-color: var(--bs-color-border-subtle, #E2E8F0);
+  align-self: center;
+  margin: 0 12px;
+}
+
+.bs-step-line--completed {
+  background-color: var(--bs-color-teal-primary, #0B6763);
+}

@@ -1,0 +1,225 @@
+/* Alert Molecule Styles - BayesStack UI */
+
+.bs-alert {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border-radius: var(--bs-radius-md, 8px);
+  font-family: var(--bs-font-family, 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif);
+  font-size: 14px;
+  line-height: 1.45;
+  position: relative;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* ==========================================================================
+   Severities & Variants
+   ========================================================================== */
+
+/* 1. INFO SEVERITY */
+.bs-alert--info.bs-alert--accent {
+  background-color: var(--bs-color-info-subtle, #E8F0FC);
+  border: 1px solid var(--bs-color-info-border, #B1CDF6);
+  border-left: 4px solid var(--bs-color-info, #317AE7);
+  color: var(--bs-color-info-text, #1E40AF);
+}
+.bs-alert--info.bs-alert--subtle {
+  background-color: var(--bs-color-info-subtle, #E8F0FC);
+  border: 1px solid var(--bs-color-info-border, #B1CDF6);
+  color: var(--bs-color-info-text, #1E40AF);
+}
+.bs-alert--info.bs-alert--solid {
+  background-color: var(--bs-color-info, #317AE7);
+  border: 1px solid var(--bs-color-info, #317AE7);
+  color: #FFFFFF;
+}
+.bs-alert--info.bs-alert--outline {
+  background-color: transparent;
+  border: 1px solid var(--bs-color-info, #317AE7);
+  color: var(--bs-color-info, #317AE7);
+}
+
+/* 2. SUCCESS SEVERITY */
+.bs-alert--success.bs-alert--accent {
+  background-color: var(--bs-color-success-subtle, #E4F4E6);
+  border: 1px solid var(--bs-color-success-border, #90D19A);
+  border-left: 4px solid var(--bs-color-success, #5CBC6A);
+  color: var(--bs-color-success-text, #166534);
+}
+.bs-alert--success.bs-alert--subtle {
+  background-color: var(--bs-color-success-subtle, #E4F4E6);
+  border: 1px solid var(--bs-color-success-border, #90D19A);
+  color: var(--bs-color-success-text, #166534);
+}
+.bs-alert--success.bs-alert--solid {
+  background-color: var(--bs-color-success, #22C55E);
+  border: 1px solid var(--bs-color-success, #22C55E);
+  color: #FFFFFF;
+}
+.bs-alert--success.bs-alert--outline {
+  background-color: transparent;
+  border: 1px solid var(--bs-color-success, #5CBC6A);
+  color: var(--bs-color-success-text, #166534);
+}
+
+/* 3. WARNING SEVERITY */
+.bs-alert--warning.bs-alert--accent {
+  background-color: var(--bs-color-warning-subtle, #FEF3E1);
+  border: 1px solid var(--bs-color-warning-border, #FBDAA6);
+  border-left: 4px solid var(--bs-color-warning, #F39C13);
+  color: var(--bs-color-warning-text, #92400E);
+}
+.bs-alert--warning.bs-alert--subtle {
+  background-color: var(--bs-color-warning-subtle, #FEF3E1);
+  border: 1px solid var(--bs-color-warning-border, #FBDAA6);
+  color: var(--bs-color-warning-text, #92400E);
+}
+.bs-alert--warning.bs-alert--solid {
+  background-color: var(--bs-color-warning, #F59E0B);
+  border: 1px solid var(--bs-color-warning, #F59E0B);
+  color: #FFFFFF;
+}
+.bs-alert--warning.bs-alert--outline {
+  background-color: transparent;
+  border: 1px solid var(--bs-color-warning, #F39C13);
+  color: var(--bs-color-warning-text, #92400E);
+}
+
+/* 4. ERROR SEVERITY */
+.bs-alert--error.bs-alert--accent {
+  background-color: var(--bs-color-error-subtle, #F7DEDE);
+  border: 1px solid var(--bs-color-error-border, #DF7878);
+  border-left: 4px solid var(--bs-color-error, #B52A2A);
+  color: var(--bs-color-error-text, #991B1B);
+}
+.bs-alert--error.bs-alert--subtle {
+  background-color: var(--bs-color-error-subtle, #F7DEDE);
+  border: 1px solid var(--bs-color-error-border, #DF7878);
+  color: var(--bs-color-error-text, #991B1B);
+}
+.bs-alert--error.bs-alert--solid {
+  background-color: var(--bs-color-error, #EF4444);
+  border: 1px solid var(--bs-color-error, #EF4444);
+  color: #FFFFFF;
+}
+.bs-alert--error.bs-alert--outline {
+  background-color: transparent;
+  border: 1px solid var(--bs-color-error, #B52A2A);
+  color: var(--bs-color-error-text, #991B1B);
+}
+
+/* ==========================================================================
+   Inner Elements Layout
+   ========================================================================== */
+
+/* Lead Icon */
+.bs-alert__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.bs-alert--info .bs-alert__icon { color: var(--bs-color-info, #317AE7); }
+.bs-alert--success .bs-alert__icon { color: var(--bs-color-success, #5CBC6A); }
+.bs-alert--warning .bs-alert__icon { color: var(--bs-color-warning, #F39C13); }
+.bs-alert--error .bs-alert__icon { color: var(--bs-color-error, #B52A2A); }
+
+.bs-alert--solid .bs-alert__icon {
+  color: #FFFFFF !important;
+}
+
+/* Body Wrapper */
+.bs-alert__body {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bs-alert--block .bs-alert__body {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+/* Content Container */
+.bs-alert__content {
+  display: flex;
+  flex: 1 1 auto;
+}
+
+.bs-alert--inline .bs-alert__content {
+  flex-direction: row;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.bs-alert--block .bs-alert__content {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+/* Title & Description Typography */
+.bs-alert__title {
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+}
+
+.bs-alert__description {
+  font-weight: 400;
+  font-size: 13.5px;
+  opacity: 0.95;
+}
+
+/* Action Trigger */
+.bs-alert__action {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.bs-alert__action-btn {
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  text-decoration: underline !important;
+  padding: 0 !important;
+  height: auto !important;
+}
+
+.bs-alert--info .bs-alert__action-btn { color: #1E40AF !important; }
+.bs-alert--success .bs-alert__action-btn { color: #166534 !important; }
+.bs-alert--warning .bs-alert__action-btn { color: #92400E !important; }
+.bs-alert--error .bs-alert__action-btn { color: #991B1B !important; }
+
+.bs-alert--solid .bs-alert__action-btn {
+  color: #FFFFFF !important;
+  text-decoration: underline !important;
+}
+
+/* Close Button */
+.bs-alert__close {
+  margin-left: 8px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  margin-top: -2px;
+}
+
+.bs-alert__close-btn {
+  opacity: 0.7;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.bs-alert__close-btn:hover {
+  opacity: 1;
+  transform: scale(1.08);
+}

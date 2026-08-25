@@ -1,6 +1,15 @@
-import React, { useState, useEffect, type ReactNode, type InputHTMLAttributes } from "react";
+import React, { createContext, useContext, useState, useEffect, type ReactNode, type InputHTMLAttributes } from "react";
 import { Icon } from "../Icons";
 import "./Inputs.css";
+
+export interface CheckboxGroupContextValue {
+  name?: string;
+  value?: string[];
+  onToggle?: (itemValue: string, e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
+}
+
+export const CheckboxGroupContext = createContext<CheckboxGroupContextValue | null>(null);
 
 export type CheckboxFillVariant = "solid" | "tick" | "solid-block";
 
@@ -46,6 +55,8 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
     {
       checked,
       defaultChecked = false,
+      value,
+      name,
       fillVariant = "solid",
       indeterminate = false,
       label,
@@ -58,9 +69,24 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
     },
     ref
   ) => {
-    const isControlled = checked !== undefined;
+    const group = useContext(CheckboxGroupContext);
+
+    const isGroupControlled = group !== null && group.value !== undefined;
+    const isCheckedInGroup = group?.value && value !== undefined
+      ? group.value.includes(String(value))
+      : false;
+
+    const isControlled = checked !== undefined || isGroupControlled;
     const [internalChecked, setInternalChecked] = useState<boolean>(Boolean(defaultChecked));
-    const isChecked = isControlled ? Boolean(checked) : internalChecked;
+
+    const isChecked = isGroupControlled
+      ? isCheckedInGroup
+      : isControlled
+      ? Boolean(checked)
+      : internalChecked;
+
+    const isDisabled = disabled || Boolean(group?.disabled);
+    const resolvedName = name || group?.name;
 
     useEffect(() => {
       if (!isControlled && defaultChecked !== undefined) {
@@ -69,19 +95,23 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
     }, [defaultChecked, isControlled]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (isDisabled) return;
       const nextChecked = e.target.checked;
       if (!isControlled) {
         setInternalChecked(nextChecked);
       }
       if (onChange) onChange(e);
       if (onCheckedChange) onCheckedChange(nextChecked);
+      if (group?.onToggle && value !== undefined) {
+        group.onToggle(String(value), e);
+      }
     };
 
     return (
       <label
         className={[
           "bs-checkbox-wrapper",
-          disabled && "bs-checkbox-wrapper--disabled",
+          isDisabled && "bs-checkbox-wrapper--disabled",
           className,
         ]
           .filter(Boolean)
@@ -101,8 +131,10 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           <input
             ref={ref}
             type="checkbox"
+            name={resolvedName}
+            value={value}
             checked={isChecked}
-            disabled={disabled}
+            disabled={isDisabled}
             onChange={handleChange}
             style={{ position: "absolute", opacity: 0, width: "100%", height: "100%", margin: 0, cursor: "inherit" }}
             {...props}

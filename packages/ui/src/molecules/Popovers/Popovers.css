@@ -1,0 +1,113 @@
+/* Popovers Molecule Styles - BayesStack UI */
+
+/* Tooltip Container Wrapper */
+.bs-tooltip-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+/* Tooltip Bubble Overlay */
+.bs-tooltip-bubble {
+  position: absolute;
+  z-index: 1100;
+  padding: 6px 10px;
+  background-color: var(--bs-color-text-primary, #0F172A);
+  color: #FFFFFF;
+  font-family: var(--bs-font-family, 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif);
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: var(--bs-radius-sm, 6px);
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+  animation: bs-fade-in 0.15s ease-out;
+}
+
+.bs-tooltip-bubble--top {
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.bs-tooltip-bubble--bottom {
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.bs-tooltip-bubble--left {
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.bs-tooltip-bubble--right {
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Popover Panel Overlay */
+.bs-popover-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.bs-popover-panel {
+  position: absolute;
+  z-index: 1050;
+  min-width: 220px;
+  max-width: 320px;
+  background-color: var(--bs-color-bg-surface, #FFFFFF);
+  border: 1px solid var(--bs-color-border-subtle, #E2E8F0);
+  border-radius: var(--bs-radius-md, 8px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  padding: 14px;
+  box-sizing: border-box;
+  font-family: var(--bs-font-family, 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif);
+  animation: bs-fade-in 0.15s ease-out;
+}
+
+.bs-popover-panel--bottom {
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.bs-popover-panel--top {
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.bs-popover-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--bs-color-text-primary, #123333);
+  margin-bottom: 6px;
+}
+
+.bs-popover-content {
+  font-size: 13px;
+  color: var(--bs-color-text-secondary, #59716E);
+  line-height: 1.45;
+}
+
+/* Popconfirm Specifics */
+.bs-popconfirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+@keyframes bs-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
