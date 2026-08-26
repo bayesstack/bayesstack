@@ -40,14 +40,51 @@
     }
   }
 
-  const observer = new MutationObserver(injectBrandText);
+  function removeOpenInEditor() {
+    const selectors = ['button', 'a', 'div[role="button"]', 'div[role="menuitem"]', 'span', 'li'];
+    document.querySelectorAll(selectors.join(',')).forEach((el) => {
+      const title = el.getAttribute('title') || el.getAttribute('aria-label') || '';
+      const text = el.innerText || el.textContent || '';
+      if (
+        title.toLowerCase().includes('open in editor') ||
+        title.toLowerCase().includes('open in ide') ||
+        text.trim().toLowerCase() === 'open in editor' ||
+        text.trim().toLowerCase() === 'open in ide' ||
+        text.trim().toLowerCase().startsWith('open in editor')
+      ) {
+        const target = el.closest('button, a, div[role="menuitem"], li') || el;
+        if (target && target.style.display !== 'none') {
+          target.style.setProperty('display', 'none', 'important');
+        }
+      }
+    });
+  }
+
+  const observer = new MutationObserver(() => {
+    injectBrandText();
+    removeOpenInEditor();
+  });
+
   document.addEventListener('DOMContentLoaded', () => {
     injectBrandText();
+    removeOpenInEditor();
     observer.observe(document.body, { childList: true, subtree: true });
   });
 </script>
 
 <style>
+  /* Hide any "Open in Editor" buttons, links, or menu items */
+  [title*="Open in editor" i],
+  [title*="Open in Editor" i],
+  [aria-label*="Open in editor" i],
+  [aria-label*="Open in Editor" i],
+  [data-action*="open-in-editor" i],
+  a[href*="vscode:"],
+  a[href*="webstorm:"],
+  a[href*="idea:"] {
+    display: none !important;
+  }
+
   /* Sidebar Navbar Pure White Background */
   .sidebar-container,
   nav.sidebar-container,
@@ -108,52 +145,192 @@
     margin-top: 1px !important;
   }
 
-  /* Sidebar Nav Tree Item Hover Styling (Transparent #0B6763) */
-  a.sidebar-item:hover,
-  button.sidebar-item:hover,
-  div[data-item-id]:hover,
-  [data-nodetype="group"]:hover,
-  [data-nodetype="component"]:hover,
-  [data-nodetype="story"]:hover,
-  .sidebar-container [role="treeitem"]:hover,
-  .sidebar-container a:hover,
-  .sidebar-container button:hover {
+  /* ========================================================= */
+  /* Sidebar Tree Item & Navigation Active & Hover Design     */
+  /* ========================================================= */
+
+  /* 1. Active / Selected Sidebar Tree Items - Uniform Light Mint Color (ULTRA-HIGH SPECIFICITY) */
+  html body nav.sidebar-container a.sidebar-item[data-selected="true"],
+  html body nav.sidebar-container button.sidebar-item[data-selected="true"],
+  html body nav.sidebar-container div[data-item-id][data-selected="true"],
+  html body nav.sidebar-container [data-nodetype][data-selected="true"],
+  html body nav.sidebar-container [data-selected="true"],
+  html body #storybook-explorer-tree [data-selected="true"] {
+    background-color: #EAF4F2 !important;
+    background: #EAF4F2 !important;
+    background-image: none !important;
+    color: #0B6763 !important;
+    font-weight: 700 !important;
+    border-radius: 6px !important;
+    box-shadow: none !important;
+    border-left: 3px solid #0B6763 !important;
+    mask-image: none !important;
+    -webkit-mask-image: none !important;
+  }
+
+  /* Strip ALL background images, linear gradients, masks, and dark overlays from ALL children and pseudo-elements inside selected tree items */
+  html body nav.sidebar-container [data-selected="true"] *,
+  html body #storybook-explorer-tree [data-selected="true"] *,
+  html body nav.sidebar-container [data-selected="true"]::before,
+  html body nav.sidebar-container [data-selected="true"]::after,
+  html body nav.sidebar-container [data-selected="true"] *::before,
+  html body nav.sidebar-container [data-selected="true"] *::after,
+  html body #storybook-explorer-tree [data-selected="true"]::before,
+  html body #storybook-explorer-tree [data-selected="true"]::after {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    mask-image: none !important;
+    -webkit-mask-image: none !important;
+    display: inherit; /* Prevent pseudo-elements from taking up space if they had block display */
+  }
+
+  /* Ensure pseudo elements are completely hidden */
+  html body nav.sidebar-container [data-selected="true"]::before,
+  html body nav.sidebar-container [data-selected="true"]::after,
+  html body nav.sidebar-container [data-selected="true"] *::before,
+  html body nav.sidebar-container [data-selected="true"] *::after {
+    display: none !important;
+    content: none !important;
+  }
+
+  /* Ensure text, icons, and svgs inside active tree item are solid #0B6763 */
+  html body nav.sidebar-container [data-selected="true"] * {
+    color: #0B6763 !important;
+    fill: #0B6763 !important;
+    stroke: #0B6763 !important;
+  }
+
+  /* 2. Active Sidebar Tree Item Hover State (Subtle deeper mint, 100% uniform) */
+  html body nav.sidebar-container [data-selected="true"]:hover,
+  html body #storybook-explorer-tree [data-selected="true"]:hover {
+    background-color: #DEEFEA !important;
+    background: #DEEFEA !important;
+    background-image: none !important;
+    color: #084C49 !important;
+    cursor: pointer !important;
+    transition: background-color 0.15s ease, color 0.15s ease !important;
+  }
+
+  html body nav.sidebar-container [data-selected="true"]:hover * {
+    color: #084C49 !important;
+    fill: #084C49 !important;
+    stroke: #084C49 !important;
+  }
+
+  /* 3. Inactive Sidebar Tree Item Hover Styling ONLY */
+  a.sidebar-item:not([data-selected="true"]):not([aria-selected="true"]):not([aria-pressed="true"]):hover,
+  button.sidebar-item:not([data-selected="true"]):not([aria-selected="true"]):not([aria-pressed="true"]):hover,
+  div[data-item-id]:not([data-selected="true"]):not([aria-selected="true"]):not([aria-pressed="true"]):hover,
+  [data-nodetype]:not([data-selected="true"]):not([aria-selected="true"]):not([aria-pressed="true"]):hover,
+  .sidebar-container [role="treeitem"]:not([data-selected="true"]):not([aria-selected="true"]):not([aria-pressed="true"]):hover {
     background-color: rgba(11, 103, 99, 0.05) !important;
     color: #0B6763 !important;
     border-radius: 6px !important;
     transition: background-color 0.15s ease, color 0.15s ease !important;
   }
 
-  a.sidebar-item:hover *,
-  button.sidebar-item:hover *,
-  div[data-item-id]:hover *,
-  [data-nodetype]:hover *,
-  .sidebar-container [role="treeitem"]:hover *,
-  .sidebar-container a:hover *,
-  .sidebar-container button:hover * {
+  a.sidebar-item:not([data-selected="true"]):not([aria-selected="true"]):not([aria-pressed="true"]):hover *,
+  button.sidebar-item:not([data-selected="true"]):not([aria-selected="true"]):not([aria-pressed="true"]):hover *,
+  div[data-item-id]:not([data-selected="true"]):not([aria-selected="true"]):not([aria-pressed="true"]):hover *,
+  [data-nodetype]:not([data-selected="true"]):not([aria-selected="true"]):not([aria-pressed="true"]):hover *,
+  .sidebar-container [role="treeitem"]:not([data-selected="true"]):not([aria-selected="true"]):not([aria-pressed="true"]):hover * {
     color: #0B6763 !important;
     fill: #0B6763 !important;
   }
 
-  /* Storybook Controls Panel - Target exact toggle switch spans (False / True) inside label[for="control-disabled"] */
-  label[for="control-disabled"] span,
-  label:has(input[role="switch"]) span,
-  label:has(input[type="checkbox"][role="switch"]) span,
-  input[role="switch"]~span,
-  input[type="checkbox"][role="switch"]~span,
-  label[for*="control-"] input[role="switch"]+span,
-  label[for*="control-"] span[aria-hidden="true"] {
-    color: #e1f4f1 !important;
+  /* 4. Canvas / Docs Tab Toggle Buttons */
+  button[aria-pressed="true"] {
+    color: #0B6763 !important;
+    background-color: transparent !important;
+    border-bottom: 2px solid #0B6763 !important;
+    font-weight: 700 !important;
   }
 
-  /* Component Tests Toolbar - ONLY "Scroll to end" text button (excluding icon buttons with aria-label) */
-  nav[aria-label="Component tests toolbar"] button:not([aria-label]),
-  button.css-1plp90 {
-    color: #e1f4f1 !important;
+  button[aria-pressed="true"]:hover {
+    color: #084C49 !important;
+    background-color: rgba(11, 103, 99, 0.06) !important;
+    border-bottom: 2px solid #084C49 !important;
   }
 
-  /* Storybook Controls Set Boolean Button Text Color */
-  button.css-lbbray {
+  button[aria-pressed="false"]:hover {
+    color: #0B6763 !important;
+    background-color: rgba(11, 103, 99, 0.04) !important;
+  }
+
+  /* ========================================================= */
+  /* Controls Panel Buttons & Toggles Text Color Fix           */
+  /* ========================================================= */
+
+  /* Make ALL text inside buttons in the Controls panel table white (e.g. "Set string", "Set object") */
+  table td button {
     color: #ffffff !important;
+  }
+  
+  table td button * {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+  }
+
+  /* Make ALL text inside boolean toggles (True/False segmented controls) white */
+  table td label:has(input[value="true"]),
+  table td label:has(input[value="false"]),
+  table td label:has(input[value="true"]) *,
+  table td label:has(input[value="false"]) * {
+    color: #ffffff !important;
+  }
+
+  /* Also target switch-style toggles or general checkbox buttons that might have dark backgrounds */
+  table td label:has(input[role="switch"]),
+  table td label:has(input[role="switch"]) *,
+  table td .css-lbbray,
+  table td .css-1plp90 {
+    color: #ffffff !important;
+  }
+
+  /* Ensure 3-dot context menu action buttons are fully functional and visible on hover for both component navitems and story navitems */
+  [data-nodetype="component"] button,
+  [data-nodetype="story"] button,
+  a.sidebar-item button,
+  button.sidebar-item button,
+  .sidebar-container [role="treeitem"] button {
+    opacity: 0.7;
+    transition: opacity 0.15s ease !important;
+  }
+
+  [data-nodetype="component"]:hover button,
+  [data-nodetype="story"]:hover button,
+  a.sidebar-item:hover button,
+  button.sidebar-item:hover button,
+  .sidebar-container [role="treeitem"]:hover button,
+  [data-nodetype="component"][data-selected="true"] button,
+  [data-nodetype="story"][data-selected="true"] button,
+  a.sidebar-item[data-selected="true"] button {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  [data-nodetype]:not([data-selected="true"]) button:hover,
+  a.sidebar-item:not([data-selected="true"]) button:hover {
+    background-color: rgba(11, 103, 99, 0.12) !important;
+    border-radius: 4px !important;
+  }
+
+  [data-selected="true"] button:hover {
+    background-color: rgba(11, 103, 99, 0.15) !important;
+    border-radius: 4px !important;
+  }
+
+  [data-nodetype] button:hover svg,
+  a.sidebar-item button:hover svg {
+    color: #0B6763 !important;
+    fill: #0B6763 !important;
+  }
+
+  [data-selected="true"] button svg,
+  [data-selected="true"] button:hover svg {
+    color: #0B6763 !important;
+    fill: #0B6763 !important;
   }
 </style>

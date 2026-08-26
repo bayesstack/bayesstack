@@ -126,3 +126,16 @@ label[for*="control-"] input[role="switch"] + span,
 label[for*="control-"] span[aria-hidden="true"] {
   color: #ffffff !important;
 }
+
+/* Hide any "Open in Editor" buttons, links, or menu items in Preview/Docs */
+[title*="Open in editor" i],
+[title*="Open in Editor" i],
+[aria-label*="Open in editor" i],
+[aria-label*="Open in Editor" i],
+[data-action*="open-in-editor" i],
+a[href*="vscode:"],
+a[href*="webstorm:"],
+a[href*="idea:"] {
+  display: none !important;
+}
+

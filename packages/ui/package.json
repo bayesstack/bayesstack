@@ -15,6 +15,8 @@
     "storybook": "storybook dev -p 6001",
     "build": "storybook build",
     "storybook:build": "storybook build",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -27,11 +29,14 @@
   },
   "devDependencies": {
     "@storybook/addon-docs": "^10.5.10",
+    "@storybook/addon-vitest": "^10.5.10",
     "@storybook/react": "^10.5.10",
     "@storybook/react-vite": "^10.5.10",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@vitest/coverage-v8": "^4.1.11",
     "storybook": "^10.5.10",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "^4.1.11"
   }
 }

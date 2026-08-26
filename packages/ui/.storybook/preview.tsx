@@ -3,10 +3,6 @@ import "../src/styles.css";
 import "./preview.css";
 
 const preview: Preview = {
-  // Generate a documentation entry for every component story. Each entry has
-  // the same Docs/Canvas tabs as Bubbles, with the primary example, its source
-  // code, and the component's available props.
-  tags: ["autodocs"],
   parameters: {
     docs: {
       canvas: {

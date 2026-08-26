@@ -1,0 +1,39 @@
+<script>
+  function removeOpenInEditor() {
+    const selectors = ['button', 'a', 'div[role="button"]', 'div[role="menuitem"]', 'span', 'li'];
+    document.querySelectorAll(selectors.join(',')).forEach((el) => {
+      const title = el.getAttribute('title') || el.getAttribute('aria-label') || '';
+      const text = el.innerText || el.textContent || '';
+      if (
+        title.toLowerCase().includes('open in editor') ||
+        title.toLowerCase().includes('open in ide') ||
+        text.trim().toLowerCase() === 'open in editor' ||
+        text.trim().toLowerCase() === 'open in ide' ||
+        text.trim().toLowerCase().startsWith('open in editor')
+      ) {
+        const target = el.closest('button, a, div[role="menuitem"], li') || el;
+        if (target && target.style.display !== 'none') {
+          target.style.setProperty('display', 'none', 'important');
+        }
+      }
+    });
+  }
+
+  const observer = new MutationObserver(removeOpenInEditor);
+  document.addEventListener('DOMContentLoaded', () => {
+    removeOpenInEditor();
+    observer.observe(document.body, { childList: true, subtree: true });
+  });
+</script>
+<style>
+  [title*="Open in editor" i],
+  [title*="Open in Editor" i],
+  [aria-label*="Open in editor" i],
+  [aria-label*="Open in Editor" i],
+  [data-action*="open-in-editor" i],
+  a[href*="vscode:"],
+  a[href*="webstorm:"],
+  a[href*="idea:"] {
+    display: none !important;
+  }
+</style>
