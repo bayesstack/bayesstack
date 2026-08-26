@@ -8,6 +8,19 @@
 <script>
   document.title = "BayesStack Design Studio";
 
+  // Storybook otherwise restores the last visited entry, which can be a Docs
+  // page. Opening the catalog URL without a path should always start on the
+  // Introduction Canvas.
+  const storybookPath = new URLSearchParams(window.location.search);
+  if (!storybookPath.has('path')) {
+    storybookPath.set('path', '/story/welcome--introduction');
+    window.history.replaceState(
+      null,
+      '',
+      `${window.location.pathname}?${storybookPath.toString()}${window.location.hash}`,
+    );
+  }
+
   function injectBrandText() {
     const brandElement = document.querySelector('a.sidebar-brand') ||
       document.querySelector('[title="BayesStack Design Studio"]');
