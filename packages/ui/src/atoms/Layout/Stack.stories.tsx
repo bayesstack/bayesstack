@@ -9,7 +9,6 @@ import { Paper } from "./Paper";
 const meta: Meta<typeof Stack> = {
   title: "Atoms/Layout/Stack",
   component: Stack,
-  tags: ["autodocs"],
   argTypes: {
     as: {
       control: { type: "select" },

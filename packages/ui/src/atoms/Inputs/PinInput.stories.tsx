@@ -5,7 +5,6 @@ import { PinInput } from "./PinInput";
 const meta: Meta<typeof PinInput> = {
   title: "Atoms/Inputs/PinInput",
   component: PinInput,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
     docs: {

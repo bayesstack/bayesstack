@@ -5,7 +5,6 @@ import { FileUpload, type FileItemData } from "./FileUpload";
 const meta: Meta<typeof FileUpload> = {
   title: "Molecules/Selects/FileUpload",
   component: FileUpload,
-  tags: ["autodocs"],
   argTypes: {
     multiple: { control: "boolean" },
     disabled: { control: "boolean" },

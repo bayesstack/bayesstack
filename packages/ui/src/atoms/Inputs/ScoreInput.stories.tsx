@@ -5,7 +5,6 @@ import { ScoreInput, type ScoreGrade } from "./ScoreInput";
 const meta: Meta<typeof ScoreInput> = {
   title: "Atoms/Inputs/ScoreInput",
   component: ScoreInput,
-  tags: ["autodocs"],
   argTypes: {
     variant: {
       control: "select",

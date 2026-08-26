@@ -6,7 +6,6 @@ import { Button } from "../../atoms/Buttons/Button";
 const meta: Meta<typeof Spotlight> = {
   title: "Organisms/Modals/Spotlight",
   component: Spotlight,
-  tags: ["autodocs"],
   argTypes: {
     theme: { control: "select", options: ["light", "dark"] },
     shortcutListener: { control: "boolean" },

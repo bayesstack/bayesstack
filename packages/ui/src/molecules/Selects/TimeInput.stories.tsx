@@ -5,7 +5,6 @@ import { TimeInput } from "./TimeInput";
 const meta: Meta<typeof TimeInput> = {
   title: "Molecules/Selects/TimeInput",
   component: TimeInput,
-  tags: ["autodocs"],
   argTypes: {
     format: {
       control: "select",

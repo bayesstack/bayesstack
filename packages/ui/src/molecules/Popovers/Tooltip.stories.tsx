@@ -6,7 +6,6 @@ import { Button } from "../../atoms/Buttons/Button";
 const meta: Meta<typeof Tooltip> = {
   title: "Molecules/Popovers/Tooltip",
   component: Tooltip,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
   },

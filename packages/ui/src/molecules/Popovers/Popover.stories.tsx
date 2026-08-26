@@ -6,7 +6,6 @@ import { Button } from "../../atoms/Buttons/Button";
 const meta: Meta<typeof Popover> = {
   title: "Molecules/Popovers/Popover",
   component: Popover,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
   },

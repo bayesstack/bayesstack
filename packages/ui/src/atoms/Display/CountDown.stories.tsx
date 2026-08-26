@@ -5,7 +5,6 @@ import { CountDown } from "./CountDown";
 const meta: Meta<typeof CountDown> = {
   title: "Atoms/Display/CountDown",
   component: CountDown,
-  tags: ["autodocs"],
   argTypes: {
     variant: {
       control: "select",

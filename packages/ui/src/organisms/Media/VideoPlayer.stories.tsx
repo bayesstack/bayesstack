@@ -5,7 +5,6 @@ import { VideoPlayer } from "./VideoPlayer";
 const meta: Meta<typeof VideoPlayer> = {
   title: "Organisms/Media/VideoPlayer",
   component: VideoPlayer,
-  tags: ["autodocs"],
   argTypes: {
     aspectRatio: { control: "select", options: ["16:9", "4:3", "21:9", "auto"] },
     autoPlay: { control: "boolean" },

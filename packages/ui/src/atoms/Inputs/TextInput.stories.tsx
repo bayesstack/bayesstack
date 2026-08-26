@@ -6,7 +6,6 @@ import { ICON_MAP } from "../Icons/icons";
 const meta: Meta<typeof TextInput> = {
   title: "Atoms/Inputs/TextInput",
   component: TextInput,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
     docs: {

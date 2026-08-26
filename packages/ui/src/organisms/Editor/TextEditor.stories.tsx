@@ -5,7 +5,6 @@ import { TextEditor } from "./TextEditor";
 const meta: Meta<typeof TextEditor> = {
   title: "Organisms/Editor/TextEditor",
   component: TextEditor,
-  tags: ["autodocs"],
   argTypes: {
     showOutline: { control: "boolean" },
     readOnly: { control: "boolean" },

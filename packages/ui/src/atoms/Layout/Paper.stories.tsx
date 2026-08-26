@@ -7,7 +7,6 @@ import { Button } from "../Buttons/Button";
 const meta: Meta<typeof Paper> = {
   title: "Atoms/Layout/Paper",
   component: Paper,
-  tags: ["autodocs"],
   argTypes: {
     as: {
       control: { type: "select" },

@@ -5,7 +5,6 @@ import { NumberInput } from "./NumberInput";
 const meta: Meta<typeof NumberInput> = {
   title: "Atoms/Inputs/NumberInput",
   component: NumberInput,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
     docs: {

@@ -5,7 +5,6 @@ import { LoadingOverlay } from "./LoadingOverlay";
 const meta: Meta<typeof LoadingOverlay> = {
   title: "Organisms/Modals/LoadingOverlay",
   component: LoadingOverlay,
-  tags: ["autodocs"],
   argTypes: {
     visible: { control: "boolean" },
     spinnerSize: {

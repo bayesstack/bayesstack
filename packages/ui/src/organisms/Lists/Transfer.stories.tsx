@@ -7,7 +7,6 @@ import { Badge } from "../../atoms/Badges/Badge";
 const meta: Meta<typeof Transfer> = {
   title: "Organisms/Lists/Transfer",
   component: Transfer,
-  tags: ["autodocs"],
   argTypes: {
     showSearch: { control: "boolean" },
     showSelectAllButtons: { control: "boolean" },

@@ -5,7 +5,6 @@ import { ContentEditorInput } from "./ContentEditorInput";
 const meta: Meta<typeof ContentEditorInput> = {
   title: "Organisms/Editor/ContentEditorInput",
   component: ContentEditorInput,
-  tags: ["autodocs"],
 };
 
 export default meta;

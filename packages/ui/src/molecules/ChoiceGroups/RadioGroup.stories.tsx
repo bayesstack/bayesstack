@@ -6,7 +6,6 @@ import { Radio } from "../../atoms/Inputs/Radio";
 const meta: Meta<typeof RadioGroup> = {
   title: "Molecules/ChoiceGroups/RadioGroup",
   component: RadioGroup,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
   },

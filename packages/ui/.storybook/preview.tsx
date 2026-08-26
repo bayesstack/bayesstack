@@ -3,7 +3,6 @@ import "../src/styles.css";
 import "./preview.css";
 
 const preview: Preview = {
-  tags: ["autodocs"],
   parameters: {
     docs: {
       canvas: {

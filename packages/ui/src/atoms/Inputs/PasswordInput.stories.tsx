@@ -6,7 +6,6 @@ import { ICON_MAP } from "../Icons/icons";
 const meta: Meta<typeof PasswordInput> = {
   title: "Atoms/Inputs/PasswordInput",
   component: PasswordInput,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
     docs: {

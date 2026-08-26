@@ -8,7 +8,6 @@ import { Badge } from "../../atoms/Badges/Badge";
 const meta: Meta<typeof PaginatedList> = {
   title: "Organisms/Lists/PaginatedList",
   component: PaginatedList,
-  tags: ["autodocs"],
   argTypes: {
     layout: {
       control: "select",

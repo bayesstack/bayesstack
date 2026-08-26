@@ -6,7 +6,6 @@ import { ICON_MAP } from "../Icons";
 const meta: Meta<typeof IconButton> = {
   title: "Atoms/Buttons/IconButton",
   component: IconButton,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
     controls: {

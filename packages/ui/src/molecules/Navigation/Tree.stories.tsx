@@ -5,7 +5,6 @@ import { Tree, type TreeNode } from "./Tree";
 const meta: Meta<typeof Tree> = {
   title: "Molecules/Navigation/Tree",
   component: Tree,
-  tags: ["autodocs"],
   argTypes: {
     selectable: { control: "boolean" },
     multiple: { control: "boolean" },

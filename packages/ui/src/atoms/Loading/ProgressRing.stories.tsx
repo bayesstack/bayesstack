@@ -5,7 +5,6 @@ import { ProgressRing } from "./ProgressRing";
 const meta: Meta<typeof ProgressRing> = {
   title: "Atoms/Loading/ProgressRing",
   component: ProgressRing,
-  tags: ["autodocs"],
   argTypes: {
     size: {
       control: "select",

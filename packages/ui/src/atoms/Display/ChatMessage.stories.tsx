@@ -10,7 +10,6 @@ import { Button } from "../Buttons/Button";
 const meta: Meta<typeof ChatMessage> = {
   title: "Atoms/Display/ChatMessage",
   component: ChatMessage,
-  tags: ["autodocs"],
   argTypes: {
     isOwn: { control: "boolean" },
     showAvatar: { control: "boolean" },

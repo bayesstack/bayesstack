@@ -5,7 +5,6 @@ import { Slider, type SliderValue } from "./Slider";
 const meta: Meta<typeof Slider> = {
   title: "Atoms/Inputs/Slider",
   component: Slider,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
     docs: {

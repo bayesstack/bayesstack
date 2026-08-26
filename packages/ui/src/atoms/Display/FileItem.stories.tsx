@@ -5,7 +5,6 @@ import { FileItem } from "./FileItem";
 const meta: Meta<typeof FileItem> = {
   title: "Atoms/Display/FileItem",
   component: FileItem,
-  tags: ["autodocs"],
   argTypes: {
     showFileName: { control: "boolean" },
     hideExtension: { control: "boolean" },

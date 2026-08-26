@@ -5,7 +5,6 @@ import { Paragraph } from "./Paragraph";
 const meta: Meta<typeof Paragraph> = {
   title: "Atoms/Typography/Paragraph",
   component: Paragraph,
-  tags: ["autodocs"],
   parameters: {
     docs: {
       description: {

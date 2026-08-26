@@ -5,7 +5,6 @@ import { TreeSelect, type TreeSelectOption } from "./TreeSelect";
 const meta: Meta<typeof TreeSelect> = {
   title: "Molecules/Selects/TreeSelect",
   component: TreeSelect,
-  tags: ["autodocs"],
   argTypes: {
     treeCheckable: { control: "boolean" },
     searchable: { control: "boolean" },

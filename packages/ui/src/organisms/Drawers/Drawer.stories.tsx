@@ -6,7 +6,6 @@ import { Button } from "../../atoms/Buttons/Button";
 const meta: Meta<typeof Drawer> = {
   title: "Organisms/Drawers/Drawer",
   component: Drawer,
-  tags: ["autodocs"],
   argTypes: {
     placement: {
       control: "select",

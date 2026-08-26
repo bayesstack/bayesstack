@@ -5,7 +5,6 @@ import { ListInput } from "./ListInput";
 const meta: Meta<typeof ListInput> = {
   title: "Molecules/Selects/ListInput",
   component: ListInput,
-  tags: ["autodocs"],
   argTypes: {
     canReorder: { control: "boolean" },
     disabled: { control: "boolean" },

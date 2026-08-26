@@ -6,7 +6,6 @@ import { Button } from "../../atoms/Buttons/Button";
 const meta: Meta<typeof Stepper> = {
   title: "Molecules/Navigation/Stepper",
   component: Stepper,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
   },

@@ -6,7 +6,6 @@ import { ICON_CATALOGUE, ICON_CATEGORIES } from "./icons";
 const meta: Meta<typeof Icon> = {
   title: "Atoms/Icons/Icon",
   component: Icon,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
     controls: {

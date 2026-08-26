@@ -5,7 +5,6 @@ import { ImageProfilePicker } from "./ImageProfilePicker";
 const meta: Meta<typeof ImageProfilePicker> = {
   title: "Molecules/Selects/ImageProfilePicker",
   component: ImageProfilePicker,
-  tags: ["autodocs"],
   argTypes: {
     variant: {
       control: "select",

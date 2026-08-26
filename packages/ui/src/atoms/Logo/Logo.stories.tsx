@@ -5,7 +5,6 @@ import { Logo } from "./Logo";
 const meta: Meta<typeof Logo> = {
   title: "Atoms/Logo/Logo",
   component: Logo,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
   },

@@ -8,7 +8,6 @@ import { Button } from "../../atoms/Buttons/Button";
 const meta: Meta<typeof Table> = {
   title: "Organisms/Tables/Table",
   component: Table,
-  tags: ["autodocs"],
   argTypes: {
     size: {
       control: "select",

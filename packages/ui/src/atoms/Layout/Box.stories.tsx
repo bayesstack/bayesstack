@@ -5,7 +5,6 @@ import { Box } from "./Box";
 const meta: Meta<typeof Box> = {
   title: "Atoms/Layout/Box",
   component: Box,
-  tags: ["autodocs"],
   argTypes: {
     as: {
       control: { type: "select" },

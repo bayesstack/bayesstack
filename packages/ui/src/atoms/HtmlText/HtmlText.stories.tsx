@@ -5,7 +5,6 @@ import { HtmlText } from "./HtmlText";
 const meta: Meta<typeof HtmlText> = {
   title: "Atoms/Typography/HtmlText",
   component: HtmlText,
-  tags: ["autodocs"],
   parameters: {
     docs: {
       description: {

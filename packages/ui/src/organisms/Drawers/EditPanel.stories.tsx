@@ -6,7 +6,6 @@ import { Button } from "../../atoms/Buttons/Button";
 const meta: Meta<typeof EditPanel> = {
   title: "Organisms/Drawers/EditPanel",
   component: EditPanel,
-  tags: ["autodocs"],
 };
 
 export default meta;

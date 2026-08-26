@@ -5,7 +5,6 @@ import { TableInput, type TableColumn } from "./TableInput";
 const meta: Meta<typeof TableInput> = {
   title: "Molecules/Selects/TableInput",
   component: TableInput,
-  tags: ["autodocs"],
   argTypes: {
     disabled: { control: "boolean" },
   },

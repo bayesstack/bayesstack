@@ -5,7 +5,6 @@ import { AvatarsGroup, type AvatarItem } from "./AvatarsGroup";
 const meta: Meta<typeof AvatarsGroup> = {
   title: "Atoms/Badges/AvatarsGroup",
   component: AvatarsGroup,
-  tags: ["autodocs"],
   argTypes: {
     size: {
       control: "select",

@@ -5,7 +5,6 @@ import { Kanban, type KanbanCardItem, type KanbanColumnItem } from "./Kanban";
 const meta: Meta<typeof Kanban> = {
   title: "Organisms/Lists/Kanban",
   component: Kanban,
-  tags: ["autodocs"],
   argTypes: {
     searchable: { control: "boolean" },
     draggableColumns: { control: "boolean" },

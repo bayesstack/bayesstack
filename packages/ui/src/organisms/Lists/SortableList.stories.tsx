@@ -6,7 +6,6 @@ import { Badge } from "../../atoms/Badges/Badge";
 const meta: Meta<typeof SortableList> = {
   title: "Organisms/Lists/SortableList",
   component: SortableList,
-  tags: ["autodocs"],
   argTypes: {
     removable: { control: "boolean" },
     disabled: { control: "boolean" },

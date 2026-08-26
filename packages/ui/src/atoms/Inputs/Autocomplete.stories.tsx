@@ -108,7 +108,6 @@ const SAMPLE_USERS: (AutocompleteItem & { email: string; role: string; avatarUrl
 const meta: Meta<typeof Autocomplete> = {
   title: "Atoms/Inputs/Autocomplete",
   component: Autocomplete,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
     docs: {

@@ -5,7 +5,6 @@ import { Switch } from "./Switch";
 const meta: Meta<typeof Switch> = {
   title: "Atoms/Inputs/Switch",
   component: Switch,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
     docs: {

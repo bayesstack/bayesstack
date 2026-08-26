@@ -6,7 +6,6 @@ import { Button } from "../../atoms/Buttons/Button";
 const meta: Meta<typeof Popconfirm> = {
   title: "Molecules/Popovers/Popconfirm",
   component: Popconfirm,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
   },

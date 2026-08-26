@@ -7,7 +7,6 @@ import { Button } from "../../atoms/Buttons/Button";
 const meta: Meta<typeof Descriptions> = {
   title: "Organisms/DataDisplay/Descriptions",
   component: Descriptions,
-  tags: ["autodocs"],
   argTypes: {
     bordered: { control: "boolean" },
     column: { control: { type: "number", min: 1, max: 4 } },

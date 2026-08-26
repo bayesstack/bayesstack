@@ -5,7 +5,6 @@ import { Title } from "./Title";
 const meta: Meta<typeof Title> = {
   title: "Atoms/Typography/Title",
   component: Title,
-  tags: ["autodocs"],
   parameters: {
     docs: {
       description: {

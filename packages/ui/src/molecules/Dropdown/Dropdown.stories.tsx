@@ -8,7 +8,6 @@ import { Text } from "../../atoms/Text/Text";
 const meta: Meta<typeof Dropdown> = {
   title: "Molecules/Dropdown/Dropdown",
   component: Dropdown,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
     controls: {

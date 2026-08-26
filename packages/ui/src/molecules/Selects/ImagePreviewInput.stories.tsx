@@ -5,7 +5,6 @@ import { ImagePreviewInput } from "./ImagePreviewInput";
 const meta: Meta<typeof ImagePreviewInput> = {
   title: "Molecules/Selects/ImagePreviewInput",
   component: ImagePreviewInput,
-  tags: ["autodocs"],
   argTypes: {
     width: { control: "number" },
     height: { control: "number" },

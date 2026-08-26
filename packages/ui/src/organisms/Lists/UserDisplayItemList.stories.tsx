@@ -5,7 +5,6 @@ import { UserDisplayItemList, type UserDisplayItemData } from "./UserDisplayItem
 const meta: Meta<typeof UserDisplayItemList> = {
   title: "Organisms/Lists/UserDisplayItemList",
   component: UserDisplayItemList,
-  tags: ["autodocs"],
   argTypes: {
     searchable: { control: "boolean" },
     selectable: { control: "boolean" },

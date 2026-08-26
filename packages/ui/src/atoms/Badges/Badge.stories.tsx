@@ -8,7 +8,6 @@ import { ICON_MAP } from "../Icons";
 const meta: Meta<typeof Badge> = {
   title: "Atoms/Badges/Badge",
   component: Badge,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
   },

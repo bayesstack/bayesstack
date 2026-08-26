@@ -6,7 +6,6 @@ import { Checkbox } from "../../atoms/Inputs/Checkbox";
 const meta: Meta<typeof CheckboxGroup> = {
   title: "Molecules/ChoiceGroups/CheckboxGroup",
   component: CheckboxGroup,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
   },

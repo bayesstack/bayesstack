@@ -5,7 +5,6 @@ import { ColorInput } from "./ColorInput";
 const meta: Meta<typeof ColorInput> = {
   title: "Atoms/Inputs/ColorInput",
   component: ColorInput,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
     docs: {

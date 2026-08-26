@@ -5,7 +5,6 @@ import { Mentions, type MentionOption } from "./Mentions";
 const meta: Meta<typeof Mentions> = {
   title: "Molecules/Selects/Mentions",
   component: Mentions,
-  tags: ["autodocs"],
   argTypes: {
     disabled: { control: "boolean" },
     rows: { control: "number" },

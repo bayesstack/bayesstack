@@ -7,7 +7,6 @@ import { Button } from "../../atoms/Buttons/Button";
 const meta: Meta<typeof Modal> = {
   title: "Organisms/Modals/Modal",
   component: Modal,
-  tags: ["autodocs"],
   argTypes: {
     size: {
       control: "select",

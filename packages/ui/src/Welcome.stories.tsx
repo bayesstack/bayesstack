@@ -267,7 +267,6 @@ const meta = {
   title: "Welcome",
   component: WelcomeLanding,
   parameters: { layout: "fullscreen", controls: { disable: true } },
-  tags: ["autodocs"],
 } satisfies Meta<typeof WelcomeLanding>;
 
 export default meta;

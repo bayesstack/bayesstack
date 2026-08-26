@@ -5,7 +5,6 @@ import { BooleanInput, type BooleanOption } from "./BooleanInput";
 const meta: Meta<typeof BooleanInput> = {
   title: "Atoms/Inputs/BooleanInput",
   component: BooleanInput,
-  tags: ["autodocs"],
   argTypes: {
     variant: {
       control: "select",

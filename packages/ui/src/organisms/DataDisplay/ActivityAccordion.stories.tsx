@@ -5,7 +5,6 @@ import { ActivityAccordion } from "./ActivityAccordion";
 const meta: Meta<typeof ActivityAccordion> = {
   title: "Organisms/DataDisplay/ActivityAccordion",
   component: ActivityAccordion,
-  tags: ["autodocs"],
 };
 
 export default meta;

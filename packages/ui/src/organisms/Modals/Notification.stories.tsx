@@ -6,7 +6,6 @@ import { Button } from "../../atoms/Buttons/Button";
 const meta: Meta<typeof Notification> = {
   title: "Organisms/Modals/Notification",
   component: Notification,
-  tags: ["autodocs"],
 };
 
 export default meta;

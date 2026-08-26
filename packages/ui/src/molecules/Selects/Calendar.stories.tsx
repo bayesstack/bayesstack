@@ -5,7 +5,6 @@ import { Calendar, type CalendarEvent } from "./Calendar";
 const meta: Meta<typeof Calendar> = {
   title: "Molecules/Selects/Calendar",
   component: Calendar,
-  tags: ["autodocs"],
   argTypes: {
     range: { control: "boolean" },
     amountOfMonths: {

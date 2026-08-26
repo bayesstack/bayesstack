@@ -6,7 +6,6 @@ import { Paper } from "./Paper";
 const meta: Meta<typeof Divider> = {
   title: "Atoms/Layout/Divider",
   component: Divider,
-  tags: ["autodocs"],
   argTypes: {
     orientation: {
       control: { type: "select" },

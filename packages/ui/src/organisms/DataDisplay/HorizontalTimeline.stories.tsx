@@ -5,7 +5,6 @@ import { HorizontalTimeline } from "./HorizontalTimeline";
 const meta: Meta<typeof HorizontalTimeline> = {
   title: "Organisms/DataDisplay/HorizontalTimeline",
   component: HorizontalTimeline,
-  tags: ["autodocs"],
 };
 
 export default meta;

@@ -6,7 +6,6 @@ import { Button } from "../../atoms/Buttons/Button";
 const meta: Meta<typeof DrawerPush> = {
   title: "Organisms/Drawers/DrawerPush",
   component: DrawerPush,
-  tags: ["autodocs"],
 };
 
 export default meta;

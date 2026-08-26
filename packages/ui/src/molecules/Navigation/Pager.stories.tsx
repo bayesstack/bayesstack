@@ -5,7 +5,6 @@ import { Pager } from "./Pager";
 const meta: Meta<typeof Pager> = {
   title: "Molecules/Navigation/Pager",
   component: Pager,
-  tags: ["autodocs"],
   argTypes: {
     variant: {
       control: "select",

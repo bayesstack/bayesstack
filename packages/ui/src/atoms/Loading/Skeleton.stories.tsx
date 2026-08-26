@@ -12,7 +12,6 @@ import { Paragraph } from "../Paragraph/Paragraph";
 const meta: Meta<typeof Skeleton> = {
   title: "Atoms/Loading/Skeleton",
   component: Skeleton,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
   },

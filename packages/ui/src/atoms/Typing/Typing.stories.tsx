@@ -5,7 +5,6 @@ import { Typing } from "./Typing";
 const meta: Meta<typeof Typing> = {
   title: "Atoms/Typography/Typing",
   component: Typing,
-  tags: ["autodocs"],
   parameters: {
     docs: {
       description: {

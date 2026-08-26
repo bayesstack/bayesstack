@@ -5,7 +5,6 @@ import { LoadingBar } from "./LoadingBar";
 const meta: Meta<typeof LoadingBar> = {
   title: "Atoms/Loading/LoadingBar",
   component: LoadingBar,
-  tags: ["autodocs"],
   argTypes: {
     progress: {
       control: { type: "range", min: 0, max: 100, step: 1 },

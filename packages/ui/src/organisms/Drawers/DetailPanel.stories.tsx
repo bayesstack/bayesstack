@@ -6,7 +6,6 @@ import { Button } from "../../atoms/Buttons/Button";
 const meta: Meta<typeof DetailPanel> = {
   title: "Organisms/Drawers/DetailPanel",
   component: DetailPanel,
-  tags: ["autodocs"],
 };
 
 export default meta;

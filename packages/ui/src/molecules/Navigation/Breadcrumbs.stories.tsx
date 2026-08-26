@@ -5,7 +5,6 @@ import { Breadcrumbs } from "./Breadcrumbs";
 const meta: Meta<typeof Breadcrumbs> = {
   title: "Molecules/Navigation/Breadcrumbs",
   component: Breadcrumbs,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
   },

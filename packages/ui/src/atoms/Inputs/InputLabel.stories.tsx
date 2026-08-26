@@ -6,7 +6,6 @@ import { TextInput } from "./TextInput";
 const meta: Meta<typeof InputLabel> = {
   title: "Atoms/Inputs/InputLabel",
   component: InputLabel,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
     docs: {

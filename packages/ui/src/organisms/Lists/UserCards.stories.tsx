@@ -5,7 +5,6 @@ import { UserCards, type UserCardProfile } from "./UserCards";
 const meta: Meta<typeof UserCards> = {
   title: "Organisms/Lists/UserCards",
   component: UserCards,
-  tags: ["autodocs"],
   argTypes: {
     layout: {
       control: "select",

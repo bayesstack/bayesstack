@@ -5,7 +5,6 @@ import { Select } from "./Select";
 const meta: Meta<typeof Select> = {
   title: "Molecules/Selects/Select",
   component: Select,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
   },

@@ -5,7 +5,6 @@ import { MultiSelect } from "./MultiSelect";
 const meta: Meta<typeof MultiSelect> = {
   title: "Molecules/Selects/MultiSelect",
   component: MultiSelect,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
   },

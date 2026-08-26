@@ -5,7 +5,6 @@ import { Cascader, type CascaderOption } from "./Cascader";
 const meta: Meta<typeof Cascader> = {
   title: "Molecules/Selects/Cascader",
   component: Cascader,
-  tags: ["autodocs"],
   argTypes: {
     expandTrigger: {
       control: "select",

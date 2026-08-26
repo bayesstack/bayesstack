@@ -7,7 +7,6 @@ import { Icon, ICON_MAP } from "../Icons";
 const meta: Meta<typeof Chip> = {
   title: "Atoms/Badges/Chip",
   component: Chip,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
   },

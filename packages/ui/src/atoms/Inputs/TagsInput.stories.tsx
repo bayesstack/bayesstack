@@ -5,7 +5,6 @@ import { TagsInput } from "./TagsInput";
 const meta: Meta<typeof TagsInput> = {
   title: "Atoms/Inputs/TagsInput",
   component: TagsInput,
-  tags: ["autodocs"],
   argTypes: {
     size: {
       control: "select",

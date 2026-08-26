@@ -7,7 +7,6 @@ import { Button } from "../../atoms/Buttons/Button";
 const meta: Meta<typeof Alert> = {
   title: "Molecules/Feedback/Alert",
   component: Alert,
-  tags: ["autodocs"],
   parameters: {
     layout: "padded",
   },
