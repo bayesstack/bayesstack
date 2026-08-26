@@ -26,10 +26,12 @@
     "react-dom": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
+    "@storybook/react": "^9.1.16",
     "@storybook/react-vite": "^9.1.16",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "storybook": "^9.1.16",
     "typescript": "catalog:"
   }
+
 }

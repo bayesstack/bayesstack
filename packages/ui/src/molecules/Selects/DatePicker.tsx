@@ -1,0 +1,436 @@
+import React, { forwardRef, useState, useRef, useEffect } from "react";
+import { Icon } from "../../atoms/Icons";
+import { IconButton } from "../../atoms/Buttons/IconButton";
+import "./Selects.css";
+
+export interface DatePickerProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
+  /**
+   * Controlled Date value or Range tuple [startDate, endDate]
+   */
+  value?: Date | [Date | null, Date | null] | null;
+
+  /**
+   * Default initial date value or range
+   */
+  defaultValue?: Date | [Date | null, Date | null] | null;
+
+  /**
+   * Callback fired when selected date changes
+   */
+  onValueChange?: (val: any) => void;
+
+  /**
+   * Enables date range picking mode
+   * @default false
+   */
+  range?: boolean;
+
+  /**
+   * Enables time selector input
+   * @default false
+   */
+  withTime?: boolean;
+
+  /**
+   * Input placeholder string
+   */
+  placeholder?: string;
+
+  /**
+   * Minimum selectable date
+   */
+  minDate?: Date;
+
+  /**
+   * Maximum selectable date
+   */
+  maxDate?: Date;
+
+  /**
+   * Displays clear button when value is set
+   * @default true
+   */
+  clearable?: boolean;
+
+  /**
+   * Disables date picker component
+   * @default false
+   */
+  disabled?: boolean;
+
+  /**
+   * Error state highlight or message
+   */
+  error?: boolean | React.ReactNode;
+
+  /**
+   * Header label title
+   */
+  label?: React.ReactNode;
+
+  /**
+   * Helper description text
+   */
+  helperText?: React.ReactNode;
+
+  /**
+   * Display size variant
+   * @default 'md'
+   */
+  size?: "sm" | "md" | "lg";
+}
+
+const MONTH_NAMES = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+const WEEKDAY_NAMES = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+
+export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
+  (
+    {
+      value: controlledValue,
+      defaultValue,
+      onValueChange,
+      range = false,
+      withTime = false,
+      placeholder,
+      minDate,
+      maxDate,
+      clearable = true,
+      disabled = false,
+      error,
+      label,
+      helperText,
+      size = "md",
+      className = "",
+      style,
+      ...props
+    },
+    ref
+  ) => {
+    const isControlled = controlledValue !== undefined;
+    const [internalValue, setInternalValue] = useState<any>(
+      defaultValue ?? (range ? [null, null] : null)
+    );
+    const activeValue = isControlled ? controlledValue : internalValue;
+
+    const [isOpen, setIsOpen] = useState(false);
+
+    // Active viewed month & year in calendar popover
+    const now = new Date();
+    const initialViewDate =
+      (range ? (activeValue as any)?.[0] : activeValue) || now;
+
+    const [viewYear, setViewYear] = useState<number>(initialViewDate.getFullYear());
+    const [viewMonth, setViewMonth] = useState<number>(initialViewDate.getMonth());
+
+    // Time picker state (HH:mm)
+    const [timeString, setTimeString] = useState<string>("12:00");
+
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    // Close popover on outside click
+    useEffect(() => {
+      const handleOutsideClick = (e: MouseEvent) => {
+        if (
+          containerRef.current &&
+          !containerRef.current.contains(e.target as Node)
+        ) {
+          setIsOpen(false);
+        }
+      };
+      document.addEventListener("mousedown", handleOutsideClick);
+      return () => document.removeEventListener("mousedown", handleOutsideClick);
+    }, []);
+
+    const handlePrevMonth = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (viewMonth === 0) {
+        setViewMonth(11);
+        setViewYear((y) => y - 1);
+      } else {
+        setViewMonth((m) => m - 1);
+      }
+    };
+
+    const handleNextMonth = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (viewMonth === 11) {
+        setViewMonth(0);
+        setViewYear((y) => y + 1);
+      } else {
+        setViewMonth((m) => m + 1);
+      }
+    };
+
+    const isSameDay = (d1: Date | null, d2: Date | null) => {
+      if (!d1 || !d2) return false;
+      return (
+        d1.getFullYear() === d2.getFullYear() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getDate() === d2.getDate()
+      );
+    };
+
+    const isBetweenDays = (d: Date, start: Date | null, end: Date | null) => {
+      if (!start || !end) return false;
+      const t = d.getTime();
+      return t > start.getTime() && t < end.getTime();
+    };
+
+    const handleSelectDay = (day: number) => {
+      if (disabled) return;
+      const selected = new Date(viewYear, viewMonth, day);
+
+      if (range) {
+        let currentRange = (activeValue as [Date | null, Date | null]) || [null, null];
+        let newRange: [Date | null, Date | null];
+
+        if (!currentRange[0] || (currentRange[0] && currentRange[1])) {
+          newRange = [selected, null];
+        } else {
+          if (selected < currentRange[0]) {
+            newRange = [selected, currentRange[0]];
+          } else {
+            newRange = [currentRange[0], selected];
+          }
+        }
+
+        if (!isControlled) setInternalValue(newRange);
+        if (onValueChange) onValueChange(newRange);
+      } else {
+        if (!isControlled) setInternalValue(selected);
+        if (onValueChange) onValueChange(selected);
+        if (!withTime) setIsOpen(false);
+      }
+    };
+
+    const handleClear = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      const cleared = range ? [null, null] : null;
+      if (!isControlled) setInternalValue(cleared);
+      if (onValueChange) onValueChange(cleared);
+    };
+
+    const handleSetToday = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      const todayDate = new Date();
+      setViewYear(todayDate.getFullYear());
+      setViewMonth(todayDate.getMonth());
+      if (!range) {
+        if (!isControlled) setInternalValue(todayDate);
+        if (onValueChange) onValueChange(todayDate);
+      }
+    };
+
+    // Calculate grid days for viewed month
+    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+    const firstDayOfWeek = new Date(viewYear, viewMonth, 1).getDay();
+
+    const calendarGrid: (number | null)[] = [];
+    for (let i = 0; i < firstDayOfWeek; i++) calendarGrid.push(null);
+    for (let d = 1; d <= daysInMonth; d++) calendarGrid.push(d);
+
+    const formatDateString = (d: Date | null) => {
+      if (!d) return "";
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+
+    const getDisplayString = () => {
+      if (range) {
+        const [start, end] = (activeValue as [Date | null, Date | null]) || [null, null];
+        if (!start && !end) return "";
+        return `${formatDateString(start)} ~ ${formatDateString(end)}`;
+      }
+      if (!activeValue) return "";
+      const dateStr = formatDateString(activeValue as Date);
+      return withTime ? `${dateStr} ${timeString}` : dateStr;
+    };
+
+    const defaultPlaceholder = range
+      ? "YYYY-MM-DD ~ YYYY-MM-DD"
+      : withTime
+      ? "YYYY-MM-DD HH:mm"
+      : "YYYY-MM-DD";
+
+    return (
+      <div
+        ref={containerRef}
+        className={["bs-select-field", className].filter(Boolean).join(" ")}
+        style={style}
+        {...props}
+      >
+        {label && <div className="bs-select-field__label">{label}</div>}
+
+        <div
+          ref={ref}
+          tabIndex={disabled ? -1 : 0}
+          className={[
+            "bs-select-trigger",
+            `bs-select-trigger--${size}`,
+            isOpen ? "bs-select-trigger--open" : "",
+            disabled ? "bs-select-trigger--disabled" : "",
+            error ? "bs-select-trigger--error" : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          onClick={() => !disabled && setIsOpen((prev) => !prev)}
+        >
+          <div className="bs-select-trigger__left">
+            <Icon name="Calendar" size="sm" color="#68807D" />
+            {getDisplayString() ? (
+              <span className="bs-select-trigger__value">{getDisplayString()}</span>
+            ) : (
+              <span className="bs-select-trigger__placeholder">
+                {placeholder || defaultPlaceholder}
+              </span>
+            )}
+          </div>
+
+          <div className="bs-select-trigger__right">
+            {clearable && getDisplayString() && !disabled && (
+              <IconButton
+                name="Close"
+                label="Clear date"
+                size="xs"
+                variant="transparent"
+                onClick={handleClear}
+              />
+            )}
+            <Icon name="ArrowDown" size="sm" color="#68807D" />
+          </div>
+        </div>
+
+        {/* DatePicker Floating Calendar Popover */}
+        {isOpen && !disabled && (
+          <div className="bs-datepicker-popover">
+            {/* Header: Month/Year navigation */}
+            <div className="bs-datepicker-header">
+              <button
+                type="button"
+                className="bs-datepicker-nav-btn"
+                onClick={handlePrevMonth}
+              >
+                <Icon name="ArrowLeft" size={14} />
+              </button>
+              <span className="bs-datepicker-month-label">
+                {MONTH_NAMES[viewMonth]} {viewYear}
+              </span>
+              <button
+                type="button"
+                className="bs-datepicker-nav-btn"
+                onClick={handleNextMonth}
+              >
+                <Icon name="ArrowRight" size={14} />
+              </button>
+            </div>
+
+            {/* Weekday Labels */}
+            <div className="bs-datepicker-weekdays">
+              {WEEKDAY_NAMES.map((wd) => (
+                <span key={wd} className="bs-datepicker-weekday">
+                  {wd}
+                </span>
+              ))}
+            </div>
+
+            {/* Calendar Days Grid */}
+            <div className="bs-datepicker-grid">
+              {calendarGrid.map((dayNum, idx) => {
+                if (dayNum === null) {
+                  return <span key={`empty-${idx}`} className="bs-datepicker-day--empty" />;
+                }
+
+                const currentCellDate = new Date(viewYear, viewMonth, dayNum);
+                let isSelected = false;
+                let isInRange = false;
+
+                if (range) {
+                  const [start, end] = (activeValue as [Date | null, Date | null]) || [
+                    null,
+                    null,
+                  ];
+                  isSelected = isSameDay(currentCellDate, start) || isSameDay(currentCellDate, end);
+                  isInRange = isBetweenDays(currentCellDate, start, end);
+                } else {
+                  isSelected = isSameDay(currentCellDate, activeValue as Date);
+                }
+
+                const isToday = isSameDay(currentCellDate, now);
+
+                return (
+                  <button
+                    key={dayNum}
+                    type="button"
+                    className={[
+                      "bs-datepicker-day-btn",
+                      isSelected ? "bs-datepicker-day-btn--selected" : "",
+                      isInRange ? "bs-datepicker-day-btn--in-range" : "",
+                      isToday ? "bs-datepicker-day-btn--today" : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSelectDay(dayNum);
+                    }}
+                  >
+                    {dayNum}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Time Slot & Footer Actions */}
+            <div className="bs-datepicker-footer">
+              {withTime && !range && (
+                <div className="bs-datepicker-time-group">
+                  <Icon name="Time" size={14} color="#68807D" />
+                  <input
+                    type="time"
+                    className="bs-datepicker-time-input"
+                    value={timeString}
+                    onChange={(e) => setTimeString(e.target.value)}
+                  />
+                </div>
+              )}
+
+              <button
+                type="button"
+                className="bs-datepicker-today-btn"
+                onClick={handleSetToday}
+              >
+                Today
+              </button>
+            </div>
+          </div>
+        )}
+
+        {error && typeof error !== "boolean" && (
+          <div className="bs-select-field__error">{error}</div>
+        )}
+        {!error && helperText && (
+          <div className="bs-select-field__helper">{helperText}</div>
+        )}
+      </div>
+    );
+  }
+);
+
+DatePicker.displayName = "DatePicker";

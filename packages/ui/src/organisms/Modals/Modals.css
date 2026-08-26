@@ -1,0 +1,617 @@
+/* Modals & Overlays Styles - BayesStack UI */
+
+/* 1. Modal Styles */
+.bs-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(18, 51, 51, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 16px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  animation: bsModalFadeIn 180ms ease-out;
+}
+
+.bs-modal-backdrop--centered {
+  align-items: center;
+}
+
+@keyframes bsModalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.bs-modal-container {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  font-family: var(--bs-font-family, 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif);
+  animation: bsModalSlideUp 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+@keyframes bsModalSlideUp {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.bs-modal-container--sm { max-width: 400px; }
+.bs-modal-container--md { max-width: 520px; }
+.bs-modal-container--lg { max-width: 680px; }
+.bs-modal-container--xl { max-width: 860px; }
+.bs-modal-container--full { max-width: calc(100vw - 32px); height: calc(100vh - 32px); }
+
+.bs-modal-header {
+  padding: 20px 24px 16px 24px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.bs-modal-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bs-modal-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #123333;
+}
+
+.bs-modal-description {
+  margin: 0;
+  font-size: 13.5px;
+  color: #68807D;
+}
+
+.bs-modal-body {
+  padding: 20px 24px;
+  color: #123333;
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.bs-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #F1F5F9;
+  background-color: #F8FCFB;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* 2. ModalZoom Lightbox Styles */
+.bs-modal-zoom-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(10, 25, 25, 0.88);
+  backdrop-filter: blur(8px);
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+}
+
+.bs-modal-zoom-toolbar {
+  height: 60px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: rgba(0, 0, 0, 0.4);
+  color: #FFFFFF;
+  font-family: var(--bs-font-family, 'Outfit', sans-serif);
+}
+
+.bs-modal-zoom-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.bs-modal-zoom-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bs-modal-zoom-reset-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #FFFFFF;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.bs-modal-zoom-stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 24px;
+}
+
+.bs-modal-zoom-img {
+  max-width: 90%;
+  max-height: 85vh;
+  object-fit: contain;
+  transition: transform 180ms ease;
+  border-radius: 6px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* 3. Loading Overlay Styles */
+.bs-loading-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(2px);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bs-loading-overlay--fullscreen {
+  position: fixed;
+  z-index: 1000;
+}
+
+.bs-loading-overlay-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.bs-loading-overlay-message {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0B6763;
+  font-family: var(--bs-font-family, 'Outfit', sans-serif);
+}
+
+/* 4. Notification Toast Styles */
+.bs-notification-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 380px;
+  width: 100%;
+}
+
+.bs-notification {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  border-left: 4px solid #0B6763;
+  font-family: var(--bs-font-family, 'Outfit', sans-serif);
+  animation: bsToastSlideIn 200ms ease-out;
+}
+
+@keyframes bsToastSlideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.bs-notification--info { border-left-color: #0284C7; }
+.bs-notification--success { border-left-color: #10B981; }
+.bs-notification--warning { border-left-color: #F59E0B; }
+.bs-notification--danger { border-left-color: #EF4444; }
+
+.bs-notification-icon {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.bs-notification--info .bs-notification-icon { color: #0284C7; }
+.bs-notification--success .bs-notification-icon { color: #10B981; }
+.bs-notification--warning .bs-notification-icon { color: #F59E0B; }
+.bs-notification--danger .bs-notification-icon { color: #EF4444; }
+
+.bs-notification-body {
+  flex: 1;
+}
+
+.bs-notification-title {
+  margin: 0 0 2px 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #123333;
+}
+
+.bs-notification-message {
+  font-size: 13px;
+  color: #59716E;
+}
+
+/* 5. Tour Walkthrough Styles */
+.bs-tour-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  pointer-events: none;
+}
+
+.bs-tour-spotlight {
+  position: fixed;
+  border-radius: 8px;
+  box-shadow: 0 0 0 9999px rgba(18, 51, 51, 0.55);
+  transition: all 250ms ease;
+  pointer-events: auto;
+}
+
+.bs-tour-card {
+  width: 320px;
+  background-color: #FFFFFF;
+  border-radius: 10px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+  padding: 16px;
+  pointer-events: auto;
+  z-index: 1060;
+  font-family: var(--bs-font-family, 'Outfit', sans-serif);
+  animation: bsTourPop 200ms ease;
+}
+
+@keyframes bsTourPop {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.bs-tour-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.bs-tour-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #123333;
+}
+
+.bs-tour-body {
+  font-size: 13px;
+  color: #59716E;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.bs-tour-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid #F1F5F9;
+  padding-top: 12px;
+}
+
+.bs-tour-progress {
+  font-size: 12px;
+  font-weight: 600;
+  color: #68807D;
+}
+
+.bs-tour-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 6. Spotlight Command Palette Styles */
+.bs-spotlight-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(18, 51, 51, 0.45);
+  backdrop-filter: blur(6px);
+  z-index: 1200;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 14vh;
+  box-sizing: border-box;
+  animation: bsSpotlightFade 160ms ease-out;
+}
+
+@keyframes bsSpotlightFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.bs-spotlight-container {
+  width: 100%;
+  max-width: 640px;
+  background-color: #FFFFFF;
+  border: 1px solid #D7E8E4;
+  border-radius: 12px;
+  box-shadow: 0 20px 35px -5px rgba(18, 51, 51, 0.15), 0 0 0 1px rgba(11, 103, 99, 0.05);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: var(--bs-font-family, 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif);
+  animation: bsSpotlightPop 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes bsSpotlightPop {
+  from { opacity: 0; transform: scale(0.96) translateY(-8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.bs-spotlight-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #E2E8F0;
+  background-color: #FFFFFF;
+}
+
+.bs-spotlight-search-icon {
+  color: #0B6763;
+}
+
+.bs-spotlight-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  font-weight: 500;
+  color: #123333;
+  font-family: inherit;
+}
+
+.bs-spotlight-search-input::placeholder {
+  color: #94A3B8;
+}
+
+.bs-spotlight-kbd-badge {
+  background-color: #F1F5F9;
+  color: #68807D;
+  border: 1px solid #CBD5E1;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.bs-spotlight-results-container {
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bs-spotlight-empty {
+  padding: 32px 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #94A3B8;
+  font-size: 13.5px;
+}
+
+.bs-spotlight-group-header {
+  padding: 8px 12px 4px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #0B6763;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bs-spotlight-group-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bs-spotlight-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 100ms ease;
+}
+
+.bs-spotlight-item:hover,
+.bs-spotlight-item--active {
+  background-color: #E6F3F1;
+}
+
+.bs-spotlight-item-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background-color: #F1F8F7;
+  color: #0B6763;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 100ms ease;
+}
+
+.bs-spotlight-item--active .bs-spotlight-item-icon {
+  background-color: #0B6763;
+  color: #FFFFFF;
+}
+
+.bs-spotlight-item-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bs-spotlight-item-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #123333;
+}
+
+.bs-spotlight-item-desc {
+  font-size: 12px;
+  color: #68807D;
+}
+
+.bs-spotlight-item-shortcuts {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bs-spotlight-kbd-key {
+  background-color: #F1F5F9;
+  color: #59716E;
+  border: 1px solid #CBD5E1;
+  border-radius: 4px;
+  padding: 2px 5px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.bs-spotlight-footer {
+  padding: 10px 16px;
+  background-color: #F8FCFB;
+  border-top: 1px solid #E2E8F0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.bs-spotlight-footer-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: #68807D;
+}
+
+.bs-spotlight-footer-kbd {
+  background-color: #FFFFFF;
+  color: #123333;
+  border: 1px solid #CBD5E1;
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+/* Optional Dark Theme Variant */
+.bs-spotlight-container--dark {
+  background-color: #0F172A;
+  border-color: #1E293B;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.bs-spotlight-container--dark .bs-spotlight-search-bar {
+  background-color: #0F172A;
+  border-bottom-color: #1E293B;
+}
+
+.bs-spotlight-container--dark .bs-spotlight-search-icon {
+  color: #38BDF8;
+}
+
+.bs-spotlight-container--dark .bs-spotlight-search-input {
+  color: #F8FAFC;
+}
+
+.bs-spotlight-container--dark .bs-spotlight-search-input::placeholder {
+  color: #64748B;
+}
+
+.bs-spotlight-container--dark .bs-spotlight-kbd-badge {
+  background-color: #1E293B;
+  color: #94A3B8;
+  border-color: #334155;
+}
+
+.bs-spotlight-container--dark .bs-spotlight-group-header {
+  color: #64748B;
+}
+
+.bs-spotlight-container--dark .bs-spotlight-item:hover,
+.bs-spotlight-container--dark .bs-spotlight-item--active {
+  background-color: #1E293B;
+}
+
+.bs-spotlight-container--dark .bs-spotlight-item-icon {
+  background-color: #1E293B;
+  color: #38BDF8;
+}
+
+.bs-spotlight-container--dark .bs-spotlight-item--active .bs-spotlight-item-icon {
+  background-color: #0284C7;
+  color: #FFFFFF;
+}
+
+.bs-spotlight-container--dark .bs-spotlight-item-title {
+  color: #F8FAFC;
+}
+
+.bs-spotlight-container--dark .bs-spotlight-item-desc {
+  color: #94A3B8;
+}
+
+.bs-spotlight-container--dark .bs-spotlight-kbd-key {
+  background-color: #1E293B;
+  color: #94A3B8;
+  border-color: #334155;
+}
+
+.bs-spotlight-container--dark .bs-spotlight-footer {
+  background-color: #0B1120;
+  border-top-color: #1E293B;
+}
+
+.bs-spotlight-container--dark .bs-spotlight-footer-hint {
+  color: #64748B;
+}
+
+.bs-spotlight-container--dark .bs-spotlight-footer-kbd {
+  background-color: #1E293B;
+  color: #94A3B8;
+  border-color: #334155;
+}
+
+

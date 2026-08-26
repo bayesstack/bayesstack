@@ -1,0 +1,276 @@
+/* DataDisplay Suite Styles - BayesStack UI */
+
+/* Descriptions Grid Styles */
+.bs-descriptions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  font-family: var(--bs-font-family, 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif);
+}
+
+.bs-descriptions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.bs-descriptions-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #123333;
+}
+
+.bs-descriptions-extra {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bs-descriptions-grid {
+  display: grid;
+  gap: 12px 20px;
+  background-color: #FFFFFF;
+}
+
+.bs-descriptions--bordered .bs-descriptions-grid {
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #F8FCFB;
+}
+
+.bs-descriptions-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bs-descriptions--horizontal .bs-descriptions-item {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.bs-descriptions-item-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #68807D;
+}
+
+.bs-descriptions-item-value {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #123333;
+}
+
+.bs-descriptions--sm .bs-descriptions-item-label { font-size: 11.5px; }
+.bs-descriptions--sm .bs-descriptions-item-value { font-size: 12.5px; }
+
+/* Horizontal Timeline Styles */
+.bs-horizontal-timeline {
+  width: 100%;
+  overflow-x: auto;
+  padding: 12px 0;
+  font-family: var(--bs-font-family, 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif);
+}
+
+.bs-horizontal-timeline-track {
+  display: flex;
+  align-items: flex-start;
+  min-width: max-content;
+  gap: 32px;
+}
+
+.bs-horizontal-timeline-node {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 180px;
+  max-width: 240px;
+}
+
+.bs-horizontal-timeline-node--clickable {
+  cursor: pointer;
+}
+
+.bs-horizontal-timeline-line {
+  position: absolute;
+  top: 13px;
+  left: 28px;
+  right: -32px;
+  height: 2px;
+  background-color: #E2E8F0;
+  z-index: 1;
+}
+
+.bs-horizontal-timeline-node--completed .bs-horizontal-timeline-line {
+  background-color: #10B981;
+}
+
+.bs-horizontal-timeline-node--in_progress .bs-horizontal-timeline-line {
+  background-color: #0B6763;
+}
+
+.bs-horizontal-timeline-marker {
+  position: relative;
+  z-index: 2;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #FFFFFF;
+  border: 2px solid #CBD5E1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #68807D;
+  transition: all 150ms ease;
+}
+
+.bs-horizontal-timeline-node--completed .bs-horizontal-timeline-marker {
+  border-color: #10B981;
+  background-color: #ECFDF5;
+  color: #10B981;
+}
+
+.bs-horizontal-timeline-node--in_progress .bs-horizontal-timeline-marker {
+  border-color: #0B6763;
+  background-color: #F1F8F7;
+  color: #0B6763;
+  box-shadow: 0 0 0 4px rgba(11, 103, 99, 0.15);
+}
+
+.bs-horizontal-timeline-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.bs-horizontal-timeline-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bs-horizontal-timeline-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bs-horizontal-timeline-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #123333;
+}
+
+.bs-horizontal-timeline-time {
+  font-size: 11.5px;
+  color: #68807D;
+}
+
+.bs-horizontal-timeline-desc {
+  margin: 4px 0 0 0;
+  font-size: 12.5px;
+  color: #59716E;
+  line-height: 1.4;
+}
+
+/* ActivityAccordion Feed Styles */
+.bs-activity-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  font-family: var(--bs-font-family, 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif);
+}
+
+.bs-activity-item {
+  position: relative;
+  display: flex;
+  gap: 14px;
+}
+
+.bs-activity-timeline-line {
+  position: absolute;
+  top: 28px;
+  left: 13px;
+  bottom: -18px;
+  width: 2px;
+  background-color: #E2E8F0;
+}
+
+.bs-activity-avatar-container {
+  position: relative;
+  z-index: 2;
+}
+
+.bs-activity-card {
+  flex: 1;
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.bs-activity-card:hover {
+  border-color: #CBD5E1;
+}
+
+.bs-activity-header {
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bs-activity-title-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 13px;
+}
+
+.bs-activity-actor {
+  font-weight: 700;
+  color: #123333;
+}
+
+.bs-activity-action {
+  color: #59716E;
+}
+
+.bs-activity-target {
+  font-weight: 600;
+  color: #0B6763;
+}
+
+.bs-activity-meta-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bs-activity-timestamp {
+  font-size: 11.5px;
+  color: #94A3B8;
+  white-space: nowrap;
+}
+
+.bs-activity-chevron {
+  color: #68807D;
+}
+
+.bs-activity-details-panel {
+  padding: 12px 14px;
+  border-top: 1px solid #F1F5F9;
+  background-color: #F8FCFB;
+  font-size: 12.5px;
+  color: #59716E;
+}

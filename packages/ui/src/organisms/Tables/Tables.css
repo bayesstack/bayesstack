@@ -1,0 +1,179 @@
+/* Tables Suite Styles - BayesStack UI */
+
+.bs-table-container {
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  overflow: hidden;
+  font-family: var(--bs-font-family, 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif);
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.bs-table-container--bordered {
+  border-color: #CBD5E1;
+}
+
+.bs-table-scroll-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.bs-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13.5px;
+  color: #123333;
+}
+
+/* Header Cells */
+.bs-table-th {
+  background-color: #F8FCFB;
+  color: #59716E;
+  font-weight: 700;
+  font-size: 12.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 12px 16px;
+  border-bottom: 2px solid #E2ECEB;
+  user-select: none;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.bs-table-th--sortable {
+  cursor: pointer;
+  transition: color 150ms ease, background-color 150ms ease;
+}
+
+.bs-table-th--sortable:hover {
+  color: #0B6763;
+  background-color: #EEF7F5;
+}
+
+.bs-table-header-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bs-table-sort-icon {
+  opacity: 0.35;
+  display: inline-flex;
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.bs-table-th--sortable:hover .bs-table-sort-icon {
+  opacity: 0.7;
+}
+
+.bs-table-sort-icon--active {
+  opacity: 1 !important;
+  color: #0B6763;
+}
+
+.bs-table-th--checkbox,
+.bs-table-td--checkbox {
+  width: 44px;
+  text-align: center;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+/* Alignment Modifiers */
+.bs-table-th--left, .bs-table-td--left { text-align: left; }
+.bs-table-th--center, .bs-table-td--center { text-align: center; }
+.bs-table-th--right, .bs-table-td--right { text-align: right; }
+
+.bs-table-th--right .bs-table-header-content {
+  justify-content: flex-end;
+}
+
+.bs-table-th--center .bs-table-header-content {
+  justify-content: center;
+}
+
+/* Table Rows & Cells */
+.bs-table-tr {
+  border-bottom: 1px solid #E2E8F0;
+  transition: background-color 150ms ease;
+}
+
+.bs-table--hoverable .bs-table-tr:hover {
+  background-color: #F4F9F8;
+}
+
+.bs-table-tr--selected {
+  background-color: #EBF5F5 !important;
+}
+
+.bs-table--striped .bs-table-tr:nth-child(even) {
+  background-color: #FAFCFC;
+}
+
+.bs-table-td {
+  padding: 12px 16px;
+  color: #123333;
+  box-sizing: border-box;
+  vertical-align: middle;
+}
+
+/* Size Density Tokens */
+.bs-table--sm .bs-table-th { padding: 8px 12px; font-size: 12px; }
+.bs-table--sm .bs-table-td { padding: 8px 12px; font-size: 13px; }
+
+.bs-table--md .bs-table-th { padding: 12px 16px; font-size: 12.5px; }
+.bs-table--md .bs-table-td { padding: 12px 16px; font-size: 13.5px; }
+
+.bs-table--lg .bs-table-th { padding: 16px 20px; font-size: 13px; }
+.bs-table--lg .bs-table-td { padding: 16px 20px; font-size: 14px; }
+
+/* Bordered Cells */
+.bs-table-container--bordered .bs-table-th,
+.bs-table-container--bordered .bs-table-td {
+  border-right: 1px solid #E2E8F0;
+}
+
+.bs-table-container--bordered .bs-table-th:last-child,
+.bs-table-container--bordered .bs-table-td:last-child {
+  border-right: none;
+}
+
+/* Empty State */
+.bs-table-empty-td {
+  text-align: center;
+  padding: 36px 16px;
+  color: #68807D;
+  font-size: 14px;
+}
+
+/* Skeleton Loading Shimmer */
+.bs-table-tr-loading .bs-table-td {
+  padding: 14px 16px;
+}
+
+.bs-table-skeleton-bar {
+  height: 14px;
+  width: 80%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #E6F0EE 25%, #F4F9F8 37%, #E6F0EE 63%);
+  background-size: 400% 100%;
+  animation: bsTableSkeletonShimmer 1.4s ease infinite;
+}
+
+@keyframes bsTableSkeletonShimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+/* Footer & Pagination Toolbar */
+.bs-table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 12px 16px;
+  background-color: #F8FCFB;
+  border-top: 1px solid #E2ECEB;
+}

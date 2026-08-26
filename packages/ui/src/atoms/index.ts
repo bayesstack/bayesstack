@@ -11,3 +11,5 @@ export * from "./Badges";
 export * from "./Loading";
 export * from "./Logo";
 export * from "./Layout";
+export * from "./Display";
+

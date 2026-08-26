@@ -1,6 +1,8 @@
 import React from "react";
 import "./Badges.css";
 
+export type AvatarSize = "xs" | "sm" | "md" | "lg" | "xl";
+
 export interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Image URL source
@@ -21,7 +23,7 @@ export interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
    * Size scale
    * @default 'md'
    */
-  size?: "xs" | "sm" | "md" | "lg" | "xl";
+  size?: AvatarSize;
 
   /**
    * Status dot indicator

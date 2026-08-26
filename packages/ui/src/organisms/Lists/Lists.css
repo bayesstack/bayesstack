@@ -1,0 +1,832 @@
+/* Lists Suite Styles - BayesStack UI */
+
+.bs-paginated-list {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-family: var(--bs-font-family, 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif);
+}
+
+.bs-paginated-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+.bs-paginated-list-grid-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+}
+
+.bs-paginated-list-grid-card:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.bs-paginated-list-grid-skel {
+  height: 120px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #E6F0EE 25%, #F4F9F8 37%, #E6F0EE 63%);
+  background-size: 400% 100%;
+  animation: bsGridSkelShimmer 1.4s ease infinite;
+}
+
+@keyframes bsGridSkelShimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+.bs-paginated-list-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px 16px;
+  color: #68807D;
+  font-size: 14px;
+}
+
+.bs-paginated-list-footer {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.bs-paginated-list-footer--start { justify-content: flex-start; }
+.bs-paginated-list-footer--center { justify-content: center; }
+.bs-paginated-list-footer--end { justify-content: flex-end; }
+
+/* Sortable List Styles */
+.bs-sortable-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-sizing: border-box;
+  font-family: var(--bs-font-family, 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif);
+}
+
+.bs-sortable-list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: border-color 150ms ease, box-shadow 150ms ease, opacity 150ms ease;
+  user-select: none;
+}
+
+.bs-sortable-list-item:hover {
+  border-color: #CBD5E1;
+}
+
+.bs-sortable-list-item--dragging {
+  opacity: 0.4;
+  background-color: #F8FCFB;
+  border-style: dashed;
+}
+
+.bs-sortable-list-item--drag-over {
+  border-color: #0B6763 !important;
+  box-shadow: 0 0 0 2px rgba(11, 103, 99, 0.15);
+}
+
+.bs-sortable-list-item--disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.bs-sortable-handle {
+  cursor: grab;
+  color: #94A3B8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 150ms ease;
+}
+
+.bs-sortable-handle:hover {
+  color: #0B6763;
+}
+
+.bs-sortable-handle:active {
+  cursor: grabbing;
+}
+
+.bs-sortable-content {
+  flex: 1;
+  font-size: 13.5px;
+  color: #123333;
+  font-weight: 500;
+}
+
+.bs-sortable-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ------------------------------------------------------------- */
+/* Transfer Component Styles */
+/* ------------------------------------------------------------- */
+.bs-transfer-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  font-family: var(--bs-font-family, 'Outfit', sans-serif);
+}
+
+.bs-transfer-bucket {
+  flex: 1;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  background-color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  height: 340px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.bs-transfer-bucket--drag-over {
+  border-color: #0B6763 !important;
+  box-shadow: 0 0 0 3px rgba(11, 103, 99, 0.15);
+}
+
+.bs-transfer-bucket--disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.bs-transfer-bucket-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid #F1F5F9;
+  background-color: #F8FCFB;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bs-transfer-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.bs-transfer-bucket-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #123333;
+}
+
+.bs-transfer-search-bar {
+  padding: 8px 12px;
+  border-bottom: 1px solid #F1F5F9;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #FFFFFF;
+}
+
+.bs-transfer-search-icon {
+  color: #94A3B8;
+}
+
+.bs-transfer-search-input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 13px;
+  color: #123333;
+  font-family: inherit;
+}
+
+.bs-transfer-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bs-transfer-empty {
+  padding: 30px;
+  text-align: center;
+  color: #94A3B8;
+  font-size: 13px;
+}
+
+.bs-transfer-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+  user-select: none;
+}
+
+.bs-transfer-item:hover {
+  background-color: #F1F8F7;
+}
+
+.bs-transfer-item--selected {
+  background-color: #E6F3F1;
+}
+
+.bs-transfer-item--dragging {
+  opacity: 0.4;
+}
+
+.bs-transfer-item--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bs-transfer-item-handle {
+  color: #CBD5E1;
+  cursor: grab;
+  display: flex;
+}
+
+.bs-transfer-item-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.bs-transfer-item-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #123333;
+}
+
+.bs-transfer-item-desc {
+  font-size: 12px;
+  color: #68807D;
+}
+
+.bs-transfer-operation-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ------------------------------------------------------------- */
+/* Kanban Board Component Styles */
+/* ------------------------------------------------------------- */
+.bs-kanban-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  font-family: var(--bs-font-family, 'Outfit', sans-serif);
+}
+
+.bs-kanban-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bs-kanban-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  height: 38px;
+  border: 1px solid #D7E8E4;
+  border-radius: 8px;
+  background-color: #FFFFFF;
+  width: 320px;
+}
+
+.bs-kanban-search-icon {
+  color: #94A3B8;
+}
+
+.bs-kanban-search-input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 13px;
+  color: #123333;
+  font-family: inherit;
+}
+
+.bs-kanban-stage {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  width: 100%;
+  min-height: 480px;
+}
+
+.bs-kanban-column {
+  flex: 1;
+  min-width: 280px;
+  max-width: 340px;
+  background-color: #F8FCFB;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.bs-kanban-column--drag-over {
+  border-color: #0B6763 !important;
+  box-shadow: 0 0 0 3px rgba(11, 103, 99, 0.15);
+  background-color: #F1F8F7;
+}
+
+.bs-kanban-column--wip-exceeded {
+  border-color: #EF4444 !important;
+  background-color: #FEF2F2;
+}
+
+.bs-kanban-column--collapsed {
+  min-width: 48px;
+  max-width: 48px;
+  cursor: pointer;
+  align-items: center;
+  padding: 16px 8px;
+  background-color: #F1F5F9;
+}
+
+.bs-kanban-collapsed-header {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  color: #123333;
+}
+
+.bs-kanban-collapsed-title {
+  font-size: 14px;
+}
+
+.bs-kanban-column-grab-handle {
+  color: #94A3B8;
+  cursor: grab;
+  display: flex;
+  align-items: center;
+}
+
+.bs-kanban-column-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.bs-kanban-card-hover-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.bs-kanban-card:hover .bs-kanban-card-hover-actions {
+  opacity: 1;
+}
+
+.bs-kanban-card-subtasks {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #0B6763;
+}
+
+.bs-kanban-inline-add-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  background-color: #FFFFFF;
+  border: 1px dashed #0B6763;
+  border-radius: 8px;
+}
+
+.bs-kanban-inline-add-input {
+  border: 1px solid #D7E8E4;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  outline: none;
+  font-family: inherit;
+  color: #123333;
+}
+
+.bs-kanban-inline-add-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.bs-kanban-column-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bs-kanban-column-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.bs-kanban-column-title {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #123333;
+}
+
+.bs-kanban-cards-container {
+  flex: 1;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.bs-kanban-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  cursor: grab;
+  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+  user-select: none;
+}
+
+.bs-kanban-card:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.bs-kanban-card:active {
+  cursor: grabbing;
+}
+
+.bs-kanban-card--dragging {
+  opacity: 0.4;
+  border-style: dashed;
+}
+
+.bs-kanban-card-meta-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.bs-kanban-card-tag {
+  font-size: 11px;
+  font-weight: 600;
+  color: #68807D;
+}
+
+.bs-kanban-card-title {
+  margin: 0 0 6px 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #123333;
+}
+
+.bs-kanban-card-desc {
+  margin: 0 0 10px 0;
+  font-size: 12.5px;
+  color: #59716E;
+  line-height: 1.4;
+}
+
+.bs-kanban-card-progress-bar {
+  height: 4px;
+  background-color: #E2E8F0;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.bs-kanban-card-progress-fill {
+  height: 100%;
+  background-color: #0B6763;
+  border-radius: 2px;
+  transition: width 200ms ease;
+}
+
+.bs-kanban-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid #F1F5F9;
+  padding-top: 10px;
+  margin-top: 4px;
+}
+
+.bs-kanban-card-assignees {
+  display: flex;
+  align-items: center;
+}
+
+.bs-kanban-avatar-stacked {
+  margin-left: -6px;
+  border: 2px solid #FFFFFF;
+}
+
+.bs-kanban-avatar-stacked:first-child {
+  margin-left: 0;
+}
+
+.bs-kanban-card-due-date {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  color: #68807D;
+}
+
+/* ------------------------------------------------------------- */
+/* UserCards Component Styles */
+/* ------------------------------------------------------------- */
+.bs-user-cards-container {
+  width: 100%;
+  font-family: var(--bs-font-family, 'Outfit', sans-serif);
+}
+
+.bs-user-cards-container--grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.bs-user-cards-container--list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bs-user-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  padding: 18px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.bs-user-card:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.bs-user-card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.bs-user-card-avatar-wrapper {
+  position: relative;
+}
+
+.bs-user-card-status-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #FFFFFF;
+}
+
+.bs-user-card-status-dot--active { background-color: #10B981; }
+.bs-user-card-status-dot--busy { background-color: #EF4444; }
+.bs-user-card-status-dot--away { background-color: #F59E0B; }
+.bs-user-card-status-dot--offline { background-color: #94A3B8; }
+
+.bs-user-card-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.bs-user-card-name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #123333;
+}
+
+.bs-user-card-role {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #0B6763;
+}
+
+.bs-user-card-email {
+  font-size: 12px;
+  color: #68807D;
+}
+
+.bs-user-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.bs-user-card-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 10px 0;
+  background-color: #F8FCFB;
+  border-radius: 8px;
+}
+
+.bs-user-card-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.bs-user-card-stat-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #123333;
+}
+
+.bs-user-card-stat-label {
+  font-size: 11px;
+  color: #68807D;
+}
+
+.bs-user-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* UserDisplayItemList Styles */
+.bs-user-display-item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  font-family: var(--bs-font-family, 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif);
+}
+
+.bs-user-list-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid #D7E8E4;
+  border-radius: 8px;
+  background-color: #FFFFFF;
+}
+
+.bs-user-list-search-icon {
+  color: #68807D;
+}
+
+.bs-user-list-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 13.5px;
+  font-family: inherit;
+  color: #123333;
+}
+
+.bs-user-list-clear-btn {
+  background: transparent;
+  border: none;
+  color: #94A3B8;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.bs-user-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.bs-user-list-empty {
+  padding: 24px;
+  text-align: center;
+  font-size: 13px;
+  color: #94A3B8;
+}
+
+.bs-user-list-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.bs-user-list-row:hover {
+  border-color: #0B6763;
+  background-color: #F8FCFB;
+}
+
+.bs-user-list-row--selected {
+  border-color: #0B6763;
+  background-color: #F1F8F7;
+}
+
+.bs-user-list-row--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bs-user-list-checkbox {
+  accent-color: #0B6763;
+  cursor: pointer;
+}
+
+.bs-user-list-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bs-user-list-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bs-user-list-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #123333;
+}
+
+.bs-user-list-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #68807D;
+}
+
+.bs-user-list-role {
+  font-weight: 600;
+  color: #0B6763;
+}
+
+.bs-user-list-dot {
+  color: #CBD5E1;
+}
+
+.bs-user-list-email {
+  color: #59716E;
+}
+
+.bs-user-list-actions {
+  display: flex;
+  align-items: center;
+}
