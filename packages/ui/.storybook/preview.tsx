@@ -4,6 +4,14 @@ import "./preview.css";
 
 const preview: Preview = {
   parameters: {
+    docs: {
+      canvas: {
+        sourceState: "shown",
+      },
+      source: {
+        type: "dynamic",
+      },
+    },
     layout: "fullscreen",
     controls: {
       expanded: false,
