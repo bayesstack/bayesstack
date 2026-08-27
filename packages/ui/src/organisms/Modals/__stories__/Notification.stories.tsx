@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import React from "react";
 import { expect, userEvent, within } from "@storybook/test";
-import { Notification, NotificationProvider, useNotification } from ".././Notification";
+import { Notification, NotificationProvider, useNotification } from "../Notification";
 import { Button } from "../../../atoms/Buttons/Button";
 
 const meta: Meta<typeof Notification> = {
@@ -56,11 +56,11 @@ export const NotificationProviderDemo: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
     const trigger = canvas.getByRole("button", { name: /Trigger Success Toast/i });
 
     await userEvent.click(trigger);
-    const toastTitle = await canvas.findByText("Project Saved");
+    const toastTitle = await body.findByText("Project Saved");
     await expect(toastTitle).toBeInTheDocument();
   },
 };
-

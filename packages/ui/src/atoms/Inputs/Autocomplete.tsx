@@ -389,7 +389,7 @@ export const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps
         const highlightedEl = dropdownRef.current.querySelector(
           `[data-nav-index="${highlightedIndex}"]`
         ) as HTMLElement | null;
-        if (highlightedEl) {
+        if (highlightedEl && typeof highlightedEl.scrollIntoView === "function") {
           highlightedEl.scrollIntoView({ block: "nearest" });
         }
       }

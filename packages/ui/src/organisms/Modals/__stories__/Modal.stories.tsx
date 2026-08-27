@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import React, { useState } from "react";
 import { expect, userEvent, within } from "@storybook/test";
-import { Modal } from ".././Modal";
-import { ModalsProvider, useModals } from ".././ModalsProvider";
+import { Modal } from "../Modal";
+import { ModalsProvider, useModals } from "../ModalsProvider";
 import { Button } from "../../../atoms/Buttons/Button";
 
 const meta: Meta<typeof Modal> = {
@@ -54,15 +54,16 @@ export const ControlledModal: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
     const trigger = canvas.getByRole("button", { name: /Open Interactive Modal/i });
 
     // Open modal
     await userEvent.click(trigger);
-    const title = await canvas.findByText("Confirm Action");
+    const title = await body.findByText("Confirm Action");
     await expect(title).toBeInTheDocument();
 
     // Close modal via Save Changes button
-    const saveBtn = canvas.getByRole("button", { name: /Save Changes/i });
+    const saveBtn = body.getByRole("button", { name: /Save Changes/i });
     await userEvent.click(saveBtn);
   },
 };
@@ -93,14 +94,14 @@ export const ImperativeModalsProvider: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
     const trigger = canvas.getByRole("button", { name: /Trigger Imperative Confirm Modal/i });
 
     await userEvent.click(trigger);
-    const modalTitle = await canvas.findByText("Delete Workspace Item?");
+    const modalTitle = await body.findByText("Delete Workspace Item?");
     await expect(modalTitle).toBeInTheDocument();
 
-    const cancelBtn = canvas.getByRole("button", { name: "Keep Item" });
+    const cancelBtn = body.getByRole("button", { name: "Keep Item" });
     await userEvent.click(cancelBtn);
   },
 };
-

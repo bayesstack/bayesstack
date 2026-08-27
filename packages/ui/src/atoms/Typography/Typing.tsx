@@ -1,4 +1,4 @@
-import React, { forwardRef, useState, useEffect, useRef } from "react";
+import React, { forwardRef, useState, useEffect, useRef, useMemo } from "react";
 import "./Typing.css";
 
 export type TypingSize = "xs" | "sm" | "md" | "lg" | "xl";
@@ -111,13 +111,15 @@ export const Typing = forwardRef<HTMLElement, TypingProps>(
     },
     ref
   ) => {
-    const textList: string[] = Array.isArray(text)
-      ? text
-      : typeof text === "string"
-      ? [text]
-      : typeof children === "string"
-      ? [children]
-      : [""];
+    const textList: string[] = useMemo(() => {
+      return Array.isArray(text)
+        ? text
+        : typeof text === "string"
+        ? [text]
+        : typeof children === "string"
+        ? [children]
+        : [""];
+    }, [text, children]);
 
     const [textIndex, setTextIndex] = useState<number>(0);
     const [displayedText, setDisplayedText] = useState<string>("");
@@ -139,7 +141,7 @@ export const Typing = forwardRef<HTMLElement, TypingProps>(
       } else {
         setIsStarted(true);
       }
-    }, [text, children, delay]);
+    }, [textList, delay]);
 
     useEffect(() => {
       if (!isStarted) return;

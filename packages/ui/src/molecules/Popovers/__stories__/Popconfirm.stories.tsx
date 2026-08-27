@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, within, fn } from "@storybook/test";
-import { Popconfirm } from ".././Popconfirm";
+import { Popconfirm } from "../Popconfirm";
 import { Button } from "../../../atoms/Buttons/Button";
 
 const meta: Meta<typeof Popconfirm> = {
@@ -22,7 +22,7 @@ export const Playground: Story = {
     okText: "Delete Checkpoint",
     cancelText: "Keep Checkpoint",
     severity: "danger",
-    children: <Button size="sm" variant="danger">Delete Checkpoint</Button>,
+    children: <Button size="sm" variant="danger">Trigger Delete</Button>,
     onConfirm: fn(),
     onCancel: fn(),
   },
@@ -33,7 +33,7 @@ export const Playground: Story = {
   ),
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    const trigger = canvas.getByRole("button", { name: /Delete Checkpoint/i });
+    const trigger = canvas.getByRole("button", { name: /Trigger Delete/i });
 
     // Open popconfirm
     await userEvent.click(trigger);
@@ -73,4 +73,3 @@ export const CancelFlow: Story = {
     await expect(args.onCancel).toHaveBeenCalled();
   },
 };
-

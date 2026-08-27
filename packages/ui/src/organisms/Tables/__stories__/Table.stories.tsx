@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import React, { useState } from "react";
 import { expect, userEvent, within } from "@storybook/test";
-import { Table, type Column } from ".././Table";
+import { Table, type Column } from "../Table";
 import { Avatar } from "../../../atoms/Badges/Avatar";
 import { Badge } from "../../../atoms/Badges/Badge";
 import { Button } from "../../../atoms/Buttons/Button";
@@ -200,13 +200,14 @@ export const WithPagination: Story = {
           onPageChange: setPage,
           withControls: true,
           withGoTo: true,
+          variant: "compact",
         }}
       />
     );
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const pageText = canvas.getByText(/Page 1 of 5/i);
+    const pageText = canvas.getByText((_, element) => element?.classList?.contains("bs-pager-compact-text") ?? false);
     await expect(pageText).toBeInTheDocument();
   },
 };
@@ -225,4 +226,3 @@ export const EmptyState: Story = {
     await expect(emptyMsg).toBeInTheDocument();
   },
 };
-
