@@ -15,6 +15,7 @@
     "dev:ui": "turbo run dev --filter=@bayesstack/ui",
     "dev:api": "./scripts/start-local.sh --api --local",
     "build": "turbo run build",
+    "build-storybook": "pnpm --filter @bayesstack/ui build-storybook",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck"
   },
