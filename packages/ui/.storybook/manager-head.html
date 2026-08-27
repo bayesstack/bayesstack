@@ -74,16 +74,35 @@
     });
   }
 
+  function fixSidebarPlusButton() {
+    const searchInputs = document.querySelectorAll('nav.sidebar-container input, .sidebar-container input, #aria-sidebar input');
+    searchInputs.forEach((input) => {
+      const searchRow = input.closest('form') || input.parentElement?.parentElement;
+      if (!searchRow) return;
+      const plusBtn = searchRow.querySelector('button');
+      if (plusBtn && !plusBtn.classList.contains('sidebar-item')) {
+        plusBtn.style.setProperty('color', '#ffffff', 'important');
+        plusBtn.querySelectorAll('*').forEach((child) => {
+          child.style.setProperty('color', '#ffffff', 'important');
+          child.style.setProperty('fill', '#ffffff', 'important');
+          child.style.setProperty('stroke', '#ffffff', 'important');
+        });
+      }
+    });
+  }
+
   const observer = new MutationObserver(() => {
     injectBrandText();
     removeOpenInEditor();
     fixUnsavedChangesButtons();
+    fixSidebarPlusButton();
   });
 
   document.addEventListener('DOMContentLoaded', () => {
     injectBrandText();
     removeOpenInEditor();
     fixUnsavedChangesButtons();
+    fixSidebarPlusButton();
     observer.observe(document.body, { childList: true, subtree: true });
   });
 </script>
@@ -276,23 +295,37 @@
   }
 
   /* ========================================================= */
-  /* Controls Panel & Unsaved Changes Buttons Text Color Fix   */
+  /* Sidebar Search Row '+' Button White Icon ONLY             */
   /* ========================================================= */
+
+  nav.sidebar-container div:has(> input) + button,
+  .sidebar-container div:has(> input) + button,
+  nav.sidebar-container form > button,
+  .sidebar-container form > button {
+    color: #ffffff !important;
+  }
+
+  nav.sidebar-container div:has(> input) + button *,
+  .sidebar-container div:has(> input) + button *,
+  nav.sidebar-container form > button *,
+  .sidebar-container form > button * {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+  }
 
   /* Make ALL text and icons inside buttons in Controls panel (including bottom Unsaved Changes bar: Save, New, Reset) white */
   table td button,
   [role="tabpanel"] button:not([role="tab"]),
   [id*="panel"] button:not([role="tab"]),
-  form button:not([role="tab"]),
-  div:has(> button) > button:not([role="tab"]):not(.sidebar-item) {
+  form.addon-controls button {
     color: #ffffff !important;
   }
   
   table td button *,
   [role="tabpanel"] button:not([role="tab"]) *,
   [id*="panel"] button:not([role="tab"]) *,
-  form button:not([role="tab"]) *,
-  div:has(> button) > button:not([role="tab"]):not(.sidebar-item) * {
+  form.addon-controls button * {
     color: #ffffff !important;
     fill: #ffffff !important;
     stroke: #ffffff !important;

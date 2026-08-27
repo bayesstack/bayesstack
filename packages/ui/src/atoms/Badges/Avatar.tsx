@@ -86,6 +86,7 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
             ]
               .filter(Boolean)
               .join(" ")}
+            role="status"
             title={statusLabel}
             aria-label={`Status: ${statusLabel}`}
           />
