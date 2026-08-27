@@ -1,5 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, userEvent, within } from "@storybook/test";
 import { Tooltip } from "./Tooltip";
 import { Button } from "../../atoms/Buttons/Button";
 
@@ -32,7 +33,16 @@ export const Playground: Story = {
       <Tooltip {...args} />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole("button", { name: /Hover Me/i });
+
+    await userEvent.hover(trigger);
+    const tooltipMsg = await canvas.findByRole("tooltip");
+    await expect(tooltipMsg).toHaveTextContent("Copies active API key to clipboard");
+  },
 };
+
 
 export const Showcase: Story = {
   render: () => (

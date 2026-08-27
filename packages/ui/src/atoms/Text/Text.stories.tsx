@@ -1,5 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "@storybook/test";
 import { Text } from "./Text";
 
 const meta: Meta<typeof Text> = {
@@ -109,4 +110,27 @@ export const Playground: Story = {
       <Text {...args} />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const element = canvas.getByText(/Lorem ipsum/i);
+    await expect(element).toBeInTheDocument();
+    await expect(element).toHaveClass("bs-text--size-sm");
+  },
 };
+
+export const TruncatedAndCustomStyle: Story = {
+  args: {
+    children: "Supercalifragilisticexpialidocious text content",
+    truncate: 10,
+    style: { color: "rgb(255, 0, 0)", fontWeight: "bold" },
+    as: "p",
+  },
+  render: (args) => <Text {...args} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const element = canvas.getByText(/Supercalif…/i);
+    await expect(element).toBeInTheDocument();
+    await expect(element.tagName).toBe("P");
+  },
+};
+

@@ -1,5 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "@storybook/test";
 import { Title } from "./Title";
 
 const meta: Meta<typeof Title> = {
@@ -67,4 +68,27 @@ export const Playground: Story = {
       <Title {...args} />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const heading = canvas.getByRole("heading", { level: 1 });
+    await expect(heading).toBeInTheDocument();
+    await expect(heading).toHaveTextContent("BayesStack Architecture Heading Primitive");
+  },
 };
+
+export const CustomStyleAndTruncate: Story = {
+  args: {
+    as: "h3",
+    children: "Long Title Heading That Will Be Truncated",
+    truncate: 10,
+    style: { color: "blue" },
+  },
+  render: (args) => <Title {...args} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const heading = canvas.getByRole("heading", { level: 3 });
+    await expect(heading).toBeInTheDocument();
+    await expect(heading).toHaveTextContent("Long Title…");
+  },
+};
+

@@ -1,5 +1,6 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import React, { useState } from "react";
+import { expect, userEvent, within } from "@storybook/test";
 import { Modal } from "./Modal";
 import { ModalsProvider, useModals } from "./ModalsProvider";
 import { Button } from "../../atoms/Buttons/Button";
@@ -51,6 +52,19 @@ export const ControlledModal: Story = {
       </div>
     );
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole("button", { name: /Open Interactive Modal/i });
+
+    // Open modal
+    await userEvent.click(trigger);
+    const title = await canvas.findByText("Confirm Action");
+    await expect(title).toBeInTheDocument();
+
+    // Close modal via Save Changes button
+    const saveBtn = canvas.getByRole("button", { name: /Save Changes/i });
+    await userEvent.click(saveBtn);
+  },
 };
 
 const ImperativeModalDemo = () => {
@@ -62,7 +76,7 @@ const ImperativeModalDemo = () => {
       description: "This operation cannot be undone. Are you sure?",
       labels: { confirm: "Delete Item", cancel: "Keep Item" },
       confirmProps: { color: "danger" },
-      onConfirm: () => alert("Confirmed item deletion!"),
+      onConfirm: () => {},
     });
   };
 
@@ -77,4 +91,16 @@ export const ImperativeModalsProvider: Story = {
       </div>
     </ModalsProvider>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole("button", { name: /Trigger Imperative Confirm Modal/i });
+
+    await userEvent.click(trigger);
+    const modalTitle = await canvas.findByText("Delete Workspace Item?");
+    await expect(modalTitle).toBeInTheDocument();
+
+    const cancelBtn = canvas.getByRole("button", { name: "Keep Item" });
+    await userEvent.click(cancelBtn);
+  },
 };
+

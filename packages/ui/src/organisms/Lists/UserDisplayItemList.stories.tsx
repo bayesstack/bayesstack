@@ -1,5 +1,6 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import React, { useState } from "react";
+import { expect, userEvent, within } from "@storybook/test";
 import { UserDisplayItemList, type UserDisplayItemData } from "./UserDisplayItemList";
 
 const meta: Meta<typeof UserDisplayItemList> = {
@@ -20,7 +21,6 @@ const sampleTeamMembers: UserDisplayItemData[] = [
     name: "Sarah Chen",
     email: "sarah.chen@bayesstack.ai",
     role: "Lead AI Architect",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
     status: "Active",
     statusColor: "success",
   },
@@ -37,7 +37,6 @@ const sampleTeamMembers: UserDisplayItemData[] = [
     name: "Elena Rostova",
     email: "elena.rostova@bayesstack.ai",
     role: "UX Architect",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
     status: "Active",
     statusColor: "success",
   },
@@ -68,9 +67,18 @@ export const SearchableTeamList: Story = {
           selectedIds={selected}
           onSelectionChange={(next) => setSelected(next)}
           actionLabel="View Profile"
-          onUserAction={(user) => alert(`Viewing profile for: ${user.name}`)}
+          onUserAction={() => {}}
         />
       </div>
     );
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const searchInput = canvas.getByPlaceholderText(/Search/i);
+    await userEvent.type(searchInput, "Sarah");
+
+    const sarahName = await canvas.findByText("Sarah Chen");
+    await expect(sarahName).toBeInTheDocument();
+  },
 };
+

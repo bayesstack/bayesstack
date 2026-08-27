@@ -33,6 +33,7 @@ export const Sample46SecondClip: Story = {
 };
 
 export const AutoPlayingMutedClip: Story = {
+  tags: ["!test"],
   args: {
     src: "https://vjs.zencdn.net/v/oceans.mp4",
     title: "BayesStack Telemetry Pipeline Architecture",

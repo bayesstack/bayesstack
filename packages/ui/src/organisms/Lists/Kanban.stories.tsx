@@ -1,5 +1,6 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import React, { useState } from "react";
+import { expect, userEvent, within } from "@storybook/test";
 import { Kanban, type KanbanCardItem, type KanbanColumnItem } from "./Kanban";
 
 const meta: Meta<typeof Kanban> = {
@@ -31,7 +32,7 @@ const cardsData: KanbanCardItem[] = [
     priority: "urgent",
     tags: ["Organisms", "UI"],
     assignees: [
-      { name: "Sarah Chen", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80" },
+      { name: "Sarah Chen" },
     ],
     dueDate: "Aug 28",
     progress: 100,
@@ -46,47 +47,11 @@ const cardsData: KanbanCardItem[] = [
     tags: ["Lists", "DND"],
     assignees: [
       { name: "Marcus Vance" },
-      { name: "Sarah Chen", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80" },
+      { name: "Sarah Chen" },
     ],
     dueDate: "Aug 29",
     progress: 75,
     subtasks: { total: 5, completed: 3 },
-  },
-  {
-    id: "card-3",
-    columnId: "in_progress",
-    title: "Kanban Board WIP Limits & Collapse",
-    description: "Support collapsible columns and inline add card input.",
-    priority: "high",
-    tags: ["Enterprise"],
-    assignees: [{ name: "Sarah Chen" }],
-    dueDate: "Aug 30",
-    progress: 50,
-    subtasks: { total: 4, completed: 2 },
-  },
-  {
-    id: "card-4",
-    columnId: "in_review",
-    title: "Tiptap Rich Text Editor Engine",
-    description: "ProseMirror WYSIWYG editor integration with floating toolbar.",
-    priority: "medium",
-    tags: ["Editor"],
-    assignees: [{ name: "Alex Rivera" }],
-    dueDate: "Sep 02",
-    progress: 90,
-    subtasks: { total: 6, completed: 5 },
-  },
-  {
-    id: "card-5",
-    columnId: "in_review",
-    title: "SchemaNav Document Table of Contents",
-    description: "Auto-generated heading tree from H1-H6 tags.",
-    priority: "low",
-    tags: ["Docs"],
-    assignees: [{ name: "Marcus Vance" }],
-    dueDate: "Sep 03",
-    progress: 10,
-    subtasks: { total: 3, completed: 0 },
   },
 ];
 
@@ -98,26 +63,32 @@ export const EnterpriseKanbanBoard: Story = {
       <div style={{ padding: 24 }}>
         <h3 style={{ margin: "0 0 4px 0", color: "#123333" }}>Sprint Planning Board</h3>
         <p style={{ margin: "0 0 16px 0", color: "#68807D", fontSize: 13.5 }}>
-          Features column drag reordering, inline "+ Add Card", WIP limit warnings (e.g. In Review 2/1), card hover action tools, and collapsible columns.
+          Features column drag reordering, inline "+ Add Card", WIP limit warnings, card hover action tools, and collapsible columns.
         </p>
         <Kanban
           columns={columnsData}
           cards={cards}
-          onChange={(updatedCards, movedCard, targetColumnId) => {
-            console.log(`Moved card "${movedCard.title}" to ${targetColumnId}`);
+          onChange={(updatedCards) => {
             setCards(updatedCards);
           }}
           onCardAdd={({ columnId, title }) => {
-            console.log(`Added card "${title}" to column ${columnId}`);
+            setCards((prev) => [
+              ...prev,
+              { id: `card-${Date.now()}`, columnId, title },
+            ]);
           }}
-          onCardAction={(action, card) => {
-            alert(`Triggered "${action}" on card: ${card.title}`);
-          }}
-          onCardClick={(card) => {
-            console.log("Card clicked:", card.title);
-          }}
+          onCardAction={() => {}}
         />
       </div>
     );
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const colHeading = canvas.getByText("Backlog");
+    await expect(colHeading).toBeInTheDocument();
+
+    const cardTitle = canvas.getByText("Implement Modal & Overlay Suite");
+    await expect(cardTitle).toBeInTheDocument();
+  },
 };
+

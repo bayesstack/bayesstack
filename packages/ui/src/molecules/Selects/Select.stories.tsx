@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, userEvent, within, fn } from "@storybook/test";
 import { Select } from "./Select";
 
 const meta: Meta<typeof Select> = {
@@ -37,12 +38,30 @@ export const Playground: Story = {
     clearable: true,
     defaultValue: "gpt-4o",
     helperText: "Selected model will route workspace inferencing queries.",
+    onValueChange: fn(),
   },
   render: (args) => (
     <div style={{ maxWidth: 440, padding: 24, margin: "16px 0 0 16px" }}>
       <Select {...args} />
     </div>
   ),
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByText(/GPT-4 Omni/i);
+    await expect(trigger).toBeInTheDocument();
+
+    // Click trigger to open dropdown
+    await userEvent.click(trigger);
+
+    // Search for Claude
+    const searchInput = await canvas.findByPlaceholderText(/Search/i);
+    await userEvent.type(searchInput, "Claude");
+
+    const option = await canvas.findByText(/Claude 3.5 Sonnet/i);
+    await userEvent.click(option);
+
+    await expect(args.onValueChange).toHaveBeenCalledWith("claude-3-5-sonnet");
+  },
 };
 
 export const Showcase: Story = {
@@ -85,4 +104,10 @@ export const Showcase: Story = {
       </div>
     );
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const errorMsg = canvas.getByText("Selected region is currently at maximum capacity.");
+    await expect(errorMsg).toBeInTheDocument();
+  },
 };
+

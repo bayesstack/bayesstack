@@ -1,5 +1,6 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import React from "react";
+import { expect, userEvent, within } from "@storybook/test";
 import { Notification, NotificationProvider, useNotification } from "./Notification";
 import { Button } from "../../atoms/Buttons/Button";
 
@@ -53,4 +54,13 @@ export const NotificationProviderDemo: Story = {
       </div>
     </NotificationProvider>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole("button", { name: /Trigger Success Toast/i });
+
+    await userEvent.click(trigger);
+    const toastTitle = await canvas.findByText("Project Saved");
+    await expect(toastTitle).toBeInTheDocument();
+  },
 };
+

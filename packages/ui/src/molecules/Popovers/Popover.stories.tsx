@@ -1,5 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, userEvent, within } from "@storybook/test";
 import { Popover } from "./Popover";
 import { Button } from "../../atoms/Buttons/Button";
 
@@ -25,4 +26,36 @@ export const Playground: Story = {
       <Popover {...args} />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole("button", { name: /View Metrics/i });
+
+    // Click trigger
+    await userEvent.click(trigger);
+    const popTitle = await canvas.findByText("Model Information");
+    await expect(popTitle).toBeInTheDocument();
+  },
 };
+
+export const HoverTrigger: Story = {
+  args: {
+    title: "Hover Info",
+    content: "Hover popover content body.",
+    trigger: "hover",
+    children: <Button size="sm" variant="secondary">Hover Me</Button>,
+  },
+  render: (args) => (
+    <div style={{ padding: 48 }}>
+      <Popover {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole("button", { name: /Hover Me/i });
+
+    await userEvent.hover(trigger);
+    const popContent = await canvas.findByText("Hover popover content body.");
+    await expect(popContent).toBeInTheDocument();
+  },
+};
+

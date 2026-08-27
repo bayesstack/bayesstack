@@ -1,5 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "@storybook/test";
 import { Paragraph } from "./Paragraph";
 
 const meta: Meta<typeof Paragraph> = {
@@ -79,4 +80,25 @@ export const Playground: Story = {
       <Paragraph {...args} />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const p = canvas.getByText(/BayesStack Design System/i);
+    await expect(p).toBeInTheDocument();
+    await expect(p.tagName).toBe("P");
+  },
 };
+
+export const LineClampAndStyle: Story = {
+  args: {
+    children: "Paragraph text with line clamping and object style prop.",
+    lineClamp: 2,
+    style: { color: "green" },
+  },
+  render: (args) => <Paragraph {...args} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const p = canvas.getByText(/Paragraph text with line clamping/i);
+    await expect(p).toBeInTheDocument();
+  },
+};
+

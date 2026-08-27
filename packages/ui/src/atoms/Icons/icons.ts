@@ -209,6 +209,19 @@ import {
   Sun01Icon,
   CreditCardIcon,
   Wallet01Icon,
+  // Missing Icons
+  AddCircleIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  BoldIcon,
+  ItalicIcon,
+  TextUnderlineIcon,
+  StrikethroughIcon,
+  CodeIcon,
+  QuoteIcon,
+  VolumeOffIcon,
 } from "@hugeicons/core-free-icons";
 
 export interface IconDefinition {
@@ -467,6 +480,24 @@ export const ICON_CATALOGUE: IconDefinition[] = [
   { name: "Sun", component: Sun01Icon, category: "Settings & Tools", tags: ["sun", "light"] },
   { name: "CreditCard", component: CreditCardIcon, category: "Settings & Tools", tags: ["card", "payment", "billing"] },
   { name: "Wallet", component: Wallet01Icon, category: "Settings & Tools", tags: ["wallet", "billing", "account"] },
+  { name: "AddCircle", component: AddCircleIcon, category: "Actions & Controls", tags: ["add", "circle"] },
+  { name: "ChevronUp", component: ChevronUpIcon, category: "Navigation & Map", tags: ["chevron", "up"] },
+  { name: "ChevronDown", component: ChevronDownIcon, category: "Navigation & Map", tags: ["chevron", "down"] },
+  { name: "ChevronLeft", component: ChevronLeftIcon, category: "Navigation & Map", tags: ["chevron", "left"] },
+  { name: "ChevronRight", component: ChevronRightIcon, category: "Navigation & Map", tags: ["chevron", "right"] },
+  { name: "TextBold", component: BoldIcon, category: "Settings & Tools", tags: ["bold", "text"] },
+  { name: "TextItalic", component: ItalicIcon, category: "Settings & Tools", tags: ["italic", "text"] },
+  { name: "TextUnderline", component: TextUnderlineIcon, category: "Settings & Tools", tags: ["underline", "text"] },
+  { name: "TextStrikethrough", component: StrikethroughIcon, category: "Settings & Tools", tags: ["strikethrough", "text"] },
+  { name: "Code", component: CodeIcon, category: "AI, Tech & Science", tags: ["code"] },
+  { name: "Quote", component: QuoteIcon, category: "Media & Content", tags: ["quote"] },
+  { name: "VolumeOff", component: VolumeOffIcon, category: "Media & Content", tags: ["volume", "off", "mute"] },
+  { name: "Time", component: Clock01Icon, category: "Time & Schedule", tags: ["time", "clock"] },
+  { name: "Plus", component: Add01Icon, category: "Actions & Controls", tags: ["plus", "add"] },
+  { name: "Trash", component: Delete02Icon, category: "Actions & Controls", tags: ["trash", "delete"] },
+  { name: "ChevronsRight", component: ChevronRightIcon, category: "Navigation & Map", tags: ["chevrons", "right"] },
+  { name: "ChevronsLeft", component: ChevronLeftIcon, category: "Navigation & Map", tags: ["chevrons", "left"] },
+  { name: "Building", component: SchoolIcon, category: "Education & Learning", tags: ["building", "school"] },
 ];
 
 export const ICON_MAP: Record<string, any> = ICON_CATALOGUE.reduce((acc, curr) => {

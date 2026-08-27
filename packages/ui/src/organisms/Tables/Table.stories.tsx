@@ -1,5 +1,6 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import React, { useState } from "react";
+import { expect, userEvent, within } from "@storybook/test";
 import { Table, type Column } from "./Table";
 import { Avatar } from "../../atoms/Badges/Avatar";
 import { Badge } from "../../atoms/Badges/Badge";
@@ -38,7 +39,6 @@ const SAMPLE_USERS: UserRow[] = [
   {
     id: "usr-1",
     name: "Sarah Chen",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
     email: "sarah.chen@bayesstack.com",
     role: "Lead Architect",
     status: "active",
@@ -47,7 +47,6 @@ const SAMPLE_USERS: UserRow[] = [
   {
     id: "usr-2",
     name: "Marcus Vance",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
     email: "marcus.vance@bayesstack.com",
     role: "Senior ML Engineer",
     status: "active",
@@ -64,7 +63,6 @@ const SAMPLE_USERS: UserRow[] = [
   {
     id: "usr-4",
     name: "David Kim",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
     email: "david.k@bayesstack.com",
     role: "DevOps Specialist",
     status: "pending",
@@ -79,7 +77,7 @@ const USER_COLUMNS: Column<UserRow>[] = [
     sortable: true,
     render: (_, row) => (
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <Avatar name={row.name} src={row.avatar} size="sm" />
+        <Avatar name={row.name} size="sm" />
         <div>
           <div style={{ fontWeight: 600, color: "#123333" }}>{row.name}</div>
           <div style={{ fontSize: 12, color: "#68807D" }}>{row.email}</div>
@@ -125,7 +123,6 @@ const USER_COLUMNS: Column<UserRow>[] = [
         size="xs"
         onClick={(e) => {
           e.stopPropagation();
-          alert(`Managing ${row.name}`);
         }}
       >
         Manage
@@ -136,6 +133,11 @@ const USER_COLUMNS: Column<UserRow>[] = [
 
 export const Default: Story = {
   render: () => <Table data={SAMPLE_USERS} columns={USER_COLUMNS} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const userRow = canvas.getByText("Sarah Chen");
+    await expect(userRow).toBeInTheDocument();
+  },
 };
 
 export const SelectableAndSortable: Story = {
@@ -158,6 +160,14 @@ export const SelectableAndSortable: Story = {
         </div>
       </div>
     );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const checkboxes = canvas.getAllByRole("checkbox");
+    await expect(checkboxes.length).toBeGreaterThan(0);
+
+    // Toggle select all
+    await userEvent.click(checkboxes[0]);
   },
 };
 
@@ -194,6 +204,11 @@ export const WithPagination: Story = {
       />
     );
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const pageText = canvas.getByText(/Page 1 of 5/i);
+    await expect(pageText).toBeInTheDocument();
+  },
 };
 
 export const LoadingState: Story = {
@@ -204,4 +219,10 @@ export const EmptyState: Story = {
   render: () => (
     <Table data={[]} columns={USER_COLUMNS} emptyText="No active team members found." />
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const emptyMsg = canvas.getByText("No active team members found.");
+    await expect(emptyMsg).toBeInTheDocument();
+  },
 };
+

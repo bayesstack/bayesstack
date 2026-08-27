@@ -1,5 +1,6 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import React, { useState } from "react";
+import { expect, userEvent, within } from "@storybook/test";
 import { Transfer, type TransferItem } from "./Transfer";
 import { Avatar } from "../../atoms/Badges/Avatar";
 import { Badge } from "../../atoms/Badges/Badge";
@@ -36,27 +37,34 @@ export const DragAndDropTransferBoard: Story = {
       <div style={{ maxWidth: 840, padding: 24 }}>
         <h3 style={{ margin: "0 0 8px 0", color: "#123333" }}>Role Permission Assignment Board</h3>
         <p style={{ margin: "0 0 16px 0", color: "#68807D", fontSize: 13.5 }}>
-          Drag and drop items between buckets, or use bulk transfer buttons (&gt;&gt; / &lt;&lt;).
+          Drag and drop items between buckets, or use bulk transfer buttons.
         </p>
         <Transfer
           dataSource={samplePermissions}
           targetKeys={targetKeys}
           titles={["Available Permissions", "Assigned Permissions"]}
           showSelectAllButtons
-          onChange={(nextTargetKeys, direction, moveKeys) => {
-            console.log("Transferred keys:", moveKeys, "Direction:", direction);
+          onChange={(nextTargetKeys) => {
             setTargetKeys(nextTargetKeys);
           }}
         />
       </div>
     );
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const availableHeader = canvas.getByText("Available Permissions");
+    await expect(availableHeader).toBeInTheDocument();
+
+    const assignedHeader = canvas.getByText("Assigned Permissions");
+    await expect(assignedHeader).toBeInTheDocument();
+  },
 };
 
 const sampleUserItems: TransferItem[] = [
-  { key: "u1", title: "Sarah Chen", name: "Sarah Chen", role: "Lead AI Engineer", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80" },
+  { key: "u1", title: "Sarah Chen", name: "Sarah Chen", role: "Lead AI Engineer" },
   { key: "u2", title: "Marcus Vance", name: "Marcus Vance", role: "Product Manager" },
-  { key: "u3", title: "Elena Rostova", name: "Elena Rostova", role: "UX Architect", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80" },
+  { key: "u3", title: "Elena Rostova", name: "Elena Rostova", role: "UX Architect" },
   { key: "u4", title: "Alex Rivera", name: "Alex Rivera", role: "MLOps Specialist" },
 ];
 
@@ -68,7 +76,7 @@ export const CustomRenderItemTransfer: Story = {
       <div style={{ maxWidth: 840, padding: 24 }}>
         <h3 style={{ margin: "0 0 8px 0", color: "#123333" }}>Project Team Assignment</h3>
         <p style={{ margin: "0 0 16px 0", color: "#68807D", fontSize: 13.5 }}>
-          Using custom <code style={{ color: "#0B6763" }}>renderItem</code> prop with avatars and role badges.
+          Using custom renderItem prop with avatars and role badges.
         </p>
         <Transfer
           dataSource={sampleUserItems as any}
@@ -76,7 +84,7 @@ export const CustomRenderItemTransfer: Story = {
           titles={["Unassigned Members", "Assigned Team"]}
           renderItem={(item) => (
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <Avatar name={item.name} src={item.avatar} size="xs" />
+              <Avatar name={item.name} size="xs" />
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <span style={{ fontSize: 13, fontWeight: 700, color: "#123333" }}>{item.name}</span>
                 <span style={{ fontSize: 11, color: "#68807D" }}>{item.role}</span>
@@ -88,4 +96,10 @@ export const CustomRenderItemTransfer: Story = {
       </div>
     );
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const unassignedHeader = canvas.getByText("Unassigned Members");
+    await expect(unassignedHeader).toBeInTheDocument();
+  },
 };
+

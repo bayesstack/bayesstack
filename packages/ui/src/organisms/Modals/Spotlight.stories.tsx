@@ -1,5 +1,6 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import React, { useState } from "react";
+import { expect, userEvent, within, fn } from "@storybook/test";
 import { Spotlight, type SpotlightActionItem } from "./Spotlight";
 import { Button } from "../../atoms/Buttons/Button";
 
@@ -25,7 +26,7 @@ const sampleActions: SpotlightActionItem[] = [
     shortcut: ["⌘", "N"],
     badge: "New",
     badgeColor: "primary",
-    onSelect: () => alert("Triggered: Create New Pipeline Project"),
+    onSelect: () => {},
   },
   {
     id: "act-2",
@@ -35,7 +36,7 @@ const sampleActions: SpotlightActionItem[] = [
     icon: "Check",
     shortcut: ["⌘", "P"],
     badgeColor: "success",
-    onSelect: () => alert("Triggered: Deploy Model to Production"),
+    onSelect: () => {},
   },
   {
     id: "act-3",
@@ -44,43 +45,23 @@ const sampleActions: SpotlightActionItem[] = [
     group: "Navigation",
     icon: "Menu",
     shortcut: ["G", "H"],
-    onSelect: () => alert("Navigating to Dashboard"),
-  },
-  {
-    id: "act-4",
-    title: "Workspace Member Settings",
-    description: "Invite members and manage team security roles",
-    group: "Navigation",
-    icon: "User",
-    shortcut: ["G", "S"],
-    onSelect: () => alert("Navigating to Settings"),
-  },
-  {
-    id: "act-5",
-    title: "Clear Telemetry Cache",
-    description: "Flush local model streaming buffer queues",
-    group: "System Commands",
-    icon: "Refresh",
-    shortcut: ["Shift", "C"],
-    badge: "Danger",
-    badgeColor: "danger",
-    onSelect: () => alert("Triggered: Clear Telemetry Cache"),
+    onSelect: () => {},
   },
 ];
 
 export const LightModeCommandPalette: Story = {
   render: () => {
-    const [open, setOpen] = useState(true);
+    const [open, setOpen] = useState(false);
 
     return (
       <div style={{ padding: 24, textAlign: "center" }}>
         <h3 style={{ margin: "0 0 8px 0", color: "#123333" }}>Light Mode Command Palette</h3>
         <p style={{ margin: "0 0 16px 0", color: "#68807D", fontSize: 13.5 }}>
-          Clean enterprise light mode palette matching BayesStack design token colors. Press <kbd style={{ padding: "2px 6px", borderRadius: 4, border: "1px solid #CBD5E1", backgroundColor: "#F1F5F9" }}>⌘ + K</kbd> to open.
+          Clean enterprise light mode palette matching BayesStack design token colors.
         </p>
 
         <Button variant="primary" onClick={() => setOpen(true)}>
-          Open Command Palette (Cmd + K)
+          Open Command Palette
         </Button>
 
         <Spotlight
@@ -92,30 +73,17 @@ export const LightModeCommandPalette: Story = {
       </div>
     );
   },
-};
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole("button", { name: /Open Command Palette/i });
 
-export const DarkModeCommandPalette: Story = {
-  render: () => {
-    const [open, setOpen] = useState(true);
+    await userEvent.click(trigger);
+    const searchInput = await canvas.findByPlaceholderText(/Type a command/i);
+    await expect(searchInput).toBeInTheDocument();
 
-    return (
-      <div style={{ padding: 24, textAlign: "center" }}>
-        <h3 style={{ margin: "0 0 8px 0", color: "#123333" }}>Dark Mode Command Palette</h3>
-        <p style={{ margin: "0 0 16px 0", color: "#68807D", fontSize: 13.5 }}>
-          Optional glassmorphic dark theme variant for night mode interfaces.
-        </p>
-
-        <Button variant="secondary" onClick={() => setOpen(true)}>
-          Open Dark Command Palette
-        </Button>
-
-        <Spotlight
-          open={open}
-          onClose={() => setOpen(false)}
-          actions={sampleActions}
-          theme="dark"
-        />
-      </div>
-    );
+    await userEvent.type(searchInput, "Pipeline");
+    const item = await canvas.findByText("Create New Pipeline Project");
+    await expect(item).toBeInTheDocument();
   },
 };
+
