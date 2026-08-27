@@ -109,7 +109,7 @@
 
 .bs-drawer-subtitle {
   font-size: 12.5px;
-  color: #68807D;
+  color: #4A6360;
   margin-top: 2px;
 }
 
@@ -202,7 +202,7 @@
 
 .bs-detail-panel-entity-subtitle {
   font-size: 12px;
-  color: #68807D;
+  color: #4A6360;
 }
 
 .bs-detail-panel-fields-grid {
@@ -224,7 +224,7 @@
 .bs-detail-panel-field-label {
   font-size: 11.5px;
   font-weight: 600;
-  color: #68807D;
+  color: #4A6360;
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }

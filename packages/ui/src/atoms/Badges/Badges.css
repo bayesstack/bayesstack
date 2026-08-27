@@ -35,25 +35,25 @@
 
 /* Badge Color & Variant Permutations */
 .bs-badge--subtle-primary { background: #E6F0EE; color: #0B6763; }
-.bs-badge--subtle-success { background: #F6FFED; color: #278800; }
-.bs-badge--subtle-warning { background: #FFF7E6; color: #D46B08; }
-.bs-badge--subtle-danger  { background: #FFF1F0; color: #E02828; }
+.bs-badge--subtle-success { background: #F6FFED; color: #237804; }
+.bs-badge--subtle-warning { background: #FFF7E6; color: #AD4E00; }
+.bs-badge--subtle-danger  { background: #FFF1F0; color: #CF1322; }
 .bs-badge--subtle-info    { background: #E6F7FF; color: #0958D9; }
-.bs-badge--subtle-neutral { background: #F0F7F6; color: #68807D; }
+.bs-badge--subtle-neutral { background: #F0F7F6; color: #3D5451; }
 
 .bs-badge--solid-primary { background: #0B6763; color: #FFFFFF; }
-.bs-badge--solid-success { background: #52C41A; color: #FFFFFF; }
-.bs-badge--solid-warning { background: #FA8C16; color: #FFFFFF; }
-.bs-badge--solid-danger  { background: #F5222D; color: #FFFFFF; }
-.bs-badge--solid-info    { background: #1677FF; color: #FFFFFF; }
-.bs-badge--solid-neutral { background: #68807D; color: #FFFFFF; }
+.bs-badge--solid-success { background: #278800; color: #FFFFFF; }
+.bs-badge--solid-warning { background: #AD4E00; color: #FFFFFF; }
+.bs-badge--solid-danger  { background: #D32029; color: #FFFFFF; }
+.bs-badge--solid-info    { background: #0958D9; color: #FFFFFF; }
+.bs-badge--solid-neutral { background: #4A6360; color: #FFFFFF; }
 
 .bs-badge--outline-primary { background: transparent; border: 1px solid #0B6763; color: #0B6763; }
-.bs-badge--outline-success { background: transparent; border: 1px solid #52C41A; color: #278800; }
-.bs-badge--outline-warning { background: transparent; border: 1px solid #FA8C16; color: #D46B08; }
-.bs-badge--outline-danger  { background: transparent; border: 1px solid #F5222D; color: #E02828; }
+.bs-badge--outline-success { background: transparent; border: 1px solid #278800; color: #237804; }
+.bs-badge--outline-warning { background: transparent; border: 1px solid #AD4E00; color: #AD4E00; }
+.bs-badge--outline-danger  { background: transparent; border: 1px solid #D32029; color: #CF1322; }
 .bs-badge--outline-info    { background: transparent; border: 1px solid #1677FF; color: #0958D9; }
-.bs-badge--outline-neutral { background: transparent; border: 1px solid #D7E8E4; color: #68807D; }
+.bs-badge--outline-neutral { background: transparent; border: 1px solid #D7E8E4; color: #3D5451; }
 
 .bs-badge-dot {
   width: 6px;
@@ -74,12 +74,41 @@
   position: absolute;
   z-index: 10;
   box-shadow: 0 0 0 2px #FFFFFF;
+  border-radius: 9999px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* Ensure background is opaque for outline variants when floating overlay */
+.bs-badge-floating.bs-badge--outline-primary,
+.bs-badge-floating.bs-badge--outline-success,
+.bs-badge-floating.bs-badge--outline-warning,
+.bs-badge-floating.bs-badge--outline-danger,
+.bs-badge-floating.bs-badge--outline-info,
+.bs-badge-floating.bs-badge--outline-neutral {
+  background-color: #FFFFFF;
+}
+
+/* Floating Size Scale Overrides */
+.bs-badge-floating.bs-badge--sm {
+  padding: 2px 4px;
+  min-width: 15px;
+  height: 15px;
+  font-size: 9px;
+}
+
+.bs-badge-floating.bs-badge--md {
   padding: 2px 6px;
   min-width: 18px;
   height: 18px;
-  border-radius: 9999px;
   font-size: 10px;
-  font-weight: 800;
+}
+
+.bs-badge-floating.bs-badge--lg {
+  padding: 3px 8px;
+  min-width: 22px;
+  height: 22px;
+  font-size: 12px;
 }
 
 .bs-badge-floating--top-right {
@@ -102,10 +131,27 @@
   transform: translate(-45%, 45%);
 }
 
-.bs-badge-floating--dot {
-  width: 8px;
-  height: 8px;
-  min-width: 8px;
+/* Floating Dot Indicator Proportional Sizes */
+.bs-badge-floating--dot.bs-badge--sm {
+  width: 7px;
+  height: 7px;
+  min-width: 7px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.bs-badge-floating--dot.bs-badge--md {
+  width: 9px;
+  height: 9px;
+  min-width: 9px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.bs-badge-floating--dot.bs-badge--lg {
+  width: 11px;
+  height: 11px;
+  min-width: 11px;
   padding: 0;
   border-radius: 50%;
 }
@@ -113,13 +159,13 @@
 /* Pulsing Live Alert Animation */
 @keyframes bsBadgePulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(245, 34, 45, 0.6);
+    box-shadow: 0 0 0 0 rgba(211, 32, 41, 0.6);
   }
   70% {
-    box-shadow: 0 0 0 6px rgba(245, 34, 45, 0);
+    box-shadow: 0 0 0 6px rgba(211, 32, 41, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(245, 34, 45, 0);
+    box-shadow: 0 0 0 0 rgba(211, 32, 41, 0);
   }
 }
 
@@ -166,32 +212,32 @@
 
 /* Chip Color & Variant Permutations */
 .bs-chip--subtle-primary { background: #E6F0EE; border: 1px solid #C7DEDA; color: #0B6763; }
-.bs-chip--subtle-success { background: #F6FFED; border: 1px solid #D9F7BE; color: #278800; }
-.bs-chip--subtle-warning { background: #FFF7E6; border: 1px solid #FFE7BA; color: #D46B08; }
-.bs-chip--subtle-danger  { background: #FFF1F0; border: 1px solid #FFCCC7; color: #E02828; }
+.bs-chip--subtle-success { background: #F6FFED; border: 1px solid #D9F7BE; color: #237804; }
+.bs-chip--subtle-warning { background: #FFF7E6; border: 1px solid #FFE7BA; color: #AD4E00; }
+.bs-chip--subtle-danger  { background: #FFF1F0; border: 1px solid #FFCCC7; color: #CF1322; }
 .bs-chip--subtle-info    { background: #E6F7FF; border: 1px solid #BAE0FF; color: #0958D9; }
 .bs-chip--subtle-neutral { background: #F0F7F6; border: 1px solid #D7E8E4; color: #123333; }
 
 .bs-chip--subtle-primary:hover { background: #D7E8E4; border-color: #0B6763; }
-.bs-chip--subtle-success:hover { background: #E6FFFB; border-color: #52C41A; }
-.bs-chip--subtle-warning:hover { background: #FFF1B8; border-color: #FA8C16; }
-.bs-chip--subtle-danger:hover  { background: #FFD8D6; border-color: #F5222D; }
+.bs-chip--subtle-success:hover { background: #E6FFFB; border-color: #278800; }
+.bs-chip--subtle-warning:hover { background: #FFF1B8; border-color: #AD4E00; }
+.bs-chip--subtle-danger:hover  { background: #FFD8D6; border-color: #D32029; }
 .bs-chip--subtle-info:hover    { background: #D6E4FF; border-color: #1677FF; }
-.bs-chip--subtle-neutral:hover { background: #E2ECEB; border-color: #68807D; }
+.bs-chip--subtle-neutral:hover { background: #E2ECEB; border-color: #4A6360; }
 
 .bs-chip--solid-primary { background: #0B6763; border: 1px solid #0B6763; color: #FFFFFF; }
-.bs-chip--solid-success { background: #52C41A; border: 1px solid #52C41A; color: #FFFFFF; }
-.bs-chip--solid-warning { background: #FA8C16; border: 1px solid #FA8C16; color: #FFFFFF; }
-.bs-chip--solid-danger  { background: #F5222D; border: 1px solid #F5222D; color: #FFFFFF; }
-.bs-chip--solid-info    { background: #1677FF; border: 1px solid #1677FF; color: #FFFFFF; }
-.bs-chip--solid-neutral { background: #68807D; border: 1px solid #68807D; color: #FFFFFF; }
+.bs-chip--solid-success { background: #278800; border: 1px solid #278800; color: #FFFFFF; }
+.bs-chip--solid-warning { background: #AD4E00; border: 1px solid #AD4E00; color: #FFFFFF; }
+.bs-chip--solid-danger  { background: #D32029; border: 1px solid #D32029; color: #FFFFFF; }
+.bs-chip--solid-info    { background: #0958D9; border: 1px solid #0958D9; color: #FFFFFF; }
+.bs-chip--solid-neutral { background: #4A6360; border: 1px solid #4A6360; color: #FFFFFF; }
 
 .bs-chip--outline-primary { background: transparent; border: 1px solid #0B6763; color: #0B6763; }
-.bs-chip--outline-success { background: transparent; border: 1px solid #52C41A; color: #278800; }
-.bs-chip--outline-warning { background: transparent; border: 1px solid #FA8C16; color: #D46B08; }
-.bs-chip--outline-danger  { background: transparent; border: 1px solid #F5222D; color: #E02828; }
+.bs-chip--outline-success { background: transparent; border: 1px solid #278800; color: #278800; }
+.bs-chip--outline-warning { background: transparent; border: 1px solid #AD4E00; color: #AD4E00; }
+.bs-chip--outline-danger  { background: transparent; border: 1px solid #D32029; color: #CF1322; }
 .bs-chip--outline-info    { background: transparent; border: 1px solid #1677FF; color: #0958D9; }
-.bs-chip--outline-neutral { background: transparent; border: 1px solid #D7E8E4; color: #68807D; }
+.bs-chip--outline-neutral { background: transparent; border: 1px solid #D7E8E4; color: #4A6360; }
 
 .bs-chip--selected {
   background: #0B6763 !important;
@@ -308,10 +354,10 @@
 .bs-avatar-status--lg { width: 14px; height: 14px; border-width: 2.5px; }
 .bs-avatar-status--xl { width: 18px; height: 18px; border-width: 3px; }
 
-.bs-avatar-status--online  { background: #52C41A; }
+.bs-avatar-status--online  { background: #278800; }
 .bs-avatar-status--offline { background: #8E9E9C; }
-.bs-avatar-status--busy    { background: #F5222D; }
-.bs-avatar-status--away    { background: #FA8C16; }
+.bs-avatar-status--busy    { background: #D32029; }
+.bs-avatar-status--away    { background: #AD4E00; }
 
 /* ==========================================================================
    AvatarsGroup Styles

@@ -110,7 +110,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         />
 
         {unit && !controls && (
-          <span className="bs-input-suffix" style={{ fontSize: 11, fontWeight: 600, color: "#68807D" }}>
+          <span className="bs-input-suffix" style={{ fontSize: 11, fontWeight: 600, color: "#4A6360" }}>
             {unit}
           </span>
         )}

@@ -136,11 +136,11 @@ function WelcomeLanding() {
               margin: 0,
             }}
           >
-            The foundational component library powering BayesStack studios and applications. Built on a 4-tier atomic design methodology, token-based CSS variables, polymorphic React APIs, and rigorous accessibility standards.
+            The foundational component library powering BayesStack studios and applications. Built on a 3-tier atomic design methodology, token-based CSS variables, polymorphic React APIs, and rigorous accessibility standards.
           </p>
         </div>
 
-        {/* 4-Tier Blueprint Spectrum */}
+        {/* 3-Tier Blueprint Spectrum */}
         <div style={{ marginBottom: 56 }}>
           <h2
             style={{
@@ -152,7 +152,7 @@ function WelcomeLanding() {
               margin: "0 0 24px",
             }}
           >
-            4-Tier Component Blueprint
+            3-Tier Component Blueprint
           </h2>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -162,10 +162,9 @@ function WelcomeLanding() {
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
                   <span style={{ fontSize: 12, fontWeight: 800, color: "#0B6763", textTransform: "uppercase" }}>Tier 1</span>
                   <span style={{ fontSize: 16, fontWeight: 700, color: "#123333" }}>Atoms</span>
-                  <span style={{ padding: "2px 8px", borderRadius: 10, background: "#E4F2EF", color: "#0B6763", fontSize: 11, fontWeight: 700 }}>Wave 1 Priority</span>
                 </div>
                 <p style={{ margin: 0, fontSize: 13, color: "#59716E" }}>
-                  Foundational UI primitives: Text, Title, Paragraph, Button, IconButton, TextInput, Checkbox, Radio, Switch, Badge, Alert, Skeleton, Box.
+                  Foundational UI primitives: Badges, Buttons, Display, Icons, Inputs, Layout, Loading, Logo, Typography.
                 </p>
               </div>
               <code style={{ fontSize: 12, color: "#0B6763", fontFamily: '"JetBrains Mono", monospace', background: "#F1F8F6", padding: "6px 12px", borderRadius: 6 }}>
@@ -181,7 +180,7 @@ function WelcomeLanding() {
                   <span style={{ fontSize: 16, fontWeight: 700, color: "#123333" }}>Molecules</span>
                 </div>
                 <p style={{ margin: 0, fontSize: 13, color: "#59716E" }}>
-                  Composite input groups & pickers: Select, MultiSelect, DatePicker, Autocomplete, Popover, Popconfirm, Menu, Tabs, RadioGroup.
+                  Composite input groups, navigation controls & pickers: Alert, ChoiceGroups, Dropdown, Navigation, Popovers, Selects.
                 </p>
               </div>
               <code style={{ fontSize: 12, color: "#59716E", fontFamily: '"JetBrains Mono", monospace', background: "#F8FAFC", padding: "6px 12px", borderRadius: 6 }}>
@@ -197,27 +196,11 @@ function WelcomeLanding() {
                   <span style={{ fontSize: 16, fontWeight: 700, color: "#123333" }}>Organisms</span>
                 </div>
                 <p style={{ margin: 0, fontSize: 13, color: "#59716E" }}>
-                  Complex functional sections & data views: Enterprise Tables, Tree Views, Dual-List Transfer, Modals, Drawers, Code Editors.
+                  Complex functional modules & data views: DataDisplay, Drawers, Editor, Lists, Media, Modals, Notification.
                 </p>
               </div>
               <code style={{ fontSize: 12, color: "#59716E", fontFamily: '"JetBrains Mono", monospace', background: "#F8FAFC", padding: "6px 12px", borderRadius: 6 }}>
                 packages/ui/src/organisms
-              </code>
-            </div>
-
-            {/* Tier 4: Layouts & Templates */}
-            <div style={{ padding: "20px 24px", borderRadius: 14, background: "#FFFFFF", border: "1px solid #E2ECE9", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
-              <div style={{ maxWidth: 520 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#59716E", textTransform: "uppercase" }}>Tier 4</span>
-                  <span style={{ fontSize: 16, fontWeight: 700, color: "#123333" }}>Layouts & Templates</span>
-                </div>
-                <p style={{ margin: 0, fontSize: 13, color: "#59716E" }}>
-                  Structural scaffolds & full application containers: Page Containers, Page Headers, Resizable Splitters, and Full Application Shells.
-                </p>
-              </div>
-              <code style={{ fontSize: 12, color: "#59716E", fontFamily: '"JetBrains Mono", monospace', background: "#F8FAFC", padding: "6px 12px", borderRadius: 6 }}>
-                packages/ui/src/layouts
               </code>
             </div>
           </div>

@@ -308,7 +308,7 @@ export const Cascader = forwardRef<HTMLDivElement, CascaderProps>(
 
                       <div className="bs-cascader-option__right">
                         {hasChildren ? (
-                          <Icon name="ArrowRight" size={14} color="#68807D" />
+                          <Icon name="ArrowRight" size={14} color="#4A6360" />
                         ) : (
                           isSelected && <Icon name="Check" size="sm" color="#0B6763" />
                         )}

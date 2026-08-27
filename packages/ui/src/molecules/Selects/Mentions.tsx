@@ -268,7 +268,7 @@ export const Mentions = forwardRef<HTMLTextAreaElement, MentionsProps>(
     const renderOptionIcon = (icon?: IconName | React.ReactNode) => {
       if (!icon) return null;
       if (typeof icon === "string") {
-        return <Icon name={icon as IconName} size="sm" color="#68807D" />;
+        return <Icon name={icon as IconName} size="sm" color="#4A6360" />;
       }
       return icon;
     };

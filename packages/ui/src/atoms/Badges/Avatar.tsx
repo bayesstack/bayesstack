@@ -52,6 +52,9 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
     },
     ref
   ) => {
+    // Extract up to 2 initials. For multi-word names ("Jane Doe"), pull first letters
+    // of the first two words ("JD"). For single-word handles ("Admin"), take the first
+    // 2 characters ("AD"). Fall back to "?" if no name or string is provided.
     const getInitials = (str?: string) => {
       if (!str) return "?";
       const parts = str.trim().split(" ");
@@ -64,7 +67,12 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
     const statusLabel = status ? STATUS_LABELS[status] : undefined;
 
     return (
+      /* The outer wrapper establishes a non-overflowing positioning context.
+         This allows the status dot to float outside the avatar boundary without 
+         being clipped by the inner .bs-avatar container's `overflow: hidden`. */
       <div className={["bs-avatar-wrapper", `bs-avatar-wrapper--${size}`].filter(Boolean).join(" ")}>
+        {/* Forward ref and HTML attributes attach directly to the avatar container, 
+            ensuring click handlers, focus management, and custom styles target the main avatar. */}
         <div
           ref={ref}
           className={["bs-avatar", `bs-avatar--${size}`, className].filter(Boolean).join(" ")}
@@ -78,6 +86,8 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
           )}
         </div>
         {status && (
+          /* role="status" is explicitly required on <span> to pair with aria-label;
+             generic spans without a valid role trigger ARIA prohibited attribute violations in a11y audits. */
           <span
             className={[
               "bs-avatar-status",

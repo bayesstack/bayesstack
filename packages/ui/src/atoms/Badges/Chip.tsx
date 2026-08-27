@@ -82,6 +82,8 @@ export const Chip = React.forwardRef<HTMLSpanElement, ChipProps>(
     },
     ref
   ) => {
+    // Intercept remove clicks to prevent them from bubbling up and triggering
+    // the parent chip's onClick handler (e.g. toggling selection state when closing).
     const handleRemove = (e: React.MouseEvent) => {
       e.stopPropagation();
       if (onRemove && !disabled) {
@@ -89,6 +91,8 @@ export const Chip = React.forwardRef<HTMLSpanElement, ChipProps>(
       }
     };
 
+    // Supports polymorphic icon injection: string names map to BayesStack <Icon />
+    // with automatic proportional sizing, while arbitrary ReactNodes pass through unchanged.
     const renderIcon = (icon?: IconName | React.ReactNode) => {
       if (!icon) return null;
       if (typeof icon === "string") {
@@ -114,6 +118,8 @@ export const Chip = React.forwardRef<HTMLSpanElement, ChipProps>(
           .join(" ")}
         style={style}
         onClick={!disabled ? onClick : undefined}
+        // Implicitly promote a standard <span> to an interactive button for screen readers
+        // and keyboard navigation only when an onClick handler is explicitly provided.
         role={onClick ? "button" : undefined}
         tabIndex={onClick && !disabled ? 0 : undefined}
         {...props}

@@ -89,7 +89,7 @@
 
 .bs-file-item-sub {
   font-size: 11px;
-  color: #68807D;
+  color: #4A6360;
 }
 
 .bs-file-item-download-btn {
@@ -158,7 +158,7 @@
   font-family: var(--bs-font-sans, "Outfit", sans-serif);
   font-size: 12px;
   font-weight: 500;
-  color: #68807D;
+  color: #4A6360;
 }
 
 .bs-countdown--pulse {

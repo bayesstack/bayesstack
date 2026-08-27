@@ -131,7 +131,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #68807D;
+  color: #4A6360;
   user-select: none;
 }
 
@@ -163,7 +163,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #68807D;
+  color: #4A6360;
   flex-shrink: 0;
   transition: color 120ms ease;
 }

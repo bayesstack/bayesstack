@@ -56,7 +56,7 @@
 .bs-descriptions-item-label {
   font-size: 12.5px;
   font-weight: 600;
-  color: #68807D;
+  color: #4A6360;
 }
 
 .bs-descriptions-item-value {
@@ -125,7 +125,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #68807D;
+  color: #4A6360;
   transition: all 150ms ease;
 }
 
@@ -169,7 +169,7 @@
 
 .bs-horizontal-timeline-time {
   font-size: 11.5px;
-  color: #68807D;
+  color: #4A6360;
 }
 
 .bs-horizontal-timeline-desc {
@@ -264,7 +264,7 @@
 }
 
 .bs-activity-chevron {
-  color: #68807D;
+  color: #4A6360;
 }
 
 .bs-activity-details-panel {

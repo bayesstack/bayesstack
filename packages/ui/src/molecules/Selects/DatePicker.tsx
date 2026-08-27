@@ -293,7 +293,7 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
           onClick={() => !disabled && setIsOpen((prev) => !prev)}
         >
           <div className="bs-select-trigger__left">
-            <Icon name="Calendar" size="sm" color="#68807D" />
+            <Icon name="Calendar" size="sm" color="#4A6360" />
             {getDisplayString() ? (
               <span className="bs-select-trigger__value">{getDisplayString()}</span>
             ) : (
@@ -313,7 +313,7 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
                 onClick={handleClear}
               />
             )}
-            <Icon name="ArrowDown" size="sm" color="#68807D" />
+            <Icon name="ArrowDown" size="sm" color="#4A6360" />
           </div>
         </div>
 
@@ -401,7 +401,7 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
             <div className="bs-datepicker-footer">
               {withTime && !range && (
                 <div className="bs-datepicker-time-group">
-                  <Icon name="Time" size={14} color="#68807D" />
+                  <Icon name="Time" size={14} color="#4A6360" />
                   <input
                     type="time"
                     className="bs-datepicker-time-input"

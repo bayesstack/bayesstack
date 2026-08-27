@@ -263,7 +263,7 @@ export const TimeInput = forwardRef<HTMLDivElement, TimeInputProps>(
           onClick={() => !disabled && setIsOpen((prev) => !prev)}
         >
           <div className="bs-select-trigger__left">
-            <Icon name="Time" size="sm" color="#68807D" />
+            <Icon name="Time" size="sm" color="#4A6360" />
             {activeValue ? (
               <span className="bs-select-trigger__value">{activeValue}</span>
             ) : (
@@ -283,7 +283,7 @@ export const TimeInput = forwardRef<HTMLDivElement, TimeInputProps>(
                 onClick={handleClear}
               />
             )}
-            <Icon name="ArrowDown" size="sm" color="#68807D" />
+            <Icon name="ArrowDown" size="sm" color="#4A6360" />
           </div>
         </div>
 

@@ -88,16 +88,21 @@ export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
     },
     ref
   ) => {
+    // Hide count badge when count is zero unless showZero is explicitly enabled.
     const hasCount = count !== undefined;
     const isZeroHidden = hasCount && count === 0 && !showZero;
 
-    // Format display string for count
+    // Caps large notification numbers at overflowCount (e.g. 120 -> "99+") for clean pill layout.
     const displayCount =
       hasCount && count > overflowCount ? `${overflowCount}+` : count;
 
-    // Check if wrapping a child element (e.g. Icon or Button)
-    const isWrapper = Boolean(children) && (hasCount || (dot && !count));
+    // Determines dual-mode behavior:
+    // When children are present alongside count/dot, Badge acts as an absolute floating overlay (wrapper mode).
+    // Otherwise, Badge acts as a standalone inline pill containing children as label text (inline mode).
+    const isWrapper = Boolean(children) && (hasCount || dot);
 
+    // Maps [x, y] offset arrays to the appropriate CSS position properties (top/bottom/left/right)
+    // based on placement quadrant. Numbers are converted to px, string units (%, em) pass through.
     const offsetStyle = React.useMemo(() => {
       if (!offset || !isWrapper) return {};
       const [x, y] = offset;
@@ -109,6 +114,8 @@ export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
       return styleObj;
     }, [offset, isWrapper, placement]);
 
+    // Resolves prefix icon string names to <Icon /> instances matching badge size scale,
+    // or renders pre-instantiated ReactNode elements directly.
     const renderIcon = (icon?: IconName | React.ReactNode) => {
       if (!icon) return null;
       if (typeof icon === "string") {
@@ -130,7 +137,7 @@ export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
             `bs-badge--${variant}-${color}`,
             isWrapper && "bs-badge-floating",
             isWrapper && `bs-badge-floating--${placement}`,
-            isWrapper && dot && !hasCount && "bs-badge-floating--dot",
+            isWrapper && dot && "bs-badge-floating--dot",
             pulse && "bs-badge--pulse",
             className,
           ]
@@ -139,11 +146,13 @@ export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
           style={{ ...offsetStyle, ...style }}
           {...props}
         >
+          {/* Render inline status dot inside pill when not in floating wrapper mode */}
           {dot && !isWrapper && (
             <span className={["bs-badge-dot", pulse && "bs-badge-dot--pulse"].filter(Boolean).join(" ")} />
           )}
           {renderIcon(prefixIcon)}
-          {hasCount ? displayCount : !isWrapper ? children : null}
+          {/* When dot is active, suppress number/children inside floating badge overlay. Otherwise render count or children. */}
+          {dot ? null : hasCount ? displayCount : !isWrapper ? children : null}
         </span>
       );
     };

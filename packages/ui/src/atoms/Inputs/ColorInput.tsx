@@ -258,9 +258,9 @@ const POPOVER_SWATCHES = [
   "#0B6763", // Teal Primary
   "#1677FF", // Blue Accent
   "#722ED1", // Purple
-  "#52C41A", // Green
-  "#FA8C16", // Orange
-  "#F5222D", // Red
+  "#278800", // Green
+  "#AD4E00", // Orange
+  "#D32029", // Red
   "#123333", // Dark Slate
   "#FFFFFF", // Pure White
   "#8E9E9C", // Muted Gray

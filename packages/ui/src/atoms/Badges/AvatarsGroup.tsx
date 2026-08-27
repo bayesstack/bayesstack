@@ -70,9 +70,19 @@ export const AvatarsGroup = forwardRef<HTMLDivElement, AvatarsGroupProps>(
     },
     ref
   ) => {
-    const visibleAvatars = avatars.slice(0, limit);
-    const totalCount = total !== undefined ? total : avatars.length;
-    const overflowCount = totalCount - visibleAvatars.length;
+    // Type-guard total to safely handle numeric strings passed from Storybook controls or JS callers.
+    // If total is less than limit, effectiveLimit caps the visible avatars to totalCount so we don't 
+    // attempt to slice non-existent array items.
+    const rawTotal =
+      typeof total === "number"
+        ? total
+        : typeof total === "string" && total !== ""
+          ? Number(total)
+          : undefined;
+    const totalCount = rawTotal !== undefined ? rawTotal : avatars.length;
+    const effectiveLimit = Math.max(0, Math.min(limit, totalCount));
+    const visibleAvatars = avatars.slice(0, effectiveLimit);
+    const overflowCount = Math.max(0, totalCount - visibleAvatars.length);
 
     return (
       <div
@@ -82,11 +92,15 @@ export const AvatarsGroup = forwardRef<HTMLDivElement, AvatarsGroupProps>(
         {...props}
       >
         {visibleAvatars.map((item, idx) => {
+          // Layering z-index order:
+          // Standard stacking (zIndexInverted = false): First avatar gets highest z-index so subsequent avatars slide behind.
+          // Inverted stacking (zIndexInverted = true): Last avatar gets highest z-index so subsequent avatars slide over top.
           const zIndex = zIndexInverted
-            ? 50 - idx
+            ? idx + 1
             : visibleAvatars.length - idx;
 
           return (
+            // Overlapping is achieved via negative left margin on all items except the first.
             <div
               key={idx}
               className="bs-avatars-group-item"
@@ -105,12 +119,15 @@ export const AvatarsGroup = forwardRef<HTMLDivElement, AvatarsGroupProps>(
           );
         })}
 
-        {/* Overflow +N Badge Pill */}
+        {/* Overflow +N Badge Pill:
+            When zIndexInverted is true (rightmost items on top), the overflow pill must receive 
+            the highest z-index (visibleAvatars.length + 1) so it sits over the last avatar circle.
+            When false (leftmost on top), z-index 0 keeps it behind the final avatar. */}
         {overflowCount > 0 && (
           <div
             className="bs-avatars-group-item"
             style={{
-              zIndex: 0,
+              zIndex: zIndexInverted ? visibleAvatars.length + 1 : 0,
               marginLeft: visibleAvatars.length === 0 ? 0 : spacing,
             }}
           >

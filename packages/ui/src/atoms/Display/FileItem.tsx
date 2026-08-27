@@ -178,7 +178,7 @@ export const FileItem = forwardRef<HTMLDivElement, FileItemProps>(
             }}
             title="Download file"
           >
-            <Icon name="Download" size={14} color="#68807D" />
+            <Icon name="Download" size={14} color="#4A6360" />
           </button>
         )}
       </div>

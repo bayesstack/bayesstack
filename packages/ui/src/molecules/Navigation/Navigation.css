@@ -308,7 +308,7 @@
 .bs-pager-dots {
   font-size: 14px;
   font-weight: 700;
-  color: #68807D;
+  color: #4A6360;
   padding: 0 4px;
 }
 
@@ -327,7 +327,7 @@
 .bs-pager-label {
   font-size: 12.5px;
   font-weight: 600;
-  color: #68807D;
+  color: #4A6360;
 }
 
 .bs-pager-goto-form {
@@ -418,7 +418,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #68807D;
+  color: #4A6360;
   transition: transform 180ms ease, color 150ms ease;
   flex-shrink: 0;
 }
