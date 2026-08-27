@@ -60,14 +60,30 @@
     });
   }
 
+  function fixUnsavedChangesButtons() {
+    const buttons = document.querySelectorAll('[role="tabpanel"] button, [id*="panel"] button, form button');
+    buttons.forEach((btn) => {
+      if (btn.getAttribute('role') !== 'tab' && !btn.closest('th') && !btn.classList.contains('sidebar-item')) {
+        btn.style.setProperty('color', '#ffffff', 'important');
+        btn.querySelectorAll('*').forEach((child) => {
+          child.style.setProperty('color', '#ffffff', 'important');
+          child.style.setProperty('fill', '#ffffff', 'important');
+          child.style.setProperty('stroke', '#ffffff', 'important');
+        });
+      }
+    });
+  }
+
   const observer = new MutationObserver(() => {
     injectBrandText();
     removeOpenInEditor();
+    fixUnsavedChangesButtons();
   });
 
   document.addEventListener('DOMContentLoaded', () => {
     injectBrandText();
     removeOpenInEditor();
+    fixUnsavedChangesButtons();
     observer.observe(document.body, { childList: true, subtree: true });
   });
 </script>
@@ -260,17 +276,34 @@
   }
 
   /* ========================================================= */
-  /* Controls Panel Buttons & Toggles Text Color Fix           */
+  /* Controls Panel & Unsaved Changes Buttons Text Color Fix   */
   /* ========================================================= */
 
-  /* Make ALL text inside buttons in the Controls panel table white (e.g. "Set string", "Set object") */
-  table td button {
+  /* Make ALL text and icons inside buttons in Controls panel (including bottom Unsaved Changes bar: Save, New, Reset) white */
+  table td button,
+  [role="tabpanel"] button:not([role="tab"]),
+  [id*="panel"] button:not([role="tab"]),
+  form button:not([role="tab"]),
+  div:has(> button) > button:not([role="tab"]):not(.sidebar-item) {
     color: #ffffff !important;
   }
   
-  table td button * {
+  table td button *,
+  [role="tabpanel"] button:not([role="tab"]) *,
+  [id*="panel"] button:not([role="tab"]) *,
+  form button:not([role="tab"]) *,
+  div:has(> button) > button:not([role="tab"]):not(.sidebar-item) * {
     color: #ffffff !important;
     fill: #ffffff !important;
+    stroke: #ffffff !important;
+  }
+
+  /* Table header reset button should remain dark muted teal on light table header */
+  table th button,
+  table th button * {
+    color: #59716E !important;
+    fill: #59716E !important;
+    stroke: #59716E !important;
   }
 
   /* Make ALL text inside boolean toggles (True/False segmented controls) white */
