@@ -24,4 +24,22 @@ describe("Divider Component", () => {
     const separator = screen.getByRole("separator");
     expect(separator).toHaveClass("bs-divider--label-left");
   });
+
+  it("applies className string and classNames object props to slots", () => {
+    render(
+      <Divider
+        className="custom-root"
+        classNames={{ root: "slot-root", label: "slot-label" }}
+      >
+        Divider Label
+      </Divider>
+    );
+    const separator = screen.getByRole("separator");
+    expect(separator).toHaveClass("bs-divider");
+    expect(separator).toHaveClass("custom-root");
+    expect(separator).toHaveClass("slot-root");
+
+    const label = screen.getByText("Divider Label");
+    expect(label).toHaveClass("slot-label");
+  });
 });

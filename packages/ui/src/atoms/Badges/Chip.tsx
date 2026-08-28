@@ -2,6 +2,19 @@ import React from "react";
 import { Icon, type IconName } from "../Icons";
 import "./Badges.css";
 
+export interface ChipSlots {
+  /** Root container element */
+  root?: string;
+  /** Lead avatar wrapper element */
+  avatar?: string;
+  /** Prefix icon element */
+  icon?: string;
+  /** Label text element */
+  label?: string;
+  /** Remove x button element */
+  removeButton?: string;
+}
+
 export interface ChipProps extends React.HTMLAttributes<HTMLSpanElement> {
   /**
    * Color theme variant
@@ -59,6 +72,16 @@ export interface ChipProps extends React.HTMLAttributes<HTMLSpanElement> {
    * @default false
    */
   disabled?: boolean;
+
+  /**
+   * Outermost root element CSS class name string
+   */
+  className?: string;
+
+  /**
+   * Object mapping custom class names to internal sub-element slots
+   */
+  classNames?: ChipSlots;
 }
 
 export const Chip = React.forwardRef<HTMLSpanElement, ChipProps>(
@@ -76,6 +99,7 @@ export const Chip = React.forwardRef<HTMLSpanElement, ChipProps>(
       disabled = false,
       children,
       className = "",
+      classNames,
       style,
       onClick,
       ...props
@@ -113,6 +137,7 @@ export const Chip = React.forwardRef<HTMLSpanElement, ChipProps>(
           selected && "bs-chip--selected",
           disabled && "bs-chip--disabled",
           className,
+          classNames?.root,
         ]
           .filter(Boolean)
           .join(" ")}
@@ -124,12 +149,14 @@ export const Chip = React.forwardRef<HTMLSpanElement, ChipProps>(
         tabIndex={onClick && !disabled ? 0 : undefined}
         {...props}
       >
-        {avatar && <span className="bs-chip-avatar">{avatar}</span>}
-        {prefixIcon && <span className="bs-chip-icon">{renderIcon(prefixIcon)}</span>}
-        <span className="bs-chip-label">{children}</span>
+        {avatar && <span className={["bs-chip-avatar", classNames?.avatar].filter(Boolean).join(" ")}>{avatar}</span>}
+        {prefixIcon && (
+          <span className={["bs-chip-icon", classNames?.icon].filter(Boolean).join(" ")}>{renderIcon(prefixIcon)}</span>
+        )}
+        <span className={["bs-chip-label", classNames?.label].filter(Boolean).join(" ")}>{children}</span>
         {removable && (
           <span
-            className="bs-chip-remove"
+            className={["bs-chip-remove", classNames?.removeButton].filter(Boolean).join(" ")}
             onClick={handleRemove}
             title="Remove item"
             role="button"

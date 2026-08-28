@@ -27,6 +27,25 @@ export interface AutocompleteItem {
   [key: string]: any;
 }
 
+export interface AutocompleteSlots {
+  root?: string;
+  wrapper?: string;
+  input?: string;
+  prefix?: string;
+  suffix?: string;
+  clearButton?: string;
+  dropdown?: string;
+  empty?: string;
+  item?: string;
+  itemIcon?: string;
+  itemText?: string;
+  itemLabel?: string;
+  itemDesc?: string;
+  highlight?: string;
+  group?: string;
+  groupHeader?: string;
+}
+
 export interface AutocompleteItemRenderProps {
   item: AutocompleteItem;
   selected: boolean;
@@ -138,26 +157,6 @@ export interface AutocompleteProps
   maxDropdownHeight?: number | string;
 
   /**
-   * Additional class name for outer container
-   */
-  className?: string;
-
-  /**
-   * Inline CSS styles for outer container
-   */
-  wrapperStyle?: React.CSSProperties;
-
-  /**
-   * Additional class name for dropdown menu
-   */
-  dropdownClassName?: string;
-
-  /**
-   * Inline CSS styles for dropdown menu
-   */
-  dropdownStyle?: React.CSSProperties;
-
-  /**
    * Native change event handler
    */
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -196,6 +195,31 @@ export interface AutocompleteProps
    * Callback fired when dropdown closes
    */
   onDropdownClose?: () => void;
+
+  /**
+   * Additional class name for outer container
+   */
+  className?: string;
+
+  /**
+   * Object mapping custom class names to internal sub-element slots
+   */
+  classNames?: AutocompleteSlots;
+
+  /**
+   * Inline CSS styles for outer container
+   */
+  wrapperStyle?: React.CSSProperties;
+
+  /**
+   * Additional class name for dropdown menu
+   */
+  dropdownClassName?: string;
+
+  /**
+   * Inline CSS styles for dropdown menu
+   */
+  dropdownStyle?: React.CSSProperties;
 }
 
 /**
@@ -215,7 +239,8 @@ function normalizeItems(data: (string | AutocompleteItem)[]): AutocompleteItem[]
 }
 
 /**
- * Highlights matched substring tokens with strong emphasis
+ * Highlights matched substring tokens with strong emphasis.
+ * Escapes regex special characters in the query string to prevent ReDoS or syntax crashes when users type [, (, +, ?, etc.
  */
 function renderHighlightedLabel(label: string, query: string, highlightMatch: boolean): ReactNode {
   if (!highlightMatch || !query || !query.trim()) {
@@ -261,6 +286,7 @@ export const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps
       maxDropdownHeight = 260,
       disabled = false,
       className = "",
+      classNames,
       wrapperStyle,
       dropdownClassName = "",
       dropdownStyle,
@@ -291,6 +317,8 @@ export const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps
     const inputRef = useRef<HTMLInputElement | null>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const searchDebounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    
+    // Prevents firing an unnecessary debounced onSearch callback on initial mount
     const isFirstSearchCall = useRef<boolean>(true);
 
     // Sync uncontrolled defaultValue updates
@@ -300,7 +328,8 @@ export const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps
       }
     }, [defaultValue, isControlled]);
 
-    // Handle debounced search callback
+    // Manages debounced remote search query execution.
+    // Suppresses execution on mount (via isFirstSearchCall) and cleans up active timers on unmount.
     useEffect(() => {
       if (!onSearch) return;
 
@@ -515,11 +544,15 @@ export const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps
     return (
       <div
         ref={containerRef}
-        className={["bs-autocomplete-container", className].filter(Boolean).join(" ")}
+        className={["bs-autocomplete-container", className, classNames?.root].filter(Boolean).join(" ")}
         style={wrapperStyle}
       >
-        <div className="bs-input-wrapper">
-          {prefixIcon && <span className="bs-input-prefix">{renderIcon(prefixIcon)}</span>}
+        <div className={["bs-input-wrapper", classNames?.wrapper].filter(Boolean).join(" ")}>
+          {prefixIcon && (
+            <span className={["bs-input-prefix", classNames?.prefix].filter(Boolean).join(" ")}>
+              {renderIcon(prefixIcon)}
+            </span>
+          )}
 
           <input
             ref={(node) => {
@@ -545,6 +578,7 @@ export const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps
               prefixIcon && "bs-input--has-prefix",
               showSuffix && "bs-input--has-suffix",
               Boolean(error) && "bs-input--error",
+              classNames?.input,
             ]
               .filter(Boolean)
               .join(" ")}
@@ -552,10 +586,13 @@ export const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps
           />
 
           {showSuffix && (
-            <span className="bs-input-suffix" style={{ pointerEvents: "auto" }}>
+            <span
+              className={["bs-input-suffix", classNames?.suffix].filter(Boolean).join(" ")}
+              style={{ pointerEvents: "auto" }}
+            >
               {loading ? (
                 <span
-                  className="bs-icon-button__spinner"
+                  className={["bs-icon-button__spinner", classNames?.clearButton].filter(Boolean).join(" ")}
                   aria-hidden="true"
                   style={{ fontSize: size === "sm" ? 12 : 14, color: "#0B6763" }}
                 />
@@ -565,6 +602,7 @@ export const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps
                   label="Clear autocomplete"
                   variant="transparent"
                   size={size === "sm" ? "xs" : "sm"}
+                  className={classNames?.clearButton}
                   onClick={handleClear}
                 />
               ) : suffixIcon ? (
@@ -578,14 +616,22 @@ export const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps
         {isOpen && !disabled && (
           <div
             ref={dropdownRef}
-            className={["bs-autocomplete-dropdown", dropdownClassName].filter(Boolean).join(" ")}
+            className={[
+              "bs-autocomplete-dropdown",
+              dropdownClassName,
+              classNames?.dropdown,
+            ]
+              .filter(Boolean)
+              .join(" ")}
             style={{
               maxHeight: typeof maxDropdownHeight === "number" ? `${maxDropdownHeight}px` : maxDropdownHeight,
               ...dropdownStyle,
             }}
           >
             {filteredItems.length === 0 ? (
-              <div className="bs-autocomplete-empty">{nothingFoundLabel}</div>
+              <div className={["bs-autocomplete-empty", classNames?.empty].filter(Boolean).join(" ")}>
+                {nothingFoundLabel}
+              </div>
             ) : (
               <>
                 {/* Ungrouped Items */}
@@ -626,6 +672,7 @@ export const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps
                         isHighlighted && "bs-autocomplete-item--highlighted",
                         isSelected && "bs-autocomplete-item--selected",
                         item.disabled && "bs-autocomplete-item--disabled",
+                        classNames?.item,
                       ]
                         .filter(Boolean)
                         .join(" ")}
@@ -633,14 +680,18 @@ export const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps
                     >
                       <div className="bs-autocomplete-item-content">
                         {item.icon && (
-                          <span className="bs-autocomplete-item-icon">{renderIcon(item.icon, "sm")}</span>
+                          <span className={["bs-autocomplete-item-icon", classNames?.itemIcon].filter(Boolean).join(" ")}>
+                            {renderIcon(item.icon, "sm")}
+                          </span>
                         )}
-                        <div className="bs-autocomplete-item-text">
-                          <span className="bs-autocomplete-item-label">
+                        <div className={["bs-autocomplete-item-text", classNames?.itemText].filter(Boolean).join(" ")}>
+                          <span className={["bs-autocomplete-item-label", classNames?.itemLabel].filter(Boolean).join(" ")}>
                             {renderHighlightedLabel(item.label || item.value, currentValue, highlightMatch)}
                           </span>
                           {item.description && (
-                            <span className="bs-autocomplete-item-desc">{item.description}</span>
+                            <span className={["bs-autocomplete-item-desc", classNames?.itemDesc].filter(Boolean).join(" ")}>
+                              {item.description}
+                            </span>
                           )}
                         </div>
                       </div>
@@ -651,8 +702,10 @@ export const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps
 
                 {/* Grouped Items */}
                 {Object.entries(groupedItems.groups).map(([groupTitle, items]) => (
-                  <div key={groupTitle} className="bs-autocomplete-group">
-                    <div className="bs-autocomplete-group-header">{groupTitle}</div>
+                  <div key={groupTitle} className={["bs-autocomplete-group", classNames?.group].filter(Boolean).join(" ")}>
+                    <div className={["bs-autocomplete-group-header", classNames?.groupHeader].filter(Boolean).join(" ")}>
+                      {groupTitle}
+                    </div>
                     {items.map((item) => {
                       const navIndex = navigableItems.indexOf(item);
                       const isHighlighted = navIndex === highlightedIndex;
@@ -690,6 +743,7 @@ export const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps
                             isHighlighted && "bs-autocomplete-item--highlighted",
                             isSelected && "bs-autocomplete-item--selected",
                             item.disabled && "bs-autocomplete-item--disabled",
+                            classNames?.item,
                           ]
                             .filter(Boolean)
                             .join(" ")}
@@ -697,14 +751,18 @@ export const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps
                         >
                           <div className="bs-autocomplete-item-content">
                             {item.icon && (
-                              <span className="bs-autocomplete-item-icon">{renderIcon(item.icon, "sm")}</span>
+                              <span className={["bs-autocomplete-item-icon", classNames?.itemIcon].filter(Boolean).join(" ")}>
+                                {renderIcon(item.icon, "sm")}
+                              </span>
                             )}
-                            <div className="bs-autocomplete-item-text">
-                              <span className="bs-autocomplete-item-label">
+                            <div className={["bs-autocomplete-item-text", classNames?.itemText].filter(Boolean).join(" ")}>
+                              <span className={["bs-autocomplete-item-label", classNames?.itemLabel].filter(Boolean).join(" ")}>
                                 {renderHighlightedLabel(item.label || item.value, currentValue, highlightMatch)}
                               </span>
                               {item.description && (
-                                <span className="bs-autocomplete-item-desc">{item.description}</span>
+                                <span className={["bs-autocomplete-item-desc", classNames?.itemDesc].filter(Boolean).join(" ")}>
+                                  {item.description}
+                                </span>
                               )}
                             </div>
                           </div>

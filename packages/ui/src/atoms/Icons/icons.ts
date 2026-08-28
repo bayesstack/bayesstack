@@ -500,9 +500,13 @@ export const ICON_CATALOGUE: IconDefinition[] = [
   { name: "Building", component: SchoolIcon, category: "Education & Learning", tags: ["building", "school"] },
 ];
 
+// Pre-indexed key-value map created from ICON_CATALOGUE to enable O(1) runtime component lookup during rendering.
 export const ICON_MAP: Record<string, any> = ICON_CATALOGUE.reduce((acc, curr) => {
   acc[curr.name] = curr.component;
   return acc;
 }, {} as Record<string, any>);
 
+// The `(string & {})` union trick preserves full IDE intellisense autocompletion 
+// for known catalogue icon names while allowing arbitrary string inputs without 
+// TypeScript collapsing the union to just `string`.
 export type IconName = keyof typeof ICON_MAP | (string & {});

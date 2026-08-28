@@ -9,6 +9,14 @@ export interface ProgressRingSection {
   tooltip?: string;
 }
 
+export interface ProgressRingSlots {
+  root?: string;
+  svg?: string;
+  track?: string;
+  circle?: string;
+  label?: string;
+}
+
 export interface ProgressRingProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
   /**
@@ -54,6 +62,16 @@ export interface ProgressRingProps
    * @default true
    */
   roundCaps?: boolean;
+
+  /**
+   * Custom root element class name
+   */
+  className?: string;
+
+  /**
+   * Object mapping custom class names to internal sub-element slots
+   */
+  classNames?: ProgressRingSlots;
 }
 
 const SIZE_MAP: Record<ProgressRingSize, { diameter: number; defaultThickness: number }> = {
@@ -76,6 +94,7 @@ export const ProgressRing = forwardRef<HTMLDivElement, ProgressRingProps>(
       trackColor = "#E2ECEB",
       roundCaps = true,
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -103,7 +122,7 @@ export const ProgressRing = forwardRef<HTMLDivElement, ProgressRingProps>(
     return (
       <div
         ref={ref}
-        className={["bs-progress-ring-container", className]
+        className={["bs-progress-ring-container", className, classNames?.root]
           .filter(Boolean)
           .join(" ")}
         style={{ width: diameter, height: diameter, ...style }}
@@ -113,7 +132,7 @@ export const ProgressRing = forwardRef<HTMLDivElement, ProgressRingProps>(
           width={diameter}
           height={diameter}
           viewBox={`0 0 ${diameter} ${diameter}`}
-          className="bs-progress-ring-svg"
+          className={["bs-progress-ring-svg", classNames?.svg].filter(Boolean).join(" ")}
         >
           {/* Background Track Ring */}
           <circle
@@ -123,12 +142,15 @@ export const ProgressRing = forwardRef<HTMLDivElement, ProgressRingProps>(
             stroke={trackColor}
             strokeWidth={strokeWidth}
             fill="none"
-            className="bs-progress-ring-track"
+            className={["bs-progress-ring-track", classNames?.track].filter(Boolean).join(" ")}
           />
 
           {/* Active Progress Segments */}
           {activeSections.map((sec, idx) => {
             const secValue = Math.max(0, Math.min(100, sec.value));
+            
+            // Calculates stroke segment length and accumulates offset so multi-section rings 
+            // render sequentially around the perimeter without overlapping each other.
             const strokeDasharray = `${(secValue / 100) * circumference} ${circumference}`;
             const strokeDashoffset = -accumulatedOffset;
             accumulatedOffset += (secValue / 100) * circumference;
@@ -145,7 +167,7 @@ export const ProgressRing = forwardRef<HTMLDivElement, ProgressRingProps>(
                 strokeDashoffset={strokeDashoffset}
                 strokeLinecap={roundCaps ? "round" : "butt"}
                 fill="none"
-                className="bs-progress-ring-circle"
+                className={["bs-progress-ring-circle", classNames?.circle].filter(Boolean).join(" ")}
               />
             );
           })}
@@ -153,7 +175,7 @@ export const ProgressRing = forwardRef<HTMLDivElement, ProgressRingProps>(
 
         {/* Center Label Overlay */}
         {label !== undefined && (
-          <div className="bs-progress-ring-label">{label}</div>
+          <div className={["bs-progress-ring-label", classNames?.label].filter(Boolean).join(" ")}>{label}</div>
         )}
       </div>
     );

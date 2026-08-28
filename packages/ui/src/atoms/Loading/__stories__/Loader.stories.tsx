@@ -1,10 +1,13 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Loader } from ".././Loader";
+import { Loader } from "../Loader";
 
 const meta: Meta<typeof Loader> = {
   title: "Atoms/Loading/Loader",
   component: Loader,
+  parameters: {
+    layout: "padded",
+  },
   argTypes: {
     size: {
       control: { type: "select" },
@@ -14,6 +17,8 @@ const meta: Meta<typeof Loader> = {
       control: { type: "select" },
       options: ["primary", "neutral", "white"],
     },
+    className: { control: "text" },
+    classNames: { control: false },
   },
 };
 
@@ -25,14 +30,4 @@ export const Playground: Story = {
     size: "md",
     color: "primary",
   },
-};
-
-export const Showcase: Story = {
-  render: () => (
-    <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
-      <Loader size="sm" />
-      <Loader size="md" />
-      <Loader size="lg" />
-    </div>
-  ),
 };

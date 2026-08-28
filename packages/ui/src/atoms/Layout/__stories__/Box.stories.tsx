@@ -1,16 +1,21 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Box } from ".././Box";
+import { Box } from "../Box";
 
 const meta: Meta<typeof Box> = {
   title: "Atoms/Layout/Box",
   component: Box,
+  parameters: {
+    layout: "padded",
+  },
   argTypes: {
     as: {
       control: { type: "select" },
       options: ["div", "span", "section", "article", "main", "header", "footer", "aside", "nav"],
       description: "Underlying HTML element tag",
     },
+    className: { control: "text" },
+    classNames: { control: false },
   },
 };
 

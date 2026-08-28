@@ -32,4 +32,21 @@ describe("IconButton Component", () => {
     expect(btn).toHaveClass("bs-icon-button--loading");
     expect(btn.querySelector(".bs-icon-button__spinner")).toBeInTheDocument();
   });
+
+  it("applies outer className string and internal classNames object slots", () => {
+    render(
+      <IconButton
+        name="Book"
+        label="Read Book"
+        className="outer-icon-btn"
+        classNames={{
+          root: "custom-icon-root",
+          icon: "custom-icon-svg",
+        }}
+      />
+    );
+    const btn = screen.getByRole("button");
+    expect(btn).toHaveClass("outer-icon-btn");
+    expect(btn).toHaveClass("custom-icon-root");
+  });
 });

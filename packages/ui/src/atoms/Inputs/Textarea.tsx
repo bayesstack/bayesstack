@@ -1,6 +1,12 @@
 import React, { type TextareaHTMLAttributes } from "react";
 import "./Inputs.css";
 
+export interface TextareaSlots {
+  root?: string;
+  textarea?: string;
+  counter?: string;
+}
+
 export interface TextareaProps
   extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   error?: boolean | string;
@@ -8,6 +14,7 @@ export interface TextareaProps
   /** Convenience callback returning raw string value */
   onValueChange?: (value: string) => void;
   className?: string;
+  classNames?: TextareaSlots;
   wrapperStyle?: React.CSSProperties;
 }
 
@@ -22,6 +29,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       error = false,
       disabled = false,
       className = "",
+      classNames,
       wrapperStyle,
       rows = 4,
       ...props
@@ -36,7 +44,10 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     };
 
     return (
-      <div className="bs-textarea-wrapper" style={{ width: "100%", boxSizing: "border-box", ...wrapperStyle }}>
+      <div
+        className={["bs-textarea-wrapper", classNames?.root].filter(Boolean).join(" ")}
+        style={{ width: "100%", boxSizing: "border-box", ...wrapperStyle }}
+      >
         <textarea
           ref={ref}
           value={value}
@@ -48,6 +59,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             "bs-textarea",
             Boolean(error) && "bs-textarea--error",
             className,
+            classNames?.textarea,
           ]
             .filter(Boolean)
             .join(" ")}
@@ -55,7 +67,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         />
 
         {showCount && maxLength && (
-          <div className="bs-textarea-counter">
+          <div className={["bs-textarea-counter", classNames?.counter].filter(Boolean).join(" ")}>
             {currentLength} / {maxLength}
           </div>
         )}

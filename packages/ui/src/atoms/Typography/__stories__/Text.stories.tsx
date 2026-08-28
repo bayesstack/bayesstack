@@ -7,6 +7,7 @@ const meta: Meta<typeof Text> = {
   title: "Atoms/Typography/Text",
   component: Text,
   parameters: {
+    layout: "padded",
     docs: {
       description: {
         component:
@@ -80,6 +81,8 @@ const meta: Meta<typeof Text> = {
       control: { type: "text" },
       description: "Text content",
     },
+    className: { control: "text" },
+    classNames: { control: false },
   },
 };
 
@@ -87,9 +90,6 @@ export default meta;
 
 type Story = StoryObj<typeof Text>;
 
-/**
- * **Canvas Playground**: Single interactive playground with full controls for font style (Outfit, Handwritten/Cursive, Serif, Monospace), decorations (italic, underline), size, color, weights, and alignment.
- */
 export const Playground: Story = {
   args: {
     children:
@@ -118,7 +118,8 @@ export const Playground: Story = {
   },
 };
 
-export const TruncatedAndCustomStyle: Story = {
+export const Ex1_TruncatedAndCustomStyle: Story = {
+  name: "01: Character Truncation & Custom Style Showcase",
   args: {
     children: "Supercalifragilisticexpialidocious text content",
     truncate: 10,
@@ -133,4 +134,3 @@ export const TruncatedAndCustomStyle: Story = {
     await expect(element.tagName).toBe("P");
   },
 };
-

@@ -15,4 +15,21 @@ describe("Icon Component", () => {
     const { container } = render(<Icon name={"NonExistentIcon" as any} />);
     expect(container.querySelector("svg")).toBeNull();
   });
+
+  it("applies outer className string and internal classNames object slots", () => {
+    const { container } = render(
+      <Icon
+        name="Check"
+        className="outer-icon-wrapper"
+        classNames={{
+          root: "custom-icon-root",
+          svg: "custom-icon-svg",
+        }}
+      />
+    );
+    const span = container.querySelector(".bs-icon");
+    expect(span).toHaveClass("outer-icon-wrapper");
+    expect(span).toHaveClass("custom-icon-root");
+    expect(container.querySelector("svg")).toHaveClass("custom-icon-svg");
+  });
 });

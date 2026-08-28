@@ -1,6 +1,17 @@
 import React, { useState } from "react";
 import "./Logo.css";
 
+export interface LogoSlots {
+  root?: string;
+  markWrapper?: string;
+  mark?: string;
+  textGroup?: string;
+  titleRow?: string;
+  title?: string;
+  badge?: string;
+  subtitle?: string;
+}
+
 export interface LogoProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Display variant
@@ -45,8 +56,20 @@ export interface LogoProps extends React.HTMLAttributes<HTMLDivElement> {
    * Defaults to '/brand/logo-primary.svg' (public/brand/logo-primary.svg).
    */
   logoSrc?: string;
+
+  /**
+   * Custom root element class name
+   */
+  className?: string;
+
+  /**
+   * Object mapping custom class names to internal sub-element slots
+   */
+  classNames?: LogoSlots;
 }
 
+// Zero-dependency vector mark fallback rendering a Bayesian DAG (Directed Acyclic Graph) node network.
+// Guarantees an immediate, crisp logo preview if static brand assets fail to load or are missing from public assets.
 const FallbackVectorMark: React.FC<{ size: number; theme: "light" | "dark" }> = ({ size, theme }) => (
   <svg
     width={size}
@@ -94,6 +117,7 @@ export const Logo = React.forwardRef<HTMLDivElement, LogoProps>(
       badge,
       logoSrc,
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -118,10 +142,9 @@ export const Logo = React.forwardRef<HTMLDivElement, LogoProps>(
 
     const sizePx = getSizePixel(size);
 
-    // Sequence of fallback image URLs for the mark icon wrapper.
-    // NOTE: logo-primary.svg wraps a base64-encoded PNG inside an <image> element.
-    // Browsers refuse to render <image> inside SVGs loaded via <img src>, so we
-    // prioritize the actual PNG/mark assets that render reliably.
+    // Cascading image resolution waterfall.
+    // Iterates through custom props -> primary SVGs -> public root paths -> PNG fallbacks -> vector fallback.
+    // This prevents broken image icons regardless of framework routing or static asset hosting paths.
     const fallbackSources = [
       logoSrc,
       "/assets/brand/logo-mark.svg",
@@ -146,6 +169,7 @@ export const Logo = React.forwardRef<HTMLDivElement, LogoProps>(
           `bs-logo--${theme}`,
           `bs-logo--variant-${variant}`,
           className,
+          classNames?.root,
         ]
           .filter(Boolean)
           .join(" ")}
@@ -153,12 +177,12 @@ export const Logo = React.forwardRef<HTMLDivElement, LogoProps>(
         {...props}
       >
         {/* Official BayesStack Logo Mark */}
-        <div className="bs-logo-mark-wrapper" style={{ width: sizePx, height: sizePx }}>
+        <div className={["bs-logo-mark-wrapper", classNames?.markWrapper].filter(Boolean).join(" ")} style={{ width: sizePx, height: sizePx }}>
           {!isFailed && currentSrc ? (
             <img
               src={currentSrc}
               alt={title || "BayesStack Logo"}
-              className="bs-logo-img"
+              className={["bs-logo-img", classNames?.mark].filter(Boolean).join(" ")}
               style={{ width: sizePx, height: sizePx, objectFit: "contain" }}
               onError={handleImgError}
             />
@@ -169,12 +193,12 @@ export const Logo = React.forwardRef<HTMLDivElement, LogoProps>(
 
         {/* Text Brand Title & Subtitle */}
         {variant !== "mark" && (
-          <div className="bs-logo-text-group">
-            <div className="bs-logo-title-row">
-              <span className="bs-logo-title">{title}</span>
-              {badge && <span className="bs-logo-badge">{badge}</span>}
+          <div className={["bs-logo-text-group", classNames?.textGroup].filter(Boolean).join(" ")}>
+            <div className={["bs-logo-title-row", classNames?.titleRow].filter(Boolean).join(" ")}>
+              <span className={["bs-logo-title", classNames?.title].filter(Boolean).join(" ")}>{title}</span>
+              {badge && <span className={["bs-logo-badge", classNames?.badge].filter(Boolean).join(" ")}>{badge}</span>}
             </div>
-            {subtitle && <span className="bs-logo-subtitle">{subtitle}</span>}
+            {subtitle && <span className={["bs-logo-subtitle", classNames?.subtitle].filter(Boolean).join(" ")}>{subtitle}</span>}
           </div>
         )}
       </div>

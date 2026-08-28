@@ -3,17 +3,20 @@ import "./Badges.css";
 
 export type AvatarSize = "xs" | "sm" | "md" | "lg" | "xl";
 
+export interface AvatarSlots {
+  /** Outermost wrapper element */
+  wrapper?: string;
+  /** Avatar root circle element */
+  root?: string;
+  /** Image element */
+  image?: string;
+  /** Fallback initials text element */
+  initials?: string;
+  /** Online/offline status dot element */
+  status?: string;
+}
+
 export interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * Image URL source
-   */
-  src?: string;
-
-  /**
-   * Alternate text for image
-   */
-  alt?: string;
-
   /**
    * User name or string to extract fallback initials from (e.g. "Sagar Shah" -> "SS")
    */
@@ -29,6 +32,26 @@ export interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
    * Status dot indicator
    */
   status?: "online" | "offline" | "busy" | "away";
+
+  /**
+   * Image URL source
+   */
+  src?: string;
+
+  /**
+   * Alternate text for image
+   */
+  alt?: string;
+
+  /**
+   * Outermost root element CSS class name string
+   */
+  className?: string;
+
+  /**
+   * Object mapping custom class names to internal sub-element slots
+   */
+  classNames?: AvatarSlots;
 }
 
 const STATUS_LABELS: Record<NonNullable<AvatarProps["status"]>, string> = {
@@ -47,6 +70,7 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
       size = "md",
       status,
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -70,19 +94,23 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
       /* The outer wrapper establishes a non-overflowing positioning context.
          This allows the status dot to float outside the avatar boundary without 
          being clipped by the inner .bs-avatar container's `overflow: hidden`. */
-      <div className={["bs-avatar-wrapper", `bs-avatar-wrapper--${size}`].filter(Boolean).join(" ")}>
+      <div
+        className={["bs-avatar-wrapper", `bs-avatar-wrapper--${size}`, classNames?.wrapper]
+          .filter(Boolean)
+          .join(" ")}
+      >
         {/* Forward ref and HTML attributes attach directly to the avatar container, 
             ensuring click handlers, focus management, and custom styles target the main avatar. */}
         <div
           ref={ref}
-          className={["bs-avatar", `bs-avatar--${size}`, className].filter(Boolean).join(" ")}
+          className={["bs-avatar", `bs-avatar--${size}`, className, classNames?.root].filter(Boolean).join(" ")}
           style={style}
           {...props}
         >
           {src ? (
-            <img src={src} alt={alt} className="bs-avatar-img" />
+            <img src={src} alt={alt} className={["bs-avatar-img", classNames?.image].filter(Boolean).join(" ")} />
           ) : (
-            <span>{getInitials(name)}</span>
+            <span className={classNames?.initials}>{getInitials(name)}</span>
           )}
         </div>
         {status && (
@@ -93,6 +121,7 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
               "bs-avatar-status",
               `bs-avatar-status--${size}`,
               `bs-avatar-status--${status}`,
+              classNames?.status,
             ]
               .filter(Boolean)
               .join(" ")}

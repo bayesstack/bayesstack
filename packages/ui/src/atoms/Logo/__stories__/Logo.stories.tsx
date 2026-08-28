@@ -1,6 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Logo } from ".././Logo";
+import { Logo } from "../Logo";
 
 const meta: Meta<typeof Logo> = {
   title: "Atoms/Logo/Logo",
@@ -24,6 +24,8 @@ const meta: Meta<typeof Logo> = {
     title: { control: { type: "text" } },
     subtitle: { control: { type: "text" } },
     badge: { control: { type: "text" } },
+    className: { control: "text" },
+    classNames: { control: false },
   },
 };
 
@@ -53,3 +55,4 @@ export const Playground: Story = {
     </div>
   ),
 };
+

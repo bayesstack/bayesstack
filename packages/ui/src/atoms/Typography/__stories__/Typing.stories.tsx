@@ -6,6 +6,7 @@ const meta: Meta<typeof Typing> = {
   title: "Atoms/Typography/Typing",
   component: Typing,
   parameters: {
+    layout: "padded",
     docs: {
       description: {
         component:
@@ -62,13 +63,15 @@ const meta: Meta<typeof Typing> = {
       options: ["primary", "secondary", "tertiary", "interactive", "error", "success", "warning"],
       description: "Semantic color token",
     },
+    className: { control: "text" },
+    classNames: { control: false },
   },
 };
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const SingleLine: Story = {
+export const Playground: Story = {
   args: {
     text: "Welcome to BayesStack Design Studio AI Assistant.",
     speed: 40,
@@ -84,7 +87,8 @@ export const SingleLine: Story = {
   ),
 };
 
-export const SequenceLooping: Story = {
+export const Ex1_SequenceLooping: Story = {
+  name: "01: Multi-String Typewriter Sequence",
   args: {
     text: [
       "AI-Powered Learning Platform",

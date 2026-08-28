@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Autocomplete, type AutocompleteItem } from ".././Autocomplete";
+import { Autocomplete, type AutocompleteItem } from "../Autocomplete";
 import { Avatar } from "../../Badges/Avatar";
 import { Badge } from "../../Badges/Badge";
 import { Chip } from "../../Badges/Chip";
@@ -110,14 +110,9 @@ const meta: Meta<typeof Autocomplete> = {
   component: Autocomplete,
   parameters: {
     layout: "padded",
-    docs: {
-      description: {
-        component:
-          "Enterprise Autocomplete input atom component inspired by Bubbles UI and aligned with BayesStack's SearchInput. Supports simple string arrays, structured objects with descriptions and icons, grouping headers, custom item renderers (e.g. user cards, badges), debounced async searching, keyboard navigation (Arrow Up/Down, Enter, Esc), instant clear, and loading states.",
-      },
-    },
   },
   argTypes: {
+    data: { control: false },
     value: { control: { type: "text" }, description: "Controlled input text value" },
     placeholder: { control: { type: "text" }, description: "Input placeholder prompt" },
     size: {
@@ -130,11 +125,8 @@ const meta: Meta<typeof Autocomplete> = {
     disabled: { control: { type: "boolean" }, description: "Disables interaction" },
     clearable: { control: { type: "boolean" }, description: "Enables instant clear trigger (✕)" },
     highlightMatch: { control: { type: "boolean" }, description: "Highlights matched substring tokens" },
-    wrapperStyle: {
-      control: "object",
-      description: "Inline CSS styles applied to the outer container div",
-      table: { category: "Layout & Container" },
-    },
+    className: { control: "text" },
+    classNames: { control: false },
   },
 };
 
@@ -152,7 +144,6 @@ export const Playground: Story = {
     disabled: false,
     clearable: true,
     highlightMatch: true,
-    wrapperStyle: { maxWidth: 380 },
   },
   render: (args) => {
     const [query, setQuery] = useState<string>(args.value ?? "Type");
@@ -162,18 +153,21 @@ export const Playground: Story = {
     }, [args.value]);
 
     return (
-      <Autocomplete
-        {...args}
-        value={query}
-        onValueChange={setQuery}
-        onItemSubmit={(item) => console.log("Selected item:", item)}
-        onClear={() => setQuery("")}
-      />
+      <div style={{ maxWidth: 380 }}>
+        <Autocomplete
+          {...args}
+          value={query}
+          onValueChange={setQuery}
+          onItemSubmit={(item) => console.log("Selected item:", item)}
+          onClear={() => setQuery("")}
+        />
+      </div>
     );
   },
 };
 
-export const StructuredCourses: Story = {
+export const Ex1_StructuredCourses: Story = {
+  name: "01: Structured Courses & Categories",
   render: () => {
     const [query, setQuery] = useState<string>("");
     const [selected, setSelected] = useState<AutocompleteItem | null>(null);
@@ -216,8 +210,8 @@ export const StructuredCourses: Story = {
   },
 };
 
-export const BubblesUserCardRenderer: Story = {
-  name: "Custom User Card Renderer (Bubbles UI Inspiration)",
+export const Ex2_UserCardRenderer: Story = {
+  name: "02: Custom User Card Renderer",
   render: () => {
     const [query, setQuery] = useState<string>("");
     const [selectedUser, setSelectedUser] = useState<any | null>(null);
@@ -303,7 +297,8 @@ export const BubblesUserCardRenderer: Story = {
   },
 };
 
-export const AsyncRemoteSearch: Story = {
+export const Ex3_AsyncRemoteSearch: Story = {
+  name: "03: Async Debounced Search",
   render: () => {
     const [query, setQuery] = useState<string>("");
     const [results, setResults] = useState<string[]>([]);
@@ -347,62 +342,4 @@ export const AsyncRemoteSearch: Story = {
       </div>
     );
   },
-};
-
-export const SizesAndStates: Story = {
-  render: () => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 18, maxWidth: 380 }}>
-      <div>
-        <h5 style={{ margin: "0 0 6px 0", fontSize: 12, color: "#4A6360" }}>Small (32px)</h5>
-        <Autocomplete
-          size="sm"
-          placeholder="Small autocomplete..."
-          data={SAMPLE_LANGUAGES}
-          defaultValue="Python"
-        />
-      </div>
-
-      <div>
-        <h5 style={{ margin: "0 0 6px 0", fontSize: 12, color: "#4A6360" }}>Medium Default (38px)</h5>
-        <Autocomplete
-          size="md"
-          placeholder="Medium autocomplete..."
-          data={SAMPLE_LANGUAGES}
-          defaultValue="TypeScript"
-        />
-      </div>
-
-      <div>
-        <h5 style={{ margin: "0 0 6px 0", fontSize: 12, color: "#4A6360" }}>Large (44px)</h5>
-        <Autocomplete
-          size="lg"
-          placeholder="Large autocomplete..."
-          data={SAMPLE_LANGUAGES}
-          defaultValue="Rust"
-        />
-      </div>
-
-      <div>
-        <h5 style={{ margin: "0 0 6px 0", fontSize: 12, color: "#4A6360" }}>Error State</h5>
-        <Autocomplete
-          size="md"
-          error
-          placeholder="Invalid selection..."
-          data={SAMPLE_LANGUAGES}
-          defaultValue="Unknown Language"
-        />
-      </div>
-
-      <div>
-        <h5 style={{ margin: "0 0 6px 0", fontSize: 12, color: "#4A6360" }}>Disabled State</h5>
-        <Autocomplete
-          size="md"
-          disabled
-          placeholder="Disabled input..."
-          data={SAMPLE_LANGUAGES}
-          defaultValue="Read-only value"
-        />
-      </div>
-    </div>
-  ),
 };

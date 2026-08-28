@@ -1,6 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { IconButton } from ".././IconButton";
+import { IconButton } from "../IconButton";
 import { ICON_MAP } from "../../Icons";
 
 const meta: Meta<typeof IconButton> = {
@@ -8,18 +8,6 @@ const meta: Meta<typeof IconButton> = {
   component: IconButton,
   parameters: {
     layout: "padded",
-    controls: {
-      include: [
-        "name",
-        "label",
-        "variant",
-        "size",
-        "strokeWidth",
-        "rounded",
-        "loading",
-        "disabled",
-      ],
-    },
     docs: {
       description: {
         component:
@@ -51,6 +39,11 @@ const meta: Meta<typeof IconButton> = {
       control: { type: "number", min: 1, max: 3, step: 0.25 },
       description: "Stroke width override for rendered icon path",
     },
+    type: {
+      control: { type: "select" },
+      options: ["button", "submit", "reset"],
+      description: "Native HTML button type attribute",
+    },
     rounded: {
       control: { type: "boolean" },
       description: "Renders fully circular shape",
@@ -63,13 +56,14 @@ const meta: Meta<typeof IconButton> = {
       control: { type: "boolean" },
       description: "Disables interaction",
     },
+    className: { control: "text" },
+    classNames: { control: false },
   },
 };
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// 1. Interactive Playground
 export const Playground: Story = {
   args: {
     name: "BookOpen",
@@ -81,81 +75,39 @@ export const Playground: Story = {
     loading: false,
     disabled: false,
   },
-  render: (args) => (
-    <div style={{ padding: 16 }}>
-      <IconButton {...args} />
+};
+
+export const Ex1_StyleVariants: Story = {
+  name: "01: Style Variants & Shapes",
+  render: () => (
+    <div style={{ background: "#FFFFFF", padding: 24, borderRadius: 12, border: "1px solid #D7E8E4", maxWidth: 680 }}>
+      <h4 style={{ margin: "0 0 16px 0", color: "#123333", fontSize: 15, fontWeight: 700 }}>
+        Style Variants & Circular Shapes
+      </h4>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
+        <IconButton name="Edit" label="Edit Item" variant="primary" />
+        <IconButton name="Copy" label="Copy Code" variant="secondary" />
+        <IconButton name="Filter" label="Filter Results" variant="outline" />
+        <IconButton name="Search" label="Search Database" variant="transparent" />
+        <IconButton name="Delete" label="Delete Record" variant="danger" />
+        <IconButton name="Sparkles" label="AI Magic" variant="secondary" rounded />
+      </div>
     </div>
   ),
 };
 
-// 2. Clubbed Variants, Sizes & States (Matching Button.stories.tsx pattern)
-export const Variants: Story = {
+export const Ex2_States: Story = {
+  name: "02: Loading & Disabled States",
   render: () => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 24, padding: 16, maxWidth: 720 }}>
-      {/* 1. Style Variants */}
-      <div>
-        <h4 style={{ margin: "0 0 12px 0", fontSize: 13, textTransform: "uppercase", letterSpacing: "0.05em", color: "#59716E" }}>
-          Style Variants
-        </h4>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
-          <IconButton name="Edit" label="Edit Item" variant="primary" />
-          <IconButton name="Copy" label="Copy Code" variant="secondary" />
-          <IconButton name="Filter" label="Filter Results" variant="outline" />
-          <IconButton name="Search" label="Search Database" variant="transparent" />
-          <IconButton name="Delete" label="Delete Record" variant="danger" />
-        </div>
-      </div>
-
-      {/* 2. Size Scale */}
-      <div>
-        <h4 style={{ margin: "0 0 12px 0", fontSize: 13, textTransform: "uppercase", letterSpacing: "0.05em", color: "#59716E" }}>
-          Size Scale
-        </h4>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
-          <IconButton name="Brain" label="AI Assistant (xs)" size="xs" variant="primary" />
-          <IconButton name="Brain" label="AI Assistant (sm)" size="sm" variant="primary" />
-          <IconButton name="Brain" label="AI Assistant (md)" size="md" variant="primary" />
-          <IconButton name="Brain" label="AI Assistant (lg)" size="lg" variant="primary" />
-          <IconButton name="Brain" label="AI Assistant (xl)" size="xl" variant="primary" />
-        </div>
-      </div>
-
-      {/* 3. Stroke Width Variations */}
-      <div>
-        <h4 style={{ margin: "0 0 12px 0", fontSize: 13, textTransform: "uppercase", letterSpacing: "0.05em", color: "#59716E" }}>
-          Stroke Width Options (1.25x - 2.5x)
-        </h4>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
-          <IconButton name="BookOpen" label="Light Stroke" variant="outline" strokeWidth={1.25} />
-          <IconButton name="BookOpen" label="Normal Stroke" variant="outline" strokeWidth={1.75} />
-          <IconButton name="BookOpen" label="Bold Stroke" variant="outline" strokeWidth={2.5} />
-        </div>
-      </div>
-
-      {/* 4. Circular Shapes */}
-      <div>
-        <h4 style={{ margin: "0 0 12px 0", fontSize: 13, textTransform: "uppercase", letterSpacing: "0.05em", color: "#59716E" }}>
-          Circular Pill Shapes
-        </h4>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
-          <IconButton name="Add" label="Add New" variant="primary" rounded />
-          <IconButton name="Sparkles" label="AI Magic" variant="secondary" rounded />
-          <IconButton name="Settings" label="Settings" variant="outline" rounded />
-          <IconButton name="Delete" label="Remove" variant="danger" rounded />
-        </div>
-      </div>
-
-      {/* 5. States */}
-      <div>
-        <h4 style={{ margin: "0 0 12px 0", fontSize: 13, textTransform: "uppercase", letterSpacing: "0.05em", color: "#59716E" }}>
-          States (Loading & Disabled)
-        </h4>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
-          <IconButton name="Save" label="Saving..." variant="primary" loading />
-          <IconButton name="Refresh" label="Loading..." variant="secondary" loading />
-          <IconButton name="Edit" label="Disabled Primary" variant="primary" disabled />
-          <IconButton name="Delete" label="Disabled Danger" variant="danger" disabled />
-        </div>
+    <div style={{ background: "#FFFFFF", padding: 24, borderRadius: 12, border: "1px solid #D7E8E4", maxWidth: 680 }}>
+      <h4 style={{ margin: "0 0 16px 0", color: "#123333", fontSize: 15, fontWeight: 700 }}>
+        States (Loading & Disabled)
+      </h4>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
+        <IconButton name="Save" label="Saving..." variant="primary" loading />
+        <IconButton name="Refresh" label="Loading..." variant="secondary" loading />
+        <IconButton name="Edit" label="Disabled Primary" variant="primary" disabled />
+        <IconButton name="Delete" label="Disabled Danger" variant="danger" disabled />
       </div>
     </div>
   ),

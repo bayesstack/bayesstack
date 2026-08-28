@@ -19,6 +19,13 @@ export interface ScoreGrade {
   label?: string;
 }
 
+export interface ScoreInputSlots {
+  root?: string;
+  item?: string;
+  icon?: string;
+  text?: string;
+}
+
 export interface ScoreInputProps {
   /**
    * Number of rating options (e.g. 5 for 5-star / 5-box, 10 for 10-box)
@@ -82,14 +89,19 @@ export interface ScoreInputProps {
   error?: boolean | string;
 
   /**
+   * Custom inline styles for wrapper
+   */
+  style?: React.CSSProperties;
+
+  /**
    * Custom CSS class name for wrapper
    */
   className?: string;
 
   /**
-   * Custom inline styles for wrapper
+   * Object mapping custom class names to internal sub-element slots
    */
-  style?: React.CSSProperties;
+  classNames?: ScoreInputSlots;
 }
 
 export const ScoreInput: React.FC<ScoreInputProps> = ({
@@ -104,6 +116,7 @@ export const ScoreInput: React.FC<ScoreInputProps> = ({
   readOnly = false,
   error = false,
   className = "",
+  classNames,
   style,
 }) => {
   // Normalize grades prop into ScoreGrade[]
@@ -146,6 +159,7 @@ export const ScoreInput: React.FC<ScoreInputProps> = ({
           disabled && "bs-score-stars-wrapper--disabled",
           Boolean(error) && "bs-score-stars-wrapper--error",
           className,
+          classNames?.root,
         ]
           .filter(Boolean)
           .join(" ")}
@@ -166,6 +180,7 @@ export const ScoreInput: React.FC<ScoreInputProps> = ({
                 "bs-score-star-btn",
                 `bs-score-star-btn--${size}`,
                 isFilled && "bs-score-star-btn--filled",
+                classNames?.item,
               ]
                 .filter(Boolean)
                 .join(" ")}
@@ -177,7 +192,8 @@ export const ScoreInput: React.FC<ScoreInputProps> = ({
               <Icon
                 name="Star"
                 size={size === "sm" ? 18 : size === "lg" ? 26 : 22}
-                strokeWidth={isFilled ? 0 : 1.75}
+                strokeWidth={1.75}
+                className={classNames?.icon}
               />
             </button>
           );
@@ -196,6 +212,7 @@ export const ScoreInput: React.FC<ScoreInputProps> = ({
         disabled && "bs-score-input-container--disabled",
         Boolean(error) && "bs-score-input-container--error",
         className,
+        classNames?.root,
       ]
         .filter(Boolean)
         .join(" ")}
@@ -213,13 +230,14 @@ export const ScoreInput: React.FC<ScoreInputProps> = ({
               `bs-score-item--${variant}`,
               `bs-score-item--${size}`,
               isSelected && "bs-score-item--selected",
+              classNames?.item,
             ]
               .filter(Boolean)
               .join(" ")}
             onClick={() => handleSelect(g)}
             title={g.label || `Score ${g.score}`}
           >
-            <span className="bs-score-text">{displayText}</span>
+            <span className={["bs-score-text", classNames?.text].filter(Boolean).join(" ")}>{displayText}</span>
           </div>
         );
       })}

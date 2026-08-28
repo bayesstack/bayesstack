@@ -25,6 +25,18 @@ export interface BooleanOption {
   disabled?: boolean;
 }
 
+export interface BooleanInputSlots {
+  root?: string;
+  label?: string;
+  description?: string;
+  optionsGroup?: string;
+  option?: string;
+  optionIcon?: string;
+  optionText?: string;
+  track?: string;
+  thumb?: string;
+}
+
 export interface BooleanInputProps {
   /**
    * Current value of the input
@@ -90,14 +102,19 @@ export interface BooleanInputProps {
   error?: boolean | string;
 
   /**
+   * Custom inline styles for wrapper
+   */
+  style?: React.CSSProperties;
+
+  /**
    * Custom CSS class name for wrapper
    */
   className?: string;
 
   /**
-   * Custom inline styles for wrapper
+   * Object mapping custom class names to internal sub-element slots
    */
-  style?: React.CSSProperties;
+  classNames?: BooleanInputSlots;
 }
 
 const DEFAULT_OPTIONS: [BooleanOption, BooleanOption] = [
@@ -118,6 +135,7 @@ export const BooleanInput: React.FC<BooleanInputProps> = ({
   readOnly = false,
   error = false,
   className = "",
+  classNames,
   style,
 }) => {
   const [internalValue, setInternalValue] = useState<any>(defaultValue);
@@ -138,7 +156,7 @@ export const BooleanInput: React.FC<BooleanInputProps> = ({
   const renderIcon = (icon?: IconName | ReactNode) => {
     if (!icon) return null;
     if (typeof icon === "string") {
-      return <Icon name={icon as IconName} size={size === "sm" ? 14 : size === "lg" ? 18 : 16} />;
+      return <Icon name={icon as IconName} size={size === "sm" ? 14 : size === "lg" ? 18 : 16} className={classNames?.optionIcon} />;
     }
     return icon;
   };
@@ -154,6 +172,7 @@ export const BooleanInput: React.FC<BooleanInputProps> = ({
           `bs-boolean-switch-container--${size}`,
           disabled && "bs-boolean-switch-container--disabled",
           className,
+          classNames?.root,
         ]
           .filter(Boolean)
           .join(" ")}
@@ -165,17 +184,24 @@ export const BooleanInput: React.FC<BooleanInputProps> = ({
             "bs-switch-track",
             `bs-switch-track--${size}`,
             isChecked && "bs-switch-track--checked",
+            classNames?.track,
           ]
             .filter(Boolean)
             .join(" ")}
         >
-          <span className="bs-switch-thumb" />
+          <span className={["bs-switch-thumb", classNames?.thumb].filter(Boolean).join(" ")} />
         </div>
 
         {label && (
           <div className="bs-boolean-switch-text-group">
-            <span className="bs-boolean-switch-label">{label}</span>
-            {description && <span className="bs-boolean-switch-desc">{description}</span>}
+            <span className={["bs-boolean-switch-label", classNames?.label].filter(Boolean).join(" ")}>
+              {label}
+            </span>
+            {description && (
+              <span className={["bs-boolean-switch-desc", classNames?.description].filter(Boolean).join(" ")}>
+                {description}
+              </span>
+            )}
           </div>
         )}
       </div>
@@ -192,14 +218,19 @@ export const BooleanInput: React.FC<BooleanInputProps> = ({
           disabled && "bs-boolean-boxed-container--disabled",
           Boolean(error) && "bs-boolean-boxed-container--error",
           className,
+          classNames?.root,
         ]
           .filter(Boolean)
           .join(" ")}
         style={style}
       >
-        {label && <div className="bs-boolean-header-label">{label}</div>}
+        {label && (
+          <div className={["bs-boolean-header-label", classNames?.label].filter(Boolean).join(" ")}>
+            {label}
+          </div>
+        )}
 
-        <div className="bs-boolean-boxed-grid">
+        <div className={["bs-boolean-boxed-grid", classNames?.optionsGroup].filter(Boolean).join(" ")}>
           {options.map((opt, idx) => {
             const isSelected = activeValue === opt.value;
             const isDisabled = disabled || readOnly || opt.disabled;
@@ -212,6 +243,7 @@ export const BooleanInput: React.FC<BooleanInputProps> = ({
                   `bs-boolean-box-card--${size}`,
                   isSelected && "bs-boolean-box-card--selected",
                   isDisabled && "bs-boolean-box-card--disabled",
+                  classNames?.option,
                 ]
                   .filter(Boolean)
                   .join(" ")}
@@ -223,7 +255,9 @@ export const BooleanInput: React.FC<BooleanInputProps> = ({
 
                 {opt.icon && <span className="bs-boolean-box-icon">{renderIcon(opt.icon)}</span>}
 
-                <span className="bs-boolean-box-label">{opt.label}</span>
+                <span className={["bs-boolean-box-label", classNames?.optionText].filter(Boolean).join(" ")}>
+                  {opt.label}
+                </span>
               </div>
             );
           })}
@@ -241,6 +275,7 @@ export const BooleanInput: React.FC<BooleanInputProps> = ({
         disabled && "bs-boolean-segmented-wrapper--disabled",
         Boolean(error) && "bs-boolean-segmented-wrapper--error",
         className,
+        classNames?.root,
       ]
         .filter(Boolean)
         .join(" ")}
@@ -259,6 +294,7 @@ export const BooleanInput: React.FC<BooleanInputProps> = ({
               `bs-boolean-segment-btn--${size}`,
               isSelected && "bs-boolean-segment-btn--selected",
               isDisabled && "bs-boolean-segment-btn--disabled",
+              classNames?.option,
             ]
               .filter(Boolean)
               .join(" ")}
@@ -266,7 +302,9 @@ export const BooleanInput: React.FC<BooleanInputProps> = ({
             disabled={isDisabled}
           >
             {opt.icon && <span className="bs-boolean-segment-icon">{renderIcon(opt.icon)}</span>}
-            <span className="bs-boolean-segment-text">{opt.label}</span>
+            <span className={["bs-boolean-segment-text", classNames?.optionText].filter(Boolean).join(" ")}>
+              {opt.label}
+            </span>
           </button>
         );
       })}

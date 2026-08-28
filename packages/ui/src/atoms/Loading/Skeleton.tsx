@@ -45,6 +45,18 @@ export interface SkeletonParagraphProps extends React.HTMLAttributes<HTMLDivElem
    Main Skeleton Props
    ========================================================================== */
 
+export interface SkeletonSlots {
+  root?: string;
+  avatar?: string;
+  button?: string;
+  input?: string;
+  image?: string;
+  title?: string;
+  paragraph?: string;
+  row?: string;
+  content?: string;
+}
+
 export interface SkeletonProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
   /**
@@ -100,6 +112,16 @@ export interface SkeletonProps
    * Actual content to display when `loading: false`
    */
   children?: React.ReactNode;
+
+  /**
+   * Custom root element class name
+   */
+  className?: string;
+
+  /**
+   * Object mapping custom class names to internal sub-element slots
+   */
+  classNames?: SkeletonSlots;
 }
 
 /* ==========================================================================
@@ -256,6 +278,7 @@ const SkeletonTitle: React.FC<SkeletonTitleProps> = ({
   );
 };
 
+// Default widths decay on the trailing row (100% -> 92% -> 65%) to mimic natural typographic text block layout
 const SkeletonParagraph: React.FC<SkeletonParagraphProps> = ({
   rows = 3,
   width = ["100%", "92%", "65%"],
@@ -316,18 +339,20 @@ export const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(
       width,
       height,
       className = "",
+      classNames,
       style,
       children,
       ...props
     },
     ref
   ) => {
-    // If loading prop is explicitly provided as false, render children
+    // When loading is explicitly false, acts as a transparent wrapper rendering real children once loaded.
     if (loading === false) {
       return <>{children}</>;
     }
 
-    // Compound Layout Mode (when avatar, title, or paragraph is specified or loading wrapper)
+    // Determines if component should render as a Compound Layout (avatar + title + paragraph card wireframe)
+    // vs a Standalone Atomic Element (individual rect, circle, or text block).
     const isCompound = Boolean(avatar || title || paragraph || loading !== undefined);
 
     if (isCompound) {
@@ -345,17 +370,18 @@ export const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(
             "bs-skeleton-compound",
             round && "bs-skeleton--round",
             className,
+            classNames?.root,
           ]
             .filter(Boolean)
             .join(" ")}
           style={style}
           {...props}
         >
-          {Boolean(avatar) && <SkeletonAvatar active={active} {...avatarProps} />}
+          {Boolean(avatar) && <SkeletonAvatar active={active} className={classNames?.avatar} {...avatarProps} />}
 
-          <div className="bs-skeleton-compound-content">
-            {Boolean(title) && <SkeletonTitle active={active} {...titleProps} />}
-            {Boolean(paragraph) && <SkeletonParagraph active={active} {...paragraphProps} />}
+          <div className={["bs-skeleton-compound-content", classNames?.content].filter(Boolean).join(" ")}>
+            {Boolean(title) && <SkeletonTitle active={active} className={classNames?.title} {...titleProps} />}
+            {Boolean(paragraph) && <SkeletonParagraph active={active} className={classNames?.paragraph} {...paragraphProps} />}
           </div>
         </div>
       );
@@ -370,6 +396,7 @@ export const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(
           `bs-skeleton--${variant}`,
           !active && "bs-skeleton--static",
           className,
+          classNames?.root,
         ]
           .filter(Boolean)
           .join(" ")}

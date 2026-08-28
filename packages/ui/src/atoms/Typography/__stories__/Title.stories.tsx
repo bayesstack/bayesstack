@@ -7,6 +7,7 @@ const meta: Meta<typeof Title> = {
   title: "Atoms/Typography/Title",
   component: Title,
   parameters: {
+    layout: "padded",
     docs: {
       description: {
         component:
@@ -48,6 +49,8 @@ const meta: Meta<typeof Title> = {
       control: { type: "number", min: 1 },
       description: "Truncates heading content to N characters with an ellipsis",
     },
+    className: { control: "text" },
+    classNames: { control: false },
   },
 };
 
@@ -76,7 +79,8 @@ export const Playground: Story = {
   },
 };
 
-export const CustomStyleAndTruncate: Story = {
+export const Ex1_CustomStyleAndTruncate: Story = {
+  name: "01: Custom Heading Truncation & Style Showcase",
   args: {
     as: "h3",
     children: "Long Title Heading That Will Be Truncated",
@@ -91,4 +95,3 @@ export const CustomStyleAndTruncate: Story = {
     await expect(heading).toHaveTextContent("Long Title…");
   },
 };
-

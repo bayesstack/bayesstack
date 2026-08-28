@@ -1,4 +1,3 @@
-import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Avatar } from ".././Avatar";
 
@@ -7,7 +6,6 @@ const meta: Meta<typeof Avatar> = {
   component: Avatar,
   argTypes: {
     name: { control: { type: "text" } },
-    src: { control: { type: "text" } },
     size: {
       control: { type: "select" },
       options: ["xs", "sm", "md", "lg", "xl"],
@@ -16,6 +14,10 @@ const meta: Meta<typeof Avatar> = {
       control: { type: "select" },
       options: ["online", "offline", "busy", "away"],
     },
+    src: { control: { type: "text" } },
+    alt: { control: { type: "text" } },
+    className: { control: { type: "text" } },
+    classNames: { control: false },
   },
 };
 

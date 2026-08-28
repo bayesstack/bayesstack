@@ -24,4 +24,21 @@ describe("ChatMessage Component", () => {
     );
     expect(container.firstChild).toHaveClass("bs-chat-message-row--own");
   });
+
+  it("applies outer className string and internal classNames object slots", () => {
+    const { container } = render(
+      <ChatMessage
+        content="Testing slots"
+        className="outer-chat-row"
+        classNames={{
+          root: "custom-chat-root",
+          bubble: "custom-chat-bubble",
+          text: "custom-chat-text",
+        }}
+      />
+    );
+    expect(container.firstChild).toHaveClass("outer-chat-row");
+    expect(container.firstChild).toHaveClass("custom-chat-root");
+    expect(container.querySelector(".bs-chat-message-bubble")).toHaveClass("custom-chat-bubble");
+  });
 });

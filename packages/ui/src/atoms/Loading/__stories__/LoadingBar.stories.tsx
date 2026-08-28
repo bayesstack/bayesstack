@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { LoadingBar } from ".././LoadingBar";
+import { LoadingBar } from "../LoadingBar";
 
 const meta: Meta<typeof LoadingBar> = {
   title: "Atoms/Loading/LoadingBar",
   component: LoadingBar,
+  parameters: {
+    layout: "padded",
+  },
   argTypes: {
     progress: {
       control: { type: "range", min: 0, max: 100, step: 1 },
@@ -22,6 +25,8 @@ const meta: Meta<typeof LoadingBar> = {
         defaultValue: { summary: "4" },
       },
     },
+    className: { control: "text" },
+    classNames: { control: false },
   },
 };
 
@@ -32,13 +37,11 @@ export const Playground: Story = {
   args: {
     height: 4,
   },
-  parameters: {
-    layout: "fullscreen",
-  },
   render: (args) => <LoadingBar {...args} />,
 };
 
-export const Showcase: Story = {
+export const Ex1_LoadingBarShowcase: Story = {
+  name: "01: Determinate & Indeterminate Progress Showcase",
   render: () => {
     const [val, setVal] = useState(15);
     useEffect(() => {

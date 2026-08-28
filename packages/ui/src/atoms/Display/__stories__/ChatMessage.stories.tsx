@@ -1,9 +1,8 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import React, { useState } from "react";
-import { ChatMessage } from ".././ChatMessage";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import React, { useState, useEffect } from "react";
+import { ChatMessage } from "../ChatMessage";
 import { Avatar } from "../../Badges/Avatar";
 import { Badge } from "../../Badges/Badge";
-import { Icon } from "../../Icons";
 import { IconButton } from "../../Buttons/IconButton";
 import { Button } from "../../Buttons/Button";
 
@@ -11,51 +10,68 @@ const meta: Meta<typeof ChatMessage> = {
   title: "Atoms/Display/ChatMessage",
   component: ChatMessage,
   argTypes: {
+    content: { control: "text" },
     isOwn: { control: "boolean" },
+    timestamp: { control: "text" },
     showAvatar: { control: "boolean" },
     showUserName: { control: "boolean" },
+    imageAttachment: { control: "text" },
+    selected: { control: "boolean" },
+    onReply: { action: "onReply" },
+    onStar: { action: "onStar" },
+    onPin: { action: "onPin" },
+    onCopy: { action: "onCopy" },
+    onDelete: { action: "onDelete" },
+    className: { control: "text" },
+    classNames: { control: false },
   },
 };
 
 export default meta;
-type Story = StoryObj<typeof ChatMessage>;
+type Story = StoryObj<typeof meta>;
 
-export const ReceivedMessage: Story = {
+export const Playground: Story = {
   args: {
+    content: "Hey team! Double-click this message to toggle selection mode and reveal WhatsApp-style quick actions.",
     user: {
       name: "Sarah Chen",
       role: "Lead AI Engineer",
       avatar:
         "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
     },
-    content: "Hey team! The new BayesStack UI components have been published to storybook.",
     timestamp: "10:42 AM",
     isOwn: false,
+    showAvatar: true,
+    showUserName: true,
+    selected: false,
+  },
+  render: (args) => {
+    const [isSelected, setIsSelected] = useState(args.selected);
+
+    useEffect(() => {
+      setIsSelected(args.selected);
+    }, [args.selected]);
+
+    return (
+      <div style={{ maxWidth: 520, padding: 16 }}>
+        <ChatMessage
+          {...args}
+          selected={isSelected}
+          onDoubleClick={(e) => {
+            setIsSelected((prev) => !prev);
+            args.onDoubleClick?.(e);
+          }}
+        />
+      </div>
+    );
   },
 };
 
-export const SentMessage: Story = {
-  args: {
-    content: "Awesome work! Checking out the new Display atoms right now.",
-    timestamp: "10:45 AM",
-    isOwn: true,
-  },
-};
-
-export const WithImageAttachment: Story = {
-  args: {
-    user: { name: "Marcus Vance", role: "Product Manager" },
-    content: "Here is the updated architecture diagram for the model pipeline:",
-    imageAttachment:
-      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80",
-    timestamp: "10:48 AM",
-    isOwn: false,
-  },
-};
-
-export const FullChatWindowShowcase: Story = {
+export const Ex1_FullChatShowcase: Story = {
+  name: "01: Full Chat Showcase (Selection & Action Bar)",
   render: () => {
     const [inputValue, setInputValue] = useState("");
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set(["3"]));
     const [messages, setMessages] = useState([
       {
         id: "1",
@@ -98,6 +114,24 @@ export const FullChatWindowShowcase: Story = {
         isOwn: true,
       },
     ]);
+
+    const toggleSelect = (id: string) => {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+        return next;
+      });
+    };
+
+    const handleDelete = (id: string) => {
+      setMessages((prev) => prev.filter((m) => m.id !== id));
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    };
 
     const handleSend = (e: React.FormEvent) => {
       e.preventDefault();
@@ -159,9 +193,14 @@ export const FullChatWindowShowcase: Story = {
                 <Badge color="success" size="sm" variant="subtle">
                   Online
                 </Badge>
+                {selectedIds.size > 0 && (
+                  <Badge color="info" size="sm" variant="solid">
+                    {selectedIds.size} Selected
+                  </Badge>
+                )}
               </div>
               <span style={{ fontSize: 12, color: "#4A6360" }}>
-                Lead AI Engineer • BayesStack Core Team
+                Lead AI Engineer • Double-click any message to toggle selection mode & action bar
               </span>
             </div>
           </div>
@@ -186,7 +225,14 @@ export const FullChatWindowShowcase: Story = {
           }}
         >
           {messages.map((msg) => (
-            <ChatMessage key={msg.id} {...msg} />
+            <ChatMessage
+              key={msg.id}
+              {...msg}
+              selected={selectedIds.has(msg.id)}
+              onDoubleClick={() => toggleSelect(msg.id)}
+              onDelete={() => handleDelete(msg.id)}
+              onReply={() => setInputValue(`Replying to "${msg.content.slice(0, 24)}...": `)}
+            />
           ))}
         </div>
 

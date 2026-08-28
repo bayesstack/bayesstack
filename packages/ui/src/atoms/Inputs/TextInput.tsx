@@ -2,6 +2,14 @@ import React, { type ReactNode, type InputHTMLAttributes } from "react";
 import { Icon, type IconName } from "../Icons";
 import "./Inputs.css";
 
+export interface TextInputSlots {
+  root?: string;
+  input?: string;
+  prefix?: string;
+  suffix?: string;
+  clearButton?: string;
+}
+
 export interface TextInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "size"> {
   size?: "sm" | "md" | "lg";
@@ -14,8 +22,9 @@ export interface TextInputProps
   /** Convenience callback fired when Enter key is pressed */
   onEnter?: (value: string) => void;
   error?: boolean | string;
-  className?: string;
   wrapperStyle?: React.CSSProperties;
+  className?: string;
+  classNames?: TextInputSlots;
 }
 
 export const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(
@@ -34,6 +43,7 @@ export const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(
       onKeyDown,
       disabled = false,
       className = "",
+      classNames,
       wrapperStyle,
       ...props
     },
@@ -63,8 +73,12 @@ export const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(
     };
 
     return (
-      <div className="bs-input-wrapper" style={wrapperStyle}>
-        {prefixIcon && <span className="bs-input-prefix">{renderIcon(prefixIcon)}</span>}
+      <div className={["bs-input-wrapper", classNames?.root].filter(Boolean).join(" ")} style={wrapperStyle}>
+        {prefixIcon && (
+          <span className={["bs-input-prefix", classNames?.prefix].filter(Boolean).join(" ")}>
+            {renderIcon(prefixIcon)}
+          </span>
+        )}
 
         <input
           ref={ref}
@@ -80,6 +94,7 @@ export const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(
             hasSuffix && "bs-input--has-suffix",
             Boolean(error) && "bs-input--error",
             className,
+            classNames?.input,
           ]
             .filter(Boolean)
             .join(" ")}
@@ -87,10 +102,10 @@ export const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(
         />
 
         {clearable && value && !disabled ? (
-          <span className="bs-input-suffix">
+          <span className={["bs-input-suffix", classNames?.suffix].filter(Boolean).join(" ")}>
             <button
               type="button"
-              className="bs-input-action-btn"
+              className={["bs-input-action-btn", classNames?.clearButton].filter(Boolean).join(" ")}
               onClick={() => {
                 if (onClear) onClear();
                 if (onValueChange) onValueChange("");
@@ -101,7 +116,9 @@ export const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(
             </button>
           </span>
         ) : suffixIcon ? (
-          <span className="bs-input-suffix">{renderIcon(suffixIcon)}</span>
+          <span className={["bs-input-suffix", classNames?.suffix].filter(Boolean).join(" ")}>
+            {renderIcon(suffixIcon)}
+          </span>
         ) : null}
       </div>
     );

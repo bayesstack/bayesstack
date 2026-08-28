@@ -1,10 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import React, { useState, useEffect } from "react";
-import { ProgressRing } from ".././ProgressRing";
+import { ProgressRing } from "../ProgressRing";
 
 const meta: Meta<typeof ProgressRing> = {
   title: "Atoms/Loading/ProgressRing",
   component: ProgressRing,
+  parameters: {
+    layout: "padded",
+  },
   argTypes: {
     size: {
       control: "select",
@@ -14,23 +17,44 @@ const meta: Meta<typeof ProgressRing> = {
     color: { control: "color" },
     trackColor: { control: "color" },
     roundCaps: { control: "boolean" },
+    className: { control: "text" },
+    classNames: { control: false },
   },
 };
 
 export default meta;
 type Story = StoryObj<typeof ProgressRing>;
 
-export const DefaultPercentage: Story = {
+export const Playground: Story = {
+  args: {
+    value: 75,
+    label: "75%",
+    size: "md",
+    color: "#0B6763",
+    trackColor: "#E2ECEB",
+    roundCaps: true,
+  },
+};
+
+export const Ex1_MultiSegmentSections: Story = {
+  name: "01: Multi-Segment Storage Breakdown",
   render: () => (
     <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-      <ProgressRing value={75} label="75%" size="md" />
-      <ProgressRing value={40} label="40%" size="lg" color="#0284C7" />
-      <ProgressRing value={90} label="90%" size="xl" color="#16A34A" />
+      <ProgressRing
+        size="lg"
+        label="Breakdown"
+        sections={[
+          { value: 40, color: "#0B6763" },
+          { value: 25, color: "#0284C7" },
+          { value: 15, color: "#F59E0B" },
+        ]}
+      />
     </div>
   ),
 };
 
-export const AnimatedTicker: Story = {
+export const Ex2_AnimatedTicker: Story = {
+  name: "02: Live Animated Progress Counter",
   render: () => {
     const [progress, setProgress] = useState(10);
 
@@ -47,32 +71,4 @@ export const AnimatedTicker: Story = {
       </div>
     );
   },
-};
-
-export const MultiSegmentSections: Story = {
-  render: () => (
-    <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-      <ProgressRing
-        size="lg"
-        label="Breakdown"
-        sections={[
-          { value: 40, color: "#0B6763" },
-          { value: 25, color: "#0284C7" },
-          { value: 15, color: "#F59E0B" },
-        ]}
-      />
-    </div>
-  ),
-};
-
-export const SizePresets: Story = {
-  render: () => (
-    <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-      <ProgressRing size="xs" value={60} />
-      <ProgressRing size="sm" value={60} label="60%" />
-      <ProgressRing size="md" value={60} label="60%" />
-      <ProgressRing size="lg" value={60} label="60%" />
-      <ProgressRing size="xl" value={60} label="60%" />
-    </div>
-  ),
 };

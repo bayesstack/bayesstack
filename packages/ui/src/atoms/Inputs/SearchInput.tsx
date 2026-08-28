@@ -3,6 +3,15 @@ import { Icon } from "../Icons";
 import { IconButton } from "../Buttons/IconButton";
 import "./Inputs.css";
 
+export interface SearchInputSlots {
+  root?: string;
+  input?: string;
+  prefix?: string;
+  suffix?: string;
+  spinner?: string;
+  clearButton?: string;
+}
+
 export interface SearchInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "value"> {
   /**
@@ -53,6 +62,11 @@ export interface SearchInputProps
   className?: string;
 
   /**
+   * Object mapping custom class names to internal sub-element slots
+   */
+  classNames?: SearchInputSlots;
+
+  /**
    * Custom inline CSS styles for outer container div
    */
   wrapperStyle?: React.CSSProperties;
@@ -74,6 +88,7 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
       placeholder = "Search...",
       disabled = false,
       className = "",
+      classNames,
       wrapperStyle,
       onKeyDown,
       ...props
@@ -121,8 +136,8 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
     const showSuffix = Boolean(currentValue) || loading;
 
     return (
-      <div className="bs-input-wrapper" style={wrapperStyle}>
-        <span className="bs-input-prefix">
+      <div className={["bs-input-wrapper", classNames?.root].filter(Boolean).join(" ")} style={wrapperStyle}>
+        <span className={["bs-input-prefix", classNames?.prefix].filter(Boolean).join(" ")}>
           <Icon name="Search" size={size === "sm" ? 14 : size === "lg" ? 18 : 16} />
         </span>
 
@@ -141,6 +156,7 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
             showSuffix && "bs-input--has-suffix",
             Boolean(error) && "bs-input--error",
             className,
+            classNames?.input,
           ]
             .filter(Boolean)
             .join(" ")}
@@ -148,10 +164,13 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
         />
 
         {showSuffix && (
-          <span className="bs-input-suffix" style={{ pointerEvents: "auto" }}>
+          <span
+            className={["bs-input-suffix", classNames?.suffix].filter(Boolean).join(" ")}
+            style={{ pointerEvents: "auto" }}
+          >
             {loading ? (
               <span
-                className="bs-icon-button__spinner"
+                className={["bs-icon-button__spinner", classNames?.spinner].filter(Boolean).join(" ")}
                 aria-hidden="true"
                 style={{ fontSize: size === "sm" ? 12 : 14, color: "#0B6763" }}
               />
@@ -161,6 +180,7 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
                 label="Clear search"
                 variant="transparent"
                 size={size === "sm" ? "xs" : "sm"}
+                className={classNames?.clearButton}
                 onClick={handleClear}
               />
             ) : null}

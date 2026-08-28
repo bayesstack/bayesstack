@@ -1,11 +1,14 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Divider } from ".././Divider";
-import { Paper } from ".././Paper";
+import { Divider } from "../Divider";
+import { Paper } from "../Paper";
 
 const meta: Meta<typeof Divider> = {
   title: "Atoms/Layout/Divider",
   component: Divider,
+  parameters: {
+    layout: "padded",
+  },
   argTypes: {
     orientation: {
       control: { type: "select" },
@@ -19,6 +22,8 @@ const meta: Meta<typeof Divider> = {
       control: { type: "select" },
       options: ["left", "center", "right"],
     },
+    className: { control: "text" },
+    classNames: { control: false },
   },
 };
 
@@ -34,7 +39,8 @@ export const Playground: Story = {
   },
 };
 
-export const Showcase: Story = {
+export const Ex1_DividerShowcase: Story = {
+  name: "01: Divider Variants & Alignment Showcase",
   render: () => (
     <div style={{ display: "flex", flexDirection: "column", gap: 28, maxWidth: 640 }}>
       {/* 1. Label Alignment Positions */}

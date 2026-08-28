@@ -1,10 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import React, { useState } from "react";
-import { BooleanInput, type BooleanOption } from ".././BooleanInput";
+import { BooleanInput, type BooleanOption } from "../BooleanInput";
 
 const meta: Meta<typeof BooleanInput> = {
   title: "Atoms/Inputs/BooleanInput",
   component: BooleanInput,
+  parameters: {
+    layout: "padded",
+  },
   argTypes: {
     variant: {
       control: "select",
@@ -16,26 +19,35 @@ const meta: Meta<typeof BooleanInput> = {
     },
     disabled: { control: "boolean" },
     error: { control: "boolean" },
+    className: { control: "text" },
+    classNames: { control: false },
   },
 };
 
 export default meta;
 type Story = StoryObj<typeof BooleanInput>;
 
-export const SegmentedDefault: Story = {
-  render: () => {
-    const [val, setVal] = useState(true);
-
+export const Playground: Story = {
+  args: {
+    variant: "segmented",
+    size: "md",
+    defaultValue: true,
+    disabled: false,
+    error: false,
+  },
+  render: (args) => {
+    const [val, setVal] = useState(args.defaultValue ?? true);
     return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        <BooleanInput value={val} onChange={setVal} />
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 320 }}>
+        <BooleanInput {...args} value={val} onChange={setVal} />
         <div style={{ fontSize: 12, color: "#4A6360" }}>Value: {String(val)}</div>
       </div>
     );
   },
 };
 
-export const CustomSegmentedOptions: Story = {
+export const Ex1_CustomSegmentedOptions: Story = {
+  name: "01: Custom Segmented Options",
   render: () => {
     const options: BooleanOption[] = [
       { label: "Daily", value: "daily", icon: "Calendar" },
@@ -46,7 +58,7 @@ export const CustomSegmentedOptions: Story = {
     const [freq, setFreq] = useState("weekly");
 
     return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 360 }}>
         <BooleanInput options={options} value={freq} onChange={setFreq} />
         <div style={{ fontSize: 12, color: "#4A6360" }}>Selected frequency: {freq}</div>
       </div>
@@ -54,7 +66,8 @@ export const CustomSegmentedOptions: Story = {
   },
 };
 
-export const BoxedVariant: Story = {
+export const Ex2_BoxedVariant: Story = {
+  name: "02: Boxed Card Selection",
   render: () => {
     const [choice, setChoice] = useState("yes");
 
@@ -77,7 +90,8 @@ export const BoxedVariant: Story = {
   },
 };
 
-export const SwitchVariant: Story = {
+export const Ex3_SwitchVariant: Story = {
+  name: "03: Switch Toggle Mode",
   render: () => {
     const [enabled, setEnabled] = useState(true);
 
@@ -91,23 +105,4 @@ export const SwitchVariant: Story = {
       />
     );
   },
-};
-
-export const Sizes: Story = {
-  render: () => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <div>
-        <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Small (sm)</div>
-        <BooleanInput size="sm" defaultValue={true} />
-      </div>
-      <div>
-        <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Medium (md)</div>
-        <BooleanInput size="md" defaultValue={true} />
-      </div>
-      <div>
-        <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Large (lg)</div>
-        <BooleanInput size="lg" defaultValue={true} />
-      </div>
-    </div>
-  ),
 };

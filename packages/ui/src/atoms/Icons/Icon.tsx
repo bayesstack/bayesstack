@@ -5,7 +5,24 @@ import "./Icon.css";
 
 export type IconSize = "xs" | "sm" | "md" | "lg" | "xl" | number;
 
+export interface IconSlots {
+  /** Outer span wrapper element slot */
+  root?: string;
+  /** Inner SVG icon element slot */
+  svg?: string;
+}
+
 export interface IconProps extends Omit<HTMLAttributes<HTMLSpanElement>, "size" | "color"> {
+  /**
+   * Additional CSS class name string for outer root element
+   */
+  className?: string;
+
+  /**
+   * Object mapping custom class names to internal sub-element slots
+   */
+  classNames?: IconSlots;
+
   /**
    * Name of the icon from BayesStack's Hugeicons library
    */
@@ -56,12 +73,14 @@ export const Icon = forwardRef<HTMLSpanElement, IconProps>(
       interactive = false,
       "aria-label": ariaLabel,
       className = "",
+      classNames,
       style,
       ...props
     },
     ref
   ) => {
-    // Resolve icon component
+    // Supports either a direct Hugeicons component instance (for un-registered custom SVGs) 
+    // or a string name resolved against the central BayesStack ICON_MAP registry.
     const IconComponent = icon || (name ? ICON_MAP[name] : null);
 
     if (!IconComponent) {
@@ -69,7 +88,8 @@ export const Icon = forwardRef<HTMLSpanElement, IconProps>(
       return null;
     }
 
-    // Resolve pixel numeric size vs CSS size class
+    // Resolves size scale presets to exact numeric pixel dimensions for SVG rendering,
+    // while simultaneously attaching BEM size classes for CSS-based token control.
     let numericSize: number | undefined;
     let sizeClassName = "";
 
@@ -107,6 +127,7 @@ export const Icon = forwardRef<HTMLSpanElement, IconProps>(
       sizeClassName,
       interactive && "bs-icon--interactive",
       className,
+      classNames?.root,
     ]
       .filter(Boolean)
       .join(" ");
@@ -116,10 +137,13 @@ export const Icon = forwardRef<HTMLSpanElement, IconProps>(
         ref={ref}
         className={wrapperClassNames}
         style={{
+          // Inherits parent text color by default ('currentColor'), avoiding color prop churn in buttons/links
           color,
           fontSize: numericSize,
           ...style,
         }}
+        // Icons are strictly decorative by default (aria-hidden=true) to avoid noisy screen reader output.
+        // Specifying an explicit aria-label upgrades the span to role="img" for standalone visual indicators.
         role={ariaLabel ? "img" : undefined}
         aria-label={ariaLabel}
         aria-hidden={!ariaLabel}
@@ -130,6 +154,7 @@ export const Icon = forwardRef<HTMLSpanElement, IconProps>(
           size={numericSize}
           color={color}
           strokeWidth={strokeWidth}
+          className={classNames?.svg}
         />
       </span>
     );

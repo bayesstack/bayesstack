@@ -1,6 +1,14 @@
 import React, { type ReactNode, type InputHTMLAttributes } from "react";
 import "./Inputs.css";
 
+export interface SwitchSlots {
+  root?: string;
+  track?: string;
+  input?: string;
+  thumb?: string;
+  label?: string;
+}
+
 export interface SwitchProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "type"> {
   checked?: boolean;
@@ -8,8 +16,9 @@ export interface SwitchProps
   label?: ReactNode;
   /** Convenience callback returning boolean checked state */
   onCheckedChange?: (checked: boolean) => void;
-  className?: string;
   style?: React.CSSProperties;
+  className?: string;
+  classNames?: SwitchSlots;
 }
 
 export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
@@ -22,6 +31,7 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
       onChange,
       onCheckedChange,
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -38,6 +48,7 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
           "bs-switch-wrapper",
           disabled && "bs-switch-wrapper--disabled",
           className,
+          classNames?.root,
         ]
           .filter(Boolean)
           .join(" ")}
@@ -48,6 +59,7 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
             "bs-switch-track",
             `bs-switch-track--${size}`,
             checked && "bs-switch-track--checked",
+            classNames?.track,
           ]
             .filter(Boolean)
             .join(" ")}
@@ -58,12 +70,13 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
             checked={checked}
             disabled={disabled}
             onChange={handleChange}
+            className={classNames?.input}
             style={{ position: "absolute", opacity: 0, width: "100%", height: "100%", margin: 0, cursor: "inherit" }}
             {...props}
           />
-          <span className="bs-switch-thumb" />
+          <span className={["bs-switch-thumb", classNames?.thumb].filter(Boolean).join(" ")} />
         </span>
-        {label && <span>{label}</span>}
+        {label && <span className={classNames?.label}>{label}</span>}
       </label>
     );
   }

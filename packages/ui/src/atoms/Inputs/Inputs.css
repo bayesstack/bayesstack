@@ -1415,18 +1415,37 @@
 .bs-score-star-btn {
   background: none;
   border: none;
-  padding: 2px;
+  padding: 3px;
   cursor: pointer;
-  color: #C4DCD7;
+  color: #B2C7C4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: transform 120ms ease, color 120ms ease;
+  outline: none;
+  border-radius: 4px;
+}
+
+.bs-score-star-btn:focus-visible {
+  box-shadow: 0 0 0 2px #0B6763;
 }
 
 .bs-score-star-btn:hover:not(:disabled) {
-  transform: scale(1.15);
+  transform: scale(1.2);
+}
+
+.bs-score-star-btn svg {
+  fill: transparent;
+  transition: fill 150ms ease, stroke 150ms ease;
 }
 
 .bs-score-star-btn--filled {
-  color: #F5A623;
+  color: #F59E0B;
+}
+
+.bs-score-star-btn--filled svg {
+  fill: #F59E0B;
+  stroke: #D97706;
 }
 
 /* ==========================================

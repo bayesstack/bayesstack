@@ -14,6 +14,10 @@ export type HtmlTextStyle = "default" | "serif" | "monospace" | "handwritten";
 export type HtmlTextAlign = "left" | "center" | "right" | "justify";
 export type HtmlTextAs = "div" | "span" | "article" | "section";
 
+export interface HtmlTextSlots {
+  root?: string;
+}
+
 export interface HtmlTextProps extends Omit<React.HTMLAttributes<HTMLElement>, "style"> {
   /**
    * Raw HTML string to render safely
@@ -59,11 +63,22 @@ export interface HtmlTextProps extends Omit<React.HTMLAttributes<HTMLElement>, "
    * Truncates HTML content: pass `true` for single-line CSS truncation, or a `number` to truncate visible text to N characters
    */
   truncate?: boolean | number;
+
+  /**
+   * Custom root element class name
+   */
+  className?: string;
+
+  /**
+   * Object mapping custom class names to internal sub-element slots
+   */
+  classNames?: HtmlTextSlots;
 }
 
 /**
  * Truncates an HTML string to a given visible text character limit
  * while preserving HTML tags, text decorations, and closing open tags.
+ * Uses in-memory DOMParser to walk text nodes without breaking HTML structure (e.g. unclosed <b> or <div> tags).
  */
 function truncateHtml(html: string, maxChars: number): string {
   if (!html || maxChars <= 0) return "";
@@ -79,6 +94,8 @@ function truncateHtml(html: string, maxChars: number): string {
       let charCount = 0;
       let isTruncated = false;
 
+      // Recursively traverses text nodes. Once charCount reaches maxChars, appends "…" 
+      // to the active text node and prunes all subsequent sibling nodes from the parent element.
       function traverse(node: Node): boolean {
         if (isTruncated) return false;
 
@@ -136,6 +153,7 @@ export const HtmlText = forwardRef<HTMLElement, HtmlTextProps>(
       align = "left",
       truncate,
       className = "",
+      classNames,
       ...props
     },
     ref
@@ -165,7 +183,7 @@ export const HtmlText = forwardRef<HTMLElement, HtmlTextProps>(
       computedInlineStyle = style;
     }
 
-    const classNames = [
+    const classes = [
       "bs-html-text",
       `bs-html-text--size-${size}`,
       `bs-html-text--color-${color}`,
@@ -173,6 +191,7 @@ export const HtmlText = forwardRef<HTMLElement, HtmlTextProps>(
       `bs-html-text--align-${align}`,
       isBooleanTruncate && "bs-html-text--truncate",
       className,
+      classNames?.root,
     ]
       .filter(Boolean)
       .join(" ");
@@ -180,7 +199,7 @@ export const HtmlText = forwardRef<HTMLElement, HtmlTextProps>(
     return (
       <Component
         ref={ref as any}
-        className={classNames}
+        className={classes}
         style={computedInlineStyle}
         dangerouslySetInnerHTML={{ __html: finalHtmlContent }}
         {...props}

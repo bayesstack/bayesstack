@@ -35,4 +35,22 @@ describe("FileItem Component", () => {
     fireEvent.click(btn);
     expect(handleDownload).toHaveBeenCalledTimes(1);
   });
+
+  it("applies outer className string and internal classNames object slots", () => {
+    const { container } = render(
+      <FileItem
+        filename="archive.zip"
+        className="outer-file-item"
+        classNames={{
+          root: "custom-file-root",
+          name: "custom-file-name",
+          extBadge: "custom-file-badge",
+        }}
+      />
+    );
+    const item = container.querySelector(".bs-file-item");
+    expect(item).toHaveClass("outer-file-item");
+    expect(item).toHaveClass("custom-file-root");
+    expect(screen.getByText("archive.zip")).toHaveClass("custom-file-name");
+  });
 });

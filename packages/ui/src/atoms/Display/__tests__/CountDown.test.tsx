@@ -33,4 +33,23 @@ describe("CountDown Component", () => {
 
     expect(handleFinish).toHaveBeenCalled();
   });
+
+  it("applies outer className string and internal classNames object slots", () => {
+    render(
+      <CountDown
+        target={60}
+        label="Remaining"
+        className="outer-countdown"
+        classNames={{
+          root: "custom-cd-root",
+          label: "custom-cd-label",
+          digits: "custom-cd-digits",
+        }}
+      />
+    );
+    const timer = screen.getByRole("timer");
+    expect(timer).toHaveClass("outer-countdown");
+    expect(timer).toHaveClass("custom-cd-root");
+    expect(screen.getByText("Remaining")).toHaveClass("custom-cd-label");
+  });
 });

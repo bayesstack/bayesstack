@@ -1,10 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import React, { useState } from "react";
-import { ScoreInput, type ScoreGrade } from ".././ScoreInput";
+import { ScoreInput, type ScoreGrade } from "../ScoreInput";
 
 const meta: Meta<typeof ScoreInput> = {
   title: "Atoms/Inputs/ScoreInput",
   component: ScoreInput,
+  parameters: {
+    layout: "padded",
+  },
   argTypes: {
     variant: {
       control: "select",
@@ -16,26 +19,39 @@ const meta: Meta<typeof ScoreInput> = {
     },
     disabled: { control: "boolean" },
     error: { control: "boolean" },
+    className: { control: "text" },
+    classNames: { control: false },
   },
 };
 
 export default meta;
 type Story = StoryObj<typeof ScoreInput>;
 
-export const BoxesDefault: Story = {
-  render: () => {
-    const [score, setScore] = useState<number | ScoreGrade>(3);
+export const Playground: Story = {
+  args: {
+    variant: "boxes",
+    size: "md",
+    defaultValue: 3,
+    grades: 5,
+    disabled: false,
+    error: false,
+  },
+  render: (args) => {
+    const [score, setScore] = useState<number | ScoreGrade>(args.defaultValue ?? 3);
 
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        <ScoreInput value={score} onChange={(val) => setScore(val.score)} grades={5} />
-        <div style={{ fontSize: 12, color: "#4A6360" }}>Selected score: {typeof score === "number" ? score : score.score}</div>
+        <ScoreInput {...args} value={score} onChange={(val) => setScore(val.score)} />
+        <div style={{ fontSize: 12, color: "#4A6360" }}>
+          Selected score: {typeof score === "number" ? score : score.score}
+        </div>
       </div>
     );
   },
 };
 
-export const StarRating: Story = {
+export const Ex1_StarRating: Story = {
+  name: "01: Interactive Star Rating",
   render: () => {
     const [score, setScore] = useState<number | ScoreGrade>(4);
 
@@ -48,7 +64,8 @@ export const StarRating: Story = {
   },
 };
 
-export const NumericPills: Story = {
+export const Ex2_NumericPills: Story = {
+  name: "02: Numeric 10-Point Pills",
   render: () => {
     const [score, setScore] = useState<number | ScoreGrade>(8);
 
@@ -61,7 +78,8 @@ export const NumericPills: Story = {
   },
 };
 
-export const LetterGrades: Story = {
+export const Ex3_LetterGrades: Story = {
+  name: "03: Academic Letter Grades",
   render: () => {
     const letterGrades: ScoreGrade[] = [
       { score: 1, letter: "F", label: "Fail" },
@@ -87,23 +105,4 @@ export const LetterGrades: Story = {
       </div>
     );
   },
-};
-
-export const Sizes: Story = {
-  render: () => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <div>
-        <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Small (sm)</div>
-        <ScoreInput size="sm" defaultValue={2} grades={5} />
-      </div>
-      <div>
-        <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Medium (md)</div>
-        <ScoreInput size="md" defaultValue={3} grades={5} />
-      </div>
-      <div>
-        <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Large (lg)</div>
-        <ScoreInput size="lg" defaultValue={4} grades={5} />
-      </div>
-    </div>
-  ),
 };

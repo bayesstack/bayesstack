@@ -16,6 +16,10 @@ export type ParagraphAlign = "left" | "center" | "right" | "justify";
 
 export type ParagraphAs = "p" | "div" | "span" | "article" | "section";
 
+export interface ParagraphSlots {
+  root?: string;
+}
+
 export interface ParagraphProps extends Omit<React.HTMLAttributes<HTMLParagraphElement>, "style"> {
   /**
    * The underlying HTML tag to render
@@ -68,6 +72,16 @@ export interface ParagraphProps extends Omit<React.HTMLAttributes<HTMLParagraphE
    * Children content
    */
   children?: React.ReactNode;
+
+  /**
+   * Custom root element class name
+   */
+  className?: string;
+
+  /**
+   * Object mapping custom class names to internal sub-element slots
+   */
+  classNames?: ParagraphSlots;
 }
 
 export const Paragraph = forwardRef<HTMLParagraphElement, ParagraphProps>(
@@ -82,6 +96,7 @@ export const Paragraph = forwardRef<HTMLParagraphElement, ParagraphProps>(
       lineClamp,
       align = "left",
       className = "",
+      classNames,
       children,
       ...props
     },
@@ -106,7 +121,7 @@ export const Paragraph = forwardRef<HTMLParagraphElement, ParagraphProps>(
       };
     }
 
-    const classNames = [
+    const classes = [
       "bs-paragraph",
       `bs-paragraph--size-${size}`,
       `bs-paragraph--style-${computedStyleVariant}`,
@@ -116,12 +131,13 @@ export const Paragraph = forwardRef<HTMLParagraphElement, ParagraphProps>(
       strong ? "bs-paragraph--strong" : "",
       lineClamp ? "bs-paragraph--line-clamp" : "",
       className,
+      classNames?.root,
     ]
       .filter(Boolean)
       .join(" ");
 
     return (
-      <Component ref={ref} className={classNames} style={computedInlineStyle} {...props}>
+      <Component ref={ref} className={classes} style={computedInlineStyle} {...props}>
         {children}
       </Component>
     );

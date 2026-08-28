@@ -10,6 +10,10 @@ export type PaperAs =
   | "footer"
   | "aside";
 
+export interface PaperSlots {
+  root?: string;
+}
+
 export interface PaperProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Drop shadow elevation scale
@@ -52,6 +56,16 @@ export interface PaperProps extends React.HTMLAttributes<HTMLDivElement> {
    * @default 'div'
    */
   as?: PaperAs;
+
+  /**
+   * Custom root element class name
+   */
+  className?: string;
+
+  /**
+   * Object mapping custom class names to internal sub-element slots
+   */
+  classNames?: PaperSlots;
 }
 
 export const Paper = React.forwardRef<HTMLDivElement, PaperProps>(
@@ -66,6 +80,7 @@ export const Paper = React.forwardRef<HTMLDivElement, PaperProps>(
       as: Component = "div",
       children,
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -73,6 +88,8 @@ export const Paper = React.forwardRef<HTMLDivElement, PaperProps>(
   ) => {
     return (
       <Component
+        // Type assertion is required because React's polymorphic forwardRef cannot 
+        // statically infer the underlying HTML element type when Component is dynamic.
         ref={ref as any}
         className={[
           "bs-paper",
@@ -82,9 +99,11 @@ export const Paper = React.forwardRef<HTMLDivElement, PaperProps>(
           bordered && "bs-paper--bordered",
           hoverable && "bs-paper--hoverable",
           className,
+          classNames?.root,
         ]
           .filter(Boolean)
           .join(" ")}
+        // Accepts raw numbers (auto-converted to px by React) or CSS shorthand strings (e.g. "12px 24px", "1.5rem")
         style={{ padding, ...style }}
         {...props}
       >

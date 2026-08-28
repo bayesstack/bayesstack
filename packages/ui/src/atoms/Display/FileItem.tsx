@@ -2,6 +2,27 @@ import React, { forwardRef, useMemo } from "react";
 import { Icon } from "../Icons";
 import "./Display.css";
 
+export interface FileItemSlots {
+  /** Outer container slot */
+  root?: string;
+  /** External wrapper link slot (when url prop is set) */
+  wrapperLink?: string;
+  /** Thumbnail image wrapper slot */
+  thumbnail?: string;
+  /** File icon box slot */
+  iconBox?: string;
+  /** File extension badge slot */
+  extBadge?: string;
+  /** Filename & details info container slot */
+  info?: string;
+  /** Filename text slot */
+  name?: string;
+  /** Subtitle / file size text slot */
+  sub?: string;
+  /** Download button slot */
+  downloadBtn?: string;
+}
+
 export interface FileItemProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Name of the file with extension (e.g. 'report_final.pdf')
@@ -66,6 +87,21 @@ export interface FileItemProps extends React.HTMLAttributes<HTMLDivElement> {
    * Callback fired when download icon is clicked
    */
   onDownload?: () => void;
+
+  /**
+   * Callback fired when main file item is clicked to open/preview
+   */
+  onOpen?: () => void;
+
+  /**
+   * Additional CSS class name string for outer root element
+   */
+  className?: string;
+
+  /**
+   * Object mapping custom class names to internal sub-element slots
+   */
+  classNames?: FileItemSlots;
 }
 
 export const FileItem = forwardRef<HTMLDivElement, FileItemProps>(
@@ -83,7 +119,10 @@ export const FileItem = forwardRef<HTMLDivElement, FileItemProps>(
       color = "#0B6763",
       noBreak = false,
       onDownload,
+      onOpen,
+      onClick,
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -105,39 +144,48 @@ export const FileItem = forwardRef<HTMLDivElement, FileItemProps>(
     }, [filename, hideExtension, hasExtension]);
 
     const activeIconSize = iconSize ?? size;
+    const isInteractive = Boolean(url || onOpen || onClick);
+
+    const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+      onOpen?.();
+      onClick?.(e);
+    };
 
     const renderContent = () => (
       <div
         ref={ref}
         className={[
           "bs-file-item",
-          url ? "bs-file-item--link" : "",
+          isInteractive ? "bs-file-item--link" : "",
           className,
+          classNames?.root,
         ]
           .filter(Boolean)
           .join(" ")}
+        onClick={isInteractive ? handleClick : undefined}
         style={style}
         {...props}
       >
         {/* Thumbnail or File Extension Icon */}
         {thumbnailUrl ? (
           <div
-            className="bs-file-item-thumbnail"
+            className={["bs-file-item-thumbnail", classNames?.thumbnail].filter(Boolean).join(" ")}
             style={{ width: activeIconSize * 1.4, height: activeIconSize * 1.4 }}
           >
             <img src={thumbnailUrl} alt={displayName} />
           </div>
         ) : (
           <div
-            className="bs-file-item-icon-box"
+            className={["bs-file-item-icon-box", classNames?.iconBox].filter(Boolean).join(" ")}
             style={{
               width: activeIconSize * 1.25,
               height: activeIconSize * 1.25,
               borderColor: color,
             }}
           >
+            {/* Sliced to max 4 chars so long extensions (e.g. .tar.gz, .jpeg) don't overflow icon badge geometry */}
             <span
-              className="bs-file-item-ext-badge"
+              className={["bs-file-item-ext-badge", classNames?.extBadge].filter(Boolean).join(" ")}
               style={{ backgroundColor: color }}
             >
               {extension.slice(0, 4)}
@@ -148,11 +196,12 @@ export const FileItem = forwardRef<HTMLDivElement, FileItemProps>(
 
         {/* Name & Details */}
         {showFileName && (
-          <div className="bs-file-item-info">
+          <div className={["bs-file-item-info", classNames?.info].filter(Boolean).join(" ")}>
             <span
               className={[
                 "bs-file-item-name",
                 noBreak ? "bs-file-item-name--nobreak" : "",
+                classNames?.name,
               ]
                 .filter(Boolean)
                 .join(" ")}
@@ -160,7 +209,7 @@ export const FileItem = forwardRef<HTMLDivElement, FileItemProps>(
               {displayName}
             </span>
             {(description || fileSize) && (
-              <span className="bs-file-item-sub">
+              <span className={["bs-file-item-sub", classNames?.sub].filter(Boolean).join(" ")}>
                 {[fileSize, description].filter(Boolean).join(" · ")}
               </span>
             )}
@@ -171,8 +220,9 @@ export const FileItem = forwardRef<HTMLDivElement, FileItemProps>(
         {onDownload && (
           <button
             type="button"
-            className="bs-file-item-download-btn"
+            className={["bs-file-item-download-btn", classNames?.downloadBtn].filter(Boolean).join(" ")}
             onClick={(e) => {
+              // Stop event from triggering parent container's onOpen/onClick handler or outer link navigation
               e.stopPropagation();
               onDownload();
             }}
@@ -184,13 +234,15 @@ export const FileItem = forwardRef<HTMLDivElement, FileItemProps>(
       </div>
     );
 
+    // If an external URL is provided, wrap the rendered file item in a semantic <a> tag 
+    // to support middle-click, right-click context menus, and native link behaviors.
     if (url) {
       return (
         <a
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="bs-file-item-wrapper-link"
+          className={["bs-file-item-wrapper-link", classNames?.wrapperLink].filter(Boolean).join(" ")}
         >
           {renderContent()}
         </a>

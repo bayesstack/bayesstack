@@ -1,14 +1,17 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Stack } from ".././Stack";
-import { Divider } from ".././Divider";
+import { Stack } from "../Stack";
+import { Divider } from "../Divider";
 import { Button } from "../../Buttons/Button";
 import { Badge } from "../../Badges/Badge";
-import { Paper } from ".././Paper";
+import { Paper } from "../Paper";
 
 const meta: Meta<typeof Stack> = {
   title: "Atoms/Layout/Stack",
   component: Stack,
+  parameters: {
+    layout: "padded",
+  },
   argTypes: {
     as: {
       control: { type: "select" },
@@ -24,6 +27,8 @@ const meta: Meta<typeof Stack> = {
       options: ["xs", "sm", "md", "lg", "xl"],
     },
     wrap: { control: { type: "boolean" } },
+    className: { control: "text" },
+    classNames: { control: false },
   },
 };
 
@@ -43,7 +48,8 @@ export const Playground: Story = {
   },
 };
 
-export const Showcase: Story = {
+export const Ex1_StackShowcase: Story = {
+  name: "01: Stack Dividers & Action Bar Showcase",
   render: () => (
     <div style={{ display: "flex", flexDirection: "column", gap: 32, maxWidth: 640 }}>
       {/* 1. Stack with Automatic Item Dividers */}

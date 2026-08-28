@@ -64,4 +64,28 @@ describe("Badge Component", () => {
     const badge = container.querySelector(".bs-badge-floating");
     expect(badge).toHaveStyle({ right: "10px", top: "15px" });
   });
+
+  it("applies outer className string and internal classNames object slots", () => {
+    const { container } = render(
+      <Badge
+        className="my-outer-badge"
+        classNames={{
+          root: "custom-root",
+          badge: "custom-badge",
+          dot: "custom-dot",
+          label: "custom-label",
+        }}
+        dot
+      >
+        Badge Label
+      </Badge>
+    );
+
+    const rootWrapper = container.querySelector(".bs-badge-wrapper");
+    expect(rootWrapper).toHaveClass("my-outer-badge");
+    expect(rootWrapper).toHaveClass("custom-root");
+
+    const badgeElement = container.querySelector(".bs-badge");
+    expect(badgeElement).toHaveClass("custom-badge");
+  });
 });

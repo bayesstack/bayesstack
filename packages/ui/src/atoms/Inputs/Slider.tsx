@@ -20,6 +20,16 @@ export type SliderMarks =
   | Record<number, ReactNode | MarkObj>
   | number[];
 
+export interface SliderSlots {
+  root?: string;
+  rail?: string;
+  track?: string;
+  markDot?: string;
+  markText?: string;
+  handle?: string;
+  tooltip?: string;
+}
+
 export interface SliderProps
   extends Omit<HTMLAttributes<HTMLDivElement>, "value" | "defaultValue" | "onChange"> {
   /**
@@ -105,6 +115,11 @@ export interface SliderProps
   className?: string;
 
   /**
+   * Object mapping custom class names to internal sub-element slots
+   */
+  classNames?: SliderSlots;
+
+  /**
    * Custom inline styles for root container
    */
   wrapperStyle?: CSSProperties;
@@ -128,6 +143,7 @@ export const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
       onChangeComplete,
       onChangeEnd,
       className = "",
+      classNames,
       wrapperStyle,
       style,
       ...props
@@ -169,6 +185,18 @@ export const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
     const [hoveringIndex, setHoveringIndex] = useState<number | null>(null);
     const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
 
+    // Mutable ref proxies synchronize component state with global window event listeners.
+    // This allows window event handlers to read fresh state without having to tear down 
+    // and re-attach global listeners on every single mousemove pixel.
+    const currentValRef = useRef(currentVal);
+    currentValRef.current = currentVal;
+
+    const isRangeModeRef = useRef(isRangeMode);
+    isRangeModeRef.current = isRangeMode;
+
+    const disabledRef = useRef(disabled);
+    disabledRef.current = disabled;
+
     // Parse marks keys into sorted numbers array
     const parsedMarks = React.useMemo(() => {
       if (!marks) return [];
@@ -186,8 +214,8 @@ export const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
       (rawVal: number): number => {
         let clamped = Math.max(min, Math.min(max, rawVal));
 
-        if (step === null || step <= 0) {
-          // Snap strictly to nearest mark
+        if (step === null || step === undefined || step <= 0 || isNaN(step)) {
+          // Snap strictly to nearest mark when step is null or invalid
           if (parsedMarks.length > 0) {
             let closest = parsedMarks[0];
             let minDiff = Math.abs(clamped - closest);
@@ -203,12 +231,15 @@ export const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
           return clamped;
         }
 
-        // Standard step quantization
+        // Standard step quantization with IEEE 754 precision correction.
+        // Uses toFixed(safePrecision) to prevent floating-point inaccuracies (e.g. 0.1 + 0.2 = 0.30000000000000004).
         const stepsCount = Math.round((clamped - min) / step);
         const stepped = min + stepsCount * step;
-        // Fix precision issues
-        const precision = String(step).split(".")[1]?.length || 0;
-        return Number(Math.max(min, Math.min(max, stepped)).toFixed(precision));
+        const precision = String(step).includes(".")
+          ? String(step).split(".")[1]?.length || 0
+          : 0;
+        const safePrecision = Math.min(20, Math.max(0, precision));
+        return Number(Math.max(min, Math.min(max, stepped)).toFixed(safePrecision));
       },
       [min, max, step, parsedMarks]
     );
@@ -239,6 +270,9 @@ export const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
       [min, max, vertical, calcSteppedValue]
     );
 
+    const getValueFromClientPosRef = useRef(getValueFromClientPos);
+    getValueFromClientPosRef.current = getValueFromClientPos;
+
     const updateValue = useCallback(
       (nextPair: [number, number], notifyComplete = false) => {
         let finalVal: SliderValue;
@@ -264,52 +298,61 @@ export const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
       [isRangeMode, isControlled, max, onChange, onChangeComplete, onChangeEnd]
     );
 
-    // Mouse / Touch Event Handlers
-    const handleDragMove = useCallback(
-      (e: MouseEvent | TouchEvent) => {
-        if (activeIndexRef.current === null || disabled) return;
+    const updateValueRef = useRef(updateValue);
+    updateValueRef.current = updateValue;
+
+    // Manages global window drag listeners during active sliding sessions.
+    // Tying listener lifecycle strictly to [draggingIndex] guarantees that window listeners 
+    // are automatically detached when dragging completes, preventing memory leaks and tab freezes.
+    useEffect(() => {
+      if (draggingIndex === null) return;
+
+      const handleMove = (e: MouseEvent | TouchEvent) => {
+        if (activeIndexRef.current === null || disabledRef.current) return;
         const clientX = "touches" in e ? e.touches[0].clientX : (e as MouseEvent).clientX;
         const clientY = "touches" in e ? e.touches[0].clientY : (e as MouseEvent).clientY;
 
-        const valAtPos = getValueFromClientPos(clientX, clientY);
+        const valAtPos = getValueFromClientPosRef.current(clientX, clientY);
         const idx = activeIndexRef.current;
+        const cur = currentValRef.current;
 
-        const nextPair: [number, number] = [...currentVal];
+        const nextPair: [number, number] = [...cur];
         nextPair[idx] = valAtPos;
 
-        if (isRangeMode) {
+        if (isRangeModeRef.current) {
           if (idx === 0 && valAtPos > nextPair[1]) nextPair[0] = nextPair[1];
           if (idx === 1 && valAtPos < nextPair[0]) nextPair[1] = nextPair[0];
         }
 
-        updateValue(nextPair);
-      },
-      [disabled, getValueFromClientPos, currentVal, isRangeMode, updateValue]
-    );
+        updateValueRef.current(nextPair);
+      };
 
-    const handleDragEnd = useCallback(() => {
-      if (activeIndexRef.current !== null) {
-        updateValue(currentVal, true);
-      }
-      activeIndexRef.current = null;
-      setDraggingIndex(null);
+      const handleEnd = () => {
+        if (activeIndexRef.current !== null) {
+          updateValueRef.current(currentValRef.current, true);
+        }
+        activeIndexRef.current = null;
+        setDraggingIndex(null);
+      };
 
-      window.removeEventListener("mousemove", handleDragMove);
-      window.removeEventListener("mouseup", handleDragEnd);
-      window.removeEventListener("touchmove", handleDragMove);
-      window.removeEventListener("touchend", handleDragEnd);
-    }, [handleDragMove, updateValue, currentVal]);
+      window.addEventListener("mousemove", handleMove);
+      window.addEventListener("mouseup", handleEnd);
+      window.addEventListener("touchmove", handleMove);
+      window.addEventListener("touchend", handleEnd);
+
+      return () => {
+        window.removeEventListener("mousemove", handleMove);
+        window.removeEventListener("mouseup", handleEnd);
+        window.removeEventListener("touchmove", handleMove);
+        window.removeEventListener("touchend", handleEnd);
+      };
+    }, [draggingIndex]);
 
     const handleStartDrag = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
       if (disabled) return;
       e.stopPropagation();
       activeIndexRef.current = idx;
       setDraggingIndex(idx);
-
-      window.addEventListener("mousemove", handleDragMove);
-      window.addEventListener("mouseup", handleDragEnd);
-      window.addEventListener("touchmove", handleDragMove);
-      window.addEventListener("touchend", handleDragEnd);
     };
 
     const handleTrackClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -359,18 +402,27 @@ export const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
       ? { bottom: `${lowerPct}%`, height: `${upperPct - lowerPct}%` }
       : { left: `${lowerPct}%`, width: `${upperPct - lowerPct}%` };
 
+    const setRefs = useCallback(
+      (node: HTMLDivElement | null) => {
+        containerRef.current = node;
+        if (typeof ref === "function") {
+          ref(node);
+        } else if (ref) {
+          (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+        }
+      },
+      [ref]
+    );
+
     return (
       <div
-        ref={(node) => {
-          containerRef.current = node;
-          if (typeof ref === "function") ref(node);
-          else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
-        }}
+        ref={setRefs}
         className={[
           "bs-slider-container",
           vertical ? "bs-slider-container--vertical" : "bs-slider-container--horizontal",
           disabled && "bs-slider-container--disabled",
           className,
+          classNames?.root,
         ]
           .filter(Boolean)
           .join(" ")}
@@ -379,10 +431,10 @@ export const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
         {...props}
       >
         {/* Background Rail */}
-        <div className="bs-slider-rail" />
+        <div className={["bs-slider-rail", classNames?.rail].filter(Boolean).join(" ")} />
 
         {/* Filled Active Track */}
-        <div className="bs-slider-track" style={trackStyle} />
+        <div className={["bs-slider-track", classNames?.track].filter(Boolean).join(" ")} style={trackStyle} />
 
         {/* Render Marks & Ticks */}
         {parsedMarks.map((mVal) => {
@@ -425,6 +477,7 @@ export const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
                 className={[
                   "bs-slider-mark-dot",
                   isActive && "bs-slider-mark-dot--active",
+                  classNames?.markDot,
                 ]
                   .filter(Boolean)
                   .join(" ")}
@@ -434,6 +487,7 @@ export const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
                 className={[
                   "bs-slider-mark-text",
                   isActive && "bs-slider-mark-text--active",
+                  classNames?.markText,
                 ]
                   .filter(Boolean)
                   .join(" ")}
@@ -470,6 +524,7 @@ export const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
           className={[
             "bs-slider-handle",
             draggingIndex === 0 && "bs-slider-handle--active",
+            classNames?.handle,
           ]
             .filter(Boolean)
             .join(" ")}
@@ -485,7 +540,7 @@ export const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
           onKeyDown={(e) => handleKeyDown(0, e)}
         >
           {showTooltip && (showTooltip === "always" || hoveringIndex === 0 || draggingIndex === 0) && (
-            <div className="bs-slider-tooltip">
+            <div className={["bs-slider-tooltip", classNames?.tooltip].filter(Boolean).join(" ")}>
               {tooltipFormatter(currentVal[0])}
             </div>
           )}
@@ -503,6 +558,7 @@ export const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
             className={[
               "bs-slider-handle",
               draggingIndex === 1 && "bs-slider-handle--active",
+              classNames?.handle,
             ]
               .filter(Boolean)
               .join(" ")}
@@ -518,7 +574,7 @@ export const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
             onKeyDown={(e) => handleKeyDown(1, e)}
           >
             {showTooltip && (showTooltip === "always" || hoveringIndex === 1 || draggingIndex === 1) && (
-              <div className="bs-slider-tooltip">
+              <div className={["bs-slider-tooltip", classNames?.tooltip].filter(Boolean).join(" ")}>
                 {tooltipFormatter(currentVal[1])}
               </div>
             )}

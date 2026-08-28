@@ -1,6 +1,10 @@
 import React from "react";
 import "./Loading.css";
 
+export interface LoaderSlots {
+  root?: string;
+}
+
 export interface LoaderProps extends React.HTMLAttributes<HTMLSpanElement> {
   /**
    * Size scale
@@ -13,6 +17,16 @@ export interface LoaderProps extends React.HTMLAttributes<HTMLSpanElement> {
    * @default 'primary'
    */
   color?: "primary" | "neutral" | "white";
+
+  /**
+   * Custom root element class name
+   */
+  className?: string;
+
+  /**
+   * Object mapping custom class names to internal sub-element slots
+   */
+  classNames?: LoaderSlots;
 }
 
 export const Loader = React.forwardRef<HTMLSpanElement, LoaderProps>(
@@ -21,6 +35,7 @@ export const Loader = React.forwardRef<HTMLSpanElement, LoaderProps>(
       size = "md",
       color = "primary",
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -34,6 +49,7 @@ export const Loader = React.forwardRef<HTMLSpanElement, LoaderProps>(
           `bs-loader--${size}`,
           `bs-loader--${color}`,
           className,
+          classNames?.root,
         ]
           .filter(Boolean)
           .join(" ")}

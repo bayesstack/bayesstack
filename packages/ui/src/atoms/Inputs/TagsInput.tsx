@@ -9,6 +9,18 @@ import React, {
 import { Icon } from "../Icons";
 import "./Inputs.css";
 
+export interface TagsInputSlots {
+  root?: string;
+  shell?: string;
+  badge?: string;
+  badgeLabel?: string;
+  badgeCloseBtn?: string;
+  input?: string;
+  suggestionsOverlay?: string;
+  suggestionsList?: string;
+  suggestionItem?: string;
+}
+
 export interface TagsInputProps {
   /**
    * Array of selected tag strings
@@ -71,14 +83,19 @@ export interface TagsInputProps {
   readOnly?: boolean;
 
   /**
+   * Custom inline styles for wrapper
+   */
+  style?: React.CSSProperties;
+
+  /**
    * Additional custom CSS class name for wrapper
    */
   className?: string;
 
   /**
-   * Custom inline styles for wrapper
+   * Object mapping custom class names to internal sub-element slots
    */
-  style?: React.CSSProperties;
+  classNames?: TagsInputSlots;
 }
 
 export const TagsInput = React.forwardRef<HTMLInputElement, TagsInputProps>(
@@ -96,6 +113,7 @@ export const TagsInput = React.forwardRef<HTMLInputElement, TagsInputProps>(
       error = false,
       readOnly = false,
       className = "",
+      classNames,
       style,
     },
     ref
@@ -133,12 +151,13 @@ export const TagsInput = React.forwardRef<HTMLInputElement, TagsInputProps>(
 
       if (maxTags && tags.length >= maxTags) return;
 
-      // Handle comma-separated tags
+      // Splits comma-separated text into individual tag candidates (e.g. "react, typescript, ui")
       const newItems = trimmed
         .split(",")
         .map((t) => t.trim())
         .filter((t) => t.length > 0);
 
+      // Filters out duplicates and validates non-suggested terms when `canAddNew={false}` (strict whitelist mode)
       const validNewItems = newItems.filter((item) => {
         if (tags.includes(item)) return false;
         if (!canAddNew && suggestions.length > 0 && !suggestions.includes(item)) {
@@ -171,7 +190,7 @@ export const TagsInput = React.forwardRef<HTMLInputElement, TagsInputProps>(
         return;
       }
 
-      // Backspace logic: remove last tag if input is empty
+      // Backspace removes the trailing tag if the input query field is empty
       if (e.key === "Backspace" && inputValue === "" && tags.length > 0) {
         if (highlightIndex === tags.length - 1) {
           removeTag(tags.length - 1);
@@ -227,7 +246,7 @@ export const TagsInput = React.forwardRef<HTMLInputElement, TagsInputProps>(
     return (
       <div
         ref={containerRef}
-        className={["bs-tags-input-wrapper", className].filter(Boolean).join(" ")}
+        className={["bs-tags-input-wrapper", className, classNames?.root].filter(Boolean).join(" ")}
         style={style}
       >
         <div
@@ -239,6 +258,7 @@ export const TagsInput = React.forwardRef<HTMLInputElement, TagsInputProps>(
             Boolean(error) && "bs-tags-input-shell--error",
             disabled && "bs-tags-input-shell--disabled",
             readOnly && "bs-tags-input-shell--readonly",
+            classNames?.shell,
           ]
             .filter(Boolean)
             .join(" ")}
@@ -250,15 +270,16 @@ export const TagsInput = React.forwardRef<HTMLInputElement, TagsInputProps>(
                 "bs-tag-badge",
                 `bs-tag-badge--${size}`,
                 highlightIndex === idx && "bs-tag-badge--highlighted",
+                classNames?.badge,
               ]
                 .filter(Boolean)
                 .join(" ")}
             >
-              <span className="bs-tag-label">{tag}</span>
+              <span className={["bs-tag-label", classNames?.badgeLabel].filter(Boolean).join(" ")}>{tag}</span>
               {!disabled && !readOnly && (
                 <button
                   type="button"
-                  className="bs-tag-close-btn"
+                  className={["bs-tag-close-btn", classNames?.badgeCloseBtn].filter(Boolean).join(" ")}
                   onClick={(e) => {
                     e.stopPropagation();
                     removeTag(idx);
@@ -290,19 +311,19 @@ export const TagsInput = React.forwardRef<HTMLInputElement, TagsInputProps>(
                 setIsFocused(false);
               }}
               placeholder={tags.length === 0 ? placeholder : ""}
-              className="bs-tags-field"
+              className={["bs-tags-field", classNames?.input].filter(Boolean).join(" ")}
             />
           )}
         </div>
 
         {/* Suggestion Dropdown */}
         {showSuggestions && filteredSuggestions.length > 0 && !disabled && !readOnly && (
-          <div className="bs-tags-suggestions-overlay">
-            <ul className="bs-tags-suggestions-list">
+          <div className={["bs-tags-suggestions-overlay", classNames?.suggestionsOverlay].filter(Boolean).join(" ")}>
+            <ul className={["bs-tags-suggestions-list", classNames?.suggestionsList].filter(Boolean).join(" ")}>
               {filteredSuggestions.map((item) => (
                 <li
                   key={item}
-                  className="bs-tags-suggestion-item"
+                  className={["bs-tags-suggestion-item", classNames?.suggestionItem].filter(Boolean).join(" ")}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     addTag(item);

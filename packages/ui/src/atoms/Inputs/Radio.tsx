@@ -11,11 +11,20 @@ export interface RadioGroupContextValue {
 
 export const RadioGroupContext = createContext<RadioGroupContextValue | null>(null);
 
+export interface RadioSlots {
+  root?: string;
+  circle?: string;
+  input?: string;
+  dot?: string;
+  label?: string;
+}
+
 export interface RadioProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "type"> {
   label?: ReactNode;
-  className?: string;
   style?: React.CSSProperties;
+  className?: string;
+  classNames?: RadioSlots;
 }
 
 export const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
@@ -28,6 +37,7 @@ export const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
       disabled = false,
       onChange,
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -58,6 +68,7 @@ export const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
           "bs-radio-wrapper",
           isDisabled && "bs-radio-wrapper--disabled",
           className,
+          classNames?.root,
         ]
           .filter(Boolean)
           .join(" ")}
@@ -67,6 +78,7 @@ export const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
           className={[
             "bs-radio",
             isChecked && "bs-radio--checked",
+            classNames?.circle,
           ]
             .filter(Boolean)
             .join(" ")}
@@ -79,12 +91,15 @@ export const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
             checked={isChecked}
             disabled={isDisabled}
             onChange={handleChange}
+            className={classNames?.input}
             style={{ position: "absolute", opacity: 0, width: "100%", height: "100%", margin: 0, cursor: "inherit" }}
             {...props}
           />
-          {isChecked && <span className="bs-radio-dot" />}
+          {isChecked && (
+            <span className={["bs-radio-dot", classNames?.dot].filter(Boolean).join(" ")} />
+          )}
         </span>
-        {label && <span>{label}</span>}
+        {label && <span className={classNames?.label}>{label}</span>}
       </label>
     );
   }

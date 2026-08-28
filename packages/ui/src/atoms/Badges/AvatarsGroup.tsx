@@ -19,6 +19,15 @@ export interface AvatarItem {
   color?: string;
 }
 
+export interface AvatarsGroupSlots {
+  /** Root group container element */
+  root?: string;
+  /** Avatar item wrapper slot */
+  item?: string;
+  /** Overflow count pill element slot */
+  overflow?: string;
+}
+
 export interface AvatarsGroupProps
   extends React.HTMLAttributes<HTMLDivElement> {
   /**
@@ -53,6 +62,16 @@ export interface AvatarsGroupProps
    * Custom overlap margin in pixels (e.g. -10)
    */
   spacing?: number;
+
+  /**
+   * Outermost root element CSS class name string
+   */
+  className?: string;
+
+  /**
+   * Object mapping custom class names to internal sub-element slots
+   */
+  classNames?: AvatarsGroupSlots;
 }
 
 export const AvatarsGroup = forwardRef<HTMLDivElement, AvatarsGroupProps>(
@@ -65,6 +84,7 @@ export const AvatarsGroup = forwardRef<HTMLDivElement, AvatarsGroupProps>(
       zIndexInverted = false,
       spacing = -8,
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -87,7 +107,7 @@ export const AvatarsGroup = forwardRef<HTMLDivElement, AvatarsGroupProps>(
     return (
       <div
         ref={ref}
-        className={["bs-avatars-group", className].filter(Boolean).join(" ")}
+        className={["bs-avatars-group", className, classNames?.root].filter(Boolean).join(" ")}
         style={style}
         {...props}
       >
@@ -103,7 +123,7 @@ export const AvatarsGroup = forwardRef<HTMLDivElement, AvatarsGroupProps>(
             // Overlapping is achieved via negative left margin on all items except the first.
             <div
               key={idx}
-              className="bs-avatars-group-item"
+              className={["bs-avatars-group-item", classNames?.item].filter(Boolean).join(" ")}
               style={{
                 zIndex,
                 marginLeft: idx === 0 ? 0 : spacing,
@@ -125,7 +145,7 @@ export const AvatarsGroup = forwardRef<HTMLDivElement, AvatarsGroupProps>(
             When false (leftmost on top), z-index 0 keeps it behind the final avatar. */}
         {overflowCount > 0 && (
           <div
-            className="bs-avatars-group-item"
+            className={["bs-avatars-group-item", classNames?.item].filter(Boolean).join(" ")}
             style={{
               zIndex: zIndexInverted ? visibleAvatars.length + 1 : 0,
               marginLeft: visibleAvatars.length === 0 ? 0 : spacing,
@@ -135,7 +155,10 @@ export const AvatarsGroup = forwardRef<HTMLDivElement, AvatarsGroupProps>(
               className={[
                 "bs-avatars-group-overflow",
                 `bs-avatars-group-overflow--${size}`,
-              ].join(" ")}
+                classNames?.overflow,
+              ]
+                .filter(Boolean)
+                .join(" ")}
             >
               +{overflowCount}
             </div>

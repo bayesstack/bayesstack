@@ -2,6 +2,19 @@ import React from "react";
 import { Icon, type IconName } from "../Icons";
 import "./Badges.css";
 
+export interface BadgeSlots {
+  /** Outermost wrapper or root badge container */
+  root?: string;
+  /** Badge counter or pill element */
+  badge?: string;
+  /** Indicator dot element */
+  dot?: string;
+  /** Prefix icon wrapper element */
+  icon?: string;
+  /** Children or text label container */
+  label?: string;
+}
+
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   /**
    * Color theme variant
@@ -65,6 +78,16 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
    * Optional prefix icon name or ReactNode for inline badge
    */
   prefixIcon?: IconName | React.ReactNode;
+
+  /**
+   * Outermost root element CSS class name string
+   */
+  className?: string;
+
+  /**
+   * Object mapping custom class names to internal sub-element slots
+   */
+  classNames?: BadgeSlots;
 }
 
 export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
@@ -83,6 +106,7 @@ export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
       prefixIcon,
       children,
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -118,11 +142,13 @@ export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
     // or renders pre-instantiated ReactNode elements directly.
     const renderIcon = (icon?: IconName | React.ReactNode) => {
       if (!icon) return null;
-      if (typeof icon === "string") {
-        const iconSize = size === "sm" ? 12 : size === "lg" ? 16 : 14;
-        return <Icon name={icon as IconName} size={iconSize} />;
-      }
-      return icon;
+      const iconNode =
+        typeof icon === "string" ? (
+          <Icon name={icon as IconName} size={size === "sm" ? 12 : size === "lg" ? 16 : 14} />
+        ) : (
+          icon
+        );
+      return <span className={["bs-badge__icon", classNames?.icon].filter(Boolean).join(" ")}>{iconNode}</span>;
     };
 
     const renderBadgeContent = () => {
@@ -139,7 +165,9 @@ export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
             isWrapper && `bs-badge-floating--${placement}`,
             isWrapper && dot && "bs-badge-floating--dot",
             pulse && "bs-badge--pulse",
-            className,
+            !isWrapper && className,
+            classNames?.badge,
+            !isWrapper && classNames?.root,
           ]
             .filter(Boolean)
             .join(" ")}
@@ -148,18 +176,24 @@ export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
         >
           {/* Render inline status dot inside pill when not in floating wrapper mode */}
           {dot && !isWrapper && (
-            <span className={["bs-badge-dot", pulse && "bs-badge-dot--pulse"].filter(Boolean).join(" ")} />
+            <span
+              className={["bs-badge-dot", pulse && "bs-badge-dot--pulse", classNames?.dot].filter(Boolean).join(" ")}
+            />
           )}
           {renderIcon(prefixIcon)}
           {/* When dot is active, suppress number/children inside floating badge overlay. Otherwise render count or children. */}
-          {dot ? null : hasCount ? displayCount : !isWrapper ? children : null}
+          {dot ? null : hasCount ? (
+            <span className={classNames?.label}>{displayCount}</span>
+          ) : !isWrapper ? (
+            <span className={classNames?.label}>{children}</span>
+          ) : null}
         </span>
       );
     };
 
     if (isWrapper) {
       return (
-        <span className="bs-badge-wrapper">
+        <span className={["bs-badge-wrapper", className, classNames?.root].filter(Boolean).join(" ")}>
           {children}
           {renderBadgeContent()}
         </span>

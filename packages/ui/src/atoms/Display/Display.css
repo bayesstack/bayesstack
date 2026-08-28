@@ -43,13 +43,14 @@
 
 .bs-file-item-ext-badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  font-size: 8.5px;
+  top: 0;
+  right: 0;
+  font-size: 8px;
   font-weight: 800;
   color: #FFFFFF;
+  background-color: #0B6763;
   padding: 1px 3px;
-  border-radius: 3px;
+  border-radius: 0 5px 0 3px;
   line-height: 1;
   text-transform: uppercase;
   letter-spacing: 0.02em;
@@ -184,10 +185,70 @@
   gap: 10px;
   margin-bottom: 10px;
   width: 100%;
+  cursor: pointer;
 }
 
 .bs-chat-message-row--own {
   flex-direction: row-reverse;
+}
+
+.bs-chat-message-row--selected {
+  background-color: rgba(11, 103, 99, 0.08);
+  border-radius: 8px;
+  padding: 6px;
+  transition: background-color 150ms ease;
+}
+
+.bs-chat-message-row--selected .bs-chat-message-bubble {
+  box-shadow: 0 0 0 2px #0B6763, 0 2px 8px rgba(11, 103, 99, 0.2);
+}
+
+.bs-chat-message-select-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  margin-right: 4px;
+  animation: bs-badge-pop 180ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.bs-chat-message-row--own .bs-chat-message-select-badge {
+  margin-right: 0;
+  margin-left: 4px;
+}
+
+@keyframes bs-badge-pop {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.bs-chat-message-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background-color: #FFFFFF;
+  border: 1px solid #0B6763;
+  border-radius: 20px;
+  padding: 2px 6px;
+  box-shadow: 0 4px 14px rgba(11, 103, 99, 0.16);
+  align-self: center;
+  margin: 0 6px;
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 180ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  user-select: none;
+}
+
+/* Opens ONLY in select mode */
+.bs-chat-message-row--selected .bs-chat-message-actions {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .bs-chat-message-avatar {
@@ -265,6 +326,10 @@
   display: block;
   font-size: 10px;
   margin-top: 4px;
-  opacity: 0.7;
+  color: #4A6360;
   text-align: right;
+}
+
+.bs-chat-message-bubble--own .bs-chat-message-time {
+  color: rgba(255, 255, 255, 0.92);
 }

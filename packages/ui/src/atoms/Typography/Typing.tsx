@@ -13,6 +13,12 @@ export type TypingColor =
 export type TypingStyle = "default" | "serif" | "handwritten" | "monospace";
 export type TypingAs = "span" | "div" | "p" | "label";
 
+export interface TypingSlots {
+  root?: string;
+  text?: string;
+  cursor?: string;
+}
+
 export interface TypingProps extends Omit<React.HTMLAttributes<HTMLElement>, "style" | "children"> {
   /**
    * Text or array of strings to display with typewriter effect
@@ -88,6 +94,16 @@ export interface TypingProps extends Omit<React.HTMLAttributes<HTMLElement>, "st
    * Callback fired when typing finishes (for single non-looping text)
    */
   onFinished?: () => void;
+
+  /**
+   * Custom root element class name
+   */
+  className?: string;
+
+  /**
+   * Object mapping custom class names to internal sub-element slots
+   */
+  classNames?: TypingSlots;
 }
 
 export const Typing = forwardRef<HTMLElement, TypingProps>(
@@ -107,6 +123,7 @@ export const Typing = forwardRef<HTMLElement, TypingProps>(
       color = "primary",
       onFinished,
       className = "",
+      classNames,
       ...props
     },
     ref
@@ -126,6 +143,7 @@ export const Typing = forwardRef<HTMLElement, TypingProps>(
     const [isDeleting, setIsDeleting] = useState<boolean>(false);
     const [isStarted, setIsStarted] = useState<boolean>(delay === 0);
 
+    // Prevents firing duplicate onFinished callbacks across fast state re-renders
     const onFinishedCalledRef = useRef<boolean>(false);
 
     useEffect(() => {
@@ -143,6 +161,11 @@ export const Typing = forwardRef<HTMLElement, TypingProps>(
       }
     }, [textList, delay]);
 
+    // Typewriter state machine effect:
+    // 1. Forward typing: slices string from 0 to current + 1 every `speed` ms.
+    // 2. Pause: waits `eraseDelay` ms upon reaching full string length.
+    // 3. Backward deletion: slices string down every `eraseSpeed` ms if looping/multi-text.
+    // 4. Advance: updates `textIndex` to next item in `textList`.
     useEffect(() => {
       if (!isStarted) return;
 
@@ -207,12 +230,13 @@ export const Typing = forwardRef<HTMLElement, TypingProps>(
       computedInlineStyle = style;
     }
 
-    const classNames = [
+    const classes = [
       "bs-typing",
       `bs-typing--size-${size}`,
       `bs-typing--style-${computedStyleVariant}`,
       `bs-typing--color-${color}`,
       className,
+      classNames?.root,
     ]
       .filter(Boolean)
       .join(" ");
@@ -221,9 +245,9 @@ export const Typing = forwardRef<HTMLElement, TypingProps>(
       typeof cursor === "string" ? cursor : cursor ? "|" : null;
 
     return (
-      <Component ref={ref as any} className={classNames} style={computedInlineStyle} {...props}>
-        <span>{displayedText}</span>
-        {cursorSymbol && <span className="bs-typing__cursor">{cursorSymbol}</span>}
+      <Component ref={ref as any} className={classes} style={computedInlineStyle} {...props}>
+        <span className={classNames?.text}>{displayedText}</span>
+        {cursorSymbol && <span className={["bs-typing__cursor", classNames?.cursor].filter(Boolean).join(" ")}>{cursorSymbol}</span>}
       </Component>
     );
   }

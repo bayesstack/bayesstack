@@ -10,6 +10,21 @@ import "./Inputs.css";
 
 export type ColorFormat = "hex" | "rgb" | "hsl";
 
+export interface ColorInputSlots {
+  root?: string;
+  shell?: string;
+  swatchTrigger?: string;
+  input?: string;
+  formatBadge?: string;
+  copyButton?: string;
+  popover?: string;
+  popoverTabs?: string;
+  popoverTab?: string;
+  satArea?: string;
+  hueBar?: string;
+  swatchDot?: string;
+}
+
 export interface ColorInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "onChange" | "value"> {
   /**
@@ -56,6 +71,11 @@ export interface ColorInputProps
   className?: string;
 
   /**
+   * Object mapping custom class names to internal sub-element slots
+   */
+  classNames?: ColorInputSlots;
+
+  /**
    * Custom inline styles for root container
    */
   wrapperStyle?: React.CSSProperties;
@@ -69,6 +89,8 @@ interface HSV {
 }
 
 // Format Converter Helpers
+// Expands shorthand 3-digit hex values (e.g. "#FFF" -> "#FFFFFF") and parses RGB integer components.
+// Returns BayesStack brand teal (#0B6763) if the input string is malformed or invalid.
 function hexToRgbNums(hex: string): { r: number; g: number; b: number } {
   let c = hex.replace("#", "");
   if (c.length === 3) c = c.split("").map((x) => x + x).join("");
@@ -277,6 +299,7 @@ export const ColorInput = React.forwardRef<HTMLInputElement, ColorInputProps>(
       disabled = false,
       onChange,
       className = "",
+      classNames,
       wrapperStyle,
       style,
       ...props
@@ -463,6 +486,7 @@ export const ColorInput = React.forwardRef<HTMLInputElement, ColorInputProps>(
     return (
       <div
         ref={containerRef}
+        className={classNames?.root}
         style={{ position: "relative", display: "inline-block", ...wrapperStyle }}
       >
         {/* Main Input Shell */}
@@ -471,6 +495,7 @@ export const ColorInput = React.forwardRef<HTMLInputElement, ColorInputProps>(
             "bs-color-input-shell",
             `bs-color-input-shell--${size}`,
             className,
+            classNames?.shell,
           ]
             .filter(Boolean)
             .join(" ")}
@@ -478,7 +503,7 @@ export const ColorInput = React.forwardRef<HTMLInputElement, ColorInputProps>(
         >
           {/* Swatch Trigger Box */}
           <div
-            className="bs-color-swatch-trigger"
+            className={["bs-color-swatch-trigger", classNames?.swatchTrigger].filter(Boolean).join(" ")}
             style={{ backgroundColor: currentColor }}
             onClick={() => !disabled && setIsOpen((prev) => !prev)}
             title="Click to open custom color visualizer"
@@ -498,14 +523,14 @@ export const ColorInput = React.forwardRef<HTMLInputElement, ColorInputProps>(
             value={typedText}
             onChange={handleTextChange}
             disabled={disabled}
-            className="bs-color-text-field"
+            className={["bs-color-text-field", classNames?.input].filter(Boolean).join(" ")}
             spellCheck={false}
           />
 
           {/* Format Toggle Badge */}
           {showFormatToggle && (
             <span
-              className="bs-color-format-badge"
+              className={["bs-color-format-badge", classNames?.formatBadge].filter(Boolean).join(" ")}
               onClick={handleCycleFormat}
               title="Click to cycle format (HEX / RGB / HSL)"
             >
@@ -519,6 +544,7 @@ export const ColorInput = React.forwardRef<HTMLInputElement, ColorInputProps>(
             label="Copy color code"
             variant="transparent"
             size={size === "sm" ? "xs" : "sm"}
+            className={classNames?.copyButton}
             onClick={handleCopy}
             disabled={disabled}
           />
@@ -526,15 +552,16 @@ export const ColorInput = React.forwardRef<HTMLInputElement, ColorInputProps>(
 
         {/* BayesStack Advanced Color Visualizer Popover */}
         {isOpen && !disabled && (
-          <div className="bs-color-popover-advanced">
+          <div className={["bs-color-popover-advanced", classNames?.popover].filter(Boolean).join(" ")}>
             {/* Format Tabs Switcher */}
-            <div className="bs-color-popover-tabs">
+            <div className={["bs-color-popover-tabs", classNames?.popoverTabs].filter(Boolean).join(" ")}>
               {(["hex", "rgb", "hsl"] as ColorFormat[]).map((fmt) => (
                 <div
                   key={fmt}
                   className={[
                     "bs-color-popover-tab",
                     activeFormat === fmt && "bs-color-popover-tab--active",
+                    classNames?.popoverTab,
                   ]
                     .filter(Boolean)
                     .join(" ")}
@@ -550,7 +577,7 @@ export const ColorInput = React.forwardRef<HTMLInputElement, ColorInputProps>(
               <>
                 <div
                   ref={satRef}
-                  className="bs-color-sat-area"
+                  className={["bs-color-sat-area", classNames?.satArea].filter(Boolean).join(" ")}
                   onMouseDown={handleSatMouseDown}
                 >
                   <div
@@ -571,7 +598,7 @@ export const ColorInput = React.forwardRef<HTMLInputElement, ColorInputProps>(
 
                 <div
                   ref={hueRef}
-                  className="bs-color-hue-bar"
+                  className={["bs-color-hue-bar", classNames?.hueBar].filter(Boolean).join(" ")}
                   onMouseDown={handleHueMouseDown}
                 >
                   <div
@@ -755,6 +782,7 @@ export const ColorInput = React.forwardRef<HTMLInputElement, ColorInputProps>(
                       "bs-color-popover-swatch-dot",
                       currentColor.toLowerCase() === swatchHex.toLowerCase() &&
                         "bs-color-popover-swatch-dot--active",
+                      classNames?.swatchDot,
                     ]
                       .filter(Boolean)
                       .join(" ")}

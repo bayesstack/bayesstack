@@ -14,6 +14,10 @@ export type TitleStyle = "default" | "serif" | "handwritten" | "monospace";
 export type TitleWeight = "normal" | "medium" | "semibold" | "bold" | "extrabold";
 export type TitleAlign = "left" | "center" | "right";
 
+export interface TitleSlots {
+  root?: string;
+}
+
 export interface TitleProps extends Omit<React.HTMLAttributes<HTMLElement>, "style"> {
   /**
    * The underlying HTML heading tag to render ('h1' to 'h6')
@@ -54,6 +58,16 @@ export interface TitleProps extends Omit<React.HTMLAttributes<HTMLElement>, "sty
    * Children content
    */
   children?: React.ReactNode;
+
+  /**
+   * Custom root element class name
+   */
+  className?: string;
+
+  /**
+   * Object mapping custom class names to internal sub-element slots
+   */
+  classNames?: TitleSlots;
 }
 
 export const Title = forwardRef<HTMLElement, TitleProps>(
@@ -66,6 +80,7 @@ export const Title = forwardRef<HTMLElement, TitleProps>(
       align = "left",
       truncate,
       className = "",
+      classNames,
       children,
       ...props
     },
@@ -109,7 +124,7 @@ export const Title = forwardRef<HTMLElement, TitleProps>(
       }
     }
 
-    const classNames = [
+    const classes = [
       "bs-title",
       typeof as === "string" && `bs-title--${as}`,
       `bs-title--style-${computedStyleVariant}`,
@@ -118,12 +133,13 @@ export const Title = forwardRef<HTMLElement, TitleProps>(
       `bs-title--align-${align}`,
       isBooleanTruncate && "bs-title--truncate",
       className,
+      classNames?.root,
     ]
       .filter(Boolean)
       .join(" ");
 
     return (
-      <Component ref={ref as any} className={classNames} style={computedInlineStyle} {...props}>
+      <Component ref={ref as any} className={classes} style={computedInlineStyle} {...props}>
         {displayChildren}
       </Component>
     );

@@ -1,12 +1,15 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Paper } from ".././Paper";
+import { Paper } from "../Paper";
 import { Badge } from "../../Badges/Badge";
 import { Button } from "../../Buttons/Button";
 
 const meta: Meta<typeof Paper> = {
   title: "Atoms/Layout/Paper",
   component: Paper,
+  parameters: {
+    layout: "padded",
+  },
   argTypes: {
     as: {
       control: { type: "select" },
@@ -27,6 +30,8 @@ const meta: Meta<typeof Paper> = {
     },
     bordered: { control: { type: "boolean" } },
     hoverable: { control: { type: "boolean" } },
+    className: { control: "text" },
+    classNames: { control: false },
   },
 };
 
@@ -54,7 +59,8 @@ export const Playground: Story = {
   },
 };
 
-export const Showcase: Story = {
+export const Ex1_PaperShowcase: Story = {
+  name: "01: Paper Variants & Interactive Showcase",
   render: () => (
     <div style={{ display: "flex", flexDirection: "column", gap: 28, maxWidth: 680 }}>
       {/* 1. Surface Variants: Default, Glass, Subtle */}

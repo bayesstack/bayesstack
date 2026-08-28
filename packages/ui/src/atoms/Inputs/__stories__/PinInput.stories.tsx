@@ -1,18 +1,12 @@
 import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { PinInput } from ".././PinInput";
+import { PinInput } from "../PinInput";
 
 const meta: Meta<typeof PinInput> = {
   title: "Atoms/Inputs/PinInput",
   component: PinInput,
   parameters: {
     layout: "padded",
-    docs: {
-      description: {
-        component:
-          "Enterprise PinInput / OTPInput primitive for verification codes, 2FA auth, and security PINs with unified separator prop, pop micro-animations, mask reveal toggle, success/error verification glows, auto-advance, and paste handling.",
-      },
-    },
   },
   argTypes: {
     length: {
@@ -24,39 +18,20 @@ const meta: Meta<typeof PinInput> = {
       options: ["number", "text", "alphanumeric"],
       description: "Valid character input type constraint",
     },
-    mask: {
-      control: { type: "boolean" },
-      description: "Mask values for security PINs",
-    },
-    showMaskToggle: {
-      control: { type: "boolean" },
-      description: "Shows eye button to toggle mask visibility",
-    },
-    separator: {
-      control: { type: "boolean" },
-      description: "Groups slots with a separator (e.g. true or '–')",
-    },
-    placeholder: {
-      control: { type: "text" },
-      description: "Placeholder symbol in empty slots",
-    },
+    mask: { control: { type: "boolean" }, description: "Mask values for security PINs" },
+    showMaskToggle: { control: { type: "boolean" }, description: "Shows eye button to toggle mask visibility" },
+    separator: { control: { type: "boolean" }, description: "Groups slots with a separator (e.g. true or '–')" },
+    placeholder: { control: { type: "text" }, description: "Placeholder symbol in empty slots" },
     size: {
       control: { type: "select" },
       options: ["sm", "md", "lg"],
       description: "Size scale variant",
     },
-    error: {
-      control: { type: "boolean" },
-      description: "Highlight error state",
-    },
-    success: {
-      control: { type: "boolean" },
-      description: "Highlight success state",
-    },
-    disabled: {
-      control: { type: "boolean" },
-      description: "Disables interactive editing",
-    },
+    error: { control: { type: "boolean" }, description: "Highlight error state" },
+    success: { control: { type: "boolean" }, description: "Highlight success state" },
+    disabled: { control: { type: "boolean" }, description: "Disables interactive editing" },
+    className: { control: "text" },
+    classNames: { control: false },
   },
 };
 
@@ -94,7 +69,8 @@ export const Playground: Story = {
   },
 };
 
-export const Showcase: Story = {
+export const Ex1_VerificationShowcase: Story = {
+  name: "01: Verification & Security Showcase",
   render: () => {
     const [otp, setOtp] = useState<string>("492");
     const [secPin, setSecPin] = useState<string>("1234");

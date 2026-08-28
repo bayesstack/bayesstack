@@ -64,4 +64,27 @@ describe("Button Component", () => {
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute("href", "https://example.com");
   });
+
+  it("applies outer className string and internal classNames object slots", () => {
+    render(
+      <Button
+        className="outer-btn-class"
+        classNames={{
+          root: "custom-root-slot",
+          label: "custom-label-slot",
+          leftIcon: "custom-left-icon-slot",
+        }}
+        leftIcon="BookOpen"
+      >
+        Read Book
+      </Button>
+    );
+
+    const btn = screen.getByRole("button");
+    expect(btn).toHaveClass("outer-btn-class");
+    expect(btn).toHaveClass("custom-root-slot");
+
+    const labelSpan = screen.getByText("Read Book");
+    expect(labelSpan).toHaveClass("custom-label-slot");
+  });
 });

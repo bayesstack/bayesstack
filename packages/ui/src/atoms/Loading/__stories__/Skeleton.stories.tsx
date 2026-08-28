@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Skeleton } from ".././Skeleton";
+import { Skeleton } from "../Skeleton";
 import { Button } from "../../Buttons/Button";
 import { Switch } from "../../Inputs/Switch";
 import { Badge } from "../../Badges/Badge";
@@ -21,6 +21,8 @@ const meta: Meta<typeof Skeleton> = {
     avatar: { control: { type: "boolean" } },
     title: { control: { type: "boolean" } },
     paragraph: { control: { type: "boolean" } },
+    className: { control: "text" },
+    classNames: { control: false },
   },
 };
 
@@ -42,7 +44,8 @@ export const Playground: Story = {
   ),
 };
 
-export const Showcase: Story = {
+export const Ex1_SkeletonShowcase: Story = {
+  name: "01: Wireframe Skeleton & Sub-Components Showcase",
   render: () => {
     const [loading, setLoading] = useState(true);
 

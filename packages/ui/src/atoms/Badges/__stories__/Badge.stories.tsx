@@ -37,6 +37,8 @@ const meta: Meta<typeof Badge> = {
     },
     count: { control: { type: "number" } },
     overflowCount: { control: { type: "number" } },
+    className: { control: "text" },
+    classNames: { control: false },
   },
 };
 
@@ -55,11 +57,6 @@ export const Playground: Story = {
     placement: "top-right",
     children: <IconButton name="Notification" label="Notifications" variant="secondary" />,
   },
-  render: (args) => (
-    <div style={{ padding: "24px 32px", display: "inline-block" }}>
-      <Badge {...args} />
-    </div>
-  ),
 };
 
 export const Ex1_PrefixIcons: Story = {

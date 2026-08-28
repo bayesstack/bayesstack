@@ -10,6 +10,13 @@ import React, {
 import { IconButton } from "../Buttons/IconButton";
 import "./Inputs.css";
 
+export interface PinInputSlots {
+  root?: string;
+  slot?: string;
+  separator?: string;
+  toggleButton?: string;
+}
+
 export interface PinInputProps {
   /**
    * Number of pin slot inputs
@@ -108,6 +115,11 @@ export interface PinInputProps {
   className?: string;
 
   /**
+   * Object mapping custom class names to internal sub-element slots
+   */
+  classNames?: PinInputSlots;
+
+  /**
    * Custom inline styles for root container
    */
   wrapperStyle?: React.CSSProperties;
@@ -133,6 +145,7 @@ export const PinInput = React.forwardRef<HTMLDivElement, PinInputProps>(
       disabled = false,
       autoFocus = false,
       className = "",
+      classNames,
       wrapperStyle,
     },
     ref
@@ -205,6 +218,9 @@ export const PinInput = React.forwardRef<HTMLDivElement, PinInputProps>(
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>, index: number) => {
       if (disabled) return;
 
+      // Two-stage Backspace handling:
+      // 1. If current box has a character, clear it without shifting focus.
+      // 2. If current box is already empty, clear the previous box and shift focus left.
       if (e.key === "Backspace") {
         e.preventDefault();
         const nextDigits = [...digits];
@@ -225,6 +241,8 @@ export const PinInput = React.forwardRef<HTMLDivElement, PinInputProps>(
       }
     };
 
+    // Filters clipboard text against character validation rules (digits vs text vs alphanumeric),
+    // populates matching slots up to max length, and moves focus to the first empty input slot.
     const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
       e.preventDefault();
       if (disabled) return;
@@ -250,7 +268,7 @@ export const PinInput = React.forwardRef<HTMLDivElement, PinInputProps>(
     return (
       <div
         ref={ref}
-        className={["bs-pin-container", className].filter(Boolean).join(" ")}
+        className={["bs-pin-container", className, classNames?.root].filter(Boolean).join(" ")}
         style={wrapperStyle}
       >
         {Array.from({ length }).map((_, index) => {
@@ -264,7 +282,9 @@ export const PinInput = React.forwardRef<HTMLDivElement, PinInputProps>(
           return (
             <React.Fragment key={index}>
               {showSeparator && (
-                <span className="bs-pin-separator">{renderSeparatorNode()}</span>
+                <span className={["bs-pin-separator", classNames?.separator].filter(Boolean).join(" ")}>
+                  {renderSeparatorNode()}
+                </span>
               )}
               <input
                 ref={(el) => {
@@ -285,6 +305,7 @@ export const PinInput = React.forwardRef<HTMLDivElement, PinInputProps>(
                   isFilled && "bs-pin-slot--filled",
                   error && "bs-pin-slot--error",
                   success && "bs-pin-slot--success",
+                  classNames?.slot,
                 ]
                   .filter(Boolean)
                   .join(" ")}
@@ -301,6 +322,7 @@ export const PinInput = React.forwardRef<HTMLDivElement, PinInputProps>(
             label={isMasked ? "Show PIN" : "Hide PIN"}
             variant="transparent"
             size={size === "sm" ? "xs" : "sm"}
+            className={classNames?.toggleButton}
             onClick={() => setIsMasked((prev) => !prev)}
             disabled={disabled}
           />

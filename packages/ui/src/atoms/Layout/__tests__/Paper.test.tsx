@@ -32,4 +32,16 @@ describe("Paper Component", () => {
     expect(surface).toHaveClass("bs-paper--variant-glass");
     expect(surface).toHaveClass("bs-paper--hoverable");
   });
+
+  it("applies className string and classNames object props to slots", () => {
+    render(
+      <Paper className="custom-root" classNames={{ root: "slot-root" }}>
+        Paper Surface
+      </Paper>
+    );
+    const surface = screen.getByText("Paper Surface");
+    expect(surface).toHaveClass("bs-paper");
+    expect(surface).toHaveClass("custom-root");
+    expect(surface).toHaveClass("slot-root");
+  });
 });

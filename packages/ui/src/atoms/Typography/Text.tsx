@@ -19,6 +19,10 @@ export type TextAlign = "left" | "center" | "right" | "justify";
 
 export type TextAs = "span" | "div" | "label" | "p" | "strong" | "em" | "small" | "code" | "b" | "i";
 
+export interface TextSlots {
+  root?: string;
+}
+
 export interface TextProps extends Omit<React.HTMLAttributes<HTMLElement>, "style"> {
   /**
    * The underlying HTML tag to render
@@ -89,6 +93,16 @@ export interface TextProps extends Omit<React.HTMLAttributes<HTMLElement>, "styl
    * Children content
    */
   children?: React.ReactNode;
+
+  /**
+   * Custom root element class name
+   */
+  className?: string;
+
+  /**
+   * Object mapping custom class names to internal sub-element slots
+   */
+  classNames?: TextSlots;
 }
 
 export const Text = forwardRef<HTMLElement, TextProps>(
@@ -106,6 +120,7 @@ export const Text = forwardRef<HTMLElement, TextProps>(
       truncate,
       highlighted = false,
       className = "",
+      classNames,
       children,
       ...props
     },
@@ -114,6 +129,8 @@ export const Text = forwardRef<HTMLElement, TextProps>(
     let computedStyleVariant: TextStyle = "default";
     let computedInlineStyle: React.CSSProperties | undefined = undefined;
 
+    // Normalizes dual-type overloading of `style` prop: string values map to font family token variants 
+    // ("serif", "monospace", etc.), while objects are passed as standard React inline CSS styles.
     if (typeof style === "string") {
       computedStyleVariant = style as TextStyle;
     } else if (typeof style === "object") {
@@ -147,7 +164,7 @@ export const Text = forwardRef<HTMLElement, TextProps>(
       }
     }
 
-    const classNames = [
+    const classes = [
       "bs-text",
       `bs-text--size-${size}`,
       `bs-text--style-${computedStyleVariant}`,
@@ -159,12 +176,13 @@ export const Text = forwardRef<HTMLElement, TextProps>(
       stronger ? "bs-text--stronger" : "",
       highlighted ? "bs-text--highlighted" : "",
       className,
+      classNames?.root,
     ]
       .filter(Boolean)
       .join(" ");
 
     return (
-      <Component ref={ref as any} className={classNames} style={computedInlineStyle} {...(props as any)}>
+      <Component ref={ref as any} className={classes} style={computedInlineStyle} {...(props as any)}>
         {displayChildren}
       </Component>
     );

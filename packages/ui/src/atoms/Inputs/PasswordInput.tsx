@@ -3,6 +3,14 @@ import { Icon, type IconName } from "../Icons";
 import { IconButton } from "../Buttons/IconButton";
 import "./Inputs.css";
 
+export interface PasswordInputSlots {
+  root?: string;
+  input?: string;
+  prefix?: string;
+  suffix?: string;
+  toggleButton?: string;
+}
+
 export interface PasswordInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "type"> {
   size?: "sm" | "md" | "lg";
@@ -14,6 +22,7 @@ export interface PasswordInputProps
   onEnter?: (value: string) => void;
   error?: boolean | string;
   className?: string;
+  classNames?: PasswordInputSlots;
   wrapperStyle?: React.CSSProperties;
 }
 
@@ -30,6 +39,7 @@ export const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputPro
       onChange,
       onKeyDown,
       className = "",
+      classNames,
       wrapperStyle,
       ...props
     },
@@ -58,8 +68,12 @@ export const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputPro
     };
 
     return (
-      <div className="bs-input-wrapper" style={wrapperStyle}>
-        {prefixIcon && <span className="bs-input-prefix">{renderIcon(prefixIcon)}</span>}
+      <div className={["bs-input-wrapper", classNames?.root].filter(Boolean).join(" ")} style={wrapperStyle}>
+        {prefixIcon && (
+          <span className={["bs-input-prefix", classNames?.prefix].filter(Boolean).join(" ")}>
+            {renderIcon(prefixIcon)}
+          </span>
+        )}
 
         <input
           ref={ref}
@@ -74,6 +88,7 @@ export const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputPro
             showToggle && "bs-input--has-suffix",
             Boolean(error) && "bs-input--error",
             className,
+            classNames?.input,
           ]
             .filter(Boolean)
             .join(" ")}
@@ -81,12 +96,16 @@ export const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputPro
         />
 
         {showToggle && (
-          <span className="bs-input-suffix" style={{ pointerEvents: "auto" }}>
+          <span
+            className={["bs-input-suffix", classNames?.suffix].filter(Boolean).join(" ")}
+            style={{ pointerEvents: "auto" }}
+          >
             <IconButton
               name={showPassword ? "EyeOff" : "Eye"}
               label={showPassword ? "Hide password" : "Show password"}
               variant="transparent"
               size={size === "sm" ? "xs" : size === "lg" ? "md" : "sm"}
+              className={classNames?.toggleButton}
               onClick={() => setShowPassword(!showPassword)}
               disabled={disabled}
             />

@@ -2,6 +2,17 @@ import React, { forwardRef, useState, useEffect } from "react";
 import { Icon } from "../Icons";
 import "./Display.css";
 
+export interface CountDownSlots {
+  /** Outer countdown container element */
+  root?: string;
+  /** Clock icon element slot */
+  icon?: string;
+  /** Label text slot */
+  label?: string;
+  /** Timer digits text slot */
+  digits?: string;
+}
+
 export interface CountDownProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Target finish Date instance, ISO date string, or total seconds duration
@@ -41,6 +52,16 @@ export interface CountDownProps extends React.HTMLAttributes<HTMLDivElement> {
    * @default 'md'
    */
   size?: "sm" | "md" | "lg";
+
+  /**
+   * Additional CSS class name string for outer root element
+   */
+  className?: string;
+
+  /**
+   * Object mapping custom class names to internal sub-element slots
+   */
+  classNames?: CountDownSlots;
 }
 
 export const CountDown = forwardRef<HTMLDivElement, CountDownProps>(
@@ -54,12 +75,13 @@ export const CountDown = forwardRef<HTMLDivElement, CountDownProps>(
       variant = "default",
       size = "md",
       className = "",
+      classNames,
       style,
       ...props
     },
     ref
   ) => {
-    // Calculate target timestamp in ms
+    // Converts target (seconds duration, ISO string, or Date) to absolute timestamp in ms once on init/prop change.
     const targetMs = React.useMemo(() => {
       if (typeof target === "number") {
         return Date.now() + target * 1000;
@@ -73,6 +95,8 @@ export const CountDown = forwardRef<HTMLDivElement, CountDownProps>(
 
     useEffect(() => {
       const interval = setInterval(() => {
+        // Calculate remaining time against actual system clock rather than subtracting 1000ms each tick.
+        // This avoids timer drift when the tab is backgrounded or main thread experiences CPU spikes.
         const remaining = Math.max(0, targetMs - Date.now());
         setTimeLeftMs(remaining);
 
@@ -103,6 +127,7 @@ export const CountDown = forwardRef<HTMLDivElement, CountDownProps>(
       timeString = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
     }
 
+    // Automatically escalate to danger theme + pulse animation when timer enters the final 60 seconds.
     const isDanger = totalSeconds <= 60 && totalSeconds > 0;
     const activeVariant = isDanger ? "danger" : variant;
 
@@ -116,6 +141,7 @@ export const CountDown = forwardRef<HTMLDivElement, CountDownProps>(
           `bs-countdown--${activeVariant}`,
           isDanger ? "bs-countdown--pulse" : "",
           className,
+          classNames?.root,
         ]
           .filter(Boolean)
           .join(" ")}
@@ -126,11 +152,17 @@ export const CountDown = forwardRef<HTMLDivElement, CountDownProps>(
           <Icon
             name="Time"
             size={size === "sm" ? 14 : size === "lg" ? 20 : 16}
-            className="bs-countdown-icon"
+            className={["bs-countdown-icon", classNames?.icon].filter(Boolean).join(" ")}
           />
         )}
-        {label && <span className="bs-countdown-label">{label}</span>}
-        <span className="bs-countdown-digits">{timeString}</span>
+        {label && (
+          <span className={["bs-countdown-label", classNames?.label].filter(Boolean).join(" ")}>
+            {label}
+          </span>
+        )}
+        <span className={["bs-countdown-digits", classNames?.digits].filter(Boolean).join(" ")}>
+          {timeString}
+        </span>
       </div>
     );
   }

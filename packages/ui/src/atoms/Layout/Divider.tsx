@@ -1,6 +1,11 @@
 import React from "react";
 import "./Layout.css";
 
+export interface DividerSlots {
+  root?: string;
+  label?: string;
+}
+
 export interface DividerProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Orientation direction
@@ -25,6 +30,16 @@ export interface DividerProps extends React.HTMLAttributes<HTMLDivElement> {
    * @default false
    */
   dashed?: boolean;
+
+  /**
+   * Custom root element class name
+   */
+  className?: string;
+
+  /**
+   * Object mapping custom class names to internal sub-element slots
+   */
+  classNames?: DividerSlots;
 }
 
 export const Divider = React.forwardRef<HTMLDivElement, DividerProps>(
@@ -36,11 +51,13 @@ export const Divider = React.forwardRef<HTMLDivElement, DividerProps>(
       dashed = false,
       children,
       className = "",
+      classNames,
       style,
       ...props
     },
     ref
   ) => {
+    // Normalizes legacy `dashed` boolean prop alias to unify with the `variant` enum token
     const computedVariant = dashed ? "dashed" : variant;
 
     return (
@@ -52,14 +69,20 @@ export const Divider = React.forwardRef<HTMLDivElement, DividerProps>(
           `bs-divider--variant-${computedVariant}`,
           children && `bs-divider--label-${labelPosition}`,
           className,
+          classNames?.root,
         ]
           .filter(Boolean)
           .join(" ")}
         style={style}
+        // Explicit ARIA separator role ensures accessibility screen readers announce visual division
         role="separator"
         {...props}
       >
-        {children}
+        {children && classNames?.label ? (
+          <span className={classNames.label}>{children}</span>
+        ) : (
+          children
+        )}
       </div>
     );
   }

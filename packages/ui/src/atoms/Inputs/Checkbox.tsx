@@ -13,6 +13,14 @@ export const CheckboxGroupContext = createContext<CheckboxGroupContextValue | nu
 
 export type CheckboxFillVariant = "solid" | "tick" | "solid-block";
 
+export interface CheckboxSlots {
+  root?: string;
+  box?: string;
+  input?: string;
+  icon?: string;
+  label?: string;
+}
+
 export interface CheckboxProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "type"> {
   /**
@@ -40,14 +48,19 @@ export interface CheckboxProps
   onCheckedChange?: (checked: boolean) => void;
 
   /**
+   * Custom inline styles for wrapper label element
+   */
+  style?: React.CSSProperties;
+
+  /**
    * Custom class name
    */
   className?: string;
 
   /**
-   * Custom inline styles for wrapper label element
+   * Object mapping custom class names to internal sub-element slots
    */
-  style?: React.CSSProperties;
+  classNames?: CheckboxSlots;
 }
 
 export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
@@ -64,6 +77,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
       onChange,
       onCheckedChange,
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -113,6 +127,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           "bs-checkbox-wrapper",
           isDisabled && "bs-checkbox-wrapper--disabled",
           className,
+          classNames?.root,
         ]
           .filter(Boolean)
           .join(" ")}
@@ -124,6 +139,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
             isChecked && "bs-checkbox--checked",
             isChecked && `bs-checkbox--fill-${fillVariant}`,
             indeterminate && "bs-checkbox--indeterminate",
+            classNames?.box,
           ]
             .filter(Boolean)
             .join(" ")}
@@ -136,22 +152,29 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
             checked={isChecked}
             disabled={isDisabled}
             onChange={handleChange}
+            className={classNames?.input}
             style={{ position: "absolute", opacity: 0, width: "100%", height: "100%", margin: 0, cursor: "inherit" }}
             {...props}
           />
           {indeterminate ? (
-            <span style={{ width: 8, height: 2, backgroundColor: "#FFFFFF", borderRadius: 1 }} />
+            <span
+              className={classNames?.icon}
+              style={{ width: 8, height: 2, backgroundColor: "#FFFFFF", borderRadius: 1 }}
+            />
           ) : isChecked ? (
             fillVariant === "solid-block" ? (
-              <span style={{ width: 10, height: 10, backgroundColor: "#0B6763", borderRadius: 2 }} />
+              <span
+                className={classNames?.icon}
+                style={{ width: 10, height: 10, backgroundColor: "#0B6763", borderRadius: 2 }}
+              />
             ) : fillVariant === "tick" ? (
-              <Icon name="Check" size={13} strokeWidth={3} color="#0B6763" />
+              <Icon name="Check" size={13} strokeWidth={3} color="#0B6763" className={classNames?.icon} />
             ) : (
-              <Icon name="Check" size={13} strokeWidth={3} color="#FFFFFF" />
+              <Icon name="Check" size={13} strokeWidth={3} color="#FFFFFF" className={classNames?.icon} />
             )
           ) : null}
         </span>
-        {label && <span>{label}</span>}
+        {label && <span className={classNames?.label}>{label}</span>}
       </label>
     );
   }

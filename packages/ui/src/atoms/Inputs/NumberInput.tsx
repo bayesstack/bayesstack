@@ -2,6 +2,15 @@ import React, { type InputHTMLAttributes } from "react";
 import { Icon } from "../Icons";
 import "./Inputs.css";
 
+export interface NumberInputSlots {
+  root?: string;
+  input?: string;
+  suffix?: string;
+  controls?: string;
+  incrementBtn?: string;
+  decrementBtn?: string;
+}
+
 export interface NumberInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "onChange" | "value"> {
   value?: number | "";
@@ -16,6 +25,7 @@ export interface NumberInputProps
   controls?: boolean;
   error?: boolean | string;
   className?: string;
+  classNames?: NumberInputSlots;
   wrapperStyle?: React.CSSProperties;
 }
 
@@ -34,6 +44,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       error = false,
       disabled = false,
       className = "",
+      classNames,
       wrapperStyle,
       onBlur,
       ...props
@@ -56,6 +67,8 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       notifyValue(nextNum);
     };
 
+    // Rejects user typing attempts that breach max/min thresholds immediately, 
+    // keeping controlled state valid without waiting for blur.
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const valStr = e.target.value;
       if (valStr === "") {
@@ -74,6 +87,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       }
     };
 
+    // Safety net for manual keyboard entries that bypass change handlers (e.g. empty states or trailing min/max bounds).
     const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
       if (typeof value === "number") {
         if (min !== undefined && value < min) {
@@ -86,7 +100,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
     };
 
     return (
-      <div className="bs-input-wrapper" style={wrapperStyle}>
+      <div className={["bs-input-wrapper", classNames?.root].filter(Boolean).join(" ")} style={wrapperStyle}>
         <input
           ref={ref}
           type="number"
@@ -103,6 +117,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
             (controls || unit) && "bs-input--has-suffix",
             Boolean(error) && "bs-input--error",
             className,
+            classNames?.input,
           ]
             .filter(Boolean)
             .join(" ")}
@@ -110,16 +125,19 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         />
 
         {unit && !controls && (
-          <span className="bs-input-suffix" style={{ fontSize: 11, fontWeight: 600, color: "#4A6360" }}>
+          <span
+            className={["bs-input-suffix", classNames?.suffix].filter(Boolean).join(" ")}
+            style={{ fontSize: 11, fontWeight: 600, color: "#4A6360" }}
+          >
             {unit}
           </span>
         )}
 
         {controls && (
-          <div className="bs-number-controls">
+          <div className={["bs-number-controls", classNames?.controls].filter(Boolean).join(" ")}>
             <button
               type="button"
-              className="bs-number-btn"
+              className={["bs-number-btn", classNames?.incrementBtn].filter(Boolean).join(" ")}
               onClick={() => handleStep("up")}
               title="Increment"
               disabled={disabled || (max !== undefined && typeof value === "number" && value >= max)}
@@ -128,7 +146,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
             </button>
             <button
               type="button"
-              className="bs-number-btn"
+              className={["bs-number-btn", classNames?.decrementBtn].filter(Boolean).join(" ")}
               onClick={() => handleStep("down")}
               title="Decrement"
               disabled={disabled || (min !== undefined && typeof value === "number" && value <= min)}

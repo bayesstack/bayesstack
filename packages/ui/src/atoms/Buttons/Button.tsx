@@ -13,6 +13,19 @@ export type ButtonSize = "xs" | "sm" | "md" | "lg";
 
 export type ButtonAs = "button" | "a" | "div" | "span";
 
+export interface ButtonSlots {
+  /** Outermost button root element */
+  root?: string;
+  /** Button text label wrapper slot */
+  label?: string;
+  /** Left icon wrapper slot */
+  leftIcon?: string;
+  /** Right icon wrapper slot */
+  rightIcon?: string;
+  /** Loading spinner element slot */
+  spinner?: string;
+}
+
 export interface ButtonProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children" | "className" | "style"> {
   /**
@@ -72,14 +85,19 @@ export interface ButtonProps
   as?: ButtonAs;
 
   /**
+   * Additional CSS class name string for outer root element
+   */
+  className?: string;
+
+  /**
+   * Object mapping custom class names to internal sub-element slots
+   */
+  classNames?: ButtonSlots;
+
+  /**
    * Custom inline style object
    */
   style?: React.CSSProperties;
-
-  /**
-   * Additional CSS class name
-   */
-  className?: string;
 }
 
 export const Button = forwardRef<HTMLElement, ButtonProps>(
@@ -98,14 +116,21 @@ export const Button = forwardRef<HTMLElement, ButtonProps>(
       disabled = false,
       type = "button",
       className = "",
+      classNames,
       style,
       ...props
     },
     ref
   ) => {
+    // Determines if we're rendering a native <button> tag to safely apply button-specific attributes
+    // like the native 'disabled' property, which is invalid on <a> or <div> tags.
     const isButtonTag = Component === "button";
+    
+    // Loading state inherently implies the button should not be interactive.
     const isDisabled = disabled || loading;
 
+    // Helper to allow consumers to pass either a raw string (for our internal Icon catalog)
+    // or a custom ReactNode (like an SVG or third-party icon component) for maximum flexibility.
     const renderIcon = (icon?: IconName | ReactNode) => {
       if (!icon) return null;
       if (typeof icon === "string") {
@@ -115,7 +140,7 @@ export const Button = forwardRef<HTMLElement, ButtonProps>(
       return icon;
     };
 
-    const classNames = [
+    const rootClassNames = [
       "bs-button",
       `bs-button--variant-${variant}`,
       `bs-button--size-${size}`,
@@ -124,30 +149,58 @@ export const Button = forwardRef<HTMLElement, ButtonProps>(
       loading && "bs-button--loading",
       isDisabled && "bs-button--disabled",
       className,
+      classNames?.root,
     ]
       .filter(Boolean)
       .join(" ");
 
     return (
       <Component
+        // Type assertion is required here because React's polymorphic `forwardRef` 
+        // struggles to strictly infer the instance type when `Component` is dynamically evaluated.
         ref={ref as any}
-        className={classNames}
+        className={rootClassNames}
         style={style}
         type={isButtonTag ? type : undefined}
+        // Only apply the native 'disabled' attribute to actual <button> tags. 
+        // Applying it to <a> or <div> tags violates HTML specs and can break layout.
         disabled={isButtonTag ? isDisabled : undefined}
+        // aria-disabled ensures that screen readers still announce the disabled state 
+        // even if the element is an <a> tag that doesn't support the native disabled attribute.
         aria-disabled={isDisabled ? true : undefined}
+        // Spread remaining props using assertion to bypass strict HTML attribute union conflicts 
+        // caused by the polymorphic nature of this component.
         {...(props as any)}
       >
         {loading ? (
           <>
-            <span className="bs-button__spinner" aria-hidden="true" />
-            <span>{loadingText || children}</span>
+            <span
+              className={["bs-button__spinner", classNames?.spinner].filter(Boolean).join(" ")}
+              aria-hidden="true"
+            />
+            <span className={classNames?.label}>{loadingText || children}</span>
           </>
         ) : (
           <>
-            {leftIcon && <span className="bs-button__icon bs-button__icon--left">{renderIcon(leftIcon)}</span>}
-            {children && <span>{children}</span>}
-            {rightIcon && <span className="bs-button__icon bs-button__icon--right">{renderIcon(rightIcon)}</span>}
+            {leftIcon && (
+              <span
+                className={["bs-button__icon bs-button__icon--left", classNames?.leftIcon]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                {renderIcon(leftIcon)}
+              </span>
+            )}
+            {children && <span className={classNames?.label}>{children}</span>}
+            {rightIcon && (
+              <span
+                className={["bs-button__icon bs-button__icon--right", classNames?.rightIcon]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                {renderIcon(rightIcon)}
+              </span>
+            )}
           </>
         )}
       </Component>

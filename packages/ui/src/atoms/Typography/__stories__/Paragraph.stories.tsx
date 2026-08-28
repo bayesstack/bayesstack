@@ -7,6 +7,7 @@ const meta: Meta<typeof Paragraph> = {
   title: "Atoms/Typography/Paragraph",
   component: Paragraph,
   parameters: {
+    layout: "padded",
     docs: {
       description: {
         component:
@@ -57,6 +58,8 @@ const meta: Meta<typeof Paragraph> = {
       options: ["left", "center", "right", "justify"],
       description: "Text alignment",
     },
+    className: { control: "text" },
+    classNames: { control: false },
   },
 };
 
@@ -88,7 +91,8 @@ export const Playground: Story = {
   },
 };
 
-export const LineClampAndStyle: Story = {
+export const Ex1_LineClampAndStyle: Story = {
+  name: "01: Multi-Line Clamping & Formatting Showcase",
   args: {
     children: "Paragraph text with line clamping and object style prop.",
     lineClamp: 2,
@@ -101,4 +105,3 @@ export const LineClampAndStyle: Story = {
     await expect(p).toBeInTheDocument();
   },
 };
-

@@ -6,6 +6,7 @@ const meta: Meta<typeof HtmlText> = {
   title: "Atoms/Typography/HtmlText",
   component: HtmlText,
   parameters: {
+    layout: "padded",
     docs: {
       description: {
         component:
@@ -47,6 +48,8 @@ const meta: Meta<typeof HtmlText> = {
       control: { type: "number", min: 1, step: 1 },
       description: "Character threshold to strip HTML tags and truncate plain text with an ellipsis",
     },
+    className: { control: "text" },
+    classNames: { control: false },
   },
 };
 
@@ -65,6 +68,36 @@ export const Playground: Story = {
   render: (args) => (
     <div style={{ maxWidth: 480, padding: 16 }}>
       <HtmlText {...args} />
+    </div>
+  ),
+};
+
+export const Ex1_HtmlFormatting: Story = {
+  name: "01: Rich Formatting & HTML Truncation Showcase",
+  render: () => (
+    <div style={{ display: "flex", flexDirection: "column", gap: 24, maxWidth: 560 }}>
+      <div style={{ background: "#FFFFFF", padding: 20, borderRadius: 12, border: "1px solid #D7E8E4" }}>
+        <h4 style={{ margin: "0 0 12px 0", fontSize: 14, fontWeight: 700, color: "#123333" }}>
+          Full Formatted Rich HTML Body
+        </h4>
+        <HtmlText
+          html="<p>Our <code>Probabilistic Machine Learning</code> core engine optimizes <em>high-dimensional posteriors</em> seamlessly. Learn more in our <a href='#' style='color: #0B6763; font-weight: 600;'>Architecture Manual</a>.</p>"
+          size="md"
+          color="primary"
+        />
+      </div>
+
+      <div style={{ background: "#FFFFFF", padding: 20, borderRadius: 12, border: "1px solid #D7E8E4" }}>
+        <h4 style={{ margin: "0 0 12px 0", fontSize: 14, fontWeight: 700, color: "#123333" }}>
+          Safe Character-Clamped HTML Truncation (60 Chars)
+        </h4>
+        <HtmlText
+          html="<p>Our <code>Probabilistic Machine Learning</code> core engine optimizes <em>high-dimensional posteriors</em> seamlessly. Learn more in our <a href='#' style='color: #0B6763; font-weight: 600;'>Architecture Manual</a>.</p>"
+          truncate={60}
+          size="sm"
+          color="secondary"
+        />
+      </div>
     </div>
   ),
 };
