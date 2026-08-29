@@ -90,6 +90,26 @@ export interface TableInputProps
    * @default 'md'
    */
   size?: "sm" | "md" | "lg";
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: TableInputClassNames;
+}
+
+export interface TableInputClassNames {
+  root?: string;
+  label?: string;
+  wrapper?: string;
+  grid?: string;
+  addBtn?: string;
+  error?: string;
+  helper?: string;
 }
 
 export const TableInput = forwardRef<HTMLDivElement, TableInputProps>(
@@ -106,6 +126,7 @@ export const TableInput = forwardRef<HTMLDivElement, TableInputProps>(
       helperText,
       size = "md",
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -136,6 +157,7 @@ export const TableInput = forwardRef<HTMLDivElement, TableInputProps>(
       updateRows(nextRows);
     };
 
+    // Generates initial row object populated with empty string values for each column accessor
     const handleAddRow = () => {
       if (disabled) return;
       const emptyRow: Record<string, any> = {};
@@ -154,7 +176,7 @@ export const TableInput = forwardRef<HTMLDivElement, TableInputProps>(
     return (
       <div
         ref={ref}
-        className={["bs-table-input-container", className].filter(Boolean).join(" ")}
+        className={["bs-table-input-container", className, classNames?.root].filter(Boolean).join(" ")}
         style={style}
         {...props}
       >
@@ -199,6 +221,7 @@ export const TableInput = forwardRef<HTMLDivElement, TableInputProps>(
                               className="bs-table-input-cell-select"
                               value={cellValue}
                               disabled={disabled}
+                              aria-label={`${col.header} row ${rowIdx + 1}`}
                               onChange={(e) =>
                                 handleCellChange(rowIdx, col.accessor, e.target.value)
                               }
@@ -216,6 +239,7 @@ export const TableInput = forwardRef<HTMLDivElement, TableInputProps>(
                               className="bs-table-input-cell-field"
                               value={cellValue}
                               placeholder={col.placeholder || ""}
+                              aria-label={`${col.header} row ${rowIdx + 1}`}
                               disabled={disabled}
                               onChange={(e) =>
                                 handleCellChange(

@@ -10,7 +10,7 @@ const meta: Meta<typeof HtmlText> = {
     docs: {
       description: {
         component:
-          "HtmlText is a typography atom inspired by Bubbles UI, designed to render raw or sanitized HTML content with full design token styling, custom element inheritance, and plain text character truncation capabilities.",
+          "HtmlText is a typography atom inspired by Bubbles UI, designed to render raw or sanitized HTML content with full design token styling, custom element inheritance, character truncation, and embedded KaTeX LaTeX equations.",
       },
     },
   },
@@ -18,6 +18,10 @@ const meta: Meta<typeof HtmlText> = {
     html: {
       control: { type: "text" },
       description: "Raw HTML content string",
+    },
+    enableLatex: {
+      control: { type: "boolean" },
+      description: "Enables rendering of embedded LaTeX formulas ($...$, $$...$$)",
     },
     as: {
       control: { type: "select" },
@@ -58,15 +62,16 @@ type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {
   args: {
-    html: "<p>Welcome to <strong>BayesStack Design Studio</strong>. Built with <code>React 19</code> and <em>Token-driven Atomic Design</em>. Visit our <a href='#'>Documentation Hub</a> for details.</p>",
+    html: "<p>Welcome to <strong>BayesStack Design Studio</strong>. Built with <code>React 19</code> and <em>Token-driven Atomic Design</em>. Formula: $E = mc^2$.</p>",
     size: "md",
     color: "primary",
     style: "default",
     align: "left",
     as: "div",
+    enableLatex: true,
   },
   render: (args) => (
-    <div style={{ maxWidth: 480, padding: 16 }}>
+    <div style={{ maxWidth: 520, padding: 16 }}>
       <HtmlText {...args} />
     </div>
   ),
@@ -98,6 +103,19 @@ export const Ex1_HtmlFormatting: Story = {
           color="secondary"
         />
       </div>
+    </div>
+  ),
+};
+
+export const Ex2_LatexEquations: Story = {
+  name: "02: HTML Content with Embedded LaTeX Equations",
+  render: () => (
+    <div style={{ background: "#FFFFFF", padding: 24, borderRadius: 12, border: "1px solid #D7E8E4", maxWidth: 600 }}>
+      <HtmlText
+        html="<h3>Bayesian Evidence Integral</h3><p>The posterior distribution $p(\theta | \mathcal{D})$ is proportional to the likelihood $p(\mathcal{D} | \theta)$ and prior $p(\theta)$:</p>$$p(\theta | \mathcal{D}) = \frac{p(\mathcal{D} | \theta) p(\theta)}{\int p(\mathcal{D} | \theta') p(\theta') d\theta'}$$<p>For Gaussian distributions, the mean is $\mu$ and covariance is $\Sigma$.</p>"
+        size="md"
+        color="primary"
+      />
     </div>
   ),
 };

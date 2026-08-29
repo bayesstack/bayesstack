@@ -1,14 +1,14 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
-import { Notification, NotificationProvider, useNotification } from "../Notification";
+import { Toast, ToastProvider, useToast } from "../Toast";
 
-function NotificationTrigger() {
-  const { showNotification } = useNotification();
+function ToastTrigger() {
+  const { showToast } = useToast();
   return (
     <button
       onClick={() =>
-        showNotification({
+        showToast({
           title: "Saved",
           message: "Changes saved successfully",
           variant: "success",
@@ -21,12 +21,12 @@ function NotificationTrigger() {
   );
 }
 
-describe("Notification Component", () => {
-  it("renders notification toast and handles close trigger", () => {
+describe("Toast Component", () => {
+  it("renders toast and handles close trigger", () => {
     const handleClose = vi.fn();
     render(
-      <Notification
-        id="n1"
+      <Toast
+        id="t1"
         title="Warning"
         message="Storage almost full"
         variant="warning"
@@ -37,16 +37,16 @@ describe("Notification Component", () => {
     expect(screen.getByText("Warning")).toBeInTheDocument();
     expect(screen.getByText("Storage almost full")).toBeInTheDocument();
 
-    const dismissBtn = screen.getByLabelText("Dismiss notification");
+    const dismissBtn = screen.getByLabelText("Dismiss toast");
     fireEvent.click(dismissBtn);
-    expect(handleClose).toHaveBeenCalledWith("n1");
+    expect(handleClose).toHaveBeenCalledWith("t1");
   });
 
-  it("provides NotificationProvider context", () => {
+  it("provides ToastProvider context", () => {
     render(
-      <NotificationProvider>
-        <NotificationTrigger />
-      </NotificationProvider>
+      <ToastProvider>
+        <ToastTrigger />
+      </ToastProvider>
     );
 
     fireEvent.click(screen.getByText("Show Toast"));

@@ -81,3 +81,7 @@ export function AlignCenterTool(props: ToolButtonProps) {
 export function AlignRightTool(props: ToolButtonProps) {
   return <ToolButton icon="Menu" title="Align Right" {...props} />;
 }
+
+export function LatexTool(props: ToolButtonProps) {
+  return <ToolButton icon="AiBrain" title="Insert LaTeX Formula" {...props} />;
+}

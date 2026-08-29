@@ -10,6 +10,7 @@ import {
   ImageTool,
   BulletListTool,
   OrderedListTool,
+  LatexTool,
 } from "./EditorTools";
 import { IconButton } from "../../atoms/Buttons/IconButton";
 import "./Editor.css";
@@ -28,19 +29,39 @@ export interface ToolbarProps extends React.HTMLAttributes<HTMLDivElement> {
   };
   onFormatChange?: (format: string, value?: any) => void;
   onOpenLinkModal?: () => void;
+  onOpenLatexModal?: () => void;
   onInsertImage?: () => void;
   onInsertCodeBlock?: () => void;
   disabled?: boolean;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: ToolbarClassNames;
+}
+
+export interface ToolbarClassNames {
+  root?: string;
+  select?: string;
+  group?: string;
+  divider?: string;
 }
 
 export function Toolbar({
   activeFormats = {},
   onFormatChange,
   onOpenLinkModal,
+  onOpenLatexModal,
   onInsertImage,
   onInsertCodeBlock,
   disabled = false,
   className = "",
+  classNames,
   style,
   ...props
 }: ToolbarProps) {
@@ -51,7 +72,12 @@ export function Toolbar({
 
   return (
     <div
-      className={["bs-editor-toolbar", disabled ? "bs-editor-toolbar--disabled" : "", className]
+      className={[
+        "bs-editor-toolbar",
+        disabled ? "bs-editor-toolbar--disabled" : "",
+        className,
+        classNames?.root,
+      ]
         .filter(Boolean)
         .join(" ")}
       style={style}
@@ -59,7 +85,7 @@ export function Toolbar({
     >
       {/* Heading Selector */}
       <select
-        className="bs-editor-heading-select"
+        className={["bs-editor-heading-select", classNames?.select].filter(Boolean).join(" ")}
         value={activeFormats.heading || "p"}
         onChange={(e) => handleFormat("heading", e.target.value)}
         disabled={disabled}
@@ -70,10 +96,10 @@ export function Toolbar({
         <option value="h3">Heading 3</option>
       </select>
 
-      <div className="bs-editor-toolbar-divider" />
+      <div className={["bs-editor-toolbar-divider", classNames?.divider].filter(Boolean).join(" ")} />
 
       {/* Inline Text Formatting Tools */}
-      <div className="bs-editor-toolbar-group">
+      <div className={["bs-editor-toolbar-group", classNames?.group].filter(Boolean).join(" ")}>
         <BoldTool
           active={activeFormats.bold}
           disabled={disabled}
@@ -101,10 +127,10 @@ export function Toolbar({
         />
       </div>
 
-      <div className="bs-editor-toolbar-divider" />
+      <div className={["bs-editor-toolbar-divider", classNames?.divider].filter(Boolean).join(" ")} />
 
       {/* Lists & Quotes */}
-      <div className="bs-editor-toolbar-group">
+      <div className={["bs-editor-toolbar-group", classNames?.group].filter(Boolean).join(" ")}>
         <BulletListTool
           active={activeFormats.bulletList}
           disabled={disabled}
@@ -122,11 +148,12 @@ export function Toolbar({
         />
       </div>
 
-      <div className="bs-editor-toolbar-divider" />
+      <div className={["bs-editor-toolbar-divider", classNames?.divider].filter(Boolean).join(" ")} />
 
-      {/* Media & Links */}
-      <div className="bs-editor-toolbar-group">
+      {/* Media, Links & Math Formulas */}
+      <div className={["bs-editor-toolbar-group", classNames?.group].filter(Boolean).join(" ")}>
         <LinkTool disabled={disabled} onClick={onOpenLinkModal} />
+        {onOpenLatexModal && <LatexTool disabled={disabled} onClick={onOpenLatexModal} />}
         {onInsertImage && <ImageTool disabled={disabled} onClick={onInsertImage} />}
         {onInsertCodeBlock && (
           <IconButton

@@ -1,10 +1,13 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import React, { useState } from "react";
-import { Calendar, type CalendarEvent } from ".././Calendar";
+import { Calendar, type CalendarEvent } from "../Calendar";
 
 const meta: Meta<typeof Calendar> = {
   title: "Molecules/Selects/Calendar",
   component: Calendar,
+  parameters: {
+    layout: "padded",
+  },
   argTypes: {
     range: { control: "boolean" },
     amountOfMonths: {
@@ -23,26 +26,24 @@ const SAMPLE_EVENTS: CalendarEvent[] = [
   { date: new Date(Date.now() + 86400000 * 5), title: "Release v1.2", color: "#E11D48" },
 ];
 
-export const DefaultSingleMonth: Story = {
-  render: () => {
+export const Playground: Story = {
+  args: {
+    amountOfMonths: 1,
+    range: false,
+    events: SAMPLE_EVENTS,
+  },
+  render: (args) => {
     const [date, setDate] = useState<Date | null>(new Date());
-
     return (
-      <div style={{ padding: 12 }}>
-        <Calendar
-          value={date}
-          onValueChange={setDate}
-          events={SAMPLE_EVENTS}
-        />
-        <div style={{ marginTop: 12, fontSize: 12, color: "#4A6360" }}>
-          Selected Date: {date ? date.toISOString().split("T")[0] : "None"}
-        </div>
+      <div style={{ padding: 16 }}>
+        <Calendar {...args} value={date} onValueChange={setDate} />
       </div>
     );
   },
 };
 
-export const DualMonthView: Story = {
+export const Ex1_DualMonthView: Story = {
+  name: "01: Dual Month Range Calendar",
   render: () => {
     const [range, setRange] = useState<[Date | null, Date | null]>([
       new Date(),
@@ -50,7 +51,7 @@ export const DualMonthView: Story = {
     ]);
 
     return (
-      <div style={{ padding: 12 }}>
+      <div style={{ padding: 16 }}>
         <Calendar
           amountOfMonths={2}
           range

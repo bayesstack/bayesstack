@@ -79,6 +79,30 @@ export interface TimeInputProps
    * @default 'md'
    */
   size?: "sm" | "md" | "lg";
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: TimeInputClassNames;
+}
+
+export interface TimeInputClassNames {
+  root?: string;
+  label?: string;
+  trigger?: string;
+  popover?: string;
+  presets?: string;
+  columns?: string;
+  column?: string;
+  cell?: string;
+  footer?: string;
+  error?: string;
+  helper?: string;
 }
 
 const DEFAULT_PRESETS_12H: TimePreset[] = [
@@ -105,6 +129,7 @@ export const TimeInput = forwardRef<HTMLDivElement, TimeInputProps>(
       helperText,
       size = "md",
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -122,7 +147,7 @@ export const TimeInput = forwardRef<HTMLDivElement, TimeInputProps>(
     const [selectedMinute, setSelectedMinute] = useState<string>("00");
     const [selectedPeriod, setSelectedPeriod] = useState<"AM" | "PM">("AM");
 
-    // Sync state when activeValue changes or overlay opens
+    // Sync state when activeValue changes or overlay opens: parses 12h ('09:30 AM') vs 24h ('14:30') strings via regex
     useEffect(() => {
       if (!activeValue) return;
       if (format === "12h") {
@@ -209,6 +234,7 @@ export const TimeInput = forwardRef<HTMLDivElement, TimeInputProps>(
       setIsOpen(false);
     };
 
+    // Rounds current system minutes to nearest minuteStep increment before committing
     const handleSetNow = () => {
       const now = new Date();
       let h = now.getHours();
@@ -242,7 +268,7 @@ export const TimeInput = forwardRef<HTMLDivElement, TimeInputProps>(
     return (
       <div
         ref={containerRef}
-        className={["bs-select-field", className].filter(Boolean).join(" ")}
+        className={["bs-select-field", className, classNames?.root].filter(Boolean).join(" ")}
         style={style}
         {...props}
       >

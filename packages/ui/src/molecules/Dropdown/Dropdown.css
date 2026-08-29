@@ -12,7 +12,7 @@
   min-width: 220px;
   max-width: 420px;
   padding: 6px;
-  background: rgba(255, 255, 255, 0.96);
+  background: #ffffff;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid #E2ECEB;
@@ -41,7 +41,7 @@
   position: absolute;
   width: 10px;
   height: 10px;
-  background: rgba(255, 255, 255, 0.96);
+  background: #ffffff;
   border-left: 1px solid #E2ECEB;
   border-top: 1px solid #E2ECEB;
   transform: rotate(45deg);
@@ -81,6 +81,7 @@
   padding: 8px 10px;
   border-bottom: 1px solid #E2ECEB;
   margin-bottom: 4px;
+  background-color: #ffffff;
 }
 
 .bs-dropdown-footer-slot {
@@ -264,7 +265,7 @@
   z-index: 1010;
   min-width: 170px;
   padding: 6px;
-  background: rgba(255, 255, 255, 0.98);
+  background: #ffffff;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid #E2ECEB;

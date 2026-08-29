@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Stepper } from ".././Stepper";
+import { Stepper } from "../Stepper";
 import { Button } from "../../../atoms/Buttons/Button";
 
 const meta: Meta<typeof Stepper> = {
@@ -8,6 +8,13 @@ const meta: Meta<typeof Stepper> = {
   component: Stepper,
   parameters: {
     layout: "padded",
+  },
+  argTypes: {
+    orientation: {
+      control: { type: "inline-radio" },
+      options: ["horizontal", "vertical"],
+    },
+    activeStep: { control: { type: "number", min: 0, max: 3 } },
   },
 };
 
@@ -28,18 +35,19 @@ export const Playground: Story = {
     steps: sampleSteps,
   },
   render: (args) => (
-    <div style={{ maxWidth: 720, padding: 24, margin: "16px 0 0 16px" }}>
+    <div style={{ maxWidth: 720, padding: 16 }}>
       <Stepper {...args} />
     </div>
   ),
 };
 
-export const InteractiveStepper: Story = {
+export const Ex1_InteractiveWizard: Story = {
+  name: "01: Interactive Step Wizard",
   render: () => {
     const [active, setActive] = useState(1);
 
     return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 32, maxWidth: 720, padding: 24, margin: "16px 0 0 16px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 24, maxWidth: 720, padding: 16 }}>
         <Stepper
           activeStep={active}
           steps={sampleSteps}

@@ -64,6 +64,29 @@ export interface TransferProps
    * @default false
    */
   disabled?: boolean;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: TransferClassNames;
+}
+
+export interface TransferClassNames {
+  root?: string;
+  bucket?: string;
+  bucketHeader?: string;
+  bucketTitle?: string;
+  searchBar?: string;
+  list?: string;
+  item?: string;
+  itemTitle?: string;
+  itemDesc?: string;
+  operations?: string;
 }
 
 export function Transfer({
@@ -77,6 +100,7 @@ export function Transfer({
   enableDragAndDrop = true,
   disabled = false,
   className = "",
+  classNames,
   style,
   ...props
 }: TransferProps) {
@@ -231,6 +255,7 @@ export function Transfer({
           "bs-transfer-bucket",
           isOver ? "bs-transfer-bucket--drag-over" : "",
           disabled ? "bs-transfer-bucket--disabled" : "",
+          classNames?.bucket,
         ]
           .filter(Boolean)
           .join(" ")}
@@ -238,15 +263,16 @@ export function Transfer({
         onDrop={(e) => handleDropBucket(e, bucket)}
       >
         {/* Bucket Header */}
-        <div className="bs-transfer-bucket-header">
+        <div className={["bs-transfer-bucket-header", classNames?.bucketHeader].filter(Boolean).join(" ")}>
           <label className="bs-transfer-checkbox-label">
             <input
               type="checkbox"
               checked={isAllChecked}
               onChange={() => toggleSelectAll(bucket)}
               disabled={disabled || allSelectableKeys.length === 0}
+              aria-label={`Select all ${typeof title === 'string' ? title : bucket}`}
             />
-            <span className="bs-transfer-bucket-title">{title}</span>
+            <span className={["bs-transfer-bucket-title", classNames?.bucketTitle].filter(Boolean).join(" ")}>{title}</span>
           </label>
 
           <Badge size="sm" variant="subtle" color="neutral">
@@ -256,7 +282,7 @@ export function Transfer({
 
         {/* Search Input */}
         {showSearch && (
-          <div className="bs-transfer-search-bar">
+          <div className={["bs-transfer-search-bar", classNames?.searchBar].filter(Boolean).join(" ")}>
             <Icon name="Search" size={14} className="bs-transfer-search-icon" />
             <input
               type="text"
@@ -264,6 +290,7 @@ export function Transfer({
               value={searchVal}
               onChange={(e) => setSearchVal(e.target.value)}
               className="bs-transfer-search-input"
+              aria-label={`Search ${typeof title === 'string' ? title : bucket} items`}
               disabled={disabled}
             />
             {searchVal && (
@@ -279,7 +306,7 @@ export function Transfer({
         )}
 
         {/* Items List */}
-        <div className="bs-transfer-list">
+        <div className={["bs-transfer-list", classNames?.list].filter(Boolean).join(" ")}>
           {items.length === 0 ? (
             <div className="bs-transfer-empty">No items</div>
           ) : (
@@ -299,6 +326,7 @@ export function Transfer({
                     isChecked ? "bs-transfer-item--selected" : "",
                     isDraggingThis ? "bs-transfer-item--dragging" : "",
                     item.disabled ? "bs-transfer-item--disabled" : "",
+                    classNames?.item,
                   ]
                     .filter(Boolean)
                     .join(" ")}
@@ -309,6 +337,7 @@ export function Transfer({
                     onChange={() => {}} // handled by row click
                     disabled={disabled || item.disabled}
                     className="bs-transfer-item-checkbox"
+                    aria-label={`Select ${item.title}`}
                   />
 
                   {enableDragAndDrop && (
@@ -322,9 +351,9 @@ export function Transfer({
                       renderItem(item)
                     ) : (
                       <>
-                        <span className="bs-transfer-item-title">{item.title}</span>
+                        <span className={["bs-transfer-item-title", classNames?.itemTitle].filter(Boolean).join(" ")}>{item.title}</span>
                         {item.description && (
-                          <span className="bs-transfer-item-desc">{item.description}</span>
+                          <span className={["bs-transfer-item-desc", classNames?.itemDesc].filter(Boolean).join(" ")}>{item.description}</span>
                         )}
                       </>
                     )}
@@ -346,7 +375,7 @@ export function Transfer({
 
   return (
     <div
-      className={["bs-transfer-container", className].filter(Boolean).join(" ")}
+      className={["bs-transfer-container", className, classNames?.root].filter(Boolean).join(" ")}
       style={style}
       {...props}
     >
@@ -361,7 +390,7 @@ export function Transfer({
       )}
 
       {/* Middle Operation Action Buttons */}
-      <div className="bs-transfer-operation-buttons">
+      <div className={["bs-transfer-operation-buttons", classNames?.operations].filter(Boolean).join(" ")}>
         {showSelectAllButtons && (
           <IconButton
             name="ChevronsRight"

@@ -274,3 +274,232 @@
   font-size: 12.5px;
   color: #59716E;
 }
+
+/* ==========================================
+   Vertical Timeline Styles
+   ========================================== */
+
+.bs-vertical-timeline {
+  width: 100%;
+  font-family: var(--bs-font-family, 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif);
+  box-sizing: border-box;
+}
+
+.bs-vertical-timeline-track {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.bs-vertical-timeline-item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding-bottom: 24px;
+}
+
+.bs-vertical-timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+.bs-vertical-timeline-item--clickable {
+  cursor: pointer;
+}
+
+/* Connecting Line */
+.bs-vertical-timeline-line {
+  position: absolute;
+  top: 28px;
+  left: 13px;
+  bottom: 0;
+  width: 2px;
+  background-color: #E2E8F0;
+  z-index: 1;
+}
+
+.bs-vertical-timeline-line--dashed .bs-vertical-timeline-line {
+  background: repeating-linear-gradient(
+    to bottom,
+    #E2E8F0,
+    #E2E8F0 4px,
+    transparent 4px,
+    transparent 8px
+  );
+}
+
+.bs-vertical-timeline-item--completed .bs-vertical-timeline-line {
+  background-color: #10B981;
+}
+
+.bs-vertical-timeline-item--in_progress .bs-vertical-timeline-line {
+  background-color: #0B6763;
+}
+
+/* Marker Bullet */
+.bs-vertical-timeline-marker {
+  position: relative;
+  z-index: 2;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #FFFFFF;
+  border: 2px solid #CBD5E1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4A6360;
+  flex-shrink: 0;
+  transition: all 150ms ease;
+  box-shadow: 0 2px 4px rgba(18, 51, 51, 0.04);
+}
+
+.bs-vertical-timeline-item--completed .bs-vertical-timeline-marker {
+  border-color: #10B981;
+  background-color: #ECFDF5;
+  color: #10B981;
+}
+
+.bs-vertical-timeline-item--in_progress .bs-vertical-timeline-marker {
+  border-color: #0B6763;
+  background-color: #F1F8F7;
+  color: #0B6763;
+  box-shadow: 0 0 0 4px rgba(11, 103, 99, 0.15);
+}
+
+.bs-vertical-timeline-item--failed .bs-vertical-timeline-marker {
+  border-color: #EF4444;
+  background-color: #FEF2F2;
+  color: #EF4444;
+}
+
+.bs-vertical-timeline-item--warning .bs-vertical-timeline-marker {
+  border-color: #F59E0B;
+  background-color: #FFFBEB;
+  color: #F59E0B;
+}
+
+.bs-vertical-timeline-item--info .bs-vertical-timeline-marker {
+  border-color: #0284C7;
+  background-color: #F0F9FF;
+  color: #0284C7;
+}
+
+.bs-vertical-timeline-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+/* Content Container */
+.bs-vertical-timeline-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  box-shadow: 0 1px 3px rgba(18, 51, 51, 0.03);
+  transition: all 150ms ease;
+}
+
+.bs-vertical-timeline-item:hover .bs-vertical-timeline-content {
+  border-color: #CBD5E1;
+  box-shadow: 0 4px 12px rgba(18, 51, 51, 0.06);
+}
+
+.bs-vertical-timeline-item--active .bs-vertical-timeline-content {
+  border-color: #0B6763;
+  box-shadow: 0 0 0 2px rgba(11, 103, 99, 0.12);
+}
+
+.bs-vertical-timeline-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bs-vertical-timeline-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.bs-vertical-timeline-actor {
+  font-size: 13px;
+  font-weight: 700;
+  color: #123333;
+}
+
+.bs-vertical-timeline-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #123333;
+}
+
+.bs-vertical-timeline-tags {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bs-vertical-timeline-timestamp {
+  font-size: 11.5px;
+  color: #94A3B8;
+  white-space: nowrap;
+}
+
+.bs-vertical-timeline-description {
+  font-size: 13px;
+  color: #59716E;
+  line-height: 1.45;
+}
+
+.bs-vertical-timeline-body {
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px dashed #E2E8F0;
+}
+
+/* Density Sizes */
+.bs-vertical-timeline--sm .bs-vertical-timeline-marker {
+  width: 22px;
+  height: 22px;
+}
+
+.bs-vertical-timeline--sm .bs-vertical-timeline-line {
+  top: 22px;
+  left: 10px;
+}
+
+.bs-vertical-timeline--sm .bs-vertical-timeline-content {
+  padding: 8px 12px;
+}
+
+.bs-vertical-timeline--sm .bs-vertical-timeline-title {
+  font-size: 12.5px;
+}
+
+.bs-vertical-timeline--lg .bs-vertical-timeline-marker {
+  width: 34px;
+  height: 34px;
+}
+
+.bs-vertical-timeline--lg .bs-vertical-timeline-line {
+  top: 34px;
+  left: 16px;
+}
+
+.bs-vertical-timeline--lg .bs-vertical-timeline-content {
+  padding: 16px 20px;
+}
+
+.bs-vertical-timeline--lg .bs-vertical-timeline-title {
+  font-size: 15px;
+}
+

@@ -94,6 +94,24 @@ export interface TreeProps
    * @default true
    */
   showLines?: boolean;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: TreeClassNames;
+}
+
+export interface TreeClassNames {
+  root?: string;
+  node?: string;
+  content?: string;
+  label?: string;
+  icon?: string;
 }
 
 export const Tree = forwardRef<HTMLDivElement, TreeProps>(
@@ -111,6 +129,7 @@ export const Tree = forwardRef<HTMLDivElement, TreeProps>(
       renderNode,
       showLines = true,
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -133,6 +152,7 @@ export const Tree = forwardRef<HTMLDivElement, TreeProps>(
       : internalSelectedKeys;
 
     const toggleExpand = (node: TreeNode, e: React.MouseEvent) => {
+      // Stop propagation so clicking the chevron toggle button doesn't also trigger node selection handlers
       e.stopPropagation();
       if (node.disabled) return;
 
@@ -155,7 +175,7 @@ export const Tree = forwardRef<HTMLDivElement, TreeProps>(
     const handleNodeClick = (node: TreeNode, e: React.MouseEvent) => {
       if (node.disabled) return;
 
-      // Expand node if it has children on double/single click
+      // Clicking a branch node label toggles expand/collapse while simultaneously selecting the node
       if (node.children && node.children.length > 0) {
         toggleExpand(node, e);
       }
@@ -202,6 +222,7 @@ export const Tree = forwardRef<HTMLDivElement, TreeProps>(
                 className={[
                   "bs-tree-node-item",
                   node.disabled ? "bs-tree-node-item--disabled" : "",
+                  classNames?.node,
                 ]
                   .filter(Boolean)
                   .join(" ")}
@@ -210,6 +231,7 @@ export const Tree = forwardRef<HTMLDivElement, TreeProps>(
                   className={[
                     "bs-tree-node-content",
                     isSelected ? "bs-tree-node-content--selected" : "",
+                    classNames?.content,
                   ]
                     .filter(Boolean)
                     .join(" ")}
@@ -236,7 +258,7 @@ export const Tree = forwardRef<HTMLDivElement, TreeProps>(
 
                   {/* Node Icon */}
                   {node.icon && (
-                    <span className="bs-tree-node-icon">
+                    <span className={["bs-tree-node-icon", classNames?.icon].filter(Boolean).join(" ")}>
                       {typeof node.icon === "string" ? (
                         <Icon name={node.icon as any} size={15} />
                       ) : (
@@ -246,7 +268,7 @@ export const Tree = forwardRef<HTMLDivElement, TreeProps>(
                   )}
 
                   {/* Node Label / Custom Renderer */}
-                  <span className="bs-tree-node-label">
+                  <span className={["bs-tree-node-label", classNames?.label].filter(Boolean).join(" ")}>
                     {renderNode ? renderNode(node) : node.label}
                   </span>
                 </div>
@@ -267,7 +289,10 @@ export const Tree = forwardRef<HTMLDivElement, TreeProps>(
     return (
       <div
         ref={ref}
-        className={["bs-tree-container", className].filter(Boolean).join(" ")}
+        tabIndex={props.tabIndex ?? 0}
+        role="region"
+        aria-label={props["aria-label"] ?? "Tree view"}
+        className={["bs-tree-container", className, classNames?.root].filter(Boolean).join(" ")}
         style={style}
         {...props}
       >

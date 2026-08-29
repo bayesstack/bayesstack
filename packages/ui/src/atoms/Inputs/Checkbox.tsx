@@ -153,6 +153,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
             disabled={isDisabled}
             onChange={handleChange}
             className={classNames?.input}
+            aria-label={props["aria-label"] || (typeof label === "string" ? label : (value !== undefined ? String(value) : undefined))}
             style={{ position: "absolute", opacity: 0, width: "100%", height: "100%", margin: 0, cursor: "inherit" }}
             {...props}
           />

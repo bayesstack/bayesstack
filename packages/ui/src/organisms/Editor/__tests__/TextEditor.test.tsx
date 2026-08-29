@@ -24,6 +24,23 @@ describe("TextEditor Component", () => {
     expect(screen.getByText("Insert Hyperlink")).toBeInTheDocument();
   });
 
+  it("opens LaTeX formula modal when math button is clicked", () => {
+    render(<TextEditor value="<p>Document Content</p>" />);
+
+    const latexBtn = screen.getByTitle("Insert LaTeX Formula");
+    fireEvent.click(latexBtn);
+
+    expect(screen.getByText("Insert LaTeX Math Equation")).toBeInTheDocument();
+  });
+
+  it("renders embedded LaTeX math equations in editor content when enableLatex is true", () => {
+    const { container } = render(
+      <TextEditor value="<p>Formula $E = mc^2$ and block $$\int x dx$$</p>" enableLatex />
+    );
+    expect(container.querySelector(".bs-latex-inline")).toBeInTheDocument();
+    expect(container.querySelector(".bs-latex-block")).toBeInTheDocument();
+  });
+
   it("executes bold formatting action on toolbar button click", () => {
     const handleValueChange = vi.fn();
     document.execCommand = vi.fn();

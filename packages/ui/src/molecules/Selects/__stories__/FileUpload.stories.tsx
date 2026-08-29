@@ -1,14 +1,18 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import React, { useState } from "react";
-import { FileUpload, type FileItemData } from ".././FileUpload";
+import { FileUpload, type FileItemData } from "../FileUpload";
 
 const meta: Meta<typeof FileUpload> = {
   title: "Molecules/Selects/FileUpload",
   component: FileUpload,
+  parameters: {
+    layout: "padded",
+  },
   argTypes: {
     multiple: { control: "boolean" },
     disabled: { control: "boolean" },
     loading: { control: "boolean" },
+    label: { control: "text" },
   },
 };
 
@@ -25,54 +29,19 @@ const SAMPLE_FILES: FileItemData[] = [
   },
 ];
 
-export const Default: Story = {
-  render: () => {
+export const Playground: Story = {
+  args: {
+    label: "Project Documents Upload",
+    multiple: true,
+    accept: ".pdf,.png,.jpg,.zip",
+  },
+  render: (args) => {
     const [files, setFiles] = useState<FileItemData[]>(SAMPLE_FILES);
-
     return (
-      <div style={{ width: 480 }}>
-        <FileUpload
-          label="Project Documents Upload"
-          value={files}
-          onValueChange={setFiles}
-          accept=".pdf,.png,.jpg,.zip"
-        />
-        <div style={{ marginTop: 12, fontSize: 12, color: "#4A6360" }}>
-          Uploaded Files ({files.length}): {files.map((f) => f.name).join(", ")}
-        </div>
+      <div style={{ width: 480, padding: 16 }}>
+        <FileUpload {...args} value={files} onValueChange={setFiles} />
       </div>
     );
   },
 };
 
-export const SingleFileUpload: Story = {
-  render: () => {
-    const [files, setFiles] = useState<FileItemData[]>([]);
-
-    return (
-      <div style={{ width: 480 }}>
-        <FileUpload
-          label="Upload Cover Avatar Image"
-          multiple={false}
-          value={files}
-          onValueChange={setFiles}
-          accept="image/*"
-          title="Drop image here or click to select"
-          subtitle="Single image up to 5MB"
-        />
-      </div>
-    );
-  },
-};
-
-export const DisabledState: Story = {
-  render: () => (
-    <div style={{ width: 480 }}>
-      <FileUpload
-        label="Readonly Attachment Area"
-        disabled
-        value={SAMPLE_FILES}
-      />
-    </div>
-  ),
-};

@@ -20,31 +20,35 @@
   white-space: nowrap;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   pointer-events: none;
-  animation: bs-fade-in 0.15s ease-out;
+  width: max-content;
 }
 
 .bs-tooltip-bubble--top {
   bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
+  animation: bs-popover-fade-tb 0.15s ease-out;
 }
 
 .bs-tooltip-bubble--bottom {
   top: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
+  animation: bs-popover-fade-tb 0.15s ease-out;
 }
 
 .bs-tooltip-bubble--left {
   right: calc(100% + 8px);
   top: 50%;
   transform: translateY(-50%);
+  animation: bs-popover-fade-lr 0.15s ease-out;
 }
 
 .bs-tooltip-bubble--right {
   left: calc(100% + 8px);
   top: 50%;
   transform: translateY(-50%);
+  animation: bs-popover-fade-lr 0.15s ease-out;
 }
 
 /* Popover Panel Overlay */
@@ -58,6 +62,7 @@
   z-index: 1050;
   min-width: 220px;
   max-width: 320px;
+  width: max-content;
   background-color: var(--bs-color-bg-surface, #FFFFFF);
   border: 1px solid var(--bs-color-border-subtle, #E2E8F0);
   border-radius: var(--bs-radius-md, 8px);
@@ -65,19 +70,69 @@
   padding: 14px;
   box-sizing: border-box;
   font-family: var(--bs-font-family, 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif);
-  animation: bs-fade-in 0.15s ease-out;
 }
 
-.bs-popover-panel--bottom {
+/* Center Alignment (Default) */
+.bs-popover-panel--bottom.bs-popover-align--center,
+.bs-popover-panel--bottom:not([class*="bs-popover-align"]) {
   top: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
+  animation: bs-popover-fade-tb 0.15s ease-out;
 }
 
-.bs-popover-panel--top {
+.bs-popover-panel--top.bs-popover-align--center,
+.bs-popover-panel--top:not([class*="bs-popover-align"]) {
   bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
+  animation: bs-popover-fade-tb 0.15s ease-out;
+}
+
+/* Left Alignment (When near left viewport edge) */
+.bs-popover-panel--bottom.bs-popover-align--left {
+  top: calc(100% + 8px);
+  left: 0;
+  transform: none;
+  animation: bs-popover-fade-left-align 0.15s ease-out;
+}
+
+.bs-popover-panel--top.bs-popover-align--left {
+  bottom: calc(100% + 8px);
+  left: 0;
+  transform: none;
+  animation: bs-popover-fade-left-align 0.15s ease-out;
+}
+
+/* Right Alignment (When near right viewport edge) */
+.bs-popover-panel--bottom.bs-popover-align--right {
+  top: calc(100% + 8px);
+  right: 0;
+  left: auto;
+  transform: none;
+  animation: bs-popover-fade-right-align 0.15s ease-out;
+}
+
+.bs-popover-panel--top.bs-popover-align--right {
+  bottom: calc(100% + 8px);
+  right: 0;
+  left: auto;
+  transform: none;
+  animation: bs-popover-fade-right-align 0.15s ease-out;
+}
+
+.bs-popover-panel--left {
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  animation: bs-popover-fade-lr 0.15s ease-out;
+}
+
+.bs-popover-panel--right {
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  animation: bs-popover-fade-lr 0.15s ease-out;
 }
 
 .bs-popover-title {
@@ -101,13 +156,51 @@
   margin-top: 12px;
 }
 
-@keyframes bs-fade-in {
+/* Keyframe Animations */
+@keyframes bs-popover-fade-tb {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+}
+
+@keyframes bs-popover-fade-lr {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+}
+
+@keyframes bs-popover-fade-left-align {
   from {
     opacity: 0;
     transform: scale(0.96);
+    transform-origin: top left;
   }
   to {
     opacity: 1;
     transform: scale(1);
+    transform-origin: top left;
+  }
+}
+
+@keyframes bs-popover-fade-right-align {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+    transform-origin: top right;
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    transform-origin: top right;
   }
 }

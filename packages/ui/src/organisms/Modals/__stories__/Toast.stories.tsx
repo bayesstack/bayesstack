@@ -1,26 +1,26 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import React from "react";
 import { expect, userEvent, within } from "@storybook/test";
-import { Notification, NotificationProvider, useNotification } from "../Notification";
+import { Toast, ToastProvider, useToast } from "../Toast";
 import { Button } from "../../../atoms/Buttons/Button";
 
-const meta: Meta<typeof Notification> = {
-  title: "Organisms/Modals/Notification",
-  component: Notification,
+const meta: Meta<typeof Toast> = {
+  title: "Organisms/Modals/Toast",
+  component: Toast,
 };
 
 export default meta;
-type Story = StoryObj<typeof Notification>;
+type Story = StoryObj<typeof Toast>;
 
 const ToastDemoControls = () => {
-  const { showNotification } = useNotification();
+  const { showToast } = useToast();
 
   return (
     <div style={{ display: "flex", gap: 12 }}>
       <Button
         size="sm"
         onClick={() =>
-          showNotification({
+          showToast({
             title: "Project Saved",
             message: "All component tokens successfully updated.",
             variant: "success",
@@ -33,7 +33,7 @@ const ToastDemoControls = () => {
         size="sm"
         variant="secondary"
         onClick={() =>
-          showNotification({
+          showToast({
             title: "Network Warning",
             message: "Slow connectivity detected.",
             variant: "warning",
@@ -46,13 +46,13 @@ const ToastDemoControls = () => {
   );
 };
 
-export const NotificationProviderDemo: Story = {
+export const Playground: Story = {
   render: () => (
-    <NotificationProvider>
+    <ToastProvider>
       <div style={{ padding: 24 }}>
         <ToastDemoControls />
       </div>
-    </NotificationProvider>
+    </ToastProvider>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);

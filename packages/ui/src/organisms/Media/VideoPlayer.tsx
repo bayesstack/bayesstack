@@ -47,6 +47,27 @@ export interface VideoPlayerProps extends React.HTMLAttributes<HTMLDivElement> {
    * @default '16:9'
    */
   aspectRatio?: "16:9" | "4:3" | "21:9" | "auto";
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: VideoPlayerClassNames;
+}
+
+export interface VideoPlayerClassNames {
+  root?: string;
+  video?: string;
+  header?: string;
+  title?: string;
+  subtitle?: string;
+  controlsBar?: string;
+  controlsRow?: string;
+  timecode?: string;
 }
 
 export function VideoPlayer({
@@ -59,6 +80,7 @@ export function VideoPlayer({
   muted: initialMuted = false,
   aspectRatio = "16:9",
   className = "",
+  classNames,
   style,
   ...props
 }: VideoPlayerProps) {
@@ -326,6 +348,7 @@ export function VideoPlayer({
         isFullscreen ? "bs-video-player--fullscreen" : "",
         showControls ? "bs-video-player--show-controls" : "",
         className,
+        classNames?.root,
       ]
         .filter(Boolean)
         .join(" ")}
@@ -348,7 +371,7 @@ export function VideoPlayer({
         onProgress={handleProgress}
         onLoadedMetadata={handleLoadedMetadata}
         onClick={togglePlay}
-        className="bs-video-player-element"
+        className={["bs-video-player-element", classNames?.video].filter(Boolean).join(" ")}
       />
 
       {/* Animated Seek Ripple Overlay (+10s / -10s) */}
@@ -448,11 +471,12 @@ export function VideoPlayer({
           className={[
             "bs-video-header-overlay",
             showControls ? "bs-video-header-overlay--visible" : "",
+            classNames?.header,
           ].join(" ")}
         >
           <div className="bs-video-header-info">
-            {title && <h4 className="bs-video-title">{title}</h4>}
-            {subtitle && <p className="bs-video-subtitle">{subtitle}</p>}
+            {title && <h4 className={["bs-video-title", classNames?.title].filter(Boolean).join(" ")}>{title}</h4>}
+            {subtitle && <p className={["bs-video-subtitle", classNames?.subtitle].filter(Boolean).join(" ")}>{subtitle}</p>}
           </div>
           <button
             type="button"
@@ -484,6 +508,7 @@ export function VideoPlayer({
         className={[
           "bs-video-controls-bar",
           showControls ? "bs-video-controls-bar--visible" : "",
+          classNames?.controlsBar,
         ].join(" ")}
       >
         {/* Seek Progress Bar with Buffered Track & Hover Timestamp Tooltip */}
@@ -533,7 +558,7 @@ export function VideoPlayer({
         </div>
 
         {/* Action Controls Row */}
-        <div className="bs-video-controls-row">
+        <div className={["bs-video-controls-row", classNames?.controlsRow].filter(Boolean).join(" ")}>
           <div className="bs-video-controls-left">
             {/* Play/Pause */}
             <button
@@ -588,7 +613,7 @@ export function VideoPlayer({
             </div>
 
             {/* Timecode */}
-            <div className="bs-video-timecode">
+            <div className={["bs-video-timecode", classNames?.timecode].filter(Boolean).join(" ")}>
               <span>{formatTime(currentTime)}</span>
               <span className="bs-video-timecode-sep">/</span>
               <span>{formatTime(duration)}</span>

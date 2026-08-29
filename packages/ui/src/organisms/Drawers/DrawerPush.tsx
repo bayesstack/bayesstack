@@ -35,6 +35,25 @@ export interface DrawerPushProps
    * Bottom footer content
    */
   footer?: React.ReactNode;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: DrawerPushClassNames;
+}
+
+export interface DrawerPushClassNames {
+  root?: string;
+  content?: string;
+  header?: string;
+  title?: string;
+  body?: string;
+  footer?: string;
 }
 
 export function DrawerPush({
@@ -46,6 +65,7 @@ export function DrawerPush({
   footer,
   children,
   className = "",
+  classNames,
   style,
   ...props
 }: DrawerPushProps) {
@@ -56,6 +76,7 @@ export function DrawerPush({
         `bs-drawer-push--${placement}`,
         open ? "bs-drawer-push--open" : "",
         className,
+        classNames?.root,
       ]
         .filter(Boolean)
         .join(" ")}
@@ -65,11 +86,11 @@ export function DrawerPush({
       }}
       {...props}
     >
-      <div className="bs-drawer-push-content" style={{ width }}>
+      <div className={["bs-drawer-push-content", classNames?.content].filter(Boolean).join(" ")} style={{ width }}>
         {/* Header */}
         {(title || onClose) && (
-          <div className="bs-drawer-push-header">
-            <div className="bs-drawer-push-title">
+          <div className={["bs-drawer-push-header", classNames?.header].filter(Boolean).join(" ")}>
+            <div className={["bs-drawer-push-title", classNames?.title].filter(Boolean).join(" ")}>
               {typeof title === "string" ? <h4>{title}</h4> : title}
             </div>
             {onClose && (
@@ -85,10 +106,10 @@ export function DrawerPush({
         )}
 
         {/* Body */}
-        <div className="bs-drawer-push-body">{children}</div>
+        <div className={["bs-drawer-push-body", classNames?.body].filter(Boolean).join(" ")}>{children}</div>
 
         {/* Footer */}
-        {footer && <div className="bs-drawer-push-footer">{footer}</div>}
+        {footer && <div className={["bs-drawer-push-footer", classNames?.footer].filter(Boolean).join(" ")}>{footer}</div>}
       </div>
     </div>
   );

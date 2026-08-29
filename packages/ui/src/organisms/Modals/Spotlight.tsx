@@ -49,6 +49,30 @@ export interface SpotlightProps extends React.HTMLAttributes<HTMLDivElement> {
    * @default true
    */
   shortcutListener?: boolean;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: SpotlightClassNames;
+}
+
+export interface SpotlightClassNames {
+  root?: string;
+  backdrop?: string;
+  container?: string;
+  searchBar?: string;
+  results?: string;
+  group?: string;
+  groupHeader?: string;
+  item?: string;
+  itemTitle?: string;
+  itemDesc?: string;
+  footer?: string;
 }
 
 export function Spotlight({
@@ -59,6 +83,7 @@ export function Spotlight({
   placeholder = "Type a command or search...",
   shortcutListener = true,
   className = "",
+  classNames,
   style,
   ...props
 }: SpotlightProps) {
@@ -147,7 +172,13 @@ export function Spotlight({
 
   return (
     <div
-      className={["bs-spotlight-backdrop", open ? "bs-spotlight--open" : ""].join(" ")}
+      className={[
+        "bs-spotlight-backdrop",
+        open ? "bs-spotlight--open" : "",
+        classNames?.backdrop,
+      ]
+        .filter(Boolean)
+        .join(" ")}
       onClick={onClose}
     >
       <div
@@ -155,6 +186,8 @@ export function Spotlight({
           "bs-spotlight-container",
           `bs-spotlight-container--${theme}`,
           className,
+          classNames?.root,
+          classNames?.container,
         ]
           .filter(Boolean)
           .join(" ")}
@@ -163,7 +196,7 @@ export function Spotlight({
         {...props}
       >
         {/* Search Header */}
-        <div className="bs-spotlight-search-bar">
+        <div className={["bs-spotlight-search-bar", classNames?.searchBar].filter(Boolean).join(" ")}>
           <Icon name="Search" size={18} className="bs-spotlight-search-icon" />
           <input
             ref={inputRef}
@@ -181,7 +214,7 @@ export function Spotlight({
         </div>
 
         {/* Action Results List */}
-        <div className="bs-spotlight-results-container">
+        <div className={["bs-spotlight-results-container", classNames?.results].filter(Boolean).join(" ")}>
           {flatList.length === 0 ? (
             <div className="bs-spotlight-empty">
               <Icon name="Search" size={24} />
@@ -189,8 +222,8 @@ export function Spotlight({
             </div>
           ) : (
             Object.entries(groupedActions).map(([groupName, groupItems]) => (
-              <div key={groupName} className="bs-spotlight-group">
-                <div className="bs-spotlight-group-header">{groupName}</div>
+              <div key={groupName} className={["bs-spotlight-group", classNames?.group].filter(Boolean).join(" ")}>
+                <div className={["bs-spotlight-group-header", classNames?.groupHeader].filter(Boolean).join(" ")}>{groupName}</div>
                 <div className="bs-spotlight-group-items">
                   {groupItems.map((item) => {
                     const itemIndex = currentFlatIdx++;
@@ -202,6 +235,7 @@ export function Spotlight({
                         className={[
                           "bs-spotlight-item",
                           isActive ? "bs-spotlight-item--active" : "",
+                          classNames?.item,
                         ]
                           .filter(Boolean)
                           .join(" ")}
@@ -219,7 +253,7 @@ export function Spotlight({
                         {/* Title & Description */}
                         <div className="bs-spotlight-item-content">
                           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                            <span className="bs-spotlight-item-title">{item.title}</span>
+                            <span className={["bs-spotlight-item-title", classNames?.itemTitle].filter(Boolean).join(" ")}>{item.title}</span>
                             {item.badge && (
                               <Badge
                                 size="sm"
@@ -231,7 +265,7 @@ export function Spotlight({
                             )}
                           </div>
                           {item.description && (
-                            <span className="bs-spotlight-item-desc">
+                            <span className={["bs-spotlight-item-desc", classNames?.itemDesc].filter(Boolean).join(" ")}>
                               {item.description}
                             </span>
                           )}
@@ -257,7 +291,7 @@ export function Spotlight({
         </div>
 
         {/* Footer Navigation Bar */}
-        <div className="bs-spotlight-footer">
+        <div className={["bs-spotlight-footer", classNames?.footer].filter(Boolean).join(" ")}>
           <div className="bs-spotlight-footer-hint">
             <kbd className="bs-spotlight-footer-kbd">↑</kbd>
             <kbd className="bs-spotlight-footer-kbd">↓</kbd>

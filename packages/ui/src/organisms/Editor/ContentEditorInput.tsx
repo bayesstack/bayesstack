@@ -28,6 +28,25 @@ export interface ContentEditorInputProps extends TextEditorProps {
    * Current text character count
    */
   charCount?: number;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: ContentEditorInputClassNames;
+}
+
+export interface ContentEditorInputClassNames {
+  root?: string;
+  header?: string;
+  label?: string;
+  footer?: string;
+  helper?: string;
+  counter?: string;
 }
 
 export function ContentEditorInput({
@@ -39,6 +58,7 @@ export function ContentEditorInput({
   value,
   onChange,
   className = "",
+  classNames,
   style,
   ...props
 }: ContentEditorInputProps) {
@@ -46,15 +66,15 @@ export function ContentEditorInput({
 
   return (
     <div
-      className={["bs-content-editor-input-wrapper", className]
+      className={["bs-content-editor-input-wrapper", className, classNames?.root]
         .filter(Boolean)
         .join(" ")}
       style={style}
     >
       {/* Label and Error Header */}
       {(label || error) && (
-        <div className="bs-content-editor-input-header">
-          {label && <label className="bs-content-editor-label">{label}</label>}
+        <div className={["bs-content-editor-input-header", classNames?.header].filter(Boolean).join(" ")}>
+          {label && <label className={["bs-content-editor-label", classNames?.label].filter(Boolean).join(" ")}>{label}</label>}
           {error && (
             <Badge size="sm" variant="subtle" color="danger">
               {error}
@@ -68,9 +88,9 @@ export function ContentEditorInput({
 
       {/* Helper Text & Character Counter Footer */}
       {(helperText || maxLength !== undefined) && (
-        <div className="bs-content-editor-input-footer">
+        <div className={["bs-content-editor-input-footer", classNames?.footer].filter(Boolean).join(" ")}>
           {helperText && (
-            <span className="bs-content-editor-helper">{helperText}</span>
+            <span className={["bs-content-editor-helper", classNames?.helper].filter(Boolean).join(" ")}>{helperText}</span>
           )}
 
           {maxLength !== undefined && (
@@ -78,6 +98,7 @@ export function ContentEditorInput({
               className={[
                 "bs-content-editor-counter",
                 isOverLength ? "bs-content-editor-counter--error" : "",
+                classNames?.counter,
               ]
                 .filter(Boolean)
                 .join(" ")}

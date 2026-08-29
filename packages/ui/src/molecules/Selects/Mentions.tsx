@@ -107,6 +107,26 @@ export interface MentionsProps
    * @default 'md'
    */
   size?: "sm" | "md" | "lg";
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: MentionsClassNames;
+}
+
+export interface MentionsClassNames {
+  root?: string;
+  label?: string;
+  textarea?: string;
+  popover?: string;
+  item?: string;
+  error?: string;
+  helper?: string;
 }
 
 export const Mentions = forwardRef<HTMLTextAreaElement, MentionsProps>(
@@ -126,6 +146,7 @@ export const Mentions = forwardRef<HTMLTextAreaElement, MentionsProps>(
       helperText,
       size = "md",
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -182,6 +203,7 @@ export const Mentions = forwardRef<HTMLTextAreaElement, MentionsProps>(
       }
 
       // Check if cursor is immediately after a trigger character
+      // Trigger detection: checks if cursor position follows a prefix symbol preceded by whitespace or string start
       const textBeforeCursor = val.slice(0, cursorPos);
       let foundTrigger: string | null = null;
       let triggerIndex = -1;
@@ -211,6 +233,7 @@ export const Mentions = forwardRef<HTMLTextAreaElement, MentionsProps>(
       setIsOpen(false);
     };
 
+    // Replaces active trigger symbol and query string with chosen mention value followed by trailing space
     const handleInsertMention = (option: MentionOption) => {
       if (disabled || option.disabled) return;
 
@@ -276,7 +299,7 @@ export const Mentions = forwardRef<HTMLTextAreaElement, MentionsProps>(
     return (
       <div
         ref={containerRef}
-        className={["bs-mentions-container", className].filter(Boolean).join(" ")}
+        className={["bs-mentions-container", className, classNames?.root].filter(Boolean).join(" ")}
         style={style}
       >
         {label && <div className="bs-select-field__label">{label}</div>}
@@ -321,6 +344,7 @@ export const Mentions = forwardRef<HTMLTextAreaElement, MentionsProps>(
                     ]
                       .filter(Boolean)
                       .join(" ")}
+                    // Use onMouseDown with e.preventDefault() to insert mention without triggering textarea blur
                     onMouseDown={(e) => {
                       e.preventDefault();
                       handleInsertMention(opt);

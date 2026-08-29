@@ -26,6 +26,22 @@ export interface LoadingOverlayProps
    * @default 'md'
    */
   spinnerSize?: "sm" | "md" | "lg";
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: LoadingOverlayClassNames;
+}
+
+export interface LoadingOverlayClassNames {
+  root?: string;
+  content?: string;
+  message?: string;
 }
 
 export function LoadingOverlay({
@@ -34,6 +50,7 @@ export function LoadingOverlay({
   message,
   spinnerSize = "md",
   className = "",
+  classNames,
   style,
   ...props
 }: LoadingOverlayProps) {
@@ -45,16 +62,17 @@ export function LoadingOverlay({
         "bs-loading-overlay",
         fullScreen ? "bs-loading-overlay--fullscreen" : "",
         className,
+        classNames?.root,
       ]
         .filter(Boolean)
         .join(" ")}
       style={style}
       {...props}
     >
-      <div className="bs-loading-overlay-content">
+      <div className={["bs-loading-overlay-content", classNames?.content].filter(Boolean).join(" ")}>
         <ProgressRing size={spinnerSize} />
         {message && (
-          <span className="bs-loading-overlay-message">{message}</span>
+          <span className={["bs-loading-overlay-message", classNames?.message].filter(Boolean).join(" ")}>{message}</span>
         )}
       </div>
     </div>

@@ -46,6 +46,12 @@ export interface TreeSelectProps
   treeCheckable?: boolean;
 
   /**
+   * Restricts selection to final leaf nodes only. Clicking a parent branch node auto-expands or collapses its children without selecting it.
+   * @default false
+   */
+  onlyLeafSelectable?: boolean;
+
+  /**
    * Enables search input inside dropdown menu
    * @default true
    */
@@ -83,6 +89,27 @@ export interface TreeSelectProps
    * @default 'md'
    */
   size?: "sm" | "md" | "lg";
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: TreeSelectClassNames;
+}
+
+export interface TreeSelectClassNames {
+  root?: string;
+  label?: string;
+  trigger?: string;
+  popover?: string;
+  searchContainer?: string;
+  treeContainer?: string;
+  error?: string;
+  helper?: string;
 }
 
 export const TreeSelect = forwardRef<HTMLDivElement, TreeSelectProps>(
@@ -94,6 +121,7 @@ export const TreeSelect = forwardRef<HTMLDivElement, TreeSelectProps>(
       options = [],
       placeholder = "Select tree node...",
       treeCheckable = false,
+      onlyLeafSelectable = false,
       searchable = true,
       clearable = true,
       disabled = false,
@@ -102,6 +130,7 @@ export const TreeSelect = forwardRef<HTMLDivElement, TreeSelectProps>(
       helperText,
       size = "md",
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -143,8 +172,10 @@ export const TreeSelect = forwardRef<HTMLDivElement, TreeSelectProps>(
     };
 
     const allFlatNodes = getFlatNodes(options);
-    const selectedNodes = allFlatNodes.filter((node) =>
-      activeValues.includes(node.value)
+    const selectedNodes = allFlatNodes.filter(
+      (node) =>
+        activeValues.includes(node.value) &&
+        (!onlyLeafSelectable || !node.children || node.children.length === 0)
     );
 
     // Close on outside click
@@ -173,7 +204,20 @@ export const TreeSelect = forwardRef<HTMLDivElement, TreeSelectProps>(
     const handleSelectNode = (node: TreeSelectOption) => {
       if (disabled || node.disabled) return;
 
+      const hasChildren = Boolean(node.children && node.children.length > 0);
+
+      // If onlyLeafSelectable is enabled, clicking parent nodes auto-expands/collapses instead of selecting
+      if (onlyLeafSelectable && hasChildren) {
+        setExpandedValues((prev) =>
+          prev.includes(node.value)
+            ? prev.filter((v) => v !== node.value)
+            : [...prev, node.value]
+        );
+        return;
+      }
+
       let newValues: string[];
+      // In treeCheckable mode, clicking toggles value in array; in single-select mode, closes popover
       if (treeCheckable) {
         newValues = activeValues.includes(node.value)
           ? activeValues.filter((v) => v !== node.value)
@@ -210,7 +254,7 @@ export const TreeSelect = forwardRef<HTMLDivElement, TreeSelectProps>(
       return icon;
     };
 
-    // Recursive Tree Node Renderer
+    // Recursive tree node renderer: auto-expands branches when search query is active if node or child matches
     const renderTreeNodes = (nodes: TreeSelectOption[], depth = 0) => {
       return nodes.map((node) => {
         const hasChildren = Boolean(node.children && node.children.length > 0);
@@ -266,8 +310,8 @@ export const TreeSelect = forwardRef<HTMLDivElement, TreeSelectProps>(
                 <span className="bs-tree-expand-placeholder" />
               )}
 
-              {/* Checkbox indicator for treeCheckable */}
-              {treeCheckable && (
+              {/* Checkbox indicator for treeCheckable (hidden on parent nodes if onlyLeafSelectable) */}
+              {treeCheckable && (!onlyLeafSelectable || !hasChildren) && (
                 <span
                   className={[
                     "bs-tree-checkbox",
@@ -284,7 +328,7 @@ export const TreeSelect = forwardRef<HTMLDivElement, TreeSelectProps>(
 
               <span className="bs-tree-node-label">{node.label}</span>
 
-              {!treeCheckable && isSelected && (
+              {!treeCheckable && isSelected && (!onlyLeafSelectable || !hasChildren) && (
                 <Icon name="Check" size="sm" color="#0B6763" className="bs-tree-check-icon" />
               )}
             </div>
@@ -306,7 +350,7 @@ export const TreeSelect = forwardRef<HTMLDivElement, TreeSelectProps>(
     return (
       <div
         ref={containerRef}
-        className={["bs-select-field", className].filter(Boolean).join(" ")}
+        className={["bs-select-field", className, classNames?.root].filter(Boolean).join(" ")}
         style={style}
         {...props}
       >
@@ -364,6 +408,7 @@ export const TreeSelect = forwardRef<HTMLDivElement, TreeSelectProps>(
                   type="text"
                   className="bs-tree-search-input"
                   placeholder="Search tree..."
+                  aria-label="Search tree options"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onClick={(e) => e.stopPropagation()}
@@ -372,7 +417,9 @@ export const TreeSelect = forwardRef<HTMLDivElement, TreeSelectProps>(
               </div>
             )}
 
-            <div className="bs-tree-container">{renderTreeNodes(options)}</div>
+            <div className="bs-tree-container" tabIndex={0} role="region" aria-label="Tree options">
+              {renderTreeNodes(options)}
+            </div>
           </div>
         )}
 

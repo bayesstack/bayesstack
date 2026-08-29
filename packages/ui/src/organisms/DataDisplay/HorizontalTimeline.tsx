@@ -29,6 +29,28 @@ export interface HorizontalTimelineProps
    * Step click event handler
    */
   onStepClick?: (step: HorizontalTimelineItem) => void;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: HorizontalTimelineClassNames;
+}
+
+export interface HorizontalTimelineClassNames {
+  root?: string;
+  track?: string;
+  node?: string;
+  line?: string;
+  marker?: string;
+  content?: string;
+  title?: string;
+  timestamp?: string;
+  description?: string;
 }
 
 export function HorizontalTimeline({
@@ -36,16 +58,23 @@ export function HorizontalTimeline({
   activeStepId,
   onStepClick,
   className = "",
+  classNames,
   style,
   ...props
 }: HorizontalTimelineProps) {
   return (
     <div
-      className={["bs-horizontal-timeline", className].filter(Boolean).join(" ")}
+      className={[
+        "bs-horizontal-timeline",
+        className,
+        classNames?.root,
+      ]
+        .filter(Boolean)
+        .join(" ")}
       style={style}
       {...props}
     >
-      <div className="bs-horizontal-timeline-track">
+      <div className={["bs-horizontal-timeline-track", classNames?.track].filter(Boolean).join(" ")}>
         {items.map((item, idx) => {
           const isLast = idx === items.length - 1;
           const isActive = item.id === activeStepId;
@@ -60,15 +89,18 @@ export function HorizontalTimeline({
                 `bs-horizontal-timeline-node--${status}`,
                 isActive ? "bs-horizontal-timeline-node--active" : "",
                 onStepClick ? "bs-horizontal-timeline-node--clickable" : "",
+                classNames?.node,
               ]
                 .filter(Boolean)
                 .join(" ")}
             >
               {/* Connector line */}
-              {!isLast && <div className="bs-horizontal-timeline-line" />}
+              {!isLast && (
+                <div className={["bs-horizontal-timeline-line", classNames?.line].filter(Boolean).join(" ")} />
+              )}
 
               {/* Icon Marker Bullet */}
-              <div className="bs-horizontal-timeline-marker">
+              <div className={["bs-horizontal-timeline-marker", classNames?.marker].filter(Boolean).join(" ")}>
                 {item.icon ? (
                   <Icon name={item.icon} size={14} />
                 ) : (
@@ -77,9 +109,11 @@ export function HorizontalTimeline({
               </div>
 
               {/* Node Card Details */}
-              <div className="bs-horizontal-timeline-content">
+              <div className={["bs-horizontal-timeline-content", classNames?.content].filter(Boolean).join(" ")}>
                 <div className="bs-horizontal-timeline-header">
-                  <span className="bs-horizontal-timeline-title">{item.title}</span>
+                  <span className={["bs-horizontal-timeline-title", classNames?.title].filter(Boolean).join(" ")}>
+                    {item.title}
+                  </span>
                   {item.tag && (
                     <Badge size="sm" variant="subtle" color="neutral">
                       {item.tag}
@@ -88,11 +122,15 @@ export function HorizontalTimeline({
                 </div>
 
                 {item.timestamp && (
-                  <span className="bs-horizontal-timeline-time">{item.timestamp}</span>
+                  <span className={["bs-horizontal-timeline-time", classNames?.timestamp].filter(Boolean).join(" ")}>
+                    {item.timestamp}
+                  </span>
                 )}
 
                 {item.description && (
-                  <p className="bs-horizontal-timeline-desc">{item.description}</p>
+                  <p className={["bs-horizontal-timeline-desc", classNames?.description].filter(Boolean).join(" ")}>
+                    {item.description}
+                  </p>
                 )}
               </div>
             </div>

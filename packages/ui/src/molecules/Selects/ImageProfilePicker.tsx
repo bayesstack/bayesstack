@@ -72,6 +72,25 @@ export interface ImageProfilePickerProps
    * @default 'Delete'
    */
   deleteButtonLabel?: string;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: ImageProfilePickerClassNames;
+}
+
+export interface ImageProfilePickerClassNames {
+  root?: string;
+  label?: string;
+  body?: string;
+  actions?: string;
+  helper?: string;
+  modal?: string;
 }
 
 export const ImageProfilePicker = forwardRef<
@@ -93,6 +112,7 @@ export const ImageProfilePicker = forwardRef<
       changeButtonLabel = "Change Image",
       deleteButtonLabel = "Delete",
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -140,7 +160,7 @@ export const ImageProfilePicker = forwardRef<
       }
     };
 
-    // Render Canvas Crop Preview
+    // Render HTML5 Canvas 2D crop preview: clips drawImage into a circular arc mask, scaling by zoom slider factor
     useEffect(() => {
       if (!isCropModalOpen || !rawImageSrc || !canvasRef.current) return;
 
@@ -223,6 +243,7 @@ export const ImageProfilePicker = forwardRef<
           "bs-profile-picker-container",
           `bs-profile-picker-container--${variant}`,
           className,
+          classNames?.root,
         ]
           .filter(Boolean)
           .join(" ")}

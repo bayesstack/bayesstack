@@ -1,13 +1,35 @@
 import React, { forwardRef } from "react";
-import { ICON_MAP, IconName } from "../../atoms/Icons/icons";
-import { Icon } from "../../atoms/Icons/Icon";
-import { Button } from "../../atoms/Buttons/Button";
-import { IconButton } from "../../atoms/Buttons/IconButton";
+import { ICON_MAP, IconName } from "../../../atoms/Icons/icons";
+import { Icon } from "../../../atoms/Icons/Icon";
+import { Button } from "../../../atoms/Buttons/Button";
+import { IconButton } from "../../../atoms/Buttons/IconButton";
 import "./Alert.css";
 
 export type AlertSeverity = "info" | "success" | "warning" | "error";
 export type AlertVariant = "accent" | "subtle" | "solid" | "outline";
 export type AlertLayout = "inline" | "block";
+
+/**
+ * Slot class names for granular internal element styling.
+ */
+export interface AlertClassNames {
+  /** Root container element */
+  root?: string;
+  /** Body flex wrapper element */
+  body?: string;
+  /** Title and description wrapper element */
+  content?: string;
+  /** Alert heading title element */
+  title?: string;
+  /** Alert description text element */
+  description?: string;
+  /** Lead icon container element */
+  icon?: string;
+  /** Action trigger container element */
+  action?: string;
+  /** Dismiss close trigger container element */
+  close?: string;
+}
 
 export interface AlertProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
   /**
@@ -69,6 +91,16 @@ export interface AlertProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "
    * @default 'alert'
    */
   role?: string;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides.
+   */
+  classNames?: AlertClassNames;
 }
 
 const DEFAULT_SEVERITY_ICONS: Record<AlertSeverity, IconName> = {
@@ -93,12 +125,16 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(
       onClose,
       role = "alert",
       className = "",
+      classNames,
       style,
       ...props
     },
     ref
   ) => {
-    // 1. Resolve lead icon
+    // Icon resolution precedence:
+    // 1. Explicit `null` or `false` suppresses the icon completely (useful for plain text banners).
+    // 2. IconName string renders standard stroke icon; custom ReactNode passes through.
+    // 3. Omitted `undefined` defaults to severity-matched icon (e.g., CheckCircle for success).
     let renderedIcon: React.ReactNode = null;
     if (icon !== null && icon !== false) {
       if (typeof icon === "string" && (ICON_MAP[icon] || icon)) {
@@ -111,33 +147,49 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(
       }
     }
 
-    // 2. Class Names
-    const classNames = [
+    const rootClasses = [
       "bs-alert",
       `bs-alert--${severity}`,
       `bs-alert--${variant}`,
       `bs-alert--${layout}`,
       closeable ? "bs-alert--closeable" : "",
       className,
+      classNames?.root,
     ]
       .filter(Boolean)
       .join(" ");
 
     return (
-      <div ref={ref} className={classNames} style={style} role={role} {...props}>
+      <div ref={ref} className={rootClasses} style={style} role={role} {...props}>
         {/* Lead Icon */}
-        {renderedIcon && <div className="bs-alert__icon">{renderedIcon}</div>}
+        {renderedIcon && (
+          <div className={["bs-alert__icon", classNames?.icon].filter(Boolean).join(" ")}>
+            {renderedIcon}
+          </div>
+        )}
 
         {/* Content Wrapper */}
-        <div className="bs-alert__body">
-          <div className="bs-alert__content">
-            {title && <div className="bs-alert__title">{title}</div>}
-            {children && <div className="bs-alert__description">{children}</div>}
+        <div className={["bs-alert__body", classNames?.body].filter(Boolean).join(" ")}>
+          <div className={["bs-alert__content", classNames?.content].filter(Boolean).join(" ")}>
+            {title && (
+              <div className={["bs-alert__title", classNames?.title].filter(Boolean).join(" ")}>
+                {title}
+              </div>
+            )}
+            {children && (
+              <div
+                className={["bs-alert__description", classNames?.description]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                {children}
+              </div>
+            )}
           </div>
 
-          {/* Action Trigger */}
+          {/* Action Trigger: Auto-wrap plain text strings in a link-style Button, but let custom ReactNodes render directly */}
           {action && (
-            <div className="bs-alert__action">
+            <div className={["bs-alert__action", classNames?.action].filter(Boolean).join(" ")}>
               {typeof action === "string" ? (
                 <Button
                   variant="link"
@@ -156,7 +208,7 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(
 
         {/* Close Button */}
         {closeable && (
-          <div className="bs-alert__close">
+          <div className={["bs-alert__close", classNames?.close].filter(Boolean).join(" ")}>
             <IconButton
               name="Close"
               label="Dismiss alert"

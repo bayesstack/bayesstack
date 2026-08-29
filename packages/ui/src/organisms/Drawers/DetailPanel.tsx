@@ -59,6 +59,29 @@ export interface DetailPanelProps extends Omit<DrawerProps, "title"> {
    * Edit action button click handler
    */
   onEdit?: () => void;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: DetailPanelClassNames;
+}
+
+export interface DetailPanelClassNames {
+  root?: string;
+  header?: string;
+  name?: string;
+  subtitle?: string;
+  fields?: string;
+  fieldItem?: string;
+  fieldLabel?: string;
+  fieldValue?: string;
+  tabs?: string;
+  tabContent?: string;
 }
 
 export function DetailPanel({
@@ -75,6 +98,7 @@ export function DetailPanel({
   size = "lg",
   children,
   className = "",
+  classNames,
   ...props
 }: DetailPanelProps) {
   const [activeTabKey, setActiveTabKey] = useState(tabs[0]?.key || "");
@@ -82,11 +106,11 @@ export function DetailPanel({
   const activeTabContent = tabs.find((t) => t.key === activeTabKey)?.content;
 
   const headerTitle = (
-    <div className="bs-detail-panel-entity-header">
+    <div className={["bs-detail-panel-entity-header", classNames?.header].filter(Boolean).join(" ")}>
       <Avatar name={entityName} src={entityAvatar} size="md" />
       <div className="bs-detail-panel-entity-info">
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <h3 className="bs-detail-panel-entity-name">{entityName}</h3>
+          <h3 className={["bs-detail-panel-entity-name", classNames?.name].filter(Boolean).join(" ")}>{entityName}</h3>
           {entityStatus && (
             <Badge size="sm" variant="subtle" color={entityStatusColor}>
               {entityStatus}
@@ -94,7 +118,7 @@ export function DetailPanel({
           )}
         </div>
         {entitySubtitle && (
-          <span className="bs-detail-panel-entity-subtitle">{entitySubtitle}</span>
+          <span className={["bs-detail-panel-entity-subtitle", classNames?.subtitle].filter(Boolean).join(" ")}>{entitySubtitle}</span>
         )}
       </div>
     </div>
@@ -117,16 +141,16 @@ export function DetailPanel({
       title={headerTitle}
       extra={extraActions}
       size={size}
-      className={["bs-detail-panel", className].filter(Boolean).join(" ")}
+      className={["bs-detail-panel", className, classNames?.root].filter(Boolean).join(" ")}
       {...props}
     >
       {/* Metadata Fields Grid */}
       {fields.length > 0 && (
-        <div className="bs-detail-panel-fields-grid">
+        <div className={["bs-detail-panel-fields-grid", classNames?.fields].filter(Boolean).join(" ")}>
           {fields.map((field, idx) => (
-            <div key={idx} className="bs-detail-panel-field-item">
-              <span className="bs-detail-panel-field-label">{field.label}</span>
-              <div className="bs-detail-panel-field-value">{field.value}</div>
+            <div key={idx} className={["bs-detail-panel-field-item", classNames?.fieldItem].filter(Boolean).join(" ")}>
+              <span className={["bs-detail-panel-field-label", classNames?.fieldLabel].filter(Boolean).join(" ")}>{field.label}</span>
+              <div className={["bs-detail-panel-field-value", classNames?.fieldValue].filter(Boolean).join(" ")}>{field.value}</div>
             </div>
           ))}
         </div>
@@ -134,7 +158,7 @@ export function DetailPanel({
 
       {/* Tabs Navigation */}
       {tabs.length > 0 && (
-        <div className="bs-detail-panel-tabs-section">
+        <div className={["bs-detail-panel-tabs-section", classNames?.tabs].filter(Boolean).join(" ")}>
           <Tabs
             items={tabs.map((t) => ({ value: t.key, label: t.label }))}
             value={activeTabKey}
@@ -142,7 +166,7 @@ export function DetailPanel({
             variant="line"
             size="sm"
           />
-          <div className="bs-detail-panel-tab-content">{activeTabContent}</div>
+          <div className={["bs-detail-panel-tab-content", classNames?.tabContent].filter(Boolean).join(" ")}>{activeTabContent}</div>
         </div>
       )}
 

@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, within } from "@storybook/test";
-import { Tooltip } from ".././Tooltip";
+import { Tooltip } from "../Tooltip";
 import { Button } from "../../../atoms/Buttons/Button";
 
 const meta: Meta<typeof Tooltip> = {
@@ -29,7 +29,7 @@ export const Playground: Story = {
     children: <Button size="sm" variant="outline">Hover Me</Button>,
   },
   render: (args) => (
-    <div style={{ padding: 48, margin: "16px 0 0 16px" }}>
+    <div style={{ padding: 48 }}>
       <Tooltip {...args} />
     </div>
   ),
@@ -43,10 +43,10 @@ export const Playground: Story = {
   },
 };
 
-
-export const Showcase: Story = {
+export const Ex1_Placements: Story = {
+  name: "01: Directional Placements",
   render: () => (
-    <div style={{ display: "flex", gap: 16, padding: 48, margin: "16px 0 0 16px" }}>
+    <div style={{ display: "flex", gap: 16, padding: 48 }}>
       <Tooltip content="Top placement tooltip" placement="top">
         <Button size="sm" variant="outline">Top</Button>
       </Tooltip>

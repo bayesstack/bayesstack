@@ -148,6 +148,28 @@ export interface TableProps<T = any>
    * Pager integration configuration
    */
   pagination?: TablePaginationProps;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: TableClassNames;
+}
+
+export interface TableClassNames {
+  root?: string;
+  scrollWrapper?: string;
+  table?: string;
+  thead?: string;
+  tbody?: string;
+  th?: string;
+  tr?: string;
+  td?: string;
+  footer?: string;
 }
 
 export function Table<T extends Record<string, any>>({
@@ -169,6 +191,7 @@ export function Table<T extends Record<string, any>>({
   emptyText = "No data available",
   pagination,
   className = "",
+  classNames,
   style,
   ...props
 }: TableProps<T>) {
@@ -273,27 +296,29 @@ export function Table<T extends Record<string, any>>({
         "bs-table-container",
         bordered ? "bs-table-container--bordered" : "",
         className,
+        classNames?.root,
       ]
         .filter(Boolean)
         .join(" ")}
       style={style}
       {...props}
     >
-      <div className="bs-table-scroll-wrapper">
+      <div className={["bs-table-scroll-wrapper", classNames?.scrollWrapper].filter(Boolean).join(" ")}>
         <table
           className={[
             "bs-table",
             `bs-table--${size}`,
             striped ? "bs-table--striped" : "",
             hoverable ? "bs-table--hoverable" : "",
+            classNames?.table,
           ]
             .filter(Boolean)
             .join(" ")}
         >
-          <thead>
-            <tr>
+          <thead className={classNames?.thead}>
+            <tr className={classNames?.tr}>
               {selectable && (
-                <th className="bs-table-th bs-table-th--checkbox">
+                <th className={["bs-table-th bs-table-th--checkbox", classNames?.th].filter(Boolean).join(" ")}>
                   <Checkbox
                     checked={allSelected}
                     indeterminate={isIndeterminate}
@@ -311,6 +336,7 @@ export function Table<T extends Record<string, any>>({
                       col.align ? `bs-table-th--${col.align}` : "",
                       col.sortable ? "bs-table-th--sortable" : "",
                       col.headerClassName || "",
+                      classNames?.th,
                     ]
                       .filter(Boolean)
                       .join(" ")}
@@ -346,14 +372,14 @@ export function Table<T extends Record<string, any>>({
               })}
             </tr>
           </thead>
-          <tbody>
+          <tbody className={classNames?.tbody}>
             {loading ? (
               // Skeleton loading placeholder rows
               Array.from({ length: 4 }).map((_, rIdx) => (
-                <tr key={`skel-row-${rIdx}`} className="bs-table-tr-loading">
-                  {selectable && <td className="bs-table-td" />}
+                <tr key={`skel-row-${rIdx}`} className={["bs-table-tr-loading", classNames?.tr].filter(Boolean).join(" ")}>
+                  {selectable && <td className={["bs-table-td", classNames?.td].filter(Boolean).join(" ")} />}
                   {columns.map((col) => (
-                    <td key={`skel-col-${col.key}`} className="bs-table-td">
+                    <td key={`skel-col-${col.key}`} className={["bs-table-td", classNames?.td].filter(Boolean).join(" ")}>
                       <div className="bs-table-skeleton-bar" />
                     </td>
                   ))}
@@ -361,10 +387,10 @@ export function Table<T extends Record<string, any>>({
               ))
             ) : processedData.length === 0 ? (
               // Empty Data Row
-              <tr>
+              <tr className={classNames?.tr}>
                 <td
                   colSpan={columns.length + (selectable ? 1 : 0)}
-                  className="bs-table-empty-td"
+                  className={["bs-table-empty-td", classNames?.td].filter(Boolean).join(" ")}
                 >
                   {emptyText}
                 </td>
@@ -381,6 +407,7 @@ export function Table<T extends Record<string, any>>({
                     className={[
                       "bs-table-tr",
                       isSelected ? "bs-table-tr--selected" : "",
+                      classNames?.tr,
                     ]
                       .filter(Boolean)
                       .join(" ")}
@@ -390,7 +417,7 @@ export function Table<T extends Record<string, any>>({
                   >
                     {selectable && (
                       <td
-                        className="bs-table-td bs-table-td--checkbox"
+                        className={["bs-table-td bs-table-td--checkbox", classNames?.td].filter(Boolean).join(" ")}
                         onClick={(e) => e.stopPropagation()}
                       >
                         <Checkbox
@@ -410,6 +437,7 @@ export function Table<T extends Record<string, any>>({
                             "bs-table-td",
                             col.align ? `bs-table-td--${col.align}` : "",
                             col.className || "",
+                            classNames?.td,
                           ]
                             .filter(Boolean)
                             .join(" ")}
@@ -432,7 +460,7 @@ export function Table<T extends Record<string, any>>({
 
       {/* Optional Integrated Pager Footer */}
       {pagination && pagination.enabled !== false && (
-        <div className="bs-table-footer">
+        <div className={["bs-table-footer", classNames?.footer].filter(Boolean).join(" ")}>
           <Pager
             page={pagination.page || 1}
             totalPages={pagination.totalPages || 1}

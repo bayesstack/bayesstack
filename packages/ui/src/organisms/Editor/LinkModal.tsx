@@ -9,6 +9,22 @@ export interface LinkModalProps {
   onInsertLink: (url: string, text?: string, openInNewTab?: boolean) => void;
   initialUrl?: string;
   initialText?: string;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: LinkModalClassNames;
+}
+
+export interface LinkModalClassNames {
+  root?: string;
+  form?: string;
+  input?: string;
 }
 
 export function LinkModal({
@@ -17,6 +33,8 @@ export function LinkModal({
   onInsertLink,
   initialUrl = "",
   initialText = "",
+  className = "",
+  classNames,
 }: LinkModalProps) {
   const [url, setUrl] = useState(initialUrl);
   const [text, setText] = useState(initialText);
@@ -35,6 +53,7 @@ export function LinkModal({
       onClose={onClose}
       title="Insert Hyperlink"
       size="sm"
+      className={[className, classNames?.root].filter(Boolean).join(" ")}
       footer={
         <>
           <Button size="sm" variant="secondary" onClick={onClose}>
@@ -46,7 +65,7 @@ export function LinkModal({
         </>
       }
     >
-      <form onSubmit={handleSubmit} className="bs-editor-link-form">
+      <form onSubmit={handleSubmit} className={["bs-editor-link-form", classNames?.form].filter(Boolean).join(" ")}>
         <div>
           <label style={{ fontSize: 13, fontWeight: 600, color: "#123333" }}>URL Link Target</label>
           <input
@@ -54,7 +73,7 @@ export function LinkModal({
             placeholder="https://example.com"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            className="bs-editor-link-input"
+            className={["bs-editor-link-input", classNames?.input].filter(Boolean).join(" ")}
             required
             autoFocus
           />
@@ -67,7 +86,7 @@ export function LinkModal({
             placeholder="e.g. Read documentation"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            className="bs-editor-link-input"
+            className={["bs-editor-link-input", classNames?.input].filter(Boolean).join(" ")}
           />
         </div>
 

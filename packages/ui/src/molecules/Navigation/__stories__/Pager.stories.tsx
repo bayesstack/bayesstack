@@ -1,13 +1,16 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import React, { useState } from "react";
-import { Pager } from ".././Pager";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import React from "react";
+import { Pager } from "../Pager";
 
 const meta: Meta<typeof Pager> = {
   title: "Molecules/Navigation/Pager",
   component: Pager,
+  parameters: {
+    layout: "padded",
+  },
   argTypes: {
     variant: {
-      control: "select",
+      control: { type: "select" },
       options: ["paged", "compact"],
     },
     withControls: { control: "boolean" },
@@ -19,67 +22,23 @@ const meta: Meta<typeof Pager> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof Pager>;
+type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
-  render: () => {
-    const [page, setPage] = useState(3);
-
-    return (
-      <div>
-        <Pager
-          page={page}
-          totalPages={15}
-          onPageChange={setPage}
-          withControls
-        />
-        <div style={{ marginTop: 16, fontSize: 13, color: "#4A6360" }}>
-          Current Page: <strong>{page}</strong>
-        </div>
-      </div>
-    );
+export const Playground: Story = {
+  args: {
+    page: 1,
+    totalPages: 10,
+    pageSize: 10,
+    withControls: true,
+    withEdges: true,
+    withGoTo: true,
+    withSizeSelector: true,
+    variant: "paged",
   },
+  render: (args) => (
+    <div style={{ maxWidth: 640, padding: 16 }}>
+      <Pager {...args} />
+    </div>
+  ),
 };
 
-export const FullEnterpriseToolbar: Story = {
-  render: () => {
-    const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(25);
-
-    return (
-      <div>
-        <Pager
-          page={page}
-          totalPages={20}
-          pageSize={pageSize}
-          onPageChange={setPage}
-          onPageSizeChange={setPageSize}
-          withEdges
-          withControls
-          withGoTo
-          withSizeSelector
-        />
-        <div style={{ marginTop: 16, fontSize: 13, color: "#4A6360" }}>
-          Active View: Page <strong>{page}</strong> | Page Size: <strong>{pageSize}</strong>
-        </div>
-      </div>
-    );
-  },
-};
-
-export const CompactVariant: Story = {
-  render: () => {
-    const [page, setPage] = useState(4);
-
-    return (
-      <Pager
-        variant="compact"
-        page={page}
-        totalPages={10}
-        onPageChange={setPage}
-        withControls
-        withEdges
-      />
-    );
-  },
-};

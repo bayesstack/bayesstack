@@ -65,6 +65,27 @@ export interface MultiSelectProps
    * Helper description hint text
    */
   helperText?: React.ReactNode;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: MultiSelectClassNames;
+}
+
+export interface MultiSelectClassNames {
+  root?: string;
+  label?: string;
+  control?: string;
+  tags?: string;
+  menu?: string;
+  option?: string;
+  error?: string;
+  helper?: string;
 }
 
 export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
@@ -82,6 +103,7 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
       error,
       helperText,
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -113,6 +135,7 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
       return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    // Array toggle logic: appends value if not present, removes value if already selected
     const handleToggleOption = (optValue: string, optDisabled?: boolean) => {
       if (disabled || optDisabled) return;
       const exists = currentValues.includes(optValue);
@@ -128,6 +151,7 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
       }
     };
 
+    // Stop propagation so clicking a Chip's remove button doesn't trigger the trigger dropdown toggle
     const handleRemoveTag = (e: React.MouseEvent, optValue: string) => {
       e.stopPropagation();
       handleToggleOption(optValue);
@@ -152,11 +176,15 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
     return (
       <div
         ref={containerRef}
-        className={["bs-select-field", className].filter(Boolean).join(" ")}
+        className={["bs-select-field", className, classNames?.root].filter(Boolean).join(" ")}
         style={style}
         {...props}
       >
-        {label && <div className="bs-select-field__label">{label}</div>}
+        {label && (
+          <div className={["bs-select-field__label", classNames?.label].filter(Boolean).join(" ")}>
+            {label}
+          </div>
+        )}
 
         <div
           ref={ref}
@@ -166,6 +194,7 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
             isOpen ? "bs-select-trigger--open" : "",
             disabled ? "bs-select-trigger--disabled" : "",
             error ? "bs-select-trigger--error" : "",
+            classNames?.control,
           ]
             .filter(Boolean)
             .join(" ")}
@@ -173,7 +202,7 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
         >
           <div className="bs-select-trigger__left">
             {selectedOptions.length > 0 ? (
-              <div className="bs-multiselect-tags">
+              <div className={["bs-multiselect-tags", classNames?.tags].filter(Boolean).join(" ")}>
                 {selectedOptions.map((opt) => (
                   <Chip
                     key={opt.value}
@@ -216,13 +245,14 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
 
         {/* Dropdown Menu */}
         {isOpen && !disabled && (
-          <div className="bs-select-menu">
+          <div className={["bs-select-menu", classNames?.menu].filter(Boolean).join(" ")}>
             {searchable && (
               <div className="bs-select-search">
                 <input
                   type="text"
                   className="bs-select-search__input"
                   placeholder="Search options..."
+                  aria-label="Search options"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onClick={(e) => e.stopPropagation()}
@@ -241,6 +271,7 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
                       "bs-select-option",
                       isSelected ? "bs-select-option--selected" : "",
                       opt.disabled ? "bs-select-option--disabled" : "",
+                      classNames?.option,
                     ]
                       .filter(Boolean)
                       .join(" ")}
@@ -260,10 +291,14 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
         )}
 
         {error && typeof error !== "boolean" && (
-          <div className="bs-select-field__error">{error}</div>
+          <div className={["bs-select-field__error", classNames?.error].filter(Boolean).join(" ")}>
+            {error}
+          </div>
         )}
         {!error && helperText && (
-          <div className="bs-select-field__helper">{helperText}</div>
+          <div className={["bs-select-field__helper", classNames?.helper].filter(Boolean).join(" ")}>
+            {helperText}
+          </div>
         )}
       </div>
     );

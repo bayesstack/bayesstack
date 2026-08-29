@@ -65,6 +65,29 @@ export interface UserDisplayItemListProps
    * Custom action button click handler
    */
   onUserAction?: (user: UserDisplayItemData) => void;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: UserDisplayItemListClassNames;
+}
+
+export interface UserDisplayItemListClassNames {
+  root?: string;
+  searchBar?: string;
+  container?: string;
+  empty?: string;
+  row?: string;
+  info?: string;
+  name?: string;
+  role?: string;
+  email?: string;
+  actions?: string;
 }
 
 export function UserDisplayItemList({
@@ -78,6 +101,7 @@ export function UserDisplayItemList({
   actionLabel = "View Profile",
   onUserAction,
   className = "",
+  classNames,
   style,
   ...props
 }: UserDisplayItemListProps) {
@@ -100,18 +124,19 @@ export function UserDisplayItemList({
 
   return (
     <div
-      className={["bs-user-display-item-list", className].filter(Boolean).join(" ")}
+      className={["bs-user-display-item-list", className, classNames?.root].filter(Boolean).join(" ")}
       style={style}
       {...props}
     >
       {/* Search Bar */}
       {searchable && (
-        <div className="bs-user-list-search-bar">
+        <div className={["bs-user-list-search-bar", classNames?.searchBar].filter(Boolean).join(" ")}>
           <Icon name="Search" size={14} className="bs-user-list-search-icon" />
           <input
             type="text"
             className="bs-user-list-search-input"
             placeholder={searchPlaceholder}
+            aria-label={searchPlaceholder}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -128,9 +153,9 @@ export function UserDisplayItemList({
       )}
 
       {/* User Items Container */}
-      <div className="bs-user-list-container">
+      <div className={["bs-user-list-container", classNames?.container].filter(Boolean).join(" ")}>
         {filteredUsers.length === 0 ? (
-          <div className="bs-user-list-empty">No members found</div>
+          <div className={["bs-user-list-empty", classNames?.empty].filter(Boolean).join(" ")}>No members found</div>
         ) : (
           filteredUsers.map((user) => {
             const isSelected = selectedIds.includes(user.id);
@@ -142,6 +167,7 @@ export function UserDisplayItemList({
                   "bs-user-list-row",
                   isSelected ? "bs-user-list-row--selected" : "",
                   user.disabled ? "bs-user-list-row--disabled" : "",
+                  classNames?.row,
                 ]
                   .filter(Boolean)
                   .join(" ")}
@@ -159,6 +185,7 @@ export function UserDisplayItemList({
                     disabled={user.disabled}
                     onChange={() => handleToggleSelect(user.id)}
                     className="bs-user-list-checkbox"
+                    aria-label={`Select ${user.name}`}
                     onClick={(e) => e.stopPropagation()}
                   />
                 )}
@@ -166,9 +193,9 @@ export function UserDisplayItemList({
                 {/* Avatar & User Details */}
                 <Avatar name={user.name} src={user.avatar} size="sm" />
 
-                <div className="bs-user-list-info">
+                <div className={["bs-user-list-info", classNames?.info].filter(Boolean).join(" ")}>
                   <div className="bs-user-list-name-row">
-                    <span className="bs-user-list-name">{user.name}</span>
+                    <span className={["bs-user-list-name", classNames?.name].filter(Boolean).join(" ")}>{user.name}</span>
                     {user.status && (
                       <Badge
                         size="sm"
@@ -182,11 +209,11 @@ export function UserDisplayItemList({
 
                   <div className="bs-user-list-meta-row">
                     {user.role && (
-                      <span className="bs-user-list-role">{user.role}</span>
+                      <span className={["bs-user-list-role", classNames?.role].filter(Boolean).join(" ")}>{user.role}</span>
                     )}
                     {user.role && user.email && <span className="bs-user-list-dot">•</span>}
                     {user.email && (
-                      <span className="bs-user-list-email">{user.email}</span>
+                      <span className={["bs-user-list-email", classNames?.email].filter(Boolean).join(" ")}>{user.email}</span>
                     )}
                   </div>
                 </div>
@@ -194,7 +221,7 @@ export function UserDisplayItemList({
                 {/* Row Action Button */}
                 {onUserAction && (
                   <div
-                    className="bs-user-list-actions"
+                    className={["bs-user-list-actions", classNames?.actions].filter(Boolean).join(" ")}
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Button

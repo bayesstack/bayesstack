@@ -80,6 +80,25 @@ export interface PagerProps
    * @default 'paged'
    */
   variant?: "paged" | "compact";
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: PagerClassNames;
+}
+
+export interface PagerClassNames {
+  root?: string;
+  controls?: string;
+  button?: string;
+  activeButton?: string;
+  sizeSelector?: string;
+  goTo?: string;
 }
 
 export const Pager = forwardRef<HTMLDivElement, PagerProps>(
@@ -99,42 +118,41 @@ export const Pager = forwardRef<HTMLDivElement, PagerProps>(
       disabled = false,
       variant = "paged",
       className = "",
+      classNames,
       style,
       ...props
     },
     ref
   ) => {
     const isControlled = controlledPage !== undefined;
-    const [internalPage, setInternalPage] = useState(1);
+    const [internalPage, setInternalPage] = useState<number>(1);
     const activePage = isControlled ? controlledPage : internalPage;
 
-    const [goToInputValue, setGoToInputValue] = useState<string>(
-      String(activePage)
-    );
+    const [goToInputValue, setGoToInputValue] = useState<string>("");
 
-    const handleSetPage = (nextPage: number) => {
+    const handleSetPage = (newPage: number) => {
       if (disabled) return;
-      const clamped = Math.max(1, Math.min(totalPages, nextPage));
+      const clamped = Math.max(1, Math.min(newPage, totalPages));
       if (!isControlled) {
         setInternalPage(clamped);
       }
-      setGoToInputValue(String(clamped));
       if (onPageChange) {
         onPageChange(clamped);
       }
     };
 
-    const handleGoToSubmit = (e: React.FormEvent) => {
-      e.preventDefault();
+    const handleGoToSubmit = () => {
       const parsed = parseInt(goToInputValue, 10);
       if (!isNaN(parsed)) {
         handleSetPage(parsed);
       } else {
+        // Reset input string back to valid current activePage if user typed invalid non-numeric text
         setGoToInputValue(String(activePage));
       }
     };
 
-    // Pagination buttons range calculation
+    // Dynamic pagination window calculation: calculates sibling offsets around active page
+    // and collapses left/right overflow bounds into ellipsis ('...') items.
     const getPageRange = () => {
       const totalNumbers = siblings * 2 + 3; // siblings + current + first + last
       const totalBlocks = totalNumbers + 2; // + 2 ellipsis blocks
@@ -187,6 +205,7 @@ export const Pager = forwardRef<HTMLDivElement, PagerProps>(
           "bs-pager-container",
           disabled ? "bs-pager-container--disabled" : "",
           className,
+          classNames?.root,
         ]
           .filter(Boolean)
           .join(" ")}
@@ -195,7 +214,7 @@ export const Pager = forwardRef<HTMLDivElement, PagerProps>(
       >
         {/* Page Size Dropdown Selector */}
         {withSizeSelector && (
-          <div className="bs-pager-size-selector">
+          <div className={["bs-pager-size-selector", classNames?.sizeSelector].filter(Boolean).join(" ")}>
             <span className="bs-pager-label">Show</span>
             <Select
               value={String(pageSize)}
@@ -213,7 +232,7 @@ export const Pager = forwardRef<HTMLDivElement, PagerProps>(
         )}
 
         {/* Numeric Page Buttons or Compact Text */}
-        <div className="bs-pager-controls-row">
+        <div className={["bs-pager-controls-row", classNames?.controls].filter(Boolean).join(" ")}>
           {/* First Page Edge (|‹) */}
           {withEdges && (
             <IconButton
@@ -264,6 +283,8 @@ export const Pager = forwardRef<HTMLDivElement, PagerProps>(
                     className={[
                       "bs-pager-btn",
                       isActive ? "bs-pager-btn--active" : "",
+                      classNames?.button,
+                      isActive ? classNames?.activeButton : "",
                     ]
                       .filter(Boolean)
                       .join(" ")}
@@ -303,7 +324,7 @@ export const Pager = forwardRef<HTMLDivElement, PagerProps>(
 
         {/* 'Go to' Jump Input */}
         {withGoTo && (
-          <form className="bs-pager-goto-form" onSubmit={handleGoToSubmit}>
+          <form className={["bs-pager-goto-form", classNames?.goTo].filter(Boolean).join(" ")} onSubmit={handleGoToSubmit}>
             <span className="bs-pager-label">Go to</span>
             <input
               type="number"
@@ -311,6 +332,7 @@ export const Pager = forwardRef<HTMLDivElement, PagerProps>(
               max={totalPages}
               disabled={disabled}
               className="bs-pager-goto-input"
+              aria-label="Go to page number"
               value={goToInputValue}
               onChange={(e) => setGoToInputValue(e.target.value)}
               onBlur={() => handleGoToSubmit}

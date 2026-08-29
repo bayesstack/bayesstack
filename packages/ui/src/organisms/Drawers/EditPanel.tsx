@@ -38,6 +38,22 @@ export interface EditPanelProps extends Omit<DrawerProps, "footer"> {
    * @default 'Cancel'
    */
   cancelText?: string;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: EditPanelClassNames;
+}
+
+export interface EditPanelClassNames {
+  root?: string;
+  body?: string;
+  footer?: string;
 }
 
 export function EditPanel({
@@ -52,6 +68,7 @@ export function EditPanel({
   size = "md",
   children,
   className = "",
+  classNames,
   ...props
 }: EditPanelProps) {
   const headerTitle = (
@@ -66,7 +83,7 @@ export function EditPanel({
   );
 
   const footerActions = (
-    <div className="bs-edit-panel-footer">
+    <div className={["bs-edit-panel-footer", classNames?.footer].filter(Boolean).join(" ")}>
       <Button
         size="sm"
         variant="secondary"
@@ -93,10 +110,10 @@ export function EditPanel({
       title={headerTitle}
       footer={footerActions}
       size={size}
-      className={["bs-edit-panel", className].filter(Boolean).join(" ")}
+      className={["bs-edit-panel", className, classNames?.root].filter(Boolean).join(" ")}
       {...props}
     >
-      <div className="bs-edit-panel-body">{children}</div>
+      <div className={["bs-edit-panel-body", classNames?.body].filter(Boolean).join(" ")}>{children}</div>
     </Drawer>
   );
 }

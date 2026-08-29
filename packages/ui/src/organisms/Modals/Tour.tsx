@@ -42,9 +42,39 @@ export interface TourProps {
    * @default 0
    */
   initialStep?: number;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: TourClassNames;
 }
 
-export function Tour({ opened, onClose, steps = [], initialStep = 0 }: TourProps) {
+export interface TourClassNames {
+  root?: string;
+  overlay?: string;
+  spotlight?: string;
+  card?: string;
+  header?: string;
+  title?: string;
+  body?: string;
+  footer?: string;
+  progress?: string;
+  actions?: string;
+}
+
+export function Tour({
+  opened,
+  onClose,
+  steps = [],
+  initialStep = 0,
+  className = "",
+  classNames,
+}: TourProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(initialStep);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
 
@@ -95,11 +125,11 @@ export function Tour({ opened, onClose, steps = [], initialStep = 0 }: TourProps
       };
 
   const tourContent = (
-    <div className="bs-tour-overlay">
+    <div className={["bs-tour-overlay", className, classNames?.root, classNames?.overlay].filter(Boolean).join(" ")}>
       {/* Spotlight cutout highlight over target element */}
       {targetRect && (
         <div
-          className="bs-tour-spotlight"
+          className={["bs-tour-spotlight", classNames?.spotlight].filter(Boolean).join(" ")}
           style={{
             top: targetRect.top - 4,
             left: targetRect.left - 4,
@@ -110,9 +140,9 @@ export function Tour({ opened, onClose, steps = [], initialStep = 0 }: TourProps
       )}
 
       {/* Popover Step Card */}
-      <div className="bs-tour-card" style={popoverStyle}>
-        <div className="bs-tour-header">
-          <h4 className="bs-tour-title">{activeStep.title}</h4>
+      <div className={["bs-tour-card", classNames?.card].filter(Boolean).join(" ")} style={popoverStyle}>
+        <div className={["bs-tour-header", classNames?.header].filter(Boolean).join(" ")}>
+          <h4 className={["bs-tour-title", classNames?.title].filter(Boolean).join(" ")}>{activeStep.title}</h4>
           <IconButton
             name="Close"
             label="Close tour"
@@ -122,13 +152,13 @@ export function Tour({ opened, onClose, steps = [], initialStep = 0 }: TourProps
           />
         </div>
 
-        <div className="bs-tour-body">{activeStep.content}</div>
+        <div className={["bs-tour-body", classNames?.body].filter(Boolean).join(" ")}>{activeStep.content}</div>
 
-        <div className="bs-tour-footer">
-          <span className="bs-tour-progress">
+        <div className={["bs-tour-footer", classNames?.footer].filter(Boolean).join(" ")}>
+          <span className={["bs-tour-progress", classNames?.progress].filter(Boolean).join(" ")}>
             Step {currentStepIndex + 1} of {steps.length}
           </span>
-          <div className="bs-tour-actions">
+          <div className={["bs-tour-actions", classNames?.actions].filter(Boolean).join(" ")}>
             {!isFirstStep && (
               <Button size="xs" variant="secondary" onClick={handleBack}>
                 Back

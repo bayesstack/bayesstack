@@ -19,8 +19,9 @@ describe("Breadcrumbs Component", () => {
   });
 
   it("renders home icon link by default", () => {
-    const { container } = render(<Breadcrumbs items={items} showHomeIcon />);
-    const homeLink = container.querySelector("a[href='/']");
+    render(<Breadcrumbs items={items} showHomeIcon />);
+    const homeLink = screen.getByRole("link", { name: "Home" });
     expect(homeLink).toBeInTheDocument();
+    expect(homeLink).toHaveAttribute("href", "/");
   });
 });

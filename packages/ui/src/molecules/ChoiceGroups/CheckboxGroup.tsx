@@ -70,6 +70,25 @@ export interface CheckboxGroupProps
    * React children (<Checkbox /> items)
    */
   children?: React.ReactNode;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: CheckboxGroupClassNames;
+}
+
+export interface CheckboxGroupClassNames {
+  root?: string;
+  label?: string;
+  items?: string;
+  card?: string;
+  error?: string;
+  helper?: string;
 }
 
 export const CheckboxGroup = forwardRef<HTMLDivElement, CheckboxGroupProps>(
@@ -88,15 +107,19 @@ export const CheckboxGroup = forwardRef<HTMLDivElement, CheckboxGroupProps>(
       options,
       children,
       className = "",
+      classNames,
       style,
       ...props
     },
     ref
   ) => {
+    // Determine controlled vs uncontrolled state mode. If `value` prop is defined,
+    // internal state updates are bypassed to allow parent state management.
     const isControlled = value !== undefined;
     const [internalValue, setInternalValue] = useState<string[]>(defaultValue);
     const currentValues = isControlled ? value : internalValue;
 
+    // Multi-select toggle handler. Filters out existing items or appends new selection.
     const handleToggle = (itemVal: string) => {
       if (disabled) return;
       const exists = currentValues.includes(itemVal);
@@ -112,6 +135,8 @@ export const CheckboxGroup = forwardRef<HTMLDivElement, CheckboxGroupProps>(
       }
     };
 
+    // Context payload passed down to child <Checkbox /> components when rendering JSX children
+    // instead of an `options` array. Avoids manual prop-drilling across child items.
     const contextValue = {
       name,
       value: currentValues,
@@ -119,6 +144,7 @@ export const CheckboxGroup = forwardRef<HTMLDivElement, CheckboxGroupProps>(
       disabled,
     };
 
+    // Normalize icon representation: supports string icon names from Hugeicons or custom ReactNode SVGs.
     const renderOptionIcon = (icon?: IconName | React.ReactNode) => {
       if (!icon) return null;
       if (typeof icon === "string") {
@@ -131,19 +157,26 @@ export const CheckboxGroup = forwardRef<HTMLDivElement, CheckboxGroupProps>(
       <CheckboxGroupContext.Provider value={contextValue}>
         <div
           ref={ref}
-          className={["bs-choice-group", className].filter(Boolean).join(" ")}
+          className={["bs-choice-group", className, classNames?.root].filter(Boolean).join(" ")}
           style={style}
           role="group"
           aria-invalid={Boolean(error)}
           {...props}
         >
-          {label && <div className="bs-choice-group__label">{label}</div>}
+          {label && (
+            <div className={["bs-choice-group__label", classNames?.label].filter(Boolean).join(" ")}>
+              {label}
+            </div>
+          )}
 
           <div
             className={[
               "bs-choice-group__items",
               `bs-choice-group__items--${direction}`,
-            ].join(" ")}
+              classNames?.items,
+            ]
+              .filter(Boolean)
+              .join(" ")}
           >
             {options
               ? options.map((opt) => {
@@ -151,6 +184,9 @@ export const CheckboxGroup = forwardRef<HTMLDivElement, CheckboxGroupProps>(
                   const isOptDisabled = disabled || opt.disabled;
 
                   if (variant === "card") {
+                    // Card variant wraps choice in a styled container card.
+                    // Because label markup is rendered in a sibling element, we provide
+                    // an explicit aria-label to the underlying Checkbox for screen-reader compliance.
                     return (
                       <div
                         key={opt.value}
@@ -158,6 +194,7 @@ export const CheckboxGroup = forwardRef<HTMLDivElement, CheckboxGroupProps>(
                           "bs-choice-card",
                           isSelected ? "bs-choice-card--selected" : "",
                           isOptDisabled ? "bs-choice-card--disabled" : "",
+                          classNames?.card,
                         ]
                           .filter(Boolean)
                           .join(" ")}
@@ -167,6 +204,7 @@ export const CheckboxGroup = forwardRef<HTMLDivElement, CheckboxGroupProps>(
                           value={opt.value}
                           disabled={isOptDisabled}
                           checked={isSelected}
+                          aria-label={typeof opt.label === "string" ? opt.label : String(opt.value)}
                         />
                         <div className="bs-choice-card__content">
                           <div className="bs-choice-card__title">
@@ -195,11 +233,16 @@ export const CheckboxGroup = forwardRef<HTMLDivElement, CheckboxGroupProps>(
               : children}
           </div>
 
+          {/* Render error string/node when provided, ignoring boolean error flags used only for aria-invalid */}
           {error && typeof error !== "boolean" && (
-            <div className="bs-choice-group__error">{error}</div>
+            <div className={["bs-choice-group__error", classNames?.error].filter(Boolean).join(" ")}>
+              {error}
+            </div>
           )}
           {!error && helperText && (
-            <div className="bs-choice-group__helper">{helperText}</div>
+            <div className={["bs-choice-group__helper", classNames?.helper].filter(Boolean).join(" ")}>
+              {helperText}
+            </div>
           )}
         </div>
       </CheckboxGroupContext.Provider>

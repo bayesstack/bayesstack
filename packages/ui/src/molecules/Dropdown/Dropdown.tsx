@@ -160,14 +160,28 @@ export interface DropdownProps {
   disabled?: boolean;
 
   /**
-   * Custom CSS class name for the wrapper container
+   * Custom inline styles for the dropdown floating menu overlay
+   */
+  style?: React.CSSProperties;
+
+  /**
+   * Additional root container CSS class string
    */
   className?: string;
 
   /**
-   * Custom inline styles for the dropdown floating menu overlay
+   * Slot class names object for granular component targeted overrides
    */
-  style?: React.CSSProperties;
+  classNames?: DropdownClassNames;
+}
+
+export interface DropdownClassNames {
+  root?: string;
+  overlay?: string;
+  header?: string;
+  footer?: string;
+  menu?: string;
+  item?: string;
 }
 
 // Submenu Item Renderer
@@ -190,6 +204,8 @@ const SubMenuItemRenderer: React.FC<{
     setSubMenuOpen(true);
   };
 
+  // 150ms buffer prevents the submenu from flickering or closing if the mouse briefly
+  // crosses the transparent gap between the parent item and the floating submenu panel.
   const handleMouseLeave = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => setSubMenuOpen(false), 150);
@@ -224,6 +240,7 @@ const SubMenuItemRenderer: React.FC<{
           .join(" ")}
         onClick={(e) => {
           if (item.disabled) return;
+          // Submenu branch headers open on hover/click without triggering item selection or overlay dismissal
           if (!hasChildren) {
             e.stopPropagation();
             if (item.onClick) item.onClick(item);
@@ -332,6 +349,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
   closeOnSelect = true,
   disabled = false,
   className = "",
+  classNames,
   style,
 }) => {
   const [internalOpen, setInternalOpen] = useState(false);
@@ -342,6 +360,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Filter down to interactive items so keyboard navigation (ArrowUp/Down) skips headers, dividers, and disabled slots
   const selectableItems = (items || []).filter(
     (item) => item.type !== "group" && item.type !== "divider" && !item.divider && !item.disabled
   );
@@ -429,6 +448,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
     setOpenState(true);
   };
 
+  // Grace period gives users time to travel from trigger to overlay without menu snapping shut
   const handleMouseLeave = () => {
     if (disabled || trigger !== "hover") return;
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
@@ -440,7 +460,8 @@ export const Dropdown: React.FC<DropdownProps> = ({
     if (closeOnSelect) setOpenState(false);
   };
 
-  // Clone trigger element with click / contextMenu handlers
+  // We clone the trigger element to safely attach internal event listeners without overwriting
+  // any existing onClick / onContextMenu props supplied directly on the trigger child
   const childElement = isValidElement(children) ? children : <span>{children}</span>;
   const triggerElement = cloneElement(childElement as ReactElement<any>, {
     onClick: (e: MouseEvent) => {
@@ -453,12 +474,13 @@ export const Dropdown: React.FC<DropdownProps> = ({
     },
   });
 
+  // Track selectable item indices while iterating over heterogeneous items (groups, dividers, submenus)
   let selectableCounter = -1;
 
   return (
     <div
       ref={containerRef}
-      className={["bs-dropdown-wrapper", className].filter(Boolean).join(" ")}
+      className={["bs-dropdown-wrapper", className, classNames?.root].filter(Boolean).join(" ")}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -469,6 +491,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
           className={[
             "bs-dropdown-overlay",
             `bs-dropdown-overlay--${placement}`,
+            classNames?.overlay,
           ]
             .filter(Boolean)
             .join(" ")}
@@ -476,10 +499,14 @@ export const Dropdown: React.FC<DropdownProps> = ({
         >
           {arrow && <div className="bs-dropdown-arrow" />}
 
-          {menuHeader && <div className="bs-dropdown-header-slot">{menuHeader}</div>}
+          {menuHeader && (
+            <div className={["bs-dropdown-header-slot", classNames?.header].filter(Boolean).join(" ")}>
+              {menuHeader}
+            </div>
+          )}
 
           {items && items.length > 0 ? (
-            <ul className="bs-dropdown-menu">
+            <ul className={["bs-dropdown-menu", classNames?.menu].filter(Boolean).join(" ")}>
               {items.map((item) => {
                 const isItemSelectable =
                   item.type !== "group" && item.type !== "divider" && !item.divider && !item.disabled;
@@ -511,7 +538,11 @@ export const Dropdown: React.FC<DropdownProps> = ({
             </ul>
           ) : null}
 
-          {menuFooter && <div className="bs-dropdown-footer-slot">{menuFooter}</div>}
+          {menuFooter && (
+            <div className={["bs-dropdown-footer-slot", classNames?.footer].filter(Boolean).join(" ")}>
+              {menuFooter}
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Tabs } from ".././Tabs";
+import { Tabs } from "../Tabs";
 
 const meta: Meta<typeof Tabs> = {
   title: "Molecules/Navigation/Tabs",
@@ -42,41 +42,39 @@ export const Playground: Story = {
     defaultValue: "overview",
   },
   render: (args) => (
-    <div style={{ maxWidth: 640, padding: 24, margin: "16px 0 0 16px" }}>
+    <div style={{ maxWidth: 640, padding: 16 }}>
       <Tabs {...args} />
     </div>
   ),
 };
 
-export const Showcase: Story = {
+export const Ex1_TabVariants: Story = {
+  name: "01: Tab Visual Style Variants",
   render: () => {
     const [tab, setTab] = useState("analytics");
 
     return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 32, maxWidth: 640, padding: 24, margin: "16px 0 0 16px" }}>
-        {/* 1. Line Variant */}
-        <section style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#123333", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-            1. Underline Active Variant (Default)
-          </h4>
+      <div style={{ display: "flex", flexDirection: "column", gap: 24, maxWidth: 640, padding: 16 }}>
+        <div>
+          <div style={{ fontSize: 12, color: "#59716E", marginBottom: 8, fontWeight: 600 }}>
+            Underline Active Variant (Default Line)
+          </div>
           <Tabs items={sampleTabs} variant="line" value={tab} onValueChange={setTab} />
-        </section>
+        </div>
 
-        {/* 2. Segmented Pill Variant */}
-        <section style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#123333", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-            2. Segmented Pill Variant
-          </h4>
+        <div>
+          <div style={{ fontSize: 12, color: "#59716E", marginBottom: 8, fontWeight: 600 }}>
+            Segmented Pill Variant
+          </div>
           <Tabs items={sampleTabs} variant="pill" defaultValue="overview" />
-        </section>
+        </div>
 
-        {/* 3. Card Container Variant */}
-        <section style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#123333", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-            3. Card Container Variant
-          </h4>
+        <div>
+          <div style={{ fontSize: 12, color: "#59716E", marginBottom: 8, fontWeight: 600 }}>
+            Card Container Variant
+          </div>
           <Tabs items={sampleTabs} variant="card" defaultValue="settings" />
-        </section>
+        </div>
       </div>
     );
   },

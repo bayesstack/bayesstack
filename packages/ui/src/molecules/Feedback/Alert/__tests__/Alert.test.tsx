@@ -57,4 +57,28 @@ describe("Alert Component", () => {
 
     expect(container.querySelector(".bs-alert__icon")).toBeNull();
   });
+
+  it("applies custom className string and classNames object slots", () => {
+    const { container } = render(
+      <Alert
+        title="Custom Slot Alert"
+        className="custom-root"
+        classNames={{
+          title: "custom-title",
+          description: "custom-desc",
+        }}
+      >
+        Custom body content
+      </Alert>
+    );
+
+    const rootElement = container.firstElementChild;
+    expect(rootElement).toHaveClass("custom-root");
+
+    const titleElement = container.querySelector(".bs-alert__title");
+    expect(titleElement).toHaveClass("custom-title");
+
+    const descElement = container.querySelector(".bs-alert__description");
+    expect(descElement).toHaveClass("custom-desc");
+  });
 });

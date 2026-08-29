@@ -91,6 +91,27 @@ export interface ImagePreviewInputProps
    * @default 'image/*'
    */
   accept?: string;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: ImagePreviewInputClassNames;
+}
+
+export interface ImagePreviewInputClassNames {
+  root?: string;
+  label?: string;
+  previewWrapper?: string;
+  previewFrame?: string;
+  actions?: string;
+  uploadBox?: string;
+  error?: string;
+  helper?: string;
 }
 
 export const ImagePreviewInput = forwardRef<
@@ -115,6 +136,7 @@ export const ImagePreviewInput = forwardRef<
       readOnly = false,
       accept = "image/*",
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -129,7 +151,7 @@ export const ImagePreviewInput = forwardRef<
 
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-    // Sync preview URL string whenever activeValue changes
+    // Sync preview URL string when activeValue changes; automatically revokes object URLs on change/unmount to prevent memory leaks
     useEffect(() => {
       if (!activeValue) {
         setPreviewUrl(null);
@@ -181,6 +203,7 @@ export const ImagePreviewInput = forwardRef<
         className={[
           "bs-image-preview-container",
           className,
+          classNames?.root,
         ]
           .filter(Boolean)
           .join(" ")}

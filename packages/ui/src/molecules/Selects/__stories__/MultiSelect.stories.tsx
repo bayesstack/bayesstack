@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { MultiSelect } from ".././MultiSelect";
+import { MultiSelect } from "../MultiSelect";
 
 const meta: Meta<typeof MultiSelect> = {
   title: "Molecules/Selects/MultiSelect",
@@ -40,33 +40,9 @@ export const Playground: Story = {
     helperText: "Filter candidate search by required tech stack.",
   },
   render: (args) => (
-    <div style={{ maxWidth: 460, padding: 24, margin: "16px 0 0 16px" }}>
+    <div style={{ maxWidth: 460, padding: 16 }}>
       <MultiSelect {...args} />
     </div>
   ),
 };
 
-export const Showcase: Story = {
-  render: () => {
-    const [selected, setSelected] = useState(["typescript", "python"]);
-
-    return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 32, maxWidth: 480, padding: 24, margin: "16px 0 0 16px" }}>
-        <section style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#123333", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-            1. MultiSelect Tag Picker
-          </h4>
-          <MultiSelect
-            label="Tech Stack Selection"
-            options={skillOptions}
-            searchable
-            clearable
-            value={selected}
-            onValueChange={setSelected}
-            helperText={`Selected items count: ${selected.length}`}
-          />
-        </section>
-      </div>
-    );
-  },
-};

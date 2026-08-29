@@ -26,6 +26,22 @@ export interface BreadcrumbsProps extends React.HTMLAttributes<HTMLElement> {
    * @default true
    */
   showHomeIcon?: boolean;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: BreadcrumbsClassNames;
+}
+
+export interface BreadcrumbsClassNames {
+  root?: string;
+  item?: string;
+  separator?: string;
 }
 
 export const Breadcrumbs = forwardRef<HTMLElement, BreadcrumbsProps>(
@@ -35,6 +51,7 @@ export const Breadcrumbs = forwardRef<HTMLElement, BreadcrumbsProps>(
       separator = "ArrowRight",
       showHomeIcon = true,
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -59,16 +76,22 @@ export const Breadcrumbs = forwardRef<HTMLElement, BreadcrumbsProps>(
       <nav
         ref={ref}
         aria-label="Breadcrumb"
-        className={["bs-breadcrumbs", className].filter(Boolean).join(" ")}
+        className={["bs-breadcrumbs", className, classNames?.root].filter(Boolean).join(" ")}
         style={style}
         {...props}
       >
         {showHomeIcon && (
           <>
-            <a href="/" className="bs-breadcrumb-item">
+            <a
+              href="/"
+              aria-label="Home"
+              className={["bs-breadcrumb-item", classNames?.item].filter(Boolean).join(" ")}
+            >
               <Icon name="Home" size="sm" />
             </a>
-            <span className="bs-breadcrumb-separator">{renderSeparator()}</span>
+            <span className={["bs-breadcrumb-separator", classNames?.separator].filter(Boolean).join(" ")}>
+              {renderSeparator()}
+            </span>
           </>
         )}
 
@@ -77,15 +100,16 @@ export const Breadcrumbs = forwardRef<HTMLElement, BreadcrumbsProps>(
 
           return (
             <React.Fragment key={idx}>
+              {/* Terminal active item renders as a static span rather than an anchor to avoid accidental self-navigation reloads */}
               {isLast ? (
-                <span className="bs-breadcrumb-item bs-breadcrumb-item--active">
+                <span className={["bs-breadcrumb-item bs-breadcrumb-item--active", classNames?.item].filter(Boolean).join(" ")}>
                   {renderIcon(item.icon)}
                   <span>{item.label}</span>
                 </span>
               ) : (
                 <a
                   href={item.href || "#"}
-                  className="bs-breadcrumb-item"
+                  className={["bs-breadcrumb-item", classNames?.item].filter(Boolean).join(" ")}
                   onClick={item.onClick}
                 >
                   {renderIcon(item.icon)}
@@ -94,7 +118,7 @@ export const Breadcrumbs = forwardRef<HTMLElement, BreadcrumbsProps>(
               )}
 
               {!isLast && (
-                <span className="bs-breadcrumb-separator">
+                <span className={["bs-breadcrumb-separator", classNames?.separator].filter(Boolean).join(" ")}>
                   {renderSeparator()}
                 </span>
               )}

@@ -83,6 +83,28 @@ export interface FileUploadProps
    * Error state highlight or message
    */
   error?: boolean | React.ReactNode;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: FileUploadClassNames;
+}
+
+export interface FileUploadClassNames {
+  root?: string;
+  label?: string;
+  dropzone?: string;
+  title?: string;
+  subtitle?: string;
+  fileList?: string;
+  fileRow?: string;
+  error?: string;
+  helper?: string;
 }
 
 export const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(
@@ -102,6 +124,7 @@ export const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(
       helperText,
       error,
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -110,7 +133,8 @@ export const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isDragOver, setIsDragOver] = useState(false);
 
-    // Normalize array of File or FileItemData into FileItemData[]
+    // Normalize raw File instances or FileItemData objects into standardized FileItemData[],
+    // generating temporary object URLs via URL.createObjectURL for inline image previews.
     const normalizeFiles = (
       rawFiles: Array<File | FileItemData>
     ): FileItemData[] => {
@@ -195,6 +219,7 @@ export const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(
     const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.files && e.target.files.length > 0) {
         handleProcessNativeFiles(Array.from(e.target.files));
+        // Reset input value so selecting the exact same file again successfully triggers onChange
         e.target.value = "";
       }
     };
@@ -214,7 +239,7 @@ export const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(
     return (
       <div
         ref={ref}
-        className={["bs-fileupload-container", className].filter(Boolean).join(" ")}
+        className={["bs-fileupload-container", className, classNames?.root].filter(Boolean).join(" ")}
         style={style}
         {...props}
       >

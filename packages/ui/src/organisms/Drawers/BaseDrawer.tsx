@@ -51,6 +51,22 @@ export interface BaseDrawerProps extends React.HTMLAttributes<HTMLDivElement> {
    * @default 1000
    */
   zIndex?: number;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: BaseDrawerClassNames;
+}
+
+export interface BaseDrawerClassNames {
+  root?: string;
+  mask?: string;
+  panel?: string;
 }
 
 export function BaseDrawer({
@@ -65,6 +81,7 @@ export function BaseDrawer({
   zIndex = 1000,
   children,
   className = "",
+  classNames,
   style,
   ...props
 }: BaseDrawerProps) {
@@ -103,13 +120,19 @@ export function BaseDrawer({
 
   return (
     <div
-      className={["bs-base-drawer-wrapper", open ? "bs-base-drawer--open" : ""].join(" ")}
+      className={[
+        "bs-base-drawer-wrapper",
+        open ? "bs-base-drawer--open" : "",
+        classNames?.root,
+      ]
+        .filter(Boolean)
+        .join(" ")}
       style={{ zIndex }}
     >
       {/* Backdrop Mask */}
       {mask && (
         <div
-          className="bs-base-drawer-mask"
+          className={["bs-base-drawer-mask", classNames?.mask].filter(Boolean).join(" ")}
           onClick={maskClosable && onClose ? onClose : undefined}
         />
       )}
@@ -120,6 +143,7 @@ export function BaseDrawer({
           "bs-base-drawer-panel",
           `bs-base-drawer-panel--${placement}`,
           className,
+          classNames?.panel,
         ]
           .filter(Boolean)
           .join(" ")}

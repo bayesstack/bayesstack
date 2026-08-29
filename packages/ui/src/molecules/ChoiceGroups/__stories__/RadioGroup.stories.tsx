@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { RadioGroup } from ".././RadioGroup";
+import { RadioGroup } from "../RadioGroup";
 import { Radio } from "../../../atoms/Inputs/Radio";
 
 const meta: Meta<typeof RadioGroup> = {
@@ -42,79 +42,58 @@ export const Playground: Story = {
     ],
   },
   render: (args) => (
-    <div style={{ maxWidth: 520, padding: 24, margin: "16px 0 0 16px" }}>
+    <div style={{ maxWidth: 520, padding: 16 }}>
       <RadioGroup {...args} />
     </div>
   ),
 };
 
-export const Showcase: Story = {
+export const Ex1_CardVariant: Story = {
+  name: "01: Rich Card Variant",
   render: () => {
     const [plan, setPlan] = useState("pro");
-
     return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 32, maxWidth: 560, padding: 24, margin: "16px 0 0 16px" }}>
-        {/* 1. Default Column & Row */}
-        <section style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#123333", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-            1. Standard Radio Groups
-          </h4>
-          <RadioGroup
-            label="Inference Device Priority"
-            defaultValue="gpu"
-            options={[
-              { value: "cpu", label: "CPU Cluster (Standard Latency)" },
-              { value: "gpu", label: "NVIDIA H100 Tensor Core (High Speed)" },
-              { value: "tpu", label: "Google TPU v5e (Large Scale Batch)" },
-            ]}
-          />
-        </section>
-
-        {/* 2. Rich Card Variant */}
-        <section style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#123333", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-            2. Rich Card Variant
-          </h4>
-          <RadioGroup
-            label="Select Subscription Tier"
-            variant="card"
-            value={plan}
-            onValueChange={setPlan}
-            options={[
-              {
-                value: "starter",
-                label: "Developer Starter",
-                description: "Includes 1,000,000 monthly token quota and 5 active projects.",
-                icon: "Developer",
-              },
-              {
-                value: "pro",
-                label: "Professional Scale",
-                description: "Includes 10,000,000 monthly token quota, dedicated support, and custom fine-tuning.",
-                icon: "Zap",
-              },
-              {
-                value: "enterprise",
-                label: "Enterprise Sovereign",
-                description: "Unlimited token throughput, VPC deployment, and zero data retention SLA.",
-                icon: "ShieldCheck",
-              },
-            ]}
-          />
-        </section>
-
-        {/* 3. Compound Children Composition */}
-        <section style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#123333", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-            3. Compound Composition (Children)
-          </h4>
-          <RadioGroup label="Horizontal Layout" direction="row" defaultValue="us-east">
-            <Radio value="us-east" label="US-East (N. Virginia)" />
-            <Radio value="eu-west" label="EU-West (Frankfurt)" />
-            <Radio value="ap-south" label="AP-South (Mumbai)" />
-          </RadioGroup>
-        </section>
+      <div style={{ maxWidth: 560, padding: 16 }}>
+        <RadioGroup
+          label="Select Subscription Tier"
+          variant="card"
+          value={plan}
+          onValueChange={setPlan}
+          options={[
+            {
+              value: "starter",
+              label: "Developer Starter",
+              description: "Includes 1,000,000 monthly token quota and 5 active projects.",
+              icon: "Developer",
+            },
+            {
+              value: "pro",
+              label: "Professional Scale",
+              description: "Includes 10,000,000 monthly token quota, dedicated support, and custom fine-tuning.",
+              icon: "Zap",
+            },
+            {
+              value: "enterprise",
+              label: "Enterprise Sovereign",
+              description: "Unlimited token throughput, VPC deployment, and zero data retention SLA.",
+              icon: "ShieldCheck",
+            },
+          ]}
+        />
       </div>
     );
   },
+};
+
+export const Ex2_CompoundComposition: Story = {
+  name: "02: Compound Composition (Children)",
+  render: () => (
+    <div style={{ maxWidth: 560, padding: 16 }}>
+      <RadioGroup label="Horizontal Layout" direction="row" defaultValue="us-east">
+        <Radio value="us-east" label="US-East (N. Virginia)" />
+        <Radio value="eu-west" label="EU-West (Frankfurt)" />
+        <Radio value="ap-south" label="AP-South (Mumbai)" />
+      </RadioGroup>
+    </div>
+  ),
 };

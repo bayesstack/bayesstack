@@ -30,6 +30,26 @@ export interface ModalZoomProps {
    * @default true
    */
   downloadable?: boolean;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: ModalZoomClassNames;
+}
+
+export interface ModalZoomClassNames {
+  root?: string;
+  backdrop?: string;
+  toolbar?: string;
+  title?: string;
+  actions?: string;
+  stage?: string;
+  img?: string;
 }
 
 export function ModalZoom({
@@ -38,6 +58,8 @@ export function ModalZoom({
   src,
   alt = "Media Preview",
   downloadable = true,
+  className = "",
+  classNames,
 }: ModalZoomProps) {
   const [scale, setScale] = useState(1);
 
@@ -55,14 +77,24 @@ export function ModalZoom({
   };
 
   const zoomContent = (
-    <div className="bs-modal-zoom-backdrop" onClick={onClose}>
+    <div
+      className={[
+        "bs-modal-zoom-backdrop",
+        className,
+        classNames?.root,
+        classNames?.backdrop,
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      onClick={onClose}
+    >
       {/* Top Toolbar */}
       <div
-        className="bs-modal-zoom-toolbar"
+        className={["bs-modal-zoom-toolbar", classNames?.toolbar].filter(Boolean).join(" ")}
         onClick={(e) => e.stopPropagation()}
       >
-        <span className="bs-modal-zoom-title">{alt}</span>
-        <div className="bs-modal-zoom-actions">
+        <span className={["bs-modal-zoom-title", classNames?.title].filter(Boolean).join(" ")}>{alt}</span>
+        <div className={["bs-modal-zoom-actions", classNames?.actions].filter(Boolean).join(" ")}>
           <IconButton
             name="Search"
             label="Zoom In"
@@ -105,13 +137,13 @@ export function ModalZoom({
 
       {/* Main Image Stage */}
       <div
-        className="bs-modal-zoom-stage"
+        className={["bs-modal-zoom-stage", classNames?.stage].filter(Boolean).join(" ")}
         onClick={(e) => e.stopPropagation()}
       >
         <img
           src={src}
           alt={alt}
-          className="bs-modal-zoom-img"
+          className={["bs-modal-zoom-img", classNames?.img].filter(Boolean).join(" ")}
           style={{ transform: `scale(${scale})` }}
         />
       </div>

@@ -43,6 +43,24 @@ export interface SortableListProps<T extends SortableListItem = SortableListItem
    * @default false
    */
   disabled?: boolean;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: SortableListClassNames;
+}
+
+export interface SortableListClassNames {
+  root?: string;
+  item?: string;
+  handle?: string;
+  content?: string;
+  actions?: string;
 }
 
 export function SortableList<T extends SortableListItem = SortableListItem>({
@@ -53,6 +71,7 @@ export function SortableList<T extends SortableListItem = SortableListItem>({
   onRemove,
   disabled = false,
   className = "",
+  classNames,
   style,
   ...props
 }: SortableListProps<T>) {
@@ -111,7 +130,7 @@ export function SortableList<T extends SortableListItem = SortableListItem>({
 
   return (
     <div
-      className={["bs-sortable-list", className].filter(Boolean).join(" ")}
+      className={["bs-sortable-list", className, classNames?.root].filter(Boolean).join(" ")}
       style={style}
       {...props}
     >
@@ -133,23 +152,24 @@ export function SortableList<T extends SortableListItem = SortableListItem>({
               isDragging ? "bs-sortable-list-item--dragging" : "",
               isDragOver ? "bs-sortable-list-item--drag-over" : "",
               isItemDisabled ? "bs-sortable-list-item--disabled" : "",
+              classNames?.item,
             ]
               .filter(Boolean)
               .join(" ")}
           >
             {/* Drag Handle Icon */}
-            <div className="bs-sortable-handle" title="Drag to reorder">
+            <div className={["bs-sortable-handle", classNames?.handle].filter(Boolean).join(" ")} title="Drag to reorder">
               <Icon name="Menu" size={16} />
             </div>
 
             {/* Item Content */}
-            <div className="bs-sortable-content">
+            <div className={["bs-sortable-content", classNames?.content].filter(Boolean).join(" ")}>
               {renderItem ? renderItem(item, index) : item.label || String(item.id)}
             </div>
 
             {/* Quick Move Up/Down Controls */}
             {!isItemDisabled && (
-              <div className="bs-sortable-actions">
+              <div className={["bs-sortable-actions", classNames?.actions].filter(Boolean).join(" ")}>
                 <IconButton
                   name="ChevronUp"
                   label="Move up"

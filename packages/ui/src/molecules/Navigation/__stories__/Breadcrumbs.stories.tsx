@@ -1,6 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Breadcrumbs } from ".././Breadcrumbs";
+import { Breadcrumbs } from "../Breadcrumbs";
 
 const meta: Meta<typeof Breadcrumbs> = {
   title: "Molecules/Navigation/Breadcrumbs",
@@ -25,24 +25,9 @@ export const Playground: Story = {
     ],
   },
   render: (args) => (
-    <div style={{ maxWidth: 640, padding: 24, margin: "16px 0 0 16px" }}>
+    <div style={{ maxWidth: 640, padding: 16 }}>
       <Breadcrumbs {...args} />
     </div>
   ),
 };
 
-export const Showcase: Story = {
-  render: () => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 24, maxWidth: 640, padding: 24, margin: "16px 0 0 16px" }}>
-      <Breadcrumbs
-        showHomeIcon
-        separator="ArrowRight"
-        items={[
-          { label: "Projects", icon: "Folder" },
-          { label: "NLP Models" },
-          { label: "Evaluation Benchmarks" },
-        ]}
-      />
-    </div>
-  ),
-};

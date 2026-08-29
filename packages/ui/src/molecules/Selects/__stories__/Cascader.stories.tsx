@@ -1,10 +1,13 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import React, { useState } from "react";
-import { Cascader, type CascaderOption } from ".././Cascader";
+import { Cascader, type CascaderOption } from "../Cascader";
 
 const meta: Meta<typeof Cascader> = {
   title: "Molecules/Selects/Cascader",
   component: Cascader,
+  parameters: {
+    layout: "padded",
+  },
   argTypes: {
     expandTrigger: {
       control: "select",
@@ -20,7 +23,7 @@ const meta: Meta<typeof Cascader> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof Cascader>;
+type Story = StoryObj<typeof meta>;
 
 const SAMPLE_OPTIONS: CascaderOption[] = [
   {
@@ -70,30 +73,28 @@ const SAMPLE_OPTIONS: CascaderOption[] = [
   },
 ];
 
-export const Default: Story = {
-  render: () => {
+export const Playground: Story = {
+  args: {
+    label: "Select Location",
+    options: SAMPLE_OPTIONS,
+    placeholder: "Pick Region > State > City...",
+    expandTrigger: "click",
+    clearable: true,
+  },
+  render: (args) => {
     const [path, setPath] = useState<string[]>(["us", "ca", "sf"]);
-
     return (
-      <div style={{ width: 360 }}>
-        <Cascader
-          label="Select Location"
-          options={SAMPLE_OPTIONS}
-          value={path}
-          onValueChange={(val) => setPath(val)}
-          placeholder="Pick Region > State > City..."
-        />
-        <div style={{ marginTop: 12, fontSize: 12, color: "#4A6360" }}>
-          Selected Path: {JSON.stringify(path)}
-        </div>
+      <div style={{ width: 360, padding: 16 }}>
+        <Cascader {...args} value={path} onValueChange={(val) => setPath(val)} />
       </div>
     );
   },
 };
 
-export const HoverTrigger: Story = {
+export const Ex1_HoverTrigger: Story = {
+  name: "01: Hover Submenu Expansion",
   render: () => (
-    <div style={{ width: 360 }}>
+    <div style={{ width: 360, padding: 16 }}>
       <Cascader
         label="Hover Expansion"
         options={SAMPLE_OPTIONS}
@@ -104,9 +105,10 @@ export const HoverTrigger: Story = {
   ),
 };
 
-export const ChangeOnSelect: Story = {
+export const Ex2_ChangeOnSelect: Story = {
+  name: "02: Select Intermediate Levels",
   render: () => (
-    <div style={{ width: 360 }}>
+    <div style={{ width: 360, padding: 16 }}>
       <Cascader
         label="Select Any Level"
         options={SAMPLE_OPTIONS}

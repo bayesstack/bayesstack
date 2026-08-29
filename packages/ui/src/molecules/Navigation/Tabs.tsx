@@ -52,6 +52,23 @@ export interface TabsProps
    * @default 'md'
    */
   size?: "sm" | "md" | "lg";
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: TabsClassNames;
+}
+
+export interface TabsClassNames {
+  root?: string;
+  tab?: string;
+  activeTab?: string;
+  badge?: string;
 }
 
 export const Tabs = forwardRef<HTMLDivElement, TabsProps>(
@@ -65,11 +82,13 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(
       direction = "row",
       size = "md",
       className = "",
+      classNames,
       style,
       ...props
     },
     ref
   ) => {
+    // Uncontrolled active tab resolution: defaults to explicit defaultValue, or falls back to first item value
     const isControlled = value !== undefined;
     const initialVal = defaultValue || (items.length > 0 ? items[0].value : "");
     const [internalValue, setInternalValue] = useState<string>(initialVal);
@@ -103,6 +122,7 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(
           `bs-tabs--${direction}`,
           `bs-tabs--${size}`,
           className,
+          classNames?.root,
         ]
           .filter(Boolean)
           .join(" ")}
@@ -123,6 +143,8 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(
                 "bs-tab-item",
                 isActive ? "bs-tab-item--active" : "",
                 tab.disabled ? "bs-tab-item--disabled" : "",
+                classNames?.tab,
+                isActive ? classNames?.activeTab : "",
               ]
                 .filter(Boolean)
                 .join(" ")}
@@ -130,7 +152,11 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(
             >
               {renderTabIcon(tab.icon)}
               <span>{tab.label}</span>
-              {tab.badge && <span className="bs-tab-badge">{tab.badge}</span>}
+              {tab.badge && (
+                <span className={["bs-tab-badge", classNames?.badge].filter(Boolean).join(" ")}>
+                  {tab.badge}
+                </span>
+              )}
             </button>
           );
         })}

@@ -57,6 +57,26 @@ export interface CalendarProps
    * @default 'md'
    */
   size?: "sm" | "md" | "lg";
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: CalendarClassNames;
+}
+
+export interface CalendarClassNames {
+  root?: string;
+  toolbar?: string;
+  monthBlock?: string;
+  header?: string;
+  weekdays?: string;
+  grid?: string;
+  dayBtn?: string;
 }
 
 const MONTH_NAMES = [
@@ -89,6 +109,7 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(
       maxDate,
       size = "md",
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -150,6 +171,8 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(
       return t > start.getTime() && t < end.getTime();
     };
 
+    // Range selection algorithm: first click sets start date; second click sets end date
+    // (auto-swaps dates if second click is earlier than start date to preserve valid [start, end] order).
     const handleSelectDay = (year: number, month: number, day: number) => {
       const selected = new Date(year, month, day);
 
@@ -190,7 +213,7 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(
       });
     };
 
-    // Render single month grid
+    // Computes total days in month via 0-day trick (Date(year, month + 1, 0)) and prepends empty cell padding for weekday offset
     const renderMonthGrid = (year: number, month: number) => {
       const daysInMonth = new Date(year, month + 1, 0).getDate();
       const firstDayOfWeek = new Date(year, month, 1).getDay();
@@ -289,6 +312,7 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(
           "bs-calendar-card",
           `bs-calendar-card--${size}`,
           className,
+          classNames?.root,
         ]
           .filter(Boolean)
           .join(" ")}

@@ -131,12 +131,12 @@ Molecules combine two or more Atoms into cohesive functional controls.
 | # | Component | Folder / Group | Primary Origin | Description & Capabilities | Target Priority | Sign Off |
 |---|---|---|---|---|---|---|
 | **Feedback** | | | | | | |
-| 44 | **Alert** | `Feedback` | Bubbles | Notification banner combining Icon, Title/Text, and close trigger. | 🔴 High (Wave 1) | — |
+| 44 | **Alert** | `Feedback` | Bubbles | Notification banner combining Icon, Title/Text, and close trigger. | 🔴 High (Wave 1) | ✅ Passed |
 | **ChoiceGroups** | | | | | | |
-| 45 | **CheckboxGroup** | `ChoiceGroups` | Bubbles | Multi-select checkbox container group. | 🔴 High (Wave 1) | — |
-| 46 | **RadioGroup** | `ChoiceGroups` | Bubbles | Manages selection state and keyboard navigation across multiple Radio inputs. | 🔴 High (Wave 1) | — |
+| 45 | **CheckboxGroup** | `ChoiceGroups` | Bubbles | Multi-select checkbox container group. | 🔴 High (Wave 1) | ✅ Passed |
+| 46 | **RadioGroup** | `ChoiceGroups` | Bubbles | Manages selection state and keyboard navigation across multiple Radio inputs. | 🔴 High (Wave 1) | ✅ Passed |
 | **Dropdown** | | | | | | |
-| 47 | **Dropdown** | `Dropdown` | Ant Design | Enterprise floating menu supporting nested submenus, pointer arrows, selectable checkmarks, shortcuts, and placements. | 🟡 Medium (Wave 2) | — |
+| 47 | **Dropdown** | `Dropdown` | Ant Design | Enterprise floating menu supporting nested submenus, pointer arrows, selectable checkmarks, shortcuts, and placements. | 🟡 Medium (Wave 2) | ✅ Passed |
 | **Navigation** | | | | | | |
 | 48 | **Breadcrumbs** | `Navigation` | Bubbles | Link navigation path with custom separator icons. | 🔴 High (Wave 1) | — |
 | 49 | **Tabs** | `Navigation` | Bubbles | Navigation tab bar supporting underline, pill, and icon styles. | 🔴 High (Wave 1) | — |

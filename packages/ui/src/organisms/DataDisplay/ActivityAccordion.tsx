@@ -29,12 +29,35 @@ export interface ActivityAccordionProps
    * Initially expanded activity item IDs
    */
   defaultExpandedIds?: string[];
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: ActivityAccordionClassNames;
+}
+
+export interface ActivityAccordionClassNames {
+  root?: string;
+  item?: string;
+  card?: string;
+  header?: string;
+  actor?: string;
+  action?: string;
+  target?: string;
+  timestamp?: string;
+  details?: string;
 }
 
 export function ActivityAccordion({
   items = [],
   defaultExpandedIds = [],
   className = "",
+  classNames,
   style,
   ...props
 }: ActivityAccordionProps) {
@@ -48,7 +71,7 @@ export function ActivityAccordion({
 
   return (
     <div
-      className={["bs-activity-accordion", className].filter(Boolean).join(" ")}
+      className={["bs-activity-accordion", className, classNames?.root].filter(Boolean).join(" ")}
       style={style}
       {...props}
     >
@@ -63,6 +86,7 @@ export function ActivityAccordion({
             className={[
               "bs-activity-item",
               isExpanded ? "bs-activity-item--expanded" : "",
+              classNames?.item,
             ]
               .filter(Boolean)
               .join(" ")}
@@ -76,17 +100,17 @@ export function ActivityAccordion({
             </div>
 
             {/* Main Item Card */}
-            <div className="bs-activity-card">
+            <div className={["bs-activity-card", classNames?.card].filter(Boolean).join(" ")}>
               <div
-                className="bs-activity-header"
+                className={["bs-activity-header", classNames?.header].filter(Boolean).join(" ")}
                 onClick={() => hasDetails && toggleExpand(item.id)}
                 style={{ cursor: hasDetails ? "pointer" : "default" }}
               >
                 <div className="bs-activity-title-group">
-                  <span className="bs-activity-actor">{item.actor.name}</span>
-                  <span className="bs-activity-action">{item.action}</span>
+                  <span className={["bs-activity-actor", classNames?.actor].filter(Boolean).join(" ")}>{item.actor.name}</span>
+                  <span className={["bs-activity-action", classNames?.action].filter(Boolean).join(" ")}>{item.action}</span>
                   {item.target && (
-                    <span className="bs-activity-target">{item.target}</span>
+                    <span className={["bs-activity-target", classNames?.target].filter(Boolean).join(" ")}>{item.target}</span>
                   )}
                   {item.tag && (
                     <Badge size="sm" variant="subtle" color={item.status || "neutral"}>
@@ -96,7 +120,7 @@ export function ActivityAccordion({
                 </div>
 
                 <div className="bs-activity-meta-right">
-                  <span className="bs-activity-timestamp">{item.timestamp}</span>
+                  <span className={["bs-activity-timestamp", classNames?.timestamp].filter(Boolean).join(" ")}>{item.timestamp}</span>
                   {hasDetails && (
                     <Icon
                       name={isExpanded ? "ChevronUp" : "ChevronDown"}
@@ -109,7 +133,7 @@ export function ActivityAccordion({
 
               {/* Expandable Details Drawer */}
               {isExpanded && item.details && (
-                <div className="bs-activity-details-panel">{item.details}</div>
+                <div className={["bs-activity-details-panel", classNames?.details].filter(Boolean).join(" ")}>{item.details}</div>
               )}
             </div>
           </div>

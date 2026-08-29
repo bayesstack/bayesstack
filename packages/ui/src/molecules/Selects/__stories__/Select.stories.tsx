@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, within, fn } from "@storybook/test";
-import { Select } from ".././Select";
+import { Select } from "../Select";
 
 const meta: Meta<typeof Select> = {
   title: "Molecules/Selects/Select",
@@ -41,7 +41,7 @@ export const Playground: Story = {
     onValueChange: fn(),
   },
   render: (args) => (
-    <div style={{ maxWidth: 440, padding: 24, margin: "16px 0 0 16px" }}>
+    <div style={{ maxWidth: 440, padding: 16 }}>
       <Select {...args} />
     </div>
   ),
@@ -50,10 +50,8 @@ export const Playground: Story = {
     const trigger = canvas.getByText(/GPT-4 Omni/i);
     await expect(trigger).toBeInTheDocument();
 
-    // Click trigger to open dropdown
     await userEvent.click(trigger);
 
-    // Search for Claude
     const searchInput = await canvas.findByPlaceholderText(/Search/i);
     await userEvent.type(searchInput, "Claude");
 
@@ -61,53 +59,6 @@ export const Playground: Story = {
     await userEvent.click(option);
 
     await expect(args.onValueChange).toHaveBeenCalledWith("claude-3-5-sonnet");
-  },
-};
-
-export const Showcase: Story = {
-  render: () => {
-    const [model, setModel] = useState("claude-3-5-sonnet");
-
-    return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 32, maxWidth: 480, padding: 24, margin: "16px 0 0 16px" }}>
-        {/* 1. Basic & Searchable Select */}
-        <section style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#123333", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-            1. Searchable Select with Lead Icon
-          </h4>
-          <Select
-            label="Primary Evaluation LLM"
-            options={sampleOptions}
-            searchable
-            clearable
-            prefixIcon="Brain"
-            value={model}
-            onValueChange={setModel}
-            helperText={`Active selection: ${model}`}
-          />
-        </section>
-
-        {/* 2. Validation Error State */}
-        <section style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#123333", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-            2. Validation Error State
-          </h4>
-          <Select
-            label="Vector Index Region"
-            options={[
-              { value: "us-east-1", label: "US East (N. Virginia)" },
-              { value: "eu-central-1", label: "EU Central (Frankfurt)" },
-            ]}
-            error="Selected region is currently at maximum capacity."
-          />
-        </section>
-      </div>
-    );
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    const errorMsg = canvas.getByText("Selected region is currently at maximum capacity.");
-    await expect(errorMsg).toBeInTheDocument();
   },
 };
 

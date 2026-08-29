@@ -1,5 +1,6 @@
 import React, { forwardRef, useState, useRef, useEffect } from "react";
 import { Button } from "../../atoms/Buttons/Button";
+import { useSmartPositioning } from "./useSmartPositioning";
 import "./Popovers.css";
 
 export interface PopconfirmProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
@@ -45,9 +46,33 @@ export interface PopconfirmProps extends Omit<React.HTMLAttributes<HTMLDivElemen
   onCancel?: () => void;
 
   /**
+   * Placement orientation
+   * @default 'bottom'
+   */
+  placement?: "top" | "bottom" | "left" | "right";
+
+  /**
    * Trigger child element
    */
   children: React.ReactNode;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: PopconfirmClassNames;
+}
+
+export interface PopconfirmClassNames {
+  root?: string;
+  panel?: string;
+  title?: string;
+  description?: string;
+  actions?: string;
 }
 
 export const Popconfirm = forwardRef<HTMLDivElement, PopconfirmProps>(
@@ -58,10 +83,12 @@ export const Popconfirm = forwardRef<HTMLDivElement, PopconfirmProps>(
       okText = "Confirm",
       cancelText = "Cancel",
       severity = "danger",
+      placement = "bottom",
       onConfirm,
       onCancel,
       children,
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -69,6 +96,14 @@ export const Popconfirm = forwardRef<HTMLDivElement, PopconfirmProps>(
   ) => {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const panelRef = useRef<HTMLDivElement>(null);
+
+    const { placement: smartPlacement, align } = useSmartPositioning({
+      containerRef,
+      panelRef,
+      isOpen,
+      preferredPlacement: placement,
+    });
 
     useEffect(() => {
       const handleClickOutside = (e: MouseEvent) => {
@@ -83,6 +118,7 @@ export const Popconfirm = forwardRef<HTMLDivElement, PopconfirmProps>(
       return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    // Close popover panel first before triggering consumer callbacks to prevent duplicate click events
     const handleConfirm = () => {
       setIsOpen(false);
       if (onConfirm) onConfirm();
@@ -93,6 +129,7 @@ export const Popconfirm = forwardRef<HTMLDivElement, PopconfirmProps>(
       if (onCancel) onCancel();
     };
 
+    // Severity to Button variant mapping: 'danger' uses red fill, 'warning' uses secondary, 'info' uses primary teal
     const buttonVariant =
       severity === "danger"
         ? "danger"
@@ -103,7 +140,7 @@ export const Popconfirm = forwardRef<HTMLDivElement, PopconfirmProps>(
     return (
       <div
         ref={containerRef}
-        className={["bs-popover-wrapper", className].filter(Boolean).join(" ")}
+        className={["bs-popover-wrapper", className, classNames?.root].filter(Boolean).join(" ")}
         style={style}
         {...props}
       >
@@ -112,12 +149,22 @@ export const Popconfirm = forwardRef<HTMLDivElement, PopconfirmProps>(
         </div>
 
         {isOpen && (
-          <div className="bs-popover-panel bs-popover-panel--bottom">
-            <div className="bs-popover-title">{title}</div>
+          <div
+            ref={panelRef}
+            className={[
+              "bs-popover-panel",
+              `bs-popover-panel--${smartPlacement}`,
+              `bs-popover-align--${align}`,
+              classNames?.panel,
+            ]
+              .filter(Boolean)
+              .join(" ")}
+          >
+            <div className={["bs-popover-title", classNames?.title].filter(Boolean).join(" ")}>{title}</div>
             {description && (
-              <div className="bs-popover-content">{description}</div>
+              <div className={["bs-popover-content", classNames?.description].filter(Boolean).join(" ")}>{description}</div>
             )}
-            <div className="bs-popconfirm-actions">
+            <div className={["bs-popconfirm-actions", classNames?.actions].filter(Boolean).join(" ")}>
               <Button size="xs" variant="outline" onClick={handleCancel}>
                 {cancelText}
               </Button>

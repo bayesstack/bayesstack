@@ -192,7 +192,7 @@
 }
 
 /* 4. Notification Toast Styles */
-.bs-notification-container {
+.bs-toast-container {
   position: fixed;
   bottom: 24px;
   right: 24px;
@@ -204,7 +204,7 @@
   width: 100%;
 }
 
-.bs-notification {
+.bs-toast {
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -222,33 +222,33 @@
   to { opacity: 1; transform: translateX(0); }
 }
 
-.bs-notification--info { border-left-color: #0284C7; }
-.bs-notification--success { border-left-color: #10B981; }
-.bs-notification--warning { border-left-color: #F59E0B; }
-.bs-notification--danger { border-left-color: #EF4444; }
+.bs-toast--info { border-left-color: #0284C7; }
+.bs-toast--success { border-left-color: #10B981; }
+.bs-toast--warning { border-left-color: #F59E0B; }
+.bs-toast--danger { border-left-color: #EF4444; }
 
-.bs-notification-icon {
+.bs-toast-icon {
   margin-top: 2px;
   flex-shrink: 0;
 }
 
-.bs-notification--info .bs-notification-icon { color: #0284C7; }
-.bs-notification--success .bs-notification-icon { color: #10B981; }
-.bs-notification--warning .bs-notification-icon { color: #F59E0B; }
-.bs-notification--danger .bs-notification-icon { color: #EF4444; }
+.bs-toast--info .bs-toast-icon { color: #0284C7; }
+.bs-toast--success .bs-toast-icon { color: #10B981; }
+.bs-toast--warning .bs-toast-icon { color: #F59E0B; }
+.bs-toast--danger .bs-toast-icon { color: #EF4444; }
 
-.bs-notification-body {
+.bs-toast-body {
   flex: 1;
 }
 
-.bs-notification-title {
+.bs-toast-title {
   margin: 0 0 2px 0;
   font-size: 14px;
   font-weight: 700;
   color: #123333;
 }
 
-.bs-notification-message {
+.bs-toast-message {
   font-size: 13px;
   color: #59716E;
 }
@@ -557,7 +557,7 @@
 }
 
 .bs-spotlight-container--dark .bs-spotlight-search-input::placeholder {
-  color: #64748B;
+  color: #94A3B8;
 }
 
 .bs-spotlight-container--dark .bs-spotlight-kbd-badge {
@@ -567,7 +567,7 @@
 }
 
 .bs-spotlight-container--dark .bs-spotlight-group-header {
-  color: #64748B;
+  color: #94A3B8;
 }
 
 .bs-spotlight-container--dark .bs-spotlight-item:hover,
@@ -605,7 +605,7 @@
 }
 
 .bs-spotlight-container--dark .bs-spotlight-footer-hint {
-  color: #64748B;
+  color: #94A3B8;
 }
 
 .bs-spotlight-container--dark .bs-spotlight-footer-kbd {

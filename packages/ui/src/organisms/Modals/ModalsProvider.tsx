@@ -83,6 +83,8 @@ export function ModalsProvider({ children }: { children: React.ReactNode }) {
             description={m.description}
             size={m.size}
             footer={footer}
+            className={m.className}
+            classNames={m.classNames}
           >
             {m.children}
           </Modal>

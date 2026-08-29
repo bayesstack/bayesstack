@@ -90,7 +90,7 @@
 /* Validation Messages */
 .bs-choice-group__helper {
   font-size: 12px;
-  color: var(--bs-color-text-muted, #64748B);
+  color: var(--bs-color-text-muted, #475569);
 }
 
 .bs-choice-group__error {

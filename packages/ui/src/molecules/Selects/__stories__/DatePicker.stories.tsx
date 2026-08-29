@@ -1,40 +1,42 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import React, { useState } from "react";
-import { DatePicker } from ".././DatePicker";
+import { DatePicker } from "../DatePicker";
 
 const meta: Meta<typeof DatePicker> = {
   title: "Molecules/Selects/DatePicker",
   component: DatePicker,
+  parameters: {
+    layout: "padded",
+  },
   argTypes: {
     range: { control: "boolean" },
     withTime: { control: "boolean" },
     disabled: { control: "boolean" },
+    label: { control: "text" },
   },
 };
 
 export default meta;
-type Story = StoryObj<typeof DatePicker>;
+type Story = StoryObj<typeof meta>;
 
-export const SingleDate: Story = {
-  render: () => {
+export const Playground: Story = {
+  args: {
+    label: "Target Date",
+    range: false,
+    withTime: false,
+  },
+  render: (args) => {
     const [date, setDate] = useState<Date | null>(new Date());
-
     return (
-      <div style={{ width: 320 }}>
-        <DatePicker
-          label="Target Date"
-          value={date}
-          onValueChange={setDate}
-        />
-        <div style={{ marginTop: 12, fontSize: 12, color: "#4A6360" }}>
-          Selected Date: {date ? date.toISOString().split("T")[0] : "None"}
-        </div>
+      <div style={{ width: 320, padding: 16 }}>
+        <DatePicker {...args} value={date} onValueChange={setDate} />
       </div>
     );
   },
 };
 
-export const DateRangePicker: Story = {
+export const Ex1_DateRangePicker: Story = {
+  name: "01: Date Range Picker",
   render: () => {
     const [range, setRange] = useState<[Date | null, Date | null]>([
       new Date(),
@@ -42,7 +44,7 @@ export const DateRangePicker: Story = {
     ]);
 
     return (
-      <div style={{ width: 340 }}>
+      <div style={{ width: 340, padding: 16 }}>
         <DatePicker
           label="Deployment Window (Range)"
           range
@@ -54,12 +56,13 @@ export const DateRangePicker: Story = {
   },
 };
 
-export const WithTimeInput: Story = {
+export const Ex2_WithTimeInput: Story = {
+  name: "02: Date & Time Picker",
   render: () => {
     const [date, setDate] = useState<Date | null>(new Date());
 
     return (
-      <div style={{ width: 340 }}>
+      <div style={{ width: 340, padding: 16 }}>
         <DatePicker
           label="Scheduled Execution Time"
           withTime

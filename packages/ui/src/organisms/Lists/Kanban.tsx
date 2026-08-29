@@ -90,6 +90,29 @@ export interface KanbanProps
    * @default false
    */
   disabled?: boolean;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: KanbanClassNames;
+}
+
+export interface KanbanClassNames {
+  root?: string;
+  toolbar?: string;
+  stage?: string;
+  column?: string;
+  columnHeader?: string;
+  cardsContainer?: string;
+  card?: string;
+  cardTitle?: string;
+  cardDesc?: string;
+  cardFooter?: string;
 }
 
 export function Kanban({
@@ -104,6 +127,7 @@ export function Kanban({
   draggableColumns = true,
   disabled = false,
   className = "",
+  classNames,
   style,
   ...props
 }: KanbanProps) {
@@ -239,13 +263,13 @@ export function Kanban({
 
   return (
     <div
-      className={["bs-kanban-wrapper", className].filter(Boolean).join(" ")}
+      className={["bs-kanban-wrapper", className, classNames?.root].filter(Boolean).join(" ")}
       style={style}
       {...props}
     >
       {/* Search Filter Header */}
       {searchable && (
-        <div className="bs-kanban-toolbar">
+        <div className={["bs-kanban-toolbar", classNames?.toolbar].filter(Boolean).join(" ")}>
           <div className="bs-kanban-search-box">
             <Icon name="Search" size={15} className="bs-kanban-search-icon" />
             <input
@@ -269,7 +293,7 @@ export function Kanban({
       )}
 
       {/* Kanban Board Stage */}
-      <div className="bs-kanban-stage">
+      <div className={["bs-kanban-stage", classNames?.stage].filter(Boolean).join(" ")}>
         {columns.map((column) => {
           const columnCards = filteredCards.filter((c) => c.columnId === column.id);
           const isColumnDragOver = dragOverColumnId === column.id;
@@ -283,7 +307,7 @@ export function Kanban({
             return (
               <div
                 key={column.id}
-                className="bs-kanban-column bs-kanban-column--collapsed"
+                className={["bs-kanban-column", "bs-kanban-column--collapsed", classNames?.column].filter(Boolean).join(" ")}
                 onClick={() => toggleColumnCollapse(column.id)}
                 title={`Expand ${column.title}`}
               >
@@ -315,12 +339,13 @@ export function Kanban({
                 "bs-kanban-column",
                 isColumnDragOver ? "bs-kanban-column--drag-over" : "",
                 isWipExceeded ? "bs-kanban-column--wip-exceeded" : "",
+                classNames?.column,
               ]
                 .filter(Boolean)
                 .join(" ")}
             >
               {/* Column Header */}
-              <div className="bs-kanban-column-header">
+              <div className={["bs-kanban-column-header", classNames?.columnHeader].filter(Boolean).join(" ")}>
                 <div className="bs-kanban-column-title-group">
                   {draggableColumns && (
                     <span className="bs-kanban-column-grab-handle" title="Drag to reorder column">
@@ -366,7 +391,7 @@ export function Kanban({
               </div>
 
               {/* Column Cards Container */}
-              <div className="bs-kanban-cards-container">
+              <div className={["bs-kanban-cards-container", classNames?.cardsContainer].filter(Boolean).join(" ")}>
                 {columnCards.map((card) => {
                   const isDragging = draggedCardId === card.id;
 
@@ -380,6 +405,7 @@ export function Kanban({
                       className={[
                         "bs-kanban-card",
                         isDragging ? "bs-kanban-card--dragging" : "",
+                        classNames?.card,
                       ]
                         .filter(Boolean)
                         .join(" ")}
@@ -436,9 +462,9 @@ export function Kanban({
                       </div>
 
                       {/* Card Title & Description */}
-                      <h5 className="bs-kanban-card-title">{card.title}</h5>
+                      <h5 className={["bs-kanban-card-title", classNames?.cardTitle].filter(Boolean).join(" ")}>{card.title}</h5>
                       {card.description && (
-                        <p className="bs-kanban-card-desc">{card.description}</p>
+                        <p className={["bs-kanban-card-desc", classNames?.cardDesc].filter(Boolean).join(" ")}>{card.description}</p>
                       )}
 
                       {/* Progress Bar (if available) */}
@@ -452,7 +478,7 @@ export function Kanban({
                       )}
 
                       {/* Card Footer: Assignee Avatars, Subtasks, Due Date */}
-                      <div className="bs-kanban-card-footer">
+                      <div className={["bs-kanban-card-footer", classNames?.cardFooter].filter(Boolean).join(" ")}>
                         {card.assignees && card.assignees.length > 0 ? (
                           <div className="bs-kanban-card-assignees">
                             {card.assignees.slice(0, 3).map((u, i) => (

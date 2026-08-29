@@ -79,6 +79,30 @@ export interface DatePickerProps
    * @default 'md'
    */
   size?: "sm" | "md" | "lg";
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: DatePickerClassNames;
+}
+
+export interface DatePickerClassNames {
+  root?: string;
+  label?: string;
+  trigger?: string;
+  popover?: string;
+  header?: string;
+  weekdays?: string;
+  grid?: string;
+  dayBtn?: string;
+  footer?: string;
+  error?: string;
+  helper?: string;
 }
 
 const MONTH_NAMES = [
@@ -116,6 +140,7 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
       helperText,
       size = "md",
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -137,8 +162,28 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
     const [viewYear, setViewYear] = useState<number>(initialViewDate.getFullYear());
     const [viewMonth, setViewMonth] = useState<number>(initialViewDate.getMonth());
 
-    // Time picker state (HH:mm)
-    const [timeString, setTimeString] = useState<string>("12:00");
+    // Time picker state
+    const [selectedHour, setSelectedHour] = useState<string>("12");
+    const [selectedMinute, setSelectedMinute] = useState<string>("00");
+    const [selectedPeriod, setSelectedPeriod] = useState<"AM" | "PM">("PM");
+    const [isTimePickerOpen, setIsTimePickerOpen] = useState<boolean>(false);
+
+    const timeString = `${selectedHour}:${selectedMinute} ${selectedPeriod}`;
+
+    const handleTimeChange = (h: string, m: string, p: "AM" | "PM") => {
+      setSelectedHour(h);
+      setSelectedMinute(m);
+      setSelectedPeriod(p);
+    };
+
+    const handleSelectPreset = (preset: string) => {
+      const match = preset.match(/^(\d{2}):(\d{2})\s*(AM|PM)$/i);
+      if (match) {
+        setSelectedHour(match[1]);
+        setSelectedMinute(match[2]);
+        setSelectedPeriod(match[3].toUpperCase() as "AM" | "PM");
+      }
+    };
 
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -272,7 +317,7 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
     return (
       <div
         ref={containerRef}
-        className={["bs-select-field", className].filter(Boolean).join(" ")}
+        className={["bs-select-field", className, classNames?.root].filter(Boolean).join(" ")}
         style={style}
         {...props}
       >
@@ -325,6 +370,7 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
               <button
                 type="button"
                 className="bs-datepicker-nav-btn"
+                aria-label="Previous month"
                 onClick={handlePrevMonth}
               >
                 <Icon name="ArrowLeft" size={14} />
@@ -335,6 +381,7 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
               <button
                 type="button"
                 className="bs-datepicker-nav-btn"
+                aria-label="Next month"
                 onClick={handleNextMonth}
               >
                 <Icon name="ArrowRight" size={14} />
@@ -400,14 +447,138 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
             {/* Time Slot & Footer Actions */}
             <div className="bs-datepicker-footer">
               {withTime && !range && (
-                <div className="bs-datepicker-time-group">
-                  <Icon name="Time" size={14} color="#4A6360" />
-                  <input
-                    type="time"
-                    className="bs-datepicker-time-input"
-                    value={timeString}
-                    onChange={(e) => setTimeString(e.target.value)}
-                  />
+                <div className="bs-datepicker-time-trigger-wrapper">
+                  <button
+                    type="button"
+                    className="bs-datepicker-time-picker-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsTimePickerOpen((prev) => !prev);
+                    }}
+                  >
+                    <Icon name="Time" size={14} color="#0B6763" />
+                    <span>{timeString}</span>
+                    <Icon name="ArrowDown" size={12} color="#4A6360" />
+                  </button>
+
+                  {isTimePickerOpen && (
+                    <div className="bs-datepicker-time-dropdown">
+                      {/* Quick Presets Bar */}
+                      <div className="bs-timeinput-presets">
+                        {["09:00 AM", "12:00 PM", "02:00 PM", "05:00 PM"].map((preset) => (
+                          <button
+                            key={preset}
+                            type="button"
+                            className={[
+                              "bs-timeinput-preset-pill",
+                              timeString === preset ? "bs-timeinput-preset-pill--active" : "",
+                            ]
+                              .filter(Boolean)
+                              .join(" ")}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSelectPreset(preset);
+                            }}
+                          >
+                            {preset}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Scrollable Column Selectors */}
+                      <div className="bs-timeinput-columns">
+                        {/* Hours */}
+                        <div className="bs-timeinput-column">
+                          <div className="bs-timeinput-column-title">Hours</div>
+                          <div className="bs-timeinput-column-list">
+                            {Array.from({ length: 12 }, (_, i) =>
+                              String(i + 1).padStart(2, "0")
+                            ).map((h) => (
+                              <button
+                                key={h}
+                                type="button"
+                                className={[
+                                  "bs-timeinput-cell",
+                                  selectedHour === h ? "bs-timeinput-cell--active" : "",
+                                ]
+                                  .filter(Boolean)
+                                  .join(" ")}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleTimeChange(h, selectedMinute, selectedPeriod);
+                                }}
+                              >
+                                {h}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Minutes */}
+                        <div className="bs-timeinput-column">
+                          <div className="bs-timeinput-column-title">Minutes</div>
+                          <div className="bs-timeinput-column-list">
+                            {[
+                              "00",
+                              "05",
+                              "10",
+                              "15",
+                              "20",
+                              "25",
+                              "30",
+                              "35",
+                              "40",
+                              "45",
+                              "50",
+                              "55",
+                            ].map((m) => (
+                              <button
+                                key={m}
+                                type="button"
+                                className={[
+                                  "bs-timeinput-cell",
+                                  selectedMinute === m ? "bs-timeinput-cell--active" : "",
+                                ]
+                                  .filter(Boolean)
+                                  .join(" ")}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleTimeChange(selectedHour, m, selectedPeriod);
+                                }}
+                              >
+                                {m}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Period */}
+                        <div className="bs-timeinput-column bs-timeinput-column--narrow">
+                          <div className="bs-timeinput-column-title">Period</div>
+                          <div className="bs-timeinput-column-list">
+                            {(["AM", "PM"] as const).map((p) => (
+                              <button
+                                key={p}
+                                type="button"
+                                className={[
+                                  "bs-timeinput-cell",
+                                  selectedPeriod === p ? "bs-timeinput-cell--active" : "",
+                                ]
+                                  .filter(Boolean)
+                                  .join(" ")}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleTimeChange(selectedHour, selectedMinute, p);
+                                }}
+                              >
+                                {p}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

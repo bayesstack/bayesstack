@@ -23,6 +23,21 @@ export interface TooltipProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
    * Target trigger child element
    */
   children: React.ReactNode;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: TooltipClassNames;
+}
+
+export interface TooltipClassNames {
+  root?: string;
+  bubble?: string;
 }
 
 export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
@@ -33,6 +48,7 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
       disabled = false,
       children,
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -40,6 +56,7 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
   ) => {
     const [isVisible, setIsVisible] = useState(false);
 
+    // Short-circuit: when disabled or message content is empty, pass children through directly without DOM wrapper overhead
     if (disabled || !content) {
       return <>{children}</>;
     }
@@ -47,8 +64,9 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
     return (
       <div
         ref={ref}
-        className={["bs-tooltip-wrapper", className].filter(Boolean).join(" ")}
+        className={["bs-tooltip-wrapper", className, classNames?.root].filter(Boolean).join(" ")}
         style={style}
+        // Support mouse hover and keyboard focus/blur to satisfy WCAG 2.1 SC 1.4.13 (Content on Hover or Focus)
         onMouseEnter={() => setIsVisible(true)}
         onMouseLeave={() => setIsVisible(false)}
         onFocus={() => setIsVisible(true)}
@@ -61,7 +79,10 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
             className={[
               "bs-tooltip-bubble",
               `bs-tooltip-bubble--${placement}`,
-            ].join(" ")}
+              classNames?.bubble,
+            ]
+              .filter(Boolean)
+              .join(" ")}
             role="tooltip"
           >
             {content}

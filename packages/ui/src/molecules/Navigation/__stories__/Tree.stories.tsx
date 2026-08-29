@@ -1,10 +1,13 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import React, { useState } from "react";
-import { Tree, type TreeNode } from ".././Tree";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import React from "react";
+import { Tree, type TreeNode } from "../Tree";
 
 const meta: Meta<typeof Tree> = {
   title: "Molecules/Navigation/Tree",
   component: Tree,
+  parameters: {
+    layout: "padded",
+  },
   argTypes: {
     selectable: { control: "boolean" },
     multiple: { control: "boolean" },
@@ -13,7 +16,7 @@ const meta: Meta<typeof Tree> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof Tree>;
+type Story = StoryObj<typeof meta>;
 
 const SAMPLE_FILE_SYSTEM: TreeNode[] = [
   {
@@ -55,46 +58,18 @@ const SAMPLE_FILE_SYSTEM: TreeNode[] = [
   { id: "tsconfig.json", label: "tsconfig.json", icon: "FileCode" },
 ];
 
-export const Default: Story = {
-  render: () => {
-    const [selected, setSelected] = useState<(string | number)[]>(["Tree.tsx"]);
-
-    return (
-      <div style={{ width: 320, padding: 16, border: "1px solid #E2E8F0", borderRadius: 8 }}>
-        <Tree
-          data={SAMPLE_FILE_SYSTEM}
-          defaultExpandedKeys={["src", "molecules"]}
-          selectedKeys={selected}
-          onSelect={(keys) => setSelected(keys)}
-        />
-        <div style={{ marginTop: 16, fontSize: 12, color: "#4A6360" }}>
-          Selected Node: <strong>{selected.join(", ") || "None"}</strong>
-        </div>
-      </div>
-    );
+export const Playground: Story = {
+  args: {
+    data: SAMPLE_FILE_SYSTEM,
+    defaultExpandedKeys: ["src", "molecules"],
+    selectable: true,
+    multiple: false,
+    showLines: true,
   },
+  render: (args) => (
+    <div style={{ width: 320, padding: 16, border: "1px solid #E2E8F0", borderRadius: 8 }}>
+      <Tree {...args} />
+    </div>
+  ),
 };
 
-export const MultiSelectMode: Story = {
-  render: () => {
-    const [selected, setSelected] = useState<(string | number)[]>([
-      "Button.tsx",
-      "Icon.tsx",
-    ]);
-
-    return (
-      <div style={{ width: 320, padding: 16, border: "1px solid #E2E8F0", borderRadius: 8 }}>
-        <Tree
-          data={SAMPLE_FILE_SYSTEM}
-          defaultExpandedKeys={["src", "atoms"]}
-          selectedKeys={selected}
-          multiple
-          onSelect={(keys) => setSelected(keys)}
-        />
-        <div style={{ marginTop: 16, fontSize: 12, color: "#4A6360" }}>
-          Selected Nodes: <strong>{selected.join(", ") || "None"}</strong>
-        </div>
-      </div>
-    );
-  },
-};

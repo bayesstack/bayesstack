@@ -26,4 +26,20 @@ describe("HtmlText Component", () => {
     render(<HtmlText html="<p>Long paragraph content to truncate</p>" truncate={10} />);
     expect(screen.getByText(/Long parag/i)).toBeInTheDocument();
   });
+
+  it("renders embedded LaTeX math equations when enableLatex is true", () => {
+    const { container } = render(
+      <HtmlText html="<p>Formula $E = mc^2$ and block $$\int x dx$$</p>" enableLatex />
+    );
+    expect(container.querySelector(".bs-latex-inline")).toBeInTheDocument();
+    expect(container.querySelector(".bs-latex-block")).toBeInTheDocument();
+  });
+
+  it("skips rendering KaTeX when enableLatex is false", () => {
+    const { container } = render(
+      <HtmlText html="<p>Formula $E = mc^2$</p>" enableLatex={false} />
+    );
+    expect(container.querySelector(".bs-latex-inline")).not.toBeInTheDocument();
+    expect(container).toHaveTextContent("$E = mc^2$");
+  });
 });

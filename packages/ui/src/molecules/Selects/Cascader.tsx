@@ -83,6 +83,27 @@ export interface CascaderProps
    * @default 'md'
    */
   size?: "sm" | "md" | "lg";
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: CascaderClassNames;
+}
+
+export interface CascaderClassNames {
+  root?: string;
+  label?: string;
+  trigger?: string;
+  popover?: string;
+  column?: string;
+  option?: string;
+  error?: string;
+  helper?: string;
 }
 
 export const Cascader = forwardRef<HTMLDivElement, CascaderProps>(
@@ -102,6 +123,7 @@ export const Cascader = forwardRef<HTMLDivElement, CascaderProps>(
       helperText,
       size = "md",
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -138,7 +160,7 @@ export const Cascader = forwardRef<HTMLDivElement, CascaderProps>(
       return () => document.removeEventListener("mousedown", handleOutsideClick);
     }, []);
 
-    // Calculate options columns list based on activeNavPath
+    // Multi-column cascading resolution: builds array of option columns by traversing activeNavPath level by level
     const columns: CascaderOption[][] = [options];
     let currentLevelOptions = options;
 
@@ -175,11 +197,13 @@ export const Cascader = forwardRef<HTMLDivElement, CascaderProps>(
     ) => {
       if (disabled || option.disabled) return;
 
+      // Truncate path beyond current column levelIndex to clear stale child choices when choosing a new branch
       const newPath = [...activeNavPath.slice(0, levelIndex), option.value];
       setActiveNavPath(newPath);
 
       const hasChildren = Boolean(option.children && option.children.length > 0);
 
+      // When changeOnSelect is false, value change callback is deferred until reaching a leaf node
       if (!hasChildren || changeOnSelect) {
         if (!isControlled) {
           setInternalValue(newPath);
@@ -226,7 +250,7 @@ export const Cascader = forwardRef<HTMLDivElement, CascaderProps>(
     return (
       <div
         ref={containerRef}
-        className={["bs-select-field", className].filter(Boolean).join(" ")}
+        className={["bs-select-field", className, classNames?.root].filter(Boolean).join(" ")}
         style={style}
         {...props}
       >

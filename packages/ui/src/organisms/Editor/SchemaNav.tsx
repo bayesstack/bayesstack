@@ -23,6 +23,23 @@ export interface SchemaNavProps extends React.HTMLAttributes<HTMLDivElement> {
    * Heading click handler for smooth scrolling
    */
   onHeadingClick?: (headingId: string) => void;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: SchemaNavClassNames;
+}
+
+export interface SchemaNavClassNames {
+  root?: string;
+  header?: string;
+  list?: string;
+  item?: string;
 }
 
 export function SchemaNav({
@@ -30,12 +47,13 @@ export function SchemaNav({
   activeHeadingId,
   onHeadingClick,
   className = "",
+  classNames,
   style,
   ...props
 }: SchemaNavProps) {
   if (headings.length === 0) {
     return (
-      <div className="bs-editor-schemanav-empty">
+      <div className={["bs-editor-schemanav-empty", className, classNames?.root].filter(Boolean).join(" ")}>
         <Icon name="Menu" size={14} />
         <span>No headings in document</span>
       </div>
@@ -44,16 +62,16 @@ export function SchemaNav({
 
   return (
     <div
-      className={["bs-editor-schemanav", className].filter(Boolean).join(" ")}
+      className={["bs-editor-schemanav", className, classNames?.root].filter(Boolean).join(" ")}
       style={style}
       {...props}
     >
-      <div className="bs-editor-schemanav-header">
+      <div className={["bs-editor-schemanav-header", classNames?.header].filter(Boolean).join(" ")}>
         <Icon name="Menu" size={14} />
         <span>Table of Contents</span>
       </div>
 
-      <div className="bs-editor-schemanav-list">
+      <div className={["bs-editor-schemanav-list", classNames?.list].filter(Boolean).join(" ")}>
         {headings.map((h) => {
           const isActive = h.id === activeHeadingId;
           return (
@@ -64,6 +82,7 @@ export function SchemaNav({
                 "bs-editor-schemanav-item",
                 `bs-editor-schemanav-item--h${h.level}`,
                 isActive ? "bs-editor-schemanav-item--active" : "",
+                classNames?.item,
               ]
                 .filter(Boolean)
                 .join(" ")}

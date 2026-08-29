@@ -32,6 +32,20 @@ export interface BubbleMenuProps extends React.HTMLAttributes<HTMLDivElement> {
     underline?: boolean;
     code?: boolean;
   };
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: BubbleMenuClassNames;
+}
+
+export interface BubbleMenuClassNames {
+  root?: string;
 }
 
 export function BubbleMenu({
@@ -41,6 +55,7 @@ export function BubbleMenu({
   onOpenLinkModal,
   activeFormats = {},
   className = "",
+  classNames,
   style,
   ...props
 }: BubbleMenuProps) {
@@ -48,7 +63,7 @@ export function BubbleMenu({
 
   return (
     <div
-      className={["bs-editor-bubble-menu", className].filter(Boolean).join(" ")}
+      className={["bs-editor-bubble-menu", className, classNames?.root].filter(Boolean).join(" ")}
       style={{
         top: position.top,
         left: position.left,

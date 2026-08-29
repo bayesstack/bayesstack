@@ -31,6 +31,25 @@ export interface StepperProps extends React.HTMLAttributes<HTMLDivElement> {
    * Callback fired when a step header is clicked
    */
   onStepClick?: (stepIndex: number) => void;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: StepperClassNames;
+}
+
+export interface StepperClassNames {
+  root?: string;
+  step?: string;
+  icon?: string;
+  title?: string;
+  description?: string;
+  line?: string;
 }
 
 export const Stepper = forwardRef<HTMLDivElement, StepperProps>(
@@ -41,11 +60,14 @@ export const Stepper = forwardRef<HTMLDivElement, StepperProps>(
       orientation = "horizontal",
       onStepClick,
       className = "",
+      classNames,
       style,
       ...props
     },
     ref
   ) => {
+    // Icon precedence: explicit step errors display CancelCircle; completed steps display Check stroke;
+    // custom icons take precedence over numeric 1-based step index fallbacks.
     const renderStepIcon = (
       step: StepItem,
       idx: number,
@@ -75,6 +97,7 @@ export const Stepper = forwardRef<HTMLDivElement, StepperProps>(
           "bs-stepper",
           `bs-stepper--${orientation}`,
           className,
+          classNames?.root,
         ]
           .filter(Boolean)
           .join(" ")}
@@ -95,19 +118,20 @@ export const Stepper = forwardRef<HTMLDivElement, StepperProps>(
                   isActive ? "bs-step--active" : "",
                   isCompleted ? "bs-step--completed" : "",
                   isError ? "bs-step--error" : "",
+                  classNames?.step,
                 ]
                   .filter(Boolean)
                   .join(" ")}
                 onClick={() => onStepClick && onStepClick(idx)}
                 style={{ cursor: onStepClick ? "pointer" : "default" }}
               >
-                <div className="bs-step-icon-circle">
+                <div className={["bs-step-icon-circle", classNames?.icon].filter(Boolean).join(" ")}>
                   {renderStepIcon(step, idx, isCompleted, isActive, isError)}
                 </div>
                 <div className="bs-step-text">
-                  <div className="bs-step-title">{step.title}</div>
+                  <div className={["bs-step-title", classNames?.title].filter(Boolean).join(" ")}>{step.title}</div>
                   {step.description && (
-                    <div className="bs-step-description">
+                    <div className={["bs-step-description", classNames?.description].filter(Boolean).join(" ")}>
                       {step.description}
                     </div>
                   )}
@@ -119,6 +143,7 @@ export const Stepper = forwardRef<HTMLDivElement, StepperProps>(
                   className={[
                     "bs-step-line",
                     isCompleted ? "bs-step-line--completed" : "",
+                    classNames?.line,
                   ]
                     .filter(Boolean)
                     .join(" ")}

@@ -1,19 +1,24 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import React, { useState } from "react";
-import { TreeSelect, type TreeSelectOption } from ".././TreeSelect";
+import { TreeSelect, type TreeSelectOption } from "../TreeSelect";
 
 const meta: Meta<typeof TreeSelect> = {
   title: "Molecules/Selects/TreeSelect",
   component: TreeSelect,
+  parameters: {
+    layout: "padded",
+  },
   argTypes: {
     treeCheckable: { control: "boolean" },
+    onlyLeafSelectable: { control: "boolean" },
     searchable: { control: "boolean" },
     disabled: { control: "boolean" },
+    label: { control: "text" },
   },
 };
 
 export default meta;
-type Story = StoryObj<typeof TreeSelect>;
+type Story = StoryObj<typeof meta>;
 
 const TREE_DATA: TreeSelectOption[] = [
   {
@@ -50,44 +55,20 @@ const TREE_DATA: TreeSelectOption[] = [
   },
 ];
 
-export const SingleSelect: Story = {
-  render: () => {
+export const Playground: Story = {
+  args: {
+    label: "Select Department Node",
+    options: TREE_DATA,
+    searchable: true,
+    onlyLeafSelectable: false,
+  },
+  render: (args) => {
     const [val, setVal] = useState<string>("react_devs");
-
     return (
-      <div style={{ width: 360 }}>
-        <TreeSelect
-          label="Select Department Node"
-          options={TREE_DATA}
-          value={val}
-          onValueChange={(nodeVal) => setVal(nodeVal)}
-        />
-        <div style={{ marginTop: 12, fontSize: 12, color: "#4A6360" }}>
-          Selected Node: {val}
-        </div>
+      <div style={{ width: 360, padding: 16 }}>
+        <TreeSelect {...args} value={val} onValueChange={(nodeVal) => setVal(nodeVal)} />
       </div>
     );
   },
 };
 
-export const MultiCheckable: Story = {
-  render: () => {
-    const [values, setValues] = useState<string[]>(["react_devs", "pm"]);
-
-    return (
-      <div style={{ width: 360 }}>
-        <TreeSelect
-          label="Select Teams (Multi)"
-          options={TREE_DATA}
-          treeCheckable
-          value={values}
-          onValueChange={(selectedVals) => setValues(selectedVals)}
-          placeholder="Pick team nodes..."
-        />
-        <div style={{ marginTop: 12, fontSize: 12, color: "#4A6360" }}>
-          Selected Teams: {JSON.stringify(values)}
-        </div>
-      </div>
-    );
-  },
-};

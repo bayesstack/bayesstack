@@ -1,4 +1,6 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, useMemo } from "react";
+import katex from "katex";
+import "katex/dist/katex.min.css";
 import "./HtmlText.css";
 
 export type HtmlTextSize = "xs" | "sm" | "md" | "lg" | "xl";
@@ -65,6 +67,12 @@ export interface HtmlTextProps extends Omit<React.HTMLAttributes<HTMLElement>, "
   truncate?: boolean | number;
 
   /**
+   * Enables rendering of embedded LaTeX formulas ($...$, $$...$$, \(...\), \[...\]) via KaTeX
+   * @default true
+   */
+  enableLatex?: boolean;
+
+  /**
    * Custom root element class name
    */
   className?: string;
@@ -73,6 +81,38 @@ export interface HtmlTextProps extends Omit<React.HTMLAttributes<HTMLElement>, "
    * Object mapping custom class names to internal sub-element slots
    */
   classNames?: HtmlTextSlots;
+}
+
+/**
+ * Replaces LaTeX math delimiters inside an HTML string with rendered KaTeX HTML.
+ * Parses display math ($$ ... $$ and \[ ... \]) before inline math ($ ... $ and \( ... \)).
+ */
+function renderLatexInHtml(input: string): string {
+  if (!input) return "";
+
+  const pattern = /(?:\$\$\s*([\s\S]+?)\s*\$\$|\\\[\s*([\s\S]+?)\s*\\\])|(?:\$(?!\$)\s*([^\$\n]+?)\s*\$|\\\(\s*([\s\S]+?)\s*\\\))/g;
+
+  return input.replace(pattern, (match, block1, block2, inline1, inline2) => {
+    const blockMath = block1 ?? block2;
+    const inlineMath = inline1 ?? inline2;
+    const isBlock = blockMath !== undefined;
+    const mathContent = blockMath ?? inlineMath;
+
+    try {
+      const renderedHtml = katex.renderToString(mathContent, {
+        displayMode: isBlock,
+        throwOnError: true,
+        output: "htmlAndMathml",
+      });
+
+      if (isBlock) {
+        return `<div class="bs-latex-block">${renderedHtml}</div>`;
+      }
+      return `<span class="bs-latex-inline">${renderedHtml}</span>`;
+    } catch (err) {
+      return `<code class="bs-latex-error" title="LaTeX Syntax Error: ${(err as Error)?.message}">${mathContent}</code>`;
+    }
+  });
 }
 
 /**
@@ -152,6 +192,7 @@ export const HtmlText = forwardRef<HTMLElement, HtmlTextProps>(
       style = "default",
       align = "left",
       truncate,
+      enableLatex = true,
       className = "",
       classNames,
       ...props
@@ -172,6 +213,10 @@ export const HtmlText = forwardRef<HTMLElement, HtmlTextProps>(
 
     if (numericTruncate !== undefined && numericTruncate > 0) {
       finalHtmlContent = truncateHtml(rawHtml, numericTruncate);
+    }
+
+    if (enableLatex) {
+      finalHtmlContent = renderLatexInHtml(finalHtmlContent);
     }
 
     let computedStyleVariant: HtmlTextStyle = "default";

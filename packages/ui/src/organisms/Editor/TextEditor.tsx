@@ -1,7 +1,10 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
+import katex from "katex";
+import "katex/dist/katex.min.css";
 import { Toolbar } from "./Toolbar";
 import { BubbleMenu } from "./BubbleMenu";
 import { LinkModal } from "./LinkModal";
+import { LatexModal } from "./LatexModal";
 import { CodeBlockComponent } from "./CodeBlockComponent";
 import { SchemaNav, type SchemaNavHeading } from "./SchemaNav";
 import "./Editor.css";
@@ -35,6 +38,61 @@ export interface TextEditorProps
    * @default false
    */
   readOnly?: boolean;
+
+  /**
+   * Enables embedded LaTeX equation parsing ($...$, $$...$$) via KaTeX
+   * @default true
+   */
+  enableLatex?: boolean;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: TextEditorClassNames;
+}
+
+export interface TextEditorClassNames {
+  root?: string;
+  main?: string;
+  stage?: string;
+  content?: string;
+  sidebar?: string;
+}
+
+/**
+ * Helper to process LaTeX math delimiters in HTML strings for editor view
+ */
+function processEditorLatex(input: string): string {
+  if (!input) return "";
+
+  const pattern = /(?:\$\$\s*([\s\S]+?)\s*\$\$|\\\[\s*([\s\S]+?)\s*\\\])|(?:\$(?!\$)\s*([^\$\n]+?)\s*\$|\\\(\s*([\s\S]+?)\s*\\\))/g;
+
+  return input.replace(pattern, (match, block1, block2, inline1, inline2) => {
+    const blockMath = block1 ?? block2;
+    const inlineMath = inline1 ?? inline2;
+    const isBlock = blockMath !== undefined;
+    const mathContent = blockMath ?? inlineMath;
+
+    try {
+      const renderedHtml = katex.renderToString(mathContent, {
+        displayMode: isBlock,
+        throwOnError: true,
+        output: "htmlAndMathml",
+      });
+
+      if (isBlock) {
+        return `<div class="bs-latex-block">${renderedHtml}</div>`;
+      }
+      return `<span class="bs-latex-inline">${renderedHtml}</span>`;
+    } catch (err) {
+      return `<code class="bs-latex-error" title="LaTeX Syntax Error: ${(err as Error)?.message}">${mathContent}</code>`;
+    }
+  });
 }
 
 export function TextEditor({
@@ -43,14 +101,17 @@ export function TextEditor({
   onChange,
   showOutline = false,
   readOnly = false,
+  enableLatex = true,
   className = "",
+  classNames,
   style,
   ...props
 }: TextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
 
-  // Link modal state
+  // Modal states
   const [linkModalOpen, setLinkModalOpen] = useState(false);
+  const [latexModalOpen, setLatexModalOpen] = useState(false);
 
   // Bubble menu state
   const [bubbleVisible, setBubbleVisible] = useState(false);
@@ -71,6 +132,11 @@ export function TextEditor({
   const [demoCode, setDemoCode] = useState(
     '// BayesStack MLOps Telemetry Pipeline\nexport function recordEvent(event: string) {\n  console.log("Telemetry event logged:", event);\n}'
   );
+
+  // Processed HTML content with KaTeX math if enabled
+  const renderedContent = useMemo(() => {
+    return enableLatex ? processEditorLatex(value) : value;
+  }, [value, enableLatex]);
 
   // Handle format action execution
   const handleFormatChange = (format: string, val?: any) => {
@@ -128,6 +194,20 @@ export function TextEditor({
     } else {
       document.execCommand("createLink", false, url);
     }
+    if (editorRef.current && onChange) {
+      onChange(editorRef.current.innerHTML);
+    }
+  };
+
+  // Insert LaTeX Formula
+  const handleInsertFormula = (formula: string, displayBlock: boolean) => {
+    const formulaStr = displayBlock ? `$$ ${formula} $$` : `$ ${formula} $`;
+    const formattedHtml = processEditorLatex(formulaStr);
+
+    document.execCommand("insertHTML", false, formattedHtml);
+    if (editorRef.current && onChange) {
+      onChange(editorRef.current.innerHTML);
+    }
   };
 
   // Document Outline Headings for SchemaNav
@@ -139,7 +219,12 @@ export function TextEditor({
 
   return (
     <div
-      className={["bs-text-editor", readOnly ? "bs-text-editor--readonly" : "", className]
+      className={[
+        "bs-text-editor",
+        readOnly ? "bs-text-editor--readonly" : "",
+        className,
+        classNames?.root,
+      ]
         .filter(Boolean)
         .join(" ")}
       style={style}
@@ -151,12 +236,13 @@ export function TextEditor({
           activeFormats={activeFormats}
           onFormatChange={handleFormatChange}
           onOpenLinkModal={() => setLinkModalOpen(true)}
+          onOpenLatexModal={() => setLatexModalOpen(true)}
         />
       )}
 
-      <div className="bs-text-editor-main">
+      <div className={["bs-text-editor-main", classNames?.main].filter(Boolean).join(" ")}>
         {/* Document Editor Stage */}
-        <div className="bs-text-editor-stage">
+        <div className={["bs-text-editor-stage", classNames?.stage].filter(Boolean).join(" ")}>
           {/* Floating Bubble Selection Menu */}
           {!readOnly && (
             <BubbleMenu
@@ -173,10 +259,10 @@ export function TextEditor({
             ref={editorRef}
             contentEditable={!readOnly}
             suppressContentEditableWarning
-            className="bs-text-editor-content"
+            className={["bs-text-editor-content", classNames?.content].filter(Boolean).join(" ")}
             onMouseUp={handleSelectionChange}
             onKeyUp={handleSelectionChange}
-            dangerouslySetInnerHTML={{ __html: value }}
+            dangerouslySetInnerHTML={{ __html: renderedContent }}
           />
 
           {/* Code Block Component */}
@@ -192,7 +278,7 @@ export function TextEditor({
 
         {/* Outline SchemaNav Sidebar */}
         {showOutline && (
-          <div className="bs-text-editor-sidebar">
+          <div className={["bs-text-editor-sidebar", classNames?.sidebar].filter(Boolean).join(" ")}>
             <SchemaNav
               headings={sampleHeadings}
               onHeadingClick={(id) => {
@@ -208,6 +294,13 @@ export function TextEditor({
         open={linkModalOpen}
         onClose={() => setLinkModalOpen(false)}
         onInsertLink={handleInsertLink}
+      />
+
+      {/* LaTeX Formula Modal */}
+      <LatexModal
+        open={latexModalOpen}
+        onClose={() => setLatexModalOpen(false)}
+        onInsertFormula={handleInsertFormula}
       />
     </div>
   );

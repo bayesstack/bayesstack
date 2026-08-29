@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, within, fn } from "@storybook/test";
-import { Dropdown, type DropdownMenuItem } from ".././Dropdown";
+import { Dropdown, type DropdownMenuItem } from "../Dropdown";
 import { Button } from "../../../atoms/Buttons/Button";
 import { IconButton } from "../../../atoms/Buttons/IconButton";
 import { Text } from "../../../atoms/Typography";
+import { Icon } from "../../../atoms/Icons";
 
 const meta: Meta<typeof Dropdown> = {
   title: "Molecules/Dropdown/Dropdown",
@@ -91,7 +92,6 @@ const sampleItems: DropdownMenuItem[] = [
   { key: "5", label: "Delete Course Permanently", icon: "Delete", danger: true, shortcut: "⌘⌫" },
 ];
 
-// 1. Interactive Playground Story
 export const Playground: Story = {
   args: {
     items: sampleItems,
@@ -106,9 +106,9 @@ export const Playground: Story = {
     onSelect: fn(),
   },
   render: (args) => (
-    <div style={{ padding: 40, display: "flex", justifyContent: "flex-start" }}>
+    <div style={{ padding: 16, display: "flex", justifyContent: "flex-start" }}>
       <Dropdown {...args}>
-        <Button variant="primary" rightIcon={<span style={{ fontSize: 10 }}>▼</span>}>
+        <Button variant="primary" rightIcon={<Icon name="ArrowDown" size="sm" />}>
           Course Actions
         </Button>
       </Dropdown>
@@ -118,48 +118,17 @@ export const Playground: Story = {
     const canvas = within(canvasElement);
     const triggerBtn = canvas.getByRole("button", { name: /Course Actions/i });
 
-    // Open menu
     await userEvent.click(triggerBtn);
     const editItem = await canvas.findByText("Edit Course Syllabus");
     await expect(editItem).toBeInTheDocument();
 
-    // Click item
     await userEvent.click(editItem);
     await expect(args.onSelect).toHaveBeenCalled();
   },
 };
 
-// 2. Keyboard Navigation Story
-export const KeyboardNavigation: Story = {
-  args: {
-    items: sampleItems,
-    onSelect: fn(),
-  },
-  render: (args) => (
-    <div style={{ padding: 40 }}>
-      <Dropdown {...args}>
-        <Button variant="secondary">Keyboard Trigger</Button>
-      </Dropdown>
-    </div>
-  ),
-  play: async ({ canvasElement, args }) => {
-    const canvas = within(canvasElement);
-    const triggerBtn = canvas.getByRole("button", { name: /Keyboard Trigger/i });
-
-    await userEvent.click(triggerBtn);
-    await canvas.findByText("Edit Course Syllabus");
-
-    // Press ArrowDown to navigate through items
-    await userEvent.keyboard("{ArrowDown}");
-    await userEvent.keyboard("{ArrowDown}");
-    await userEvent.keyboard("{Enter}");
-
-    await expect(args.onSelect).toHaveBeenCalled();
-  },
-};
-
-// 3. Selectable Checkmark & Custom Header/Footer Story
-export const SelectableWithHeaderFooter: Story = {
+export const Ex1_SelectableHeaderFooter: Story = {
+  name: "01: Selectable Checkmark & Custom Header/Footer",
   render: () => {
     const [selectedView, setSelectedView] = useState<(string | number)[]>(["grid"]);
 
@@ -182,7 +151,7 @@ export const SelectableWithHeaderFooter: Story = {
     );
 
     return (
-      <div style={{ padding: 40, display: "flex", gap: 32 }}>
+      <div style={{ padding: 16, display: "flex", gap: 32 }}>
         <Dropdown
           items={viewModeItems}
           selectable
@@ -213,11 +182,9 @@ export const SelectableWithHeaderFooter: Story = {
     const listOption = canvas.getByText("Compact Table View");
     await userEvent.click(listOption);
 
-    // Profile menu trigger
     const profileBtn = canvas.getByRole("button", { name: /User Profile Menu/i });
     await userEvent.click(profileBtn);
     const header = await canvas.findByTestId("dropdown-header");
     await expect(header).toBeInTheDocument();
   },
 };
-

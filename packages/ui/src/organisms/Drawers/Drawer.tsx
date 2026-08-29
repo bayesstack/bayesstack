@@ -35,6 +35,26 @@ export interface DrawerProps extends Omit<BaseDrawerProps, "title"> {
    * @default false
    */
   closable?: boolean;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: DrawerClassNames;
+}
+
+export interface DrawerClassNames {
+  root?: string;
+  header?: string;
+  title?: string;
+  subtitle?: string;
+  actions?: string;
+  body?: string;
+  footer?: string;
 }
 
 const PRESET_SIZES = {
@@ -58,6 +78,7 @@ export function Drawer({
   width,
   children,
   className = "",
+  classNames,
   ...props
 }: DrawerProps) {
   const resolvedWidth = width ?? PRESET_SIZES[size];
@@ -68,22 +89,24 @@ export function Drawer({
       onClose={onClose}
       placement={placement}
       width={resolvedWidth}
-      className={["bs-drawer", className].filter(Boolean).join(" ")}
+      className={["bs-drawer", className, classNames?.root].filter(Boolean).join(" ")}
       {...props}
     >
       {/* Drawer Header */}
       {(title || closable || extra) && (
-        <div className="bs-drawer-header">
+        <div className={["bs-drawer-header", classNames?.header].filter(Boolean).join(" ")}>
           <div className="bs-drawer-header-title-group">
             {typeof title === "string" ? (
-              <h3 className="bs-drawer-title">{title}</h3>
+              <h3 className={["bs-drawer-title", classNames?.title].filter(Boolean).join(" ")}>{title}</h3>
             ) : (
               title
             )}
-            {subtitle && <span className="bs-drawer-subtitle">{subtitle}</span>}
+            {subtitle && (
+              <span className={["bs-drawer-subtitle", classNames?.subtitle].filter(Boolean).join(" ")}>{subtitle}</span>
+            )}
           </div>
 
-          <div className="bs-drawer-header-actions">
+          <div className={["bs-drawer-header-actions", classNames?.actions].filter(Boolean).join(" ")}>
             {extra}
             {closable && (
               <IconButton
@@ -99,10 +122,10 @@ export function Drawer({
       )}
 
       {/* Drawer Body Content */}
-      <div className="bs-drawer-body">{children}</div>
+      <div className={["bs-drawer-body", classNames?.body].filter(Boolean).join(" ")}>{children}</div>
 
       {/* Drawer Footer */}
-      {footer && <div className="bs-drawer-footer">{footer}</div>}
+      {footer && <div className={["bs-drawer-footer", classNames?.footer].filter(Boolean).join(" ")}>{footer}</div>}
     </BaseDrawer>
   );
 }

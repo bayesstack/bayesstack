@@ -3,6 +3,8 @@ export * from "./Toolbar";
 export * from "./BubbleMenu";
 export * from "./CodeBlockComponent";
 export * from "./LinkModal";
+export * from "./LatexModal";
 export * from "./SchemaNav";
 export * from "./TextEditor";
+export * from "./TextEditorInput";
 export * from "./ContentEditorInput";

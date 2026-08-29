@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { CheckboxGroup } from ".././CheckboxGroup";
+import { CheckboxGroup } from "../CheckboxGroup";
 import { Checkbox } from "../../../atoms/Inputs/Checkbox";
 
 const meta: Meta<typeof CheckboxGroup> = {
@@ -42,79 +42,58 @@ export const Playground: Story = {
     ],
   },
   render: (args) => (
-    <div style={{ maxWidth: 520, padding: 24, margin: "16px 0 0 16px" }}>
+    <div style={{ maxWidth: 520, padding: 16 }}>
       <CheckboxGroup {...args} />
     </div>
   ),
 };
 
-export const Showcase: Story = {
+export const Ex1_CardVariant: Story = {
+  name: "01: Rich Card Variant",
   render: () => {
     const [perms, setPerms] = useState(["read", "write"]);
-
     return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 32, maxWidth: 560, padding: 24, margin: "16px 0 0 16px" }}>
-        {/* 1. Standard Checkbox Group */}
-        <section style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#123333", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-            1. Standard Checkbox Group
-          </h4>
-          <CheckboxGroup
-            label="Dataset Preprocessing Flags"
-            defaultValue={["clean", "normalize"]}
-            options={[
-              { value: "clean", label: "Strip HTML & special control characters" },
-              { value: "normalize", label: "Normalize unicode text formatting" },
-              { value: "dedupe", label: "De-duplicate semantic vector embeddings" },
-            ]}
-          />
-        </section>
-
-        {/* 2. Rich Card Variant */}
-        <section style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#123333", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-            2. Rich Card Variant
-          </h4>
-          <CheckboxGroup
-            label="API Key Access Scopes"
-            variant="card"
-            value={perms}
-            onValueChange={setPerms}
-            options={[
-              {
-                value: "read",
-                label: "Read Datasets & Models",
-                description: "Allows fetching evaluation metrics and downloading model weights.",
-                icon: "View",
-              },
-              {
-                value: "write",
-                label: "Write & Train Models",
-                description: "Allows launching fine-tuning jobs and triggering vector index builds.",
-                icon: "Edit",
-              },
-              {
-                value: "admin",
-                label: "Admin & Billing Control",
-                description: "Full access to workspace billing, team member invites, and API key generation.",
-                icon: "SecurityCheck",
-              },
-            ]}
-          />
-        </section>
-
-        {/* 3. Compound Children Composition */}
-        <section style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#123333", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-            3. Compound Composition (Children)
-          </h4>
-          <CheckboxGroup label="Export Formats" direction="row" defaultValue={["json", "csv"]}>
-            <Checkbox value="json" label="JSON Lines (.jsonl)" />
-            <Checkbox value="csv" label="CSV (.csv)" />
-            <Checkbox value="parquet" label="Apache Parquet (.parquet)" />
-          </CheckboxGroup>
-        </section>
+      <div style={{ maxWidth: 560, padding: 16 }}>
+        <CheckboxGroup
+          label="API Key Access Scopes"
+          variant="card"
+          value={perms}
+          onValueChange={setPerms}
+          options={[
+            {
+              value: "read",
+              label: "Read Datasets & Models",
+              description: "Allows fetching evaluation metrics and downloading model weights.",
+              icon: "View",
+            },
+            {
+              value: "write",
+              label: "Write & Train Models",
+              description: "Allows launching fine-tuning jobs and triggering vector index builds.",
+              icon: "Edit",
+            },
+            {
+              value: "admin",
+              label: "Admin & Billing Control",
+              description: "Full access to workspace billing, team member invites, and API key generation.",
+              icon: "SecurityCheck",
+            },
+          ]}
+        />
       </div>
     );
   },
+};
+
+export const Ex2_CompoundComposition: Story = {
+  name: "02: Compound Composition (Children)",
+  render: () => (
+    <div style={{ maxWidth: 560, padding: 16 }}>
+      <CheckboxGroup label="Export Formats" direction="row" defaultValue={["json", "csv"]}>
+        <Checkbox value="json" label="JSON Lines (.jsonl)" />
+        <Checkbox value="csv" label="CSV (.csv)" />
+        <Checkbox value="parquet" label="Apache Parquet (.parquet)" />
+      </CheckboxGroup>
+    </div>
+  ),
 };

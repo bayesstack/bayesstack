@@ -48,6 +48,27 @@ export interface DescriptionsProps
    * Array of key-value description items
    */
   items: DescriptionItem[];
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: DescriptionsClassNames;
+}
+
+export interface DescriptionsClassNames {
+  root?: string;
+  header?: string;
+  title?: string;
+  extra?: string;
+  grid?: string;
+  item?: string;
+  label?: string;
+  value?: string;
 }
 
 export function Descriptions({
@@ -59,6 +80,7 @@ export function Descriptions({
   size = "md",
   items = [],
   className = "",
+  classNames,
   style,
   ...props
 }: DescriptionsProps) {
@@ -70,6 +92,7 @@ export function Descriptions({
         `bs-descriptions--${layout}`,
         `bs-descriptions--${size}`,
         className,
+        classNames?.root,
       ]
         .filter(Boolean)
         .join(" ")}
@@ -78,15 +101,15 @@ export function Descriptions({
     >
       {/* Header */}
       {(title || extra) && (
-        <div className="bs-descriptions-header">
-          {title && <div className="bs-descriptions-title">{title}</div>}
-          {extra && <div className="bs-descriptions-extra">{extra}</div>}
+        <div className={["bs-descriptions-header", classNames?.header].filter(Boolean).join(" ")}>
+          {title && <div className={["bs-descriptions-title", classNames?.title].filter(Boolean).join(" ")}>{title}</div>}
+          {extra && <div className={["bs-descriptions-extra", classNames?.extra].filter(Boolean).join(" ")}>{extra}</div>}
         </div>
       )}
 
       {/* Grid Container */}
       <div
-        className="bs-descriptions-grid"
+        className={["bs-descriptions-grid", classNames?.grid].filter(Boolean).join(" ")}
         style={{
           gridTemplateColumns: `repeat(${column}, 1fr)`,
         }}
@@ -96,11 +119,11 @@ export function Descriptions({
           return (
             <div
               key={item.key || idx}
-              className="bs-descriptions-item"
+              className={["bs-descriptions-item", classNames?.item].filter(Boolean).join(" ")}
               style={{ gridColumn: `span ${gridSpan}` }}
             >
-              <span className="bs-descriptions-item-label">{item.label}</span>
-              <span className="bs-descriptions-item-value">{item.value}</span>
+              <span className={["bs-descriptions-item-label", classNames?.label].filter(Boolean).join(" ")}>{item.label}</span>
+              <span className={["bs-descriptions-item-value", classNames?.value].filter(Boolean).join(" ")}>{item.value}</span>
             </div>
           );
         })}

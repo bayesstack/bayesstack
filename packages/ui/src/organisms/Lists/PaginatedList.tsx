@@ -97,6 +97,24 @@ export interface PaginatedListProps<T = any>
    * @default 'No items available'
    */
   emptyText?: React.ReactNode;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: PaginatedListClassNames;
+}
+
+export interface PaginatedListClassNames {
+  root?: string;
+  grid?: string;
+  empty?: string;
+  card?: string;
+  footer?: string;
 }
 
 export function PaginatedList<T extends Record<string, any>>({
@@ -118,6 +136,7 @@ export function PaginatedList<T extends Record<string, any>>({
   pagerVariant = "paged",
   emptyText = "No items available",
   className = "",
+  classNames,
   style,
   ...props
 }: PaginatedListProps<T>) {
@@ -130,7 +149,7 @@ export function PaginatedList<T extends Record<string, any>>({
 
   return (
     <div
-      className={["bs-paginated-list", className].filter(Boolean).join(" ")}
+      className={["bs-paginated-list", className, classNames?.root].filter(Boolean).join(" ")}
       style={style}
       {...props}
     >
@@ -145,16 +164,16 @@ export function PaginatedList<T extends Record<string, any>>({
           emptyText={emptyText}
         />
       ) : (
-        <div className="bs-paginated-list-grid">
+        <div className={["bs-paginated-list-grid", classNames?.grid].filter(Boolean).join(" ")}>
           {loading ? (
             Array.from({ length: 6 }).map((_, idx) => (
               <div key={`grid-skel-${idx}`} className="bs-paginated-list-grid-skel" />
             ))
           ) : items.length === 0 ? (
-            <div className="bs-paginated-list-empty">{emptyText}</div>
+            <div className={["bs-paginated-list-empty", classNames?.empty].filter(Boolean).join(" ")}>{emptyText}</div>
           ) : (
             items.map((item, idx) => (
-              <div key={item.id || `grid-item-${idx}`} className="bs-paginated-list-grid-card">
+              <div key={item.id || `grid-item-${idx}`} className={["bs-paginated-list-grid-card", classNames?.card].filter(Boolean).join(" ")}>
                 {renderItem ? renderItem(item, idx) : JSON.stringify(item)}
               </div>
             ))
@@ -168,6 +187,7 @@ export function PaginatedList<T extends Record<string, any>>({
           className={[
             "bs-paginated-list-footer",
             `bs-paginated-list-footer--${pagerPlace}`,
+            classNames?.footer,
           ]
             .filter(Boolean)
             .join(" ")}

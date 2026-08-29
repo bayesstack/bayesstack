@@ -71,6 +71,7 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
             disabled={disabled}
             onChange={handleChange}
             className={classNames?.input}
+            aria-label={props["aria-label"] || (typeof label === "string" ? label : undefined)}
             style={{ position: "absolute", opacity: 0, width: "100%", height: "100%", margin: 0, cursor: "inherit" }}
             {...props}
           />

@@ -31,6 +31,26 @@ export interface CodeBlockComponentProps
    * @default true
    */
   editable?: boolean;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: CodeBlockComponentClassNames;
+}
+
+export interface CodeBlockComponentClassNames {
+  root?: string;
+  header?: string;
+  select?: string;
+  body?: string;
+  lines?: string;
+  textarea?: string;
+  pre?: string;
 }
 
 const SUPPORTED_LANGUAGES = [
@@ -51,6 +71,7 @@ export function CodeBlockComponent({
   onLanguageChange,
   editable = true,
   className = "",
+  classNames,
   style,
   ...props
 }: CodeBlockComponentProps) {
@@ -66,15 +87,15 @@ export function CodeBlockComponent({
 
   return (
     <div
-      className={["bs-editor-code-block", className].filter(Boolean).join(" ")}
+      className={["bs-editor-code-block", className, classNames?.root].filter(Boolean).join(" ")}
       style={style}
       {...props}
     >
       {/* Header bar */}
-      <div className="bs-editor-code-block-header">
+      <div className={["bs-editor-code-block-header", classNames?.header].filter(Boolean).join(" ")}>
         {editable ? (
           <select
-            className="bs-editor-code-lang-select"
+            className={["bs-editor-code-lang-select", classNames?.select].filter(Boolean).join(" ")}
             value={language}
             onChange={(e) => onLanguageChange && onLanguageChange(e.target.value)}
           >
@@ -100,8 +121,8 @@ export function CodeBlockComponent({
       </div>
 
       {/* Code Editor Body */}
-      <div className="bs-editor-code-block-body">
-        <div className="bs-editor-code-lines">
+      <div className={["bs-editor-code-block-body", classNames?.body].filter(Boolean).join(" ")}>
+        <div className={["bs-editor-code-lines", classNames?.lines].filter(Boolean).join(" ")}>
           {lines.map((_, i) => (
             <span key={i}>{i + 1}</span>
           ))}
@@ -109,14 +130,14 @@ export function CodeBlockComponent({
 
         {editable ? (
           <textarea
-            className="bs-editor-code-textarea"
+            className={["bs-editor-code-textarea", classNames?.textarea].filter(Boolean).join(" ")}
             value={code}
             onChange={(e) => onChange && onChange(e.target.value)}
             spellCheck={false}
             rows={Math.max(3, lines.length)}
           />
         ) : (
-          <pre className="bs-editor-code-pre">
+          <pre className={["bs-editor-code-pre", classNames?.pre].filter(Boolean).join(" ")}>
             <code>{code}</code>
           </pre>
         )}

@@ -77,6 +77,26 @@ export interface SelectProps
    * Helper description hint text
    */
   helperText?: React.ReactNode;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: SelectClassNames;
+}
+
+export interface SelectClassNames {
+  root?: string;
+  label?: string;
+  control?: string;
+  menu?: string;
+  option?: string;
+  error?: string;
+  helper?: string;
 }
 
 export const Select = forwardRef<HTMLDivElement, SelectProps>(
@@ -95,6 +115,7 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
       error,
       helperText,
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -110,7 +131,7 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
 
     const selectedOption = options.find((opt) => opt.value === currentValue);
 
-    // Close menu when clicking outside
+    // Dismiss dropdown menu and clear active search query on outside container click
     useEffect(() => {
       const handleClickOutside = (e: MouseEvent) => {
         if (
@@ -124,13 +145,13 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
       return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const handleSelectOption = (optValue: string, optDisabled?: boolean) => {
-      if (disabled || optDisabled) return;
+    const handleSelectOption = (optVal: string, optDisabled?: boolean) => {
+      if (optDisabled || disabled) return;
       if (!isControlled) {
-        setInternalValue(optValue);
+        setInternalValue(optVal);
       }
       if (onValueChange) {
-        onValueChange(optValue);
+        onValueChange(optVal);
       }
       setIsOpen(false);
       setSearchQuery("");
@@ -138,6 +159,7 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
 
     const handleClear = (e: React.MouseEvent) => {
       e.stopPropagation();
+      if (disabled) return;
       if (!isControlled) {
         setInternalValue("");
       }
@@ -146,16 +168,16 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
       }
     };
 
-    const filteredOptions = options.filter(
-      (opt) =>
-        opt.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        opt.value.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredOptions = searchQuery
+      ? options.filter((opt) =>
+          opt.label.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : options;
 
     const renderPrefixIcon = () => {
       if (!prefixIcon) return null;
       if (typeof prefixIcon === "string") {
-        return <Icon name={prefixIcon as IconName} size="md" color="#64748B" />;
+        return <Icon name={prefixIcon as IconName} size="sm" />;
       }
       return prefixIcon;
     };
@@ -171,11 +193,15 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
     return (
       <div
         ref={containerRef}
-        className={["bs-select-field", className].filter(Boolean).join(" ")}
+        className={["bs-select-field", className, classNames?.root].filter(Boolean).join(" ")}
         style={style}
         {...props}
       >
-        {label && <div className="bs-select-field__label">{label}</div>}
+        {label && (
+          <div className={["bs-select-field__label", classNames?.label].filter(Boolean).join(" ")}>
+            {label}
+          </div>
+        )}
 
         <div
           ref={ref}
@@ -185,10 +211,12 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
             isOpen ? "bs-select-trigger--open" : "",
             disabled ? "bs-select-trigger--disabled" : "",
             error ? "bs-select-trigger--error" : "",
+            classNames?.control,
           ]
             .filter(Boolean)
             .join(" ")}
           onClick={() => !disabled && setIsOpen((prev) => !prev)}
+          // Enable Space and Enter keys for keyboard-accessible menu expansion
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
@@ -232,13 +260,14 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
 
         {/* Dropdown Menu */}
         {isOpen && !disabled && (
-          <div className="bs-select-menu">
+          <div className={["bs-select-menu", classNames?.menu].filter(Boolean).join(" ")}>
             {searchable && (
               <div className="bs-select-search">
                 <input
                   type="text"
                   className="bs-select-search__input"
                   placeholder="Search options..."
+                  aria-label="Search options"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onClick={(e) => e.stopPropagation()}
@@ -257,6 +286,7 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
                       "bs-select-option",
                       isSelected ? "bs-select-option--selected" : "",
                       opt.disabled ? "bs-select-option--disabled" : "",
+                      classNames?.option,
                     ]
                       .filter(Boolean)
                       .join(" ")}
@@ -284,10 +314,14 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
         )}
 
         {error && typeof error !== "boolean" && (
-          <div className="bs-select-field__error">{error}</div>
+          <div className={["bs-select-field__error", classNames?.error].filter(Boolean).join(" ")}>
+            {error}
+          </div>
         )}
         {!error && helperText && (
-          <div className="bs-select-field__helper">{helperText}</div>
+          <div className={["bs-select-field__helper", classNames?.helper].filter(Boolean).join(" ")}>
+            {helperText}
+          </div>
         )}
       </div>
     );

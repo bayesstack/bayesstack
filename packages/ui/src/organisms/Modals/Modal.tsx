@@ -60,6 +60,27 @@ export interface ModalProps
    * @default true
    */
   centered?: boolean;
+
+  /**
+   * Additional root container CSS class string
+   */
+  className?: string;
+
+  /**
+   * Slot class names object for granular component targeted overrides
+   */
+  classNames?: ModalClassNames;
+}
+
+export interface ModalClassNames {
+  root?: string;
+  backdrop?: string;
+  container?: string;
+  header?: string;
+  title?: string;
+  description?: string;
+  body?: string;
+  footer?: string;
 }
 
 export const Modal = forwardRef<HTMLDivElement, ModalProps>(
@@ -77,6 +98,7 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
       closeOnEscape = true,
       centered = true,
       className = "",
+      classNames,
       style,
       ...props
     },
@@ -115,6 +137,7 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
         className={[
           "bs-modal-backdrop",
           centered ? "bs-modal-backdrop--centered" : "",
+          classNames?.backdrop,
         ]
           .filter(Boolean)
           .join(" ")}
@@ -130,6 +153,8 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
             "bs-modal-container",
             `bs-modal-container--${size}`,
             className,
+            classNames?.root,
+            classNames?.container,
           ]
             .filter(Boolean)
             .join(" ")}
@@ -140,11 +165,11 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
         >
           {/* Header */}
           {(title || withCloseButton) && (
-            <div className="bs-modal-header">
+            <div className={["bs-modal-header", classNames?.header].filter(Boolean).join(" ")}>
               <div className="bs-modal-title-group">
-                {title && <h3 className="bs-modal-title">{title}</h3>}
+                {title && <h3 className={["bs-modal-title", classNames?.title].filter(Boolean).join(" ")}>{title}</h3>}
                 {description && (
-                  <p className="bs-modal-description">{description}</p>
+                  <p className={["bs-modal-description", classNames?.description].filter(Boolean).join(" ")}>{description}</p>
                 )}
               </div>
               {withCloseButton && (
@@ -160,10 +185,10 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
           )}
 
           {/* Body */}
-          <div className="bs-modal-body">{children}</div>
+          <div className={["bs-modal-body", classNames?.body].filter(Boolean).join(" ")}>{children}</div>
 
           {/* Footer */}
-          {footer && <div className="bs-modal-footer">{footer}</div>}
+          {footer && <div className={["bs-modal-footer", classNames?.footer].filter(Boolean).join(" ")}>{footer}</div>}
         </div>
       </div>
     );
