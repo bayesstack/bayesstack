@@ -56,6 +56,10 @@ export interface DrawerPushClassNames {
   footer?: string;
 }
 
+/**
+ * DrawerPush renders an inline sidebar panel that pushes adjacent layout content rather than floating over it.
+ * Designed for workspace sidebars, inspector panes, and inline code details panels without backdrop masks.
+ */
 export function DrawerPush({
   open,
   onClose,
@@ -81,11 +85,13 @@ export function DrawerPush({
         .filter(Boolean)
         .join(" ")}
       style={{
+        // Animate root wrapper width while locking inner content width to prevent layout squishing during transitions
         width: open ? width : 0,
         ...style,
       }}
       {...props}
     >
+      {/* Inner panel maintains explicit target width so internal text/controls do not reflow while sliding */}
       <div className={["bs-drawer-push-content", classNames?.content].filter(Boolean).join(" ")} style={{ width }}>
         {/* Header */}
         {(title || onClose) && (

@@ -66,6 +66,10 @@ export interface UserCardsClassNames {
   actions?: string;
 }
 
+/**
+ * UserCards renders a member directory grid or list display featuring user avatars, live presence indicators,
+ * skill badges, numerical activity metrics, and quick action buttons.
+ */
 export function UserCards({
   users = [],
   layout = "grid",
@@ -76,6 +80,7 @@ export function UserCards({
   style,
   ...props
 }: UserCardsProps) {
+  // Translate online presence state to semantic badge color tokens
   const getStatusColor = (status?: string) => {
     switch (status) {
       case "active":
@@ -105,6 +110,7 @@ export function UserCards({
       {users.map((user) => (
         <div key={user.id} className={["bs-user-card", classNames?.card].filter(Boolean).join(" ")}>
           <div className={["bs-user-card-header", classNames?.header].filter(Boolean).join(" ")}>
+            {/* Avatar wrapper positioning status indicator badge dot over the avatar */}
             <div className="bs-user-card-avatar-wrapper">
               <Avatar name={user.name} src={user.avatar} size="lg" />
               {user.status && (

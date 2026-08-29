@@ -53,6 +53,11 @@ export interface ActivityAccordionClassNames {
   details?: string;
 }
 
+/**
+ * ActivityAccordion displays a chronological audit feed combining vertical timeline connectors
+ * with expandable detail drawers. Designed specifically for system audit logs, deployment feeds,
+ * and user action histories.
+ */
 export function ActivityAccordion({
   items = [],
   defaultExpandedIds = [],
@@ -61,6 +66,8 @@ export function ActivityAccordion({
   style,
   ...props
 }: ActivityAccordionProps) {
+  // Track open items as an array to support multi-expansion rather than single-accordion behavior,
+  // allowing developers/users to compare multiple activity details side-by-side.
   const [expandedIds, setExpandedIds] = useState<string[]>(defaultExpandedIds);
 
   const toggleExpand = (id: string) => {
@@ -91,7 +98,7 @@ export function ActivityAccordion({
               .filter(Boolean)
               .join(" ")}
           >
-            {/* Timeline Vertical Line */}
+            {/* Omit trailing vertical connector on the final entry to avoid line overflows */}
             {!isLast && <div className="bs-activity-timeline-line" />}
 
             {/* Avatar Bullet */}
@@ -101,6 +108,7 @@ export function ActivityAccordion({
 
             {/* Main Item Card */}
             <div className={["bs-activity-card", classNames?.card].filter(Boolean).join(" ")}>
+              {/* Headers are only click-toggleable when details exist; otherwise cursor is default */}
               <div
                 className={["bs-activity-header", classNames?.header].filter(Boolean).join(" ")}
                 onClick={() => hasDetails && toggleExpand(item.id)}

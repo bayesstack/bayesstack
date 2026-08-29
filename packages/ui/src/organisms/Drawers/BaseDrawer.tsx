@@ -69,6 +69,10 @@ export interface BaseDrawerClassNames {
   panel?: string;
 }
 
+/**
+ * BaseDrawer is the foundation primitive for off-canvas side panels. It manages overlay masks,
+ * body scroll-locking, keyboard navigation (Escape to close), and directional slide placement.
+ */
 export function BaseDrawer({
   open,
   onClose,
@@ -85,7 +89,7 @@ export function BaseDrawer({
   style,
   ...props
 }: BaseDrawerProps) {
-  // Handle escape key press
+  // Listen for global Escape keydown events when open to ensure accessibility compliance
   useEffect(() => {
     if (!open || !escapeToClose || !onClose) return;
 
@@ -99,7 +103,8 @@ export function BaseDrawer({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open, escapeToClose, onClose]);
 
-  // Lock body scroll when open
+  // Lock document body scrolling while drawer is active to prevent double-scrollbar jumpiness.
+  // Cleanup unconditionally resets body overflow to handle unexpected unmounts gracefully.
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -113,6 +118,7 @@ export function BaseDrawer({
 
   if (!open) return null;
 
+  // Dynamically assign dimension styles based on directional orientation (width for lateral, height for vertical)
   const isVertical = placement === "top" || placement === "bottom";
   const sizeStyle: React.CSSProperties = isVertical
     ? { height: height ?? 360 }

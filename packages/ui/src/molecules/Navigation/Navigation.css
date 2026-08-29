@@ -148,7 +148,7 @@
 }
 
 .bs-breadcrumb-separator {
-  color: var(--bs-color-text-muted, #94A3B8);
+  color: var(--bs-color-text-muted, #64748B);
   display: flex;
   align-items: center;
 }

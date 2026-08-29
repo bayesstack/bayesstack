@@ -89,6 +89,10 @@ export interface TransferClassNames {
   operations?: string;
 }
 
+/**
+ * Transfer (Shuttle) allows moving items between two bucket boxes (Source vs Target) with support for
+ * search filtering, batch multi-selection checkboxes, move-all actions, and drag-and-drop transfers.
+ */
 export function Transfer({
   dataSource = [],
   targetKeys: controlledTargetKeys = [],
@@ -104,7 +108,7 @@ export function Transfer({
   style,
   ...props
 }: TransferProps) {
-  // Target keys state
+  // Target keys state supporting controlled/uncontrolled usage
   const [targetKeys, setTargetKeys] = useState<string[]>(controlledTargetKeys);
   const activeTargetKeys =
     controlledTargetKeys !== undefined ? controlledTargetKeys : targetKeys;
@@ -121,15 +125,15 @@ export function Transfer({
   const [draggedKey, setDraggedKey] = useState<string | null>(null);
   const [dragOverBucket, setDragOverBucket] = useState<"left" | "right" | null>(null);
 
-  // Partition dataset into left (source) and right (target)
+  // Partition dataset into left (source) and right (target) lists
   const leftItems = dataSource.filter((item) => !activeTargetKeys.includes(item.key));
   
-  // Preserve targetKeys ordering for rightItems
+  // Preserve targetKeys selection ordering for rightItems instead of reverting to dataSource index order
   const rightItems = activeTargetKeys
     .map((k) => dataSource.find((item) => item.key === k))
     .filter(Boolean) as TransferItem[];
 
-  // Filter items by search query
+  // Filter items by active search query
   const filteredLeft = leftItems.filter(
     (item) =>
       item.title.toLowerCase().includes(leftSearch.toLowerCase()) ||

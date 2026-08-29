@@ -84,6 +84,10 @@ export interface DetailPanelClassNames {
   tabContent?: string;
 }
 
+/**
+ * DetailPanel is a high-level entity inspector drawer that composes avatars, entity status badges,
+ * key-value field summary grids, and tabbed sub-views into a cohesive off-canvas inspection view.
+ */
 export function DetailPanel({
   open,
   onClose,
@@ -101,10 +105,12 @@ export function DetailPanel({
   classNames,
   ...props
 }: DetailPanelProps) {
+  // Local active tab key state initialized to the first tab's key fallback
   const [activeTabKey, setActiveTabKey] = useState(tabs[0]?.key || "");
 
   const activeTabContent = tabs.find((t) => t.key === activeTabKey)?.content;
 
+  // Custom entity header composite passed directly to the base Drawer's title slot
   const headerTitle = (
     <div className={["bs-detail-panel-entity-header", classNames?.header].filter(Boolean).join(" ")}>
       <Avatar name={entityName} src={entityAvatar} size="md" />
@@ -144,7 +150,7 @@ export function DetailPanel({
       className={["bs-detail-panel", className, classNames?.root].filter(Boolean).join(" ")}
       {...props}
     >
-      {/* Metadata Fields Grid */}
+      {/* Summary Metadata Grid */}
       {fields.length > 0 && (
         <div className={["bs-detail-panel-fields-grid", classNames?.fields].filter(Boolean).join(" ")}>
           {fields.map((field, idx) => (
@@ -156,7 +162,7 @@ export function DetailPanel({
         </div>
       )}
 
-      {/* Tabs Navigation */}
+      {/* Tabs Navigation Panel */}
       {tabs.length > 0 && (
         <div className={["bs-detail-panel-tabs-section", classNames?.tabs].filter(Boolean).join(" ")}>
           <Tabs

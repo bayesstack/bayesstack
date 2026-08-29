@@ -83,6 +83,10 @@ export interface ModalClassNames {
   footer?: string;
 }
 
+/**
+ * Modal provides a portal-rendered off-canvas dialog container equipped with ARIA dialog attributes,
+ * body scroll lock capabilities, backdrop click dismissal, and standard preset size variants.
+ */
 export const Modal = forwardRef<HTMLDivElement, ModalProps>(
   (
     {
@@ -104,7 +108,7 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
     },
     ref
   ) => {
-    // Handle Escape key listener
+    // Listen for Escape key press to dismiss modal for keyboard accessibility compliance
     useEffect(() => {
       if (!opened || !closeOnEscape) return;
 
@@ -118,7 +122,7 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
       return () => document.removeEventListener("keydown", handleKeyDown);
     }, [opened, closeOnEscape, onClose]);
 
-    // Prevent body scroll when modal is open
+    // Lock body scrolling while modal overlay is open to prevent double scrollbars
     useEffect(() => {
       if (opened) {
         document.body.style.overflow = "hidden";
@@ -142,6 +146,7 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
           .filter(Boolean)
           .join(" ")}
         onClick={(e) => {
+          // Strictly verify click originated on the outer backdrop itself (not bubbling up from inner dialog clicks)
           if (e.target === e.currentTarget && closeOnClickOutside) {
             onClose();
           }
@@ -193,7 +198,7 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
       </div>
     );
 
-    // Render portal into document body if DOM is available
+    // Render portal into document body to break out of nested CSS transform / overflow clipping contexts
     if (typeof document !== "undefined") {
       return createPortal(modalContent, document.body);
     }

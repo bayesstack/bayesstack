@@ -92,3 +92,26 @@ export const EnterpriseKanbanBoard: Story = {
   },
 };
 
+export const MinimalKanbanBoard: Story = {
+  render: () => {
+    const [cards, setCards] = useState<KanbanCardItem[]>(cardsData);
+
+    return (
+      <div style={{ padding: 24 }}>
+        <h3 style={{ margin: "0 0 4px 0", color: "#123333" }}>Minimal & High Density Board</h3>
+        <p style={{ margin: "0 0 16px 0", color: "#4A6360", fontSize: 13.5 }}>
+          Minimal board theme (`variant="minimal"`) designed for clean, high-density issue tracking.
+        </p>
+        <Kanban
+          columns={columnsData}
+          cards={cards}
+          variant="minimal"
+          onChange={(updatedCards) => {
+            setCards(updatedCards);
+          }}
+        />
+      </div>
+    );
+  },
+};
+

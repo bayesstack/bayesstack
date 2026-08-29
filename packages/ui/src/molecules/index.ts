@@ -4,3 +4,4 @@ export * from "./ChoiceGroups";
 export * from "./Selects";
 export * from "./Navigation";
 export * from "./Popovers";
+export * from "./Disclosures";

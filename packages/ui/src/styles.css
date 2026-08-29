@@ -11,3 +11,34 @@
   --bs-ui-font-sans: "Outfit", "Inter", sans-serif;
   --bs-ui-font-mono: "JetBrains Mono", "DM Mono", monospace;
 }
+
+/* ------------------------------------------
+   Global Scrollbar Styling for UI Universe
+   ------------------------------------------ */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(11, 103, 99, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(11, 103, 99, 0.4);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox Support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(11, 103, 99, 0.2) transparent;
+}

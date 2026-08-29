@@ -63,6 +63,10 @@ export interface SortableListClassNames {
   actions?: string;
 }
 
+/**
+ * SortableList provides reorderable item lists equipped with both native drag-and-drop handles
+ * and accessible step button controls (Up/Down chevrons).
+ */
 export function SortableList<T extends SortableListItem = SortableListItem>({
   items = [],
   onChange,
@@ -75,10 +79,11 @@ export function SortableList<T extends SortableListItem = SortableListItem>({
   style,
   ...props
 }: SortableListProps<T>) {
-  // Drag state
+  // Drag state index tracking
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
+  // Immutably reorder list array elements using array splice
   const moveItem = (fromIndex: number, toIndex: number) => {
     if (toIndex < 0 || toIndex >= items.length) return;
     const newItems = [...items];
@@ -94,7 +99,6 @@ export function SortableList<T extends SortableListItem = SortableListItem>({
     if (disabled || items[index]?.disabled) return;
     setDraggedIndex(index);
     e.dataTransfer.effectAllowed = "move";
-    // Set transparent drag ghost if supported
     e.dataTransfer.setData("text/plain", String(index));
   };
 
@@ -167,7 +171,7 @@ export function SortableList<T extends SortableListItem = SortableListItem>({
               {renderItem ? renderItem(item, index) : item.label || String(item.id)}
             </div>
 
-            {/* Quick Move Up/Down Controls */}
+            {/* Accessible keyboard/mouse step buttons for users who prefer clicking over drag-and-drop */}
             {!isItemDisabled && (
               <div className={["bs-sortable-actions", classNames?.actions].filter(Boolean).join(" ")}>
                 <IconButton

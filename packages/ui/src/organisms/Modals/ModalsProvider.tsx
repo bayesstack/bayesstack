@@ -20,6 +20,10 @@ interface ModalsContextType {
 
 const ModalsContext = createContext<ModalsContextType | null>(null);
 
+/**
+ * ModalsProvider enables context-based imperative modal management (e.g. `openConfirmModal`),
+ * eliminating boilerplate state management for confirmation dialogs across application workflows.
+ */
 export function useModals() {
   const ctx = useContext(ModalsContext);
   if (!ctx) {
@@ -29,6 +33,7 @@ export function useModals() {
 }
 
 export function ModalsProvider({ children }: { children: React.ReactNode }) {
+  // Stack of active programmatically managed modals
   const [modalState, setModalState] = useState<
     ({ id: string; opened: boolean } & ConfirmModalProps)[]
   >([]);
@@ -37,6 +42,7 @@ export function ModalsProvider({ children }: { children: React.ReactNode }) {
     setModalState((prev) => prev.filter((m) => m.id !== id));
   }, []);
 
+  // Generate unique collision-resistant ID string for imperative modal tracking
   const openConfirmModal = useCallback(
     (props: ConfirmModalProps) => {
       const id = `modal-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
@@ -50,6 +56,7 @@ export function ModalsProvider({ children }: { children: React.ReactNode }) {
     <ModalsContext.Provider value={{ openConfirmModal, closeModal }}>
       {children}
       {modalState.map((m) => {
+        // Wrap action handlers to automatically tear down modal instance upon user decision
         const handleConfirm = () => {
           if (m.onConfirm) m.onConfirm();
           closeModal(m.id);

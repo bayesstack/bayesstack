@@ -1,11 +1,14 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import React, { useState } from "react";
-import { Drawer } from ".././Drawer";
+import { Drawer } from "../Drawer";
 import { Button } from "../../../atoms/Buttons/Button";
 
 const meta: Meta<typeof Drawer> = {
   title: "Organisms/Drawers/Drawer",
   component: Drawer,
+  parameters: {
+    layout: "padded",
+  },
   argTypes: {
     placement: {
       control: "select",
@@ -15,14 +18,23 @@ const meta: Meta<typeof Drawer> = {
       control: "select",
       options: ["sm", "md", "lg", "xl", "full"],
     },
+    children: { control: false },
+    footer: { control: false },
+    onClose: { action: "onClose" },
   },
 };
 
 export default meta;
-type Story = StoryObj<typeof Drawer>;
+type Story = StoryObj<typeof meta>;
 
-export const InteractiveDrawer: Story = {
-  render: () => {
+export const Playground: Story = {
+  args: {
+    title: "Workspace Settings",
+    subtitle: "Manage domain settings and member permissions",
+    size: "md",
+    placement: "right",
+  },
+  render: (args) => {
     const [open, setOpen] = useState(false);
 
     return (
@@ -32,11 +44,9 @@ export const InteractiveDrawer: Story = {
         </Button>
 
         <Drawer
+          {...args}
           open={open}
           onClose={() => setOpen(false)}
-          title="Workspace Settings"
-          subtitle="Manage domain settings and member permissions"
-          size="md"
           footer={
             <>
               <Button size="sm" variant="secondary" onClick={() => setOpen(false)}>
@@ -48,7 +58,7 @@ export const InteractiveDrawer: Story = {
             </>
           }
         >
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16, fontFamily: "Outfit, sans-serif" }}>
             <div>
               <label style={{ fontSize: 13, fontWeight: 600, color: "#123333" }}>Workspace Title</label>
               <input
@@ -60,6 +70,7 @@ export const InteractiveDrawer: Story = {
                   borderRadius: 6,
                   border: "1px solid #D7E8E4",
                   marginTop: 6,
+                  boxSizing: "border-box",
                 }}
               />
             </div>
@@ -74,6 +85,7 @@ export const InteractiveDrawer: Story = {
                   borderRadius: 6,
                   border: "1px solid #D7E8E4",
                   marginTop: 6,
+                  boxSizing: "border-box",
                 }}
               />
             </div>

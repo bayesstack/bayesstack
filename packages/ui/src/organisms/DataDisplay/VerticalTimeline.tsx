@@ -92,6 +92,10 @@ export interface VerticalTimelineClassNames {
   body?: string;
 }
 
+/**
+ * VerticalTimeline renders chronological events along a vertical spine with support for alternate alignment,
+ * status-aware icon markers, custom avatars, and expandable node bodies.
+ */
 export function VerticalTimeline({
   items = [],
   activeItemId,
@@ -104,6 +108,7 @@ export function VerticalTimeline({
   style,
   ...props
 }: VerticalTimelineProps) {
+  // Map semantic item status to icon fallback when no explicit icon or avatar is provided
   const getStatusIcon = (status?: VerticalTimelineStatus): IconName => {
     switch (status) {
       case "completed":
@@ -160,7 +165,7 @@ export function VerticalTimeline({
                 .filter(Boolean)
                 .join(" ")}
             >
-              {/* Vertical Connecting Line */}
+              {/* Vertical connecting line connecting markers; suppressed on the final item */}
               {!isLast && (
                 <div
                   className={["bs-vertical-timeline-line", classNames?.line]
@@ -169,7 +174,7 @@ export function VerticalTimeline({
                 />
               )}
 
-              {/* Marker / Icon / Avatar */}
+              {/* Marker Resolution Order: avatar > custom icon > status-based icon > colored dot fallback */}
               <div
                 className={["bs-vertical-timeline-marker", classNames?.marker]
                   .filter(Boolean)

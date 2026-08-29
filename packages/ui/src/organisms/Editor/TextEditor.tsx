@@ -1,11 +1,10 @@
-import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useRef, useMemo, useEffect } from "react";
 import katex from "katex";
 import "katex/dist/katex.min.css";
 import { Toolbar } from "./Toolbar";
 import { BubbleMenu } from "./BubbleMenu";
 import { LinkModal } from "./LinkModal";
 import { LatexModal } from "./LatexModal";
-import { CodeBlockComponent } from "./CodeBlockComponent";
 import { SchemaNav, type SchemaNavHeading } from "./SchemaNav";
 import "./Editor.css";
 
@@ -28,10 +27,21 @@ export interface TextEditorProps
   onChange?: (html: string) => void;
 
   /**
+   * Optional callback fired when the publish action is triggered
+   */
+  onPublish?: (html: string) => void;
+
+  /**
    * Displays document Table of Contents outline panel (SchemaNav)
    * @default false
    */
   showOutline?: boolean;
+  
+  /**
+   * Shows a subtle footer bar with word and character count
+   * @default false
+   */
+  showWordCount?: boolean;
 
   /**
    * Read-only mode
@@ -44,6 +54,12 @@ export interface TextEditorProps
    * @default true
    */
   enableLatex?: boolean;
+
+  /**
+   * Controls which toolbar groups are visible
+   * @default ["typography", "formatting", "lists", "alignment", "media", "history", "actions"]
+   */
+  toolbarGroups?: string[];
 
   /**
    * Additional root container CSS class string
@@ -62,6 +78,7 @@ export interface TextEditorClassNames {
   stage?: string;
   content?: string;
   sidebar?: string;
+  footer?: string;
 }
 
 /**
@@ -99,9 +116,12 @@ export function TextEditor({
   value = "<p>Welcome to <strong>BayesStack Text Editor</strong>. Select text to see the floating format bubble menu or use the top toolbar.</p>",
   placeholder = "Start typing document content...",
   onChange,
+  onPublish,
   showOutline = false,
+  showWordCount = false,
   readOnly = false,
   enableLatex = true,
+  toolbarGroups,
   className = "",
   classNames,
   style,
@@ -117,6 +137,10 @@ export function TextEditor({
   const [bubbleVisible, setBubbleVisible] = useState(false);
   const [bubblePos, setBubblePos] = useState({ top: 0, left: 0 });
 
+  // Word count state
+  const [words, setWords] = useState(0);
+  const [chars, setChars] = useState(0);
+
   // Formatting state
   const [activeFormats, setActiveFormats] = useState({
     bold: false,
@@ -126,35 +150,58 @@ export function TextEditor({
     blockquote: false,
     code: false,
     heading: "p" as "p" | "h1" | "h2" | "h3",
+    align: "left" as "left" | "center" | "right" | "justify"
   });
-
-  // Example Code Block state inside document
-  const [demoCode, setDemoCode] = useState(
-    '// BayesStack MLOps Telemetry Pipeline\nexport function recordEvent(event: string) {\n  console.log("Telemetry event logged:", event);\n}'
-  );
 
   // Processed HTML content with KaTeX math if enabled
   const renderedContent = useMemo(() => {
     return enableLatex ? processEditorLatex(value) : value;
   }, [value, enableLatex]);
 
+  // Update counts on mount or value change
+  useEffect(() => {
+    if (editorRef.current) {
+      const text = editorRef.current.innerText || "";
+      setChars(text.length);
+      setWords(text.trim() ? text.trim().split(/\\s+/).length : 0);
+    }
+  }, [value, renderedContent]);
+
+  const emitChange = () => {
+    if (editorRef.current) {
+      const html = editorRef.current.innerHTML;
+      const text = editorRef.current.innerText || "";
+      setChars(text.length);
+      setWords(text.trim() ? text.trim().split(/\\s+/).length : 0);
+      if (onChange) onChange(html);
+    }
+  };
+
   // Handle format action execution
   const handleFormatChange = (format: string, val?: any) => {
     if (readOnly) return;
-    document.execCommand(format, false, val);
+    
+    if (format === "align") {
+      if (val === "left") document.execCommand("justifyLeft", false);
+      if (val === "center") document.execCommand("justifyCenter", false);
+      if (val === "right") document.execCommand("justifyRight", false);
+      if (val === "justify") document.execCommand("justifyFull", false);
+      setActiveFormats((p) => ({ ...p, align: val }));
+    } else {
+      document.execCommand(format, false, val);
+    }
 
     // Update active format state toggle
     if (format === "bold") setActiveFormats((p) => ({ ...p, bold: !p.bold }));
     if (format === "italic") setActiveFormats((p) => ({ ...p, italic: !p.italic }));
     if (format === "underline") setActiveFormats((p) => ({ ...p, underline: !p.underline }));
+    if (format === "strike") setActiveFormats((p) => ({ ...p, strike: !p.strike }));
     if (format === "heading" && val) {
       document.execCommand("formatBlock", false, `<${val}>`);
       setActiveFormats((p) => ({ ...p, heading: val }));
     }
 
-    if (editorRef.current && onChange) {
-      onChange(editorRef.current.innerHTML);
-    }
+    emitChange();
   };
 
   // Handle text selection for floating BubbleMenu
@@ -171,11 +218,12 @@ export function TextEditor({
 
     if (
       rect.top >= editorRect.top &&
-      rect.bottom <= editorRect.bottom
+      rect.bottom <= editorRect.bottom &&
+      editorRef.current.contains(range.commonAncestorContainer)
     ) {
       setBubblePos({
         top: rect.top - editorRect.top - 42,
-        left: rect.left - editorRect.left + rect.width / 2 - 80,
+        left: rect.left - editorRect.left + rect.width / 2 - 120, // wider menu
       });
       setBubbleVisible(true);
     } else {
@@ -194,9 +242,7 @@ export function TextEditor({
     } else {
       document.execCommand("createLink", false, url);
     }
-    if (editorRef.current && onChange) {
-      onChange(editorRef.current.innerHTML);
-    }
+    emitChange();
   };
 
   // Insert LaTeX Formula
@@ -205,9 +251,21 @@ export function TextEditor({
     const formattedHtml = processEditorLatex(formulaStr);
 
     document.execCommand("insertHTML", false, formattedHtml);
-    if (editorRef.current && onChange) {
-      onChange(editorRef.current.innerHTML);
-    }
+    emitChange();
+  };
+
+  // Insert basic table
+  const handleInsertTable = () => {
+    const tableHTML = `
+      <table class="bs-editor-table" border="1" cellpadding="8" cellspacing="0">
+        <tbody>
+          <tr><td>Header 1</td><td>Header 2</td></tr>
+          <tr><td>Cell</td><td>Cell</td></tr>
+        </tbody>
+      </table><p><br></p>
+    `;
+    document.execCommand("insertHTML", false, tableHTML);
+    emitChange();
   };
 
   // Document Outline Headings for SchemaNav
@@ -234,9 +292,15 @@ export function TextEditor({
       {!readOnly && (
         <Toolbar
           activeFormats={activeFormats}
+          toolbarGroups={toolbarGroups}
           onFormatChange={handleFormatChange}
           onOpenLinkModal={() => setLinkModalOpen(true)}
           onOpenLatexModal={() => setLatexModalOpen(true)}
+          onInsertTable={handleInsertTable}
+          onUndo={() => { document.execCommand("undo"); emitChange(); }}
+          onRedo={() => { document.execCommand("redo"); emitChange(); }}
+          onClearFormatting={() => { document.execCommand("removeFormat"); emitChange(); }}
+          onPublish={onPublish ? () => onPublish(editorRef.current?.innerHTML || "") : undefined}
         />
       )}
 
@@ -262,18 +326,9 @@ export function TextEditor({
             className={["bs-text-editor-content", classNames?.content].filter(Boolean).join(" ")}
             onMouseUp={handleSelectionChange}
             onKeyUp={handleSelectionChange}
+            onInput={emitChange}
             dangerouslySetInnerHTML={{ __html: renderedContent }}
           />
-
-          {/* Code Block Component */}
-          <div style={{ marginTop: 20 }}>
-            <CodeBlockComponent
-              code={demoCode}
-              language="typescript"
-              onChange={(newCode) => setDemoCode(newCode)}
-              editable={!readOnly}
-            />
-          </div>
         </div>
 
         {/* Outline SchemaNav Sidebar */}
@@ -288,6 +343,21 @@ export function TextEditor({
           </div>
         )}
       </div>
+
+      {/* Editor Footer Bar */}
+      {(showWordCount || onPublish) && (
+        <div className={["bs-editor-footer-bar", classNames?.footer].filter(Boolean).join(" ")}>
+          {showWordCount && (
+            <div className="bs-editor-word-count">
+              {words} {words === 1 ? "word" : "words"} · {chars} {chars === 1 ? "character" : "characters"}
+            </div>
+          )}
+          {onPublish && !showWordCount && <div />}
+          <div className="bs-editor-status">
+            {readOnly ? "Viewing" : "Editing"}
+          </div>
+        </div>
+      )}
 
       {/* Link Insertion Modal */}
       <LinkModal

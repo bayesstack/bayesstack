@@ -56,6 +56,10 @@ export interface EditPanelClassNames {
   footer?: string;
 }
 
+/**
+ * EditPanel is a specialized form-submission drawer equipped with an automatic 'Unsaved Changes' dirty badge,
+ * built-in Save/Cancel footer buttons, and async submit loading state controls.
+ */
 export function EditPanel({
   open,
   onClose,
@@ -71,6 +75,7 @@ export function EditPanel({
   classNames,
   ...props
 }: EditPanelProps) {
+  // Render unsaved changes dirty badge next to title if form state has been modified
   const headerTitle = (
     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
       {typeof title === "string" ? <span>{title}</span> : title}
@@ -82,6 +87,7 @@ export function EditPanel({
     </div>
   );
 
+  // Standardized footer action bar disabling cancel while save mutation is pending
   const footerActions = (
     <div className={["bs-edit-panel-footer", classNames?.footer].filter(Boolean).join(" ")}>
       <Button

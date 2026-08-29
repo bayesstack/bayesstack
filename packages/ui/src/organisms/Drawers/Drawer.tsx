@@ -65,6 +65,10 @@ const PRESET_SIZES = {
   full: "100vw",
 };
 
+/**
+ * Drawer provides a structured off-canvas dialog with standardized Header, Body, and Footer layout slots.
+ * Features preset size options ('sm' through 'full') and composable header actions.
+ */
 export function Drawer({
   open,
   onClose,
@@ -81,6 +85,7 @@ export function Drawer({
   classNames,
   ...props
 }: DrawerProps) {
+  // Explicit width overrides take priority over semantic preset size tokens
   const resolvedWidth = width ?? PRESET_SIZES[size];
 
   return (
@@ -92,10 +97,11 @@ export function Drawer({
       className={["bs-drawer", className, classNames?.root].filter(Boolean).join(" ")}
       {...props}
     >
-      {/* Drawer Header */}
+      {/* Header section renders if any title, extra action element, or close button is enabled */}
       {(title || closable || extra) && (
         <div className={["bs-drawer-header", classNames?.header].filter(Boolean).join(" ")}>
           <div className="bs-drawer-header-title-group">
+            {/* Plain string titles are wrapped in semantic h3 tags; ReactNode titles render raw to allow custom header typography */}
             {typeof title === "string" ? (
               <h3 className={["bs-drawer-title", classNames?.title].filter(Boolean).join(" ")}>{title}</h3>
             ) : (

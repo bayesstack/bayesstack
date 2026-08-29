@@ -70,6 +70,10 @@ export interface VideoPlayerClassNames {
   timecode?: string;
 }
 
+/**
+ * VideoPlayer is an OTT-grade custom media player supporting picture-in-picture, native fullscreen,
+ * buffer track streaming visualizers, keyboard shortcut navigation, hover timestamp scrubbers, and subtitle overlays.
+ */
 export function VideoPlayer({
   src,
   poster,
@@ -177,6 +181,7 @@ export function VideoPlayer({
     }
   };
 
+  // Step seek by +/- seconds while triggering visual ripple animations
   const skipTime = (seconds: number) => {
     if (!videoRef.current) return;
     videoRef.current.currentTime = Math.min(
@@ -195,7 +200,7 @@ export function VideoPlayer({
     }, 700);
   };
 
-  // Auto-hide controls during playback
+  // Auto-hide control overlays after 2.5 seconds of mouse inactivity during active playback
   const handleMouseMove = () => {
     setShowControls(true);
     if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
@@ -209,7 +214,7 @@ export function VideoPlayer({
 
   const [isPiP, setIsPiP] = useState(false);
 
-  // Sync state when entering/exiting Picture-in-Picture mode
+  // Sync state when entering or exiting Picture-in-Picture mode via native browser triggers
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -249,7 +254,7 @@ export function VideoPlayer({
     }
   };
 
-  // Sync state when exiting fullscreen via ESC or browser UI
+  // Sync state when exiting fullscreen via ESC key or native browser window controls
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
@@ -263,7 +268,7 @@ export function VideoPlayer({
     };
   }, []);
 
-  // Keyboard controls listener
+  // Global hotkey shortcuts handler (bypasses input/textarea active elements to prevent typing interference)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const activeEl = document.activeElement;
@@ -303,6 +308,7 @@ export function VideoPlayer({
         e.preventDefault();
         skipTime(5);
       } else if (/^[0-9]$/.test(e.key) && duration > 0) {
+        // Digit hotkeys (0-9) seek directly to percentage marks (e.g. 5 = 50% duration)
         e.preventDefault();
         const digit = parseInt(e.key, 10);
         const targetTime = duration * (digit * 0.1);

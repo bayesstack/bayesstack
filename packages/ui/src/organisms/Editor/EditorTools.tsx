@@ -63,25 +63,45 @@ export function ImageTool(props: ToolButtonProps) {
 }
 
 export function BulletListTool(props: ToolButtonProps) {
-  return <ToolButton icon="Menu" title="Bullet List" {...props} />;
+  return <ToolButton icon="ListBullet" title="Bullet List" {...props} />;
 }
 
 export function OrderedListTool(props: ToolButtonProps) {
-  return <ToolButton icon="Menu" title="Numbered List" {...props} />;
+  return <ToolButton icon="ListNumber" title="Numbered List" {...props} />;
 }
 
 export function AlignLeftTool(props: ToolButtonProps) {
-  return <ToolButton icon="Menu" title="Align Left" {...props} />;
+  return <ToolButton icon="AlignLeft" title="Align Left" {...props} />;
 }
 
 export function AlignCenterTool(props: ToolButtonProps) {
-  return <ToolButton icon="Menu" title="Align Center" {...props} />;
+  return <ToolButton icon="AlignCenter" title="Align Center" {...props} />;
 }
 
 export function AlignRightTool(props: ToolButtonProps) {
-  return <ToolButton icon="Menu" title="Align Right" {...props} />;
+  return <ToolButton icon="AlignRight" title="Align Right" {...props} />;
+}
+
+export function AlignJustifyTool(props: ToolButtonProps) {
+  return <ToolButton icon="AlignJustify" title="Justify" {...props} />;
+}
+
+export function TableTool(props: ToolButtonProps) {
+  return <ToolButton icon="Table" title="Insert Table" {...props} />;
 }
 
 export function LatexTool(props: ToolButtonProps) {
-  return <ToolButton icon="AiBrain" title="Insert LaTeX Formula" {...props} />;
+  return <ToolButton icon="FunctionOfX" title="Insert LaTeX Formula" {...props} />;
+}
+
+export function UndoTool(props: ToolButtonProps) {
+  return <ToolButton icon="Undo" title="Undo (Ctrl+Z)" {...props} />;
+}
+
+export function RedoTool(props: ToolButtonProps) {
+  return <ToolButton icon="Redo" title="Redo (Ctrl+Y)" {...props} />;
+}
+
+export function ClearFormattingTool(props: ToolButtonProps) {
+  return <ToolButton icon="Eraser" title="Clear Formatting" {...props} />;
 }

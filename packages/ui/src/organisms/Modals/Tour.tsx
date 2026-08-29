@@ -67,6 +67,10 @@ export interface TourClassNames {
   actions?: string;
 }
 
+/**
+ * Tour renders an interactive product onboarding walkthrough overlay that highlights DOM elements
+ * by CSS selector using dynamic bounding rectangle cutouts and anchored popover instruction cards.
+ */
 export function Tour({
   opened,
   onClose,
@@ -80,6 +84,7 @@ export function Tour({
 
   const activeStep = steps[currentStepIndex];
 
+  // Query DOM target element for active step and retrieve its screen bounding box coordinates
   useEffect(() => {
     if (!opened || !activeStep) return;
 
@@ -111,6 +116,7 @@ export function Tour({
     }
   };
 
+  // Clamp popover position inside viewport boundaries (falls back to viewport center if DOM element is absent)
   const popoverStyle: React.CSSProperties = targetRect
     ? {
         position: "fixed",
@@ -126,7 +132,7 @@ export function Tour({
 
   const tourContent = (
     <div className={["bs-tour-overlay", className, classNames?.root, classNames?.overlay].filter(Boolean).join(" ")}>
-      {/* Spotlight cutout highlight over target element */}
+      {/* Spotlight cutout highlight box padded 4px around target element */}
       {targetRect && (
         <div
           className={["bs-tour-spotlight", classNames?.spotlight].filter(Boolean).join(" ")}

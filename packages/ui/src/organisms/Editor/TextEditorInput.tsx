@@ -15,9 +15,14 @@ export interface TextEditorInputProps extends TextEditorProps {
   description?: React.ReactNode;
 
   /**
-   * Helper text below editor
+   * Helper text below editor (alias: helperText)
    */
   help?: React.ReactNode;
+
+  /**
+   * Alias for help text
+   */
+  helperText?: React.ReactNode;
 
   /**
    * Validation error message
@@ -28,6 +33,16 @@ export interface TextEditorInputProps extends TextEditorProps {
    * Marks input as required
    */
   required?: boolean;
+
+  /**
+   * Maximum character count limit
+   */
+  maxLength?: number;
+
+  /**
+   * Current text character count
+   */
+  charCount?: number;
 
   /**
    * Additional root container CSS class string
@@ -47,14 +62,18 @@ export interface TextEditorInputClassNames {
   description?: string;
   footer?: string;
   helper?: string;
+  counter?: string;
 }
 
 export function TextEditorInput({
   label,
   description,
   help,
+  helperText,
   error,
   required = false,
+  maxLength,
+  charCount = 0,
   value,
   onChange,
   className = "",
@@ -62,6 +81,9 @@ export function TextEditorInput({
   style,
   ...props
 }: TextEditorInputProps) {
+  const isOverLength = maxLength !== undefined && charCount > maxLength;
+  const displayHelper = help || helperText;
+
   return (
     <div
       className={["bs-text-editor-input-wrapper", className, classNames?.root]
@@ -80,7 +102,9 @@ export function TextEditorInput({
               </label>
             )}
             {description && (
-              <p className={classNames?.description} style={{ margin: "2px 0 0 0", fontSize: 12, color: "#59716E" }}>{description}</p>
+              <p className={classNames?.description} style={{ margin: "2px 0 0 0", fontSize: 12, color: "#59716E" }}>
+                {description}
+              </p>
             )}
           </div>
           {error && (
@@ -94,10 +118,28 @@ export function TextEditorInput({
       {/* Primary Rich Text Editor Component */}
       <TextEditor value={value} onChange={onChange} {...props} />
 
-      {/* Helper Footer */}
-      {help && (
+      {/* Helper Footer & Character Counter */}
+      {(displayHelper || maxLength !== undefined) && (
         <div className={["bs-content-editor-input-footer", classNames?.footer].filter(Boolean).join(" ")}>
-          <span className={["bs-content-editor-helper", classNames?.helper].filter(Boolean).join(" ")}>{help}</span>
+          {displayHelper ? (
+            <span className={["bs-content-editor-helper", classNames?.helper].filter(Boolean).join(" ")}>
+              {displayHelper}
+            </span>
+          ) : <div />}
+
+          {maxLength !== undefined && (
+            <span
+              className={[
+                "bs-content-editor-counter",
+                isOverLength ? "bs-content-editor-counter--error" : "",
+                classNames?.counter,
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              {charCount} / {maxLength} chars
+            </span>
+          )}
         </div>
       )}
     </div>

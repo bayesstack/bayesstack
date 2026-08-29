@@ -117,6 +117,10 @@ export interface PaginatedListClassNames {
   footer?: string;
 }
 
+/**
+ * PaginatedList wraps datasets with built-in layout switching (Table vs Card Grid),
+ * responsive pagination toolbar integration, selection hooks, and skeleton loaders.
+ */
 export function PaginatedList<T extends Record<string, any>>({
   layout = "table",
   items = [],
@@ -140,6 +144,7 @@ export function PaginatedList<T extends Record<string, any>>({
   style,
   ...props
 }: PaginatedListProps<T>) {
+  // Infer total pages count from totalCount if explicit totalPages prop is omitted; fallback to 1 to avoid NaN
   const calculatedTotalPages =
     propTotalPages !== undefined
       ? propTotalPages
@@ -153,6 +158,7 @@ export function PaginatedList<T extends Record<string, any>>({
       style={style}
       {...props}
     >
+      {/* Layout switch: delegates to Table primitive for tabular layout or renders custom item cards in grid layout */}
       {layout === "table" ? (
         <Table
           data={items}
@@ -181,7 +187,7 @@ export function PaginatedList<T extends Record<string, any>>({
         </div>
       )}
 
-      {/* Pager Toolbar Footer */}
+      {/* Pager Footer displayed only when dataset spans more than 1 page */}
       {calculatedTotalPages > 1 && (
         <div
           className={[

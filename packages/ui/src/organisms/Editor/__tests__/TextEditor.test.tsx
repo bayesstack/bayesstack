@@ -52,6 +52,40 @@ describe("TextEditor Component", () => {
     expect(document.execCommand).toHaveBeenCalledWith("bold", false, undefined);
   });
 
+  it("executes undo and redo actions on toolbar button click", () => {
+    const handleValueChange = vi.fn();
+    document.execCommand = vi.fn();
+    render(<TextEditor value="<p>Text</p>" onChange={handleValueChange} />);
+
+    const undoBtn = screen.getByTitle("Undo (Ctrl+Z)");
+    fireEvent.click(undoBtn);
+    expect(document.execCommand).toHaveBeenCalledWith("undo");
+
+    const redoBtn = screen.getByTitle("Redo (Ctrl+Y)");
+    fireEvent.click(redoBtn);
+    expect(document.execCommand).toHaveBeenCalledWith("redo");
+  });
+
+  it("fires onPublish callback when publish button is clicked", () => {
+    const handlePublish = vi.fn();
+    render(<TextEditor value="<p>Publish Me</p>" onPublish={handlePublish} />);
+
+    const publishBtn = screen.getByText("Publish");
+    fireEvent.click(publishBtn);
+
+    expect(handlePublish).toHaveBeenCalledWith("<p>Publish Me</p>");
+  });
+
+  it("inserts table when table toolbar button is clicked", () => {
+    document.execCommand = vi.fn();
+    render(<TextEditor value="<p>Text</p>" />);
+
+    const tableBtn = screen.getByTitle("Insert Table");
+    fireEvent.click(tableBtn);
+
+    expect(document.execCommand).toHaveBeenCalledWith("insertHTML", false, expect.stringContaining("bs-editor-table"));
+  });
+
   it("disables toolbar and editing features when readOnly is true", () => {
     const { container } = render(<TextEditor value="<p>Read Only</p>" readOnly />);
     expect(container.querySelector(".bs-text-editor--readonly")).toBeInTheDocument();

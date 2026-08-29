@@ -74,6 +74,12 @@ export interface KanbanProps
   onCardAdd?: (newCard: { columnId: string; title: string }) => void;
 
   /**
+   * Theme variant for the Kanban board ("classic" editorial vs "minimal" dense issue tracker)
+   * @default "classic"
+   */
+  variant?: "classic" | "minimal";
+
+  /**
    * Enables card search input toolbar
    * @default true
    */
@@ -115,6 +121,10 @@ export interface KanbanClassNames {
   cardFooter?: string;
 }
 
+/**
+ * Kanban provides a full-featured task board with native HTML5 drag-and-drop support for both cards and columns.
+ * Features work-in-progress (WIP) limit warnings, collapsible columns, search filtering, and dual theme variants ("classic" vs "minimal").
+ */
 export function Kanban({
   columns: initialColumns = [],
   cards: controlledCards = [],
@@ -123,6 +133,7 @@ export function Kanban({
   onCardClick,
   onCardAction,
   onCardAdd,
+  variant = "classic",
   searchable = true,
   draggableColumns = true,
   disabled = false,
@@ -133,6 +144,8 @@ export function Kanban({
 }: KanbanProps) {
   const [columns, setColumns] = useState<KanbanColumnItem[]>(initialColumns);
   const [cards, setCards] = useState<KanbanCardItem[]>(controlledCards);
+
+  // Support dual controlled/uncontrolled state: use parent prop if explicitly supplied, fallback to local state
   const activeCards = controlledCards !== undefined ? controlledCards : cards;
 
   // Search filter query
@@ -145,13 +158,12 @@ export function Kanban({
   const [addingCardColumnId, setAddingCardColumnId] = useState<string | null>(null);
   const [newCardTitle, setNewCardTitle] = useState("");
 
-  // Drag-and-drop state for cards
+  // Native HTML5 Drag-and-drop state for cards and columns (eliminates heavy dnd dependencies)
   const [draggedCardId, setDraggedCardId] = useState<string | null>(null);
   const [dragOverColumnId, setDragOverColumnId] = useState<string | null>(null);
-
-  // Drag-and-drop state for columns
   const [draggedColumnId, setDraggedColumnId] = useState<string | null>(null);
 
+  // Card search filtering across title, description, and tag properties
   const filteredCards = activeCards.filter((card) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
@@ -177,6 +189,7 @@ export function Kanban({
     }
   };
 
+  // Handles both card transfers between columns and column position reordering
   const handleDropColumn = (e: React.DragEvent, targetColumnId: string) => {
     e.preventDefault();
     if (draggedCardId) {
@@ -192,7 +205,7 @@ export function Kanban({
         }
       }
     } else if (draggedColumnId && draggedColumnId !== targetColumnId && draggableColumns) {
-      // Reorder columns
+      // Reorder columns in array
       const oldIdx = columns.findIndex((col) => col.id === draggedColumnId);
       const newIdx = columns.findIndex((col) => col.id === targetColumnId);
       if (oldIdx !== -1 && newIdx !== -1) {
@@ -263,7 +276,14 @@ export function Kanban({
 
   return (
     <div
-      className={["bs-kanban-wrapper", className, classNames?.root].filter(Boolean).join(" ")}
+      className={[
+        "bs-kanban-wrapper",
+        `bs-kanban-wrapper--${variant}`,
+        className,
+        classNames?.root,
+      ]
+        .filter(Boolean)
+        .join(" ")}
       style={style}
       {...props}
     >
@@ -404,113 +424,189 @@ export function Kanban({
                       onClick={() => onCardClick && onCardClick(card)}
                       className={[
                         "bs-kanban-card",
+                        `bs-kanban-card--${variant}`,
                         isDragging ? "bs-kanban-card--dragging" : "",
                         classNames?.card,
                       ]
                         .filter(Boolean)
                         .join(" ")}
                     >
-                      {/* Priority Tag & Badges */}
-                      <div className="bs-kanban-card-meta-top">
-                        {card.priority && (
-                          <Badge
-                            size="sm"
-                            color={getPriorityColor(card.priority)}
-                            variant="subtle"
-                          >
-                            {card.priority}
-                          </Badge>
-                        )}
-                        {card.tags &&
-                          card.tags.map((tag) => (
-                            <span key={tag} className="bs-kanban-card-tag">
-                              #{tag}
-                            </span>
-                          ))}
+                      {variant === "minimal" ? (
+                        <div className="bs-kanban-minimal-card-inner">
+                          <div className="bs-kanban-minimal-card-header">
+                            <span
+                              className={`bs-kanban-priority-dot bs-kanban-priority-dot--${card.priority || "neutral"}`}
+                              title={card.priority ? `Priority: ${card.priority}` : undefined}
+                            />
+                            <h5 className={["bs-kanban-card-title", classNames?.cardTitle].filter(Boolean).join(" ")}>
+                              {card.title}
+                            </h5>
 
-                        {/* Quick Hover Action Bar */}
-                        <div
-                          className="bs-kanban-card-hover-actions"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {onCardAction && (
-                            <>
-                              <IconButton
-                                name="Edit"
-                                label="Edit card"
-                                size="xs"
-                                variant="transparent"
-                                onClick={() => onCardAction("edit", card)}
-                              />
-                              <IconButton
-                                name="Copy"
-                                label="Duplicate card"
-                                size="xs"
-                                variant="transparent"
-                                onClick={() => onCardAction("duplicate", card)}
-                              />
-                              <IconButton
-                                name="Trash"
-                                label="Delete card"
-                                size="xs"
-                                variant="transparent"
-                                onClick={() => onCardAction("delete", card)}
-                              />
-                            </>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Card Title & Description */}
-                      <h5 className={["bs-kanban-card-title", classNames?.cardTitle].filter(Boolean).join(" ")}>{card.title}</h5>
-                      {card.description && (
-                        <p className={["bs-kanban-card-desc", classNames?.cardDesc].filter(Boolean).join(" ")}>{card.description}</p>
-                      )}
-
-                      {/* Progress Bar (if available) */}
-                      {card.progress !== undefined && (
-                        <div className="bs-kanban-card-progress-bar">
-                          <div
-                            className="bs-kanban-card-progress-fill"
-                            style={{ width: `${card.progress}%` }}
-                          />
-                        </div>
-                      )}
-
-                      {/* Card Footer: Assignee Avatars, Subtasks, Due Date */}
-                      <div className={["bs-kanban-card-footer", classNames?.cardFooter].filter(Boolean).join(" ")}>
-                        {card.assignees && card.assignees.length > 0 ? (
-                          <div className="bs-kanban-card-assignees">
-                            {card.assignees.slice(0, 3).map((u, i) => (
-                              <Avatar
-                                key={i}
-                                name={u.name}
-                                src={u.avatar}
-                                size="xs"
-                                className="bs-kanban-avatar-stacked"
-                              />
-                            ))}
+                            {/* Quick Hover Actions */}
+                            <div className="bs-kanban-card-hover-actions" onClick={(e) => e.stopPropagation()}>
+                              {onCardAction && (
+                                <>
+                                  <IconButton
+                                    name="Edit"
+                                    label="Edit card"
+                                    size="xs"
+                                    variant="transparent"
+                                    onClick={() => onCardAction("edit", card)}
+                                  />
+                                  <IconButton
+                                    name="Trash"
+                                    label="Delete card"
+                                    size="xs"
+                                    variant="transparent"
+                                    onClick={() => onCardAction("delete", card)}
+                                  />
+                                </>
+                              )}
+                            </div>
                           </div>
-                        ) : (
-                          <span />
-                        )}
 
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          {card.subtasks && (
-                            <span className="bs-kanban-card-subtasks">
-                              <Icon name="Check" size={12} />
-                              {card.subtasks.completed}/{card.subtasks.total}
-                            </span>
+                          <div className="bs-kanban-minimal-card-meta">
+                            {card.tags && card.tags.length > 0 ? (
+                              <div className="bs-kanban-card-tags">
+                                {card.tags.slice(0, 2).map((t) => (
+                                  <span key={t} className="bs-kanban-card-tag">
+                                    #{t}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <span />
+                            )}
+
+                            <div className="bs-kanban-minimal-right-meta">
+                              {card.subtasks && (
+                                <span className="bs-kanban-card-subtasks">
+                                  <Icon name="Check" size={11} />
+                                  {card.subtasks.completed}/{card.subtasks.total}
+                                </span>
+                              )}
+                              {card.dueDate && (
+                                <span className="bs-kanban-card-due-date">
+                                  <Icon name="Calendar" size={11} />
+                                  {card.dueDate}
+                                </span>
+                              )}
+                              {card.assignees && card.assignees.length > 0 && (
+                                <Avatar
+                                  name={card.assignees[0].name}
+                                  src={card.assignees[0].avatar}
+                                  size="xs"
+                                  className="bs-kanban-avatar-stacked"
+                                />
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          {/* Priority Tag & Badges */}
+                          <div className="bs-kanban-card-meta-top">
+                            {card.priority && (
+                              <Badge
+                                size="sm"
+                                color={getPriorityColor(card.priority)}
+                                variant="subtle"
+                              >
+                                {card.priority}
+                              </Badge>
+                            )}
+                            {card.tags &&
+                              card.tags.map((tag) => (
+                                <span key={tag} className="bs-kanban-card-tag">
+                                  #{tag}
+                                </span>
+                              ))}
+
+                            {/* Quick Hover Action Bar */}
+                            <div
+                              className="bs-kanban-card-hover-actions"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {onCardAction && (
+                                <>
+                                  <IconButton
+                                    name="Edit"
+                                    label="Edit card"
+                                    size="xs"
+                                    variant="transparent"
+                                    onClick={() => onCardAction("edit", card)}
+                                  />
+                                  <IconButton
+                                    name="Copy"
+                                    label="Duplicate card"
+                                    size="xs"
+                                    variant="transparent"
+                                    onClick={() => onCardAction("duplicate", card)}
+                                  />
+                                  <IconButton
+                                    name="Trash"
+                                    label="Delete card"
+                                    size="xs"
+                                    variant="transparent"
+                                    onClick={() => onCardAction("delete", card)}
+                                  />
+                                </>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Card Title & Description */}
+                          <h5 className={["bs-kanban-card-title", classNames?.cardTitle].filter(Boolean).join(" ")}>{card.title}</h5>
+                          {card.description && (
+                            <p className={["bs-kanban-card-desc", classNames?.cardDesc].filter(Boolean).join(" ")}>{card.description}</p>
                           )}
 
-                          {card.dueDate && (
-                            <div className="bs-kanban-card-due-date">
-                              <Icon name="Calendar" size={12} />
-                              <span>{card.dueDate}</span>
+                          {/* Progress Bar (if available) */}
+                          {card.progress !== undefined && (
+                            <div className="bs-kanban-card-progress-bar">
+                              <div
+                                className="bs-kanban-card-progress-fill"
+                                style={{ width: `${card.progress}%` }}
+                              />
                             </div>
                           )}
-                        </div>
-                      </div>
+
+                          {/* Card Footer: Assignee Avatars, Subtasks, Due Date */}
+                          <div className={["bs-kanban-card-footer", classNames?.cardFooter].filter(Boolean).join(" ")}>
+                            {card.assignees && card.assignees.length > 0 ? (
+                              <div className="bs-kanban-card-assignees">
+                                {card.assignees.slice(0, 3).map((u, i) => (
+                                  <Avatar
+                                    key={i}
+                                    name={u.name}
+                                    src={u.avatar}
+                                    size="xs"
+                                    className="bs-kanban-avatar-stacked"
+                                  />
+                                ))}
+                              </div>
+                            ) : (
+                              <span />
+                            )}
+
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                              {card.subtasks && (
+                                <span className="bs-kanban-card-subtasks">
+                                  <Icon name="Check" size={12} />
+                                  {card.subtasks.completed}/{card.subtasks.total}
+                                </span>
+                              )}
+
+                              {card.dueDate && (
+                                <div className="bs-kanban-card-due-date">
+                                  <Icon name="Calendar" size={12} />
+                                  <span>{card.dueDate}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </div>
                   );
                 })}

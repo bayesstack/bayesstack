@@ -52,6 +52,10 @@ export interface ModalZoomClassNames {
   img?: string;
 }
 
+/**
+ * ModalZoom provides a lightbox media viewer with interactive zoom scaling (50% to 300%),
+ * scale reset indicators, direct asset download capabilities, and dark overlay masking.
+ */
 export function ModalZoom({
   opened,
   onClose,
@@ -65,10 +69,12 @@ export function ModalZoom({
 
   if (!opened) return null;
 
+  // Clamp zoom scale between 50% (0.5x) min and 300% (3x) max to avoid visual clipping/invisibility
   const handleZoomIn = () => setScale((s) => Math.min(s + 0.25, 3));
   const handleZoomOut = () => setScale((s) => Math.max(s - 0.25, 0.5));
   const handleResetZoom = () => setScale(1);
 
+  // Trigger browser download action by injecting temporary programmatic anchor element
   const handleDownload = () => {
     const link = document.createElement("a");
     link.href = src;
@@ -88,7 +94,7 @@ export function ModalZoom({
         .join(" ")}
       onClick={onClose}
     >
-      {/* Top Toolbar */}
+      {/* Top Toolbar (stopPropagation isolates toolbar clicks from closing the overlay) */}
       <div
         className={["bs-modal-zoom-toolbar", classNames?.toolbar].filter(Boolean).join(" ")}
         onClick={(e) => e.stopPropagation()}

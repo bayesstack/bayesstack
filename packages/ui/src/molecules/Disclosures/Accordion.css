@@ -1,0 +1,290 @@
+/* Disclosures & Accordion Suite - BayesStack UI */
+
+.bs-accordion {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  font-family: var(--bs-font-family, 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif);
+  box-sizing: border-box;
+}
+
+/* 1. Bordered Variant (Sleek Card Stack) */
+.bs-accordion--bordered {
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #FFFFFF;
+  box-shadow: 0 1px 3px rgba(18, 51, 51, 0.04);
+}
+
+.bs-accordion--bordered .bs-accordion-item {
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.bs-accordion--bordered .bs-accordion-item:last-child {
+  border-bottom: none;
+}
+
+/* 2. Separated Variant (Independent Floating Cards) */
+.bs-accordion--separated {
+  gap: 12px;
+}
+
+.bs-accordion--separated .bs-accordion-item {
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  background-color: #FFFFFF;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(18, 51, 51, 0.03);
+  transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bs-accordion--separated .bs-accordion-item:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 4px 12px rgba(18, 51, 51, 0.06);
+}
+
+.bs-accordion--separated .bs-accordion-item--expanded {
+  border-color: #0B6763;
+  box-shadow: 0 6px 16px rgba(11, 103, 99, 0.08);
+}
+
+/* 3. Flush Variant */
+.bs-accordion--flush {
+  border-radius: 0;
+  background-color: transparent;
+}
+
+.bs-accordion--flush .bs-accordion-item {
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.bs-accordion--flush .bs-accordion-item:last-child {
+  border-bottom: none;
+}
+
+/* 4. Ghost Variant */
+.bs-accordion--ghost .bs-accordion-item {
+  border: none;
+  background-color: transparent;
+  border-radius: 8px;
+}
+
+.bs-accordion--ghost .bs-accordion-item--expanded {
+  background-color: #F8FCFB;
+}
+
+/* Item State & Left Accent Bar */
+.bs-accordion-item {
+  position: relative;
+  transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.bs-accordion-item--expanded::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3.5px;
+  background-color: #0B6763;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  z-index: 2;
+}
+
+.bs-accordion--flush .bs-accordion-item--expanded::before,
+.bs-accordion--ghost .bs-accordion-item--expanded::before {
+  display: none;
+}
+
+.bs-accordion-item--disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Trigger Button */
+.bs-accordion-header {
+  margin: 0;
+  padding: 0;
+}
+
+.bs-accordion-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 20px;
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  text-align: left;
+  color: #123333;
+  transition: background-color 150ms ease;
+}
+
+.bs-accordion-trigger:hover {
+  background-color: #F8FCFB;
+}
+
+.bs-accordion-item--expanded .bs-accordion-trigger {
+  background-color: #F1F8F7;
+}
+
+.bs-accordion-trigger:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px #0B6763;
+}
+
+.bs-accordion-trigger--left {
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
+/* Header Left Group */
+.bs-accordion-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+}
+
+.bs-accordion-icon-badge {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background-color: #E4F2EF;
+  color: #0B6763;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 180ms ease, background-color 180ms ease;
+}
+
+.bs-accordion-item--expanded .bs-accordion-icon-badge {
+  background-color: #0B6763;
+  color: #FFFFFF;
+  transform: scale(1.04);
+}
+
+.bs-accordion-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bs-accordion-title {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #123333;
+  letter-spacing: -0.2px;
+  transition: color 150ms ease;
+}
+
+.bs-accordion-item--expanded .bs-accordion-title {
+  color: #0B6763;
+}
+
+.bs-accordion-subtitle {
+  font-size: 12px;
+  font-weight: 500;
+  color: #59716E;
+}
+
+/* Header Right Group */
+.bs-accordion-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bs-accordion-chevron-pill {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #F1F5F9;
+  color: #4A6360;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+
+.bs-accordion-trigger:hover .bs-accordion-chevron-pill {
+  background-color: #E2ECE9;
+  color: #123333;
+}
+
+.bs-accordion-item--expanded .bs-accordion-chevron-pill {
+  background-color: #E4F2EF;
+  color: #0B6763;
+  transform: rotate(180deg);
+}
+
+/* Content Panel */
+.bs-accordion-content {
+  overflow: hidden;
+  transition: max-height 250ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms ease;
+  animation: bsAccordionExpand 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes bsAccordionExpand {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bs-accordion-body {
+  padding: 4px 20px 20px 20px;
+  font-size: 13.5px;
+  color: #4A6360;
+  line-height: 1.6;
+}
+
+/* Size Densities */
+.bs-accordion--sm .bs-accordion-trigger {
+  padding: 12px 16px;
+}
+
+.bs-accordion--sm .bs-accordion-icon-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+}
+
+.bs-accordion--sm .bs-accordion-title {
+  font-size: 13.5px;
+}
+
+.bs-accordion--sm .bs-accordion-body {
+  padding: 2px 16px 14px 16px;
+  font-size: 12.5px;
+}
+
+.bs-accordion--lg .bs-accordion-trigger {
+  padding: 20px 24px;
+}
+
+.bs-accordion--lg .bs-accordion-icon-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+}
+
+.bs-accordion--lg .bs-accordion-title {
+  font-size: 16px;
+}
+
+.bs-accordion--lg .bs-accordion-body {
+  padding: 6px 24px 24px 24px;
+  font-size: 14.5px;
+}

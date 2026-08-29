@@ -1,12 +1,15 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import React from "react";
-import { Descriptions } from ".././Descriptions";
+import { Descriptions, type DescriptionItem } from "../Descriptions";
 import { Badge } from "../../../atoms/Badges/Badge";
 import { Button } from "../../../atoms/Buttons/Button";
 
 const meta: Meta<typeof Descriptions> = {
   title: "Organisms/DataDisplay/Descriptions",
   component: Descriptions,
+  parameters: {
+    layout: "padded",
+  },
   argTypes: {
     bordered: { control: "boolean" },
     column: { control: { type: "number", min: 1, max: 4 } },
@@ -16,29 +19,36 @@ const meta: Meta<typeof Descriptions> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof Descriptions>;
+type Story = StoryObj<typeof meta>;
 
-export const EntityMetadataGrid: Story = {
-  render: () => (
+const MOCK_ITEMS: DescriptionItem[] = [
+  { label: "Pipeline Name", value: "transformer-v4-prod" },
+  { label: "Deployment Region", value: "us-east-1 (N. Virginia)" },
+  {
+    label: "Health Status",
+    value: <Badge size="sm" color="success">Healthy</Badge>,
+  },
+  { label: "Latency P99", value: "14.2ms" },
+  { label: "Throughput", value: "4,200 req/sec" },
+  { label: "Replica Count", value: "12 Pods" },
+  { label: "Created By", value: "Sarah Chen (MLOps)" },
+  { label: "Created At", value: "Aug 24, 2026 14:22 UTC", span: 2 },
+];
+
+export const Playground: Story = {
+  args: {
+    title: "Model Pipeline Deployment Metadata",
+    bordered: true,
+    column: 3,
+    size: "md",
+    layout: "horizontal",
+    items: MOCK_ITEMS,
+  },
+  render: (args) => (
     <div style={{ padding: 24, maxWidth: 900 }}>
       <Descriptions
-        title="Model Pipeline Deployment Metadata"
+        {...args}
         extra={<Button size="xs" variant="secondary">Edit Specs</Button>}
-        bordered
-        column={3}
-        items={[
-          { label: "Pipeline Name", value: "transformer-v4-prod" },
-          { label: "Deployment Region", value: "us-east-1 (N. Virginia)" },
-          {
-            label: "Health Status",
-            value: <Badge size="sm" color="success">Healthy</Badge>,
-          },
-          { label: "Latency P99", value: "14.2ms" },
-          { label: "Throughput", value: "4,200 req/sec" },
-          { label: "Replica Count", value: "12 Pods" },
-          { label: "Created By", value: "Sarah Chen (MLOps)" },
-          { label: "Created At", value: "Aug 24, 2026 14:22 UTC", span: 2 },
-        ]}
       />
     </div>
   ),

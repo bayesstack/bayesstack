@@ -333,3 +333,385 @@
 .bs-chat-message-bubble--own .bs-chat-message-time {
   color: rgba(255, 255, 255, 0.92);
 }
+
+/* ------------------------------------------
+   CodeDisplay Styles
+   ------------------------------------------ */
+
+.bs-code-display {
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  overflow: hidden;
+  font-family: var(--bs-font-mono, "JetBrains Mono", monospace, sans-serif);
+  font-size: 13px;
+  line-height: 1.5;
+  box-shadow: 0 4px 16px rgba(18, 51, 51, 0.08);
+}
+
+.bs-code-display--dark {
+  background-color: #0F172A;
+  border: 1px solid #1E293B;
+  color: #F8FAFC;
+}
+
+.bs-code-display--light {
+  background-color: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  color: #0F172A;
+}
+
+.bs-code-display--minimal {
+  background-color: transparent;
+  border: 1px solid #D7E8E4;
+  color: #123333;
+  box-shadow: none;
+}
+
+.bs-code-display-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  user-select: none;
+}
+
+.bs-code-display--dark .bs-code-display-header {
+  background-color: #1E293B;
+  border-bottom: 1px solid #334155;
+}
+
+.bs-code-display--light .bs-code-display-header {
+  background-color: #EDF2F7;
+  border-bottom: 1px solid #CBD5E1;
+}
+
+.bs-code-display--minimal .bs-code-display-header {
+  background-color: transparent;
+  border-bottom: 1px solid #E2ECEB;
+}
+
+.bs-code-display-badge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.bs-code-display--dark .bs-code-display-badge {
+  background-color: #334155;
+  color: #38BDF8;
+}
+
+.bs-code-display--light .bs-code-display-badge {
+  background-color: #CBD5E1;
+  color: #0B6763;
+}
+
+.bs-code-display--minimal .bs-code-display-badge {
+  background-color: #F0F7F6;
+  color: #0B6763;
+}
+
+.bs-code-display-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 150ms ease;
+  font-family: inherit;
+}
+
+.bs-code-display--dark .bs-code-display-copy-btn {
+  color: #94A3B8;
+}
+
+.bs-code-display--dark .bs-code-display-copy-btn:hover {
+  background-color: #334155;
+  color: #F8FAFC;
+}
+
+.bs-code-display--light .bs-code-display-copy-btn {
+  color: #334155;
+}
+
+.bs-code-display--light .bs-code-display-copy-btn:hover {
+  background-color: #CBD5E1;
+  color: #0F172A;
+}
+
+.bs-code-display--minimal .bs-code-display-copy-btn {
+  color: #475569;
+}
+
+.bs-code-display--minimal .bs-code-display-copy-btn:hover {
+  background-color: #F0F7F6;
+  color: #0B6763;
+}
+
+.bs-code-display-copy-btn--copied {
+  color: #10B981 !important;
+}
+
+.bs-code-display-body {
+  display: flex;
+  overflow: auto;
+  position: relative;
+}
+
+.bs-code-display-gutter {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 10px 12px 14px;
+  user-select: none;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.bs-code-display--dark .bs-code-display-gutter {
+  background-color: #0F172A;
+  color: #94A3B8;
+  border-right: 1px solid #1E293B;
+}
+
+.bs-code-display--light .bs-code-display-gutter {
+  background-color: #F1F5F9;
+  color: #334155;
+  border-right: 1px solid #E2E8F0;
+}
+
+.bs-code-display--minimal .bs-code-display-gutter {
+  background-color: transparent;
+  color: #334155;
+  border-right: 1px solid #E2ECEB;
+}
+
+.bs-code-display-filename {
+  font-size: 12px;
+  font-weight: 600;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  opacity: 0.9;
+}
+
+.bs-code-display-line-number {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.bs-code-gutter--add {
+  color: #10B981 !important;
+  font-weight: 700;
+}
+
+.bs-code-gutter--remove {
+  color: #EF4444 !important;
+  font-weight: 700;
+}
+
+.bs-code-display-lines-stage {
+  flex: 1;
+  padding: 12px 0;
+  overflow-x: auto;
+}
+
+.bs-code-display--wrap .bs-code-display-lines-stage {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.bs-code-line-row {
+  padding: 0 16px;
+  line-height: 1.5;
+  transition: background-color 120ms ease, opacity 120ms ease;
+  border-left: 3px solid transparent;
+}
+
+.bs-code-line-text {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Diff Line Colors */
+.bs-code-line--add {
+  background-color: rgba(16, 185, 129, 0.14) !important;
+  border-left-color: #10B981 !important;
+}
+
+.bs-code-line--remove {
+  background-color: rgba(239, 68, 68, 0.14) !important;
+  border-left-color: #EF4444 !important;
+}
+
+/* Highlight Color Tints */
+.bs-code-line--red {
+  background-color: rgba(239, 68, 68, 0.18) !important;
+  border-left-color: #EF4444 !important;
+}
+
+.bs-code-line--green {
+  background-color: rgba(16, 185, 129, 0.18) !important;
+  border-left-color: #10B981 !important;
+}
+
+.bs-code-line--grey {
+  background-color: rgba(148, 163, 184, 0.22) !important;
+  border-left-color: #94A3B8 !important;
+}
+
+.bs-code-line--yellow {
+  background-color: rgba(245, 158, 11, 0.2) !important;
+  border-left-color: #F59E0B !important;
+}
+
+.bs-code-line--blue {
+  background-color: rgba(56, 189, 248, 0.2) !important;
+  border-left-color: #38BDF8 !important;
+}
+
+/* Focus Filter Dimming */
+.bs-code-line--dimmed {
+  opacity: 0.35 !important;
+}
+
+/* Educational Callout Annotation */
+.bs-code-annotation-callout {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 16px 4px 16px;
+  padding: 6px 12px;
+  background-color: rgba(11, 103, 99, 0.1);
+  border: 1px solid rgba(11, 103, 99, 0.25);
+  border-radius: 6px;
+  font-size: 12px;
+  color: #0B6763;
+  line-height: 1.4;
+}
+
+.bs-code-display--dark .bs-code-annotation-callout {
+  background-color: rgba(56, 189, 248, 0.12);
+  border-color: rgba(56, 189, 248, 0.3);
+  color: #38BDF8;
+}
+
+.bs-code-annotation-icon {
+  flex-shrink: 0;
+}
+
+.bs-code-annotation-text {
+  font-family: var(--bs-font-sans, "Outfit", sans-serif);
+  font-weight: 500;
+}
+
+/* ------------------------------------------
+   Syntax Token Styling (Theme-Aware WCAG AA)
+   ------------------------------------------ */
+
+.bs-token-keyword {
+  font-weight: 600;
+}
+
+.bs-token-comment {
+  font-style: italic;
+}
+
+/* Dark Theme Syntax Colors */
+.bs-code-display--dark .bs-token-keyword {
+  color: #C084FC;
+}
+
+.bs-code-display--dark .bs-token-string {
+  color: #34D399;
+}
+
+.bs-code-display--dark .bs-token-comment {
+  color: #94A3B8;
+}
+
+.bs-code-display--dark .bs-token-number {
+  color: #F97316;
+}
+
+.bs-code-display--dark .bs-token-function {
+  color: #38BDF8;
+}
+
+.bs-code-display--dark .bs-token-type {
+  color: #FBBF24;
+}
+
+.bs-code-display--dark .bs-token-operator {
+  color: #F472B6;
+}
+
+/* Light Theme Syntax Colors */
+.bs-code-display--light .bs-token-keyword {
+  color: #6D28D9;
+}
+
+.bs-code-display--light .bs-token-string {
+  color: #047857;
+}
+
+.bs-code-display--light .bs-token-comment {
+  color: #475569;
+}
+
+.bs-code-display--light .bs-token-number {
+  color: #C2410C;
+}
+
+.bs-code-display--light .bs-token-function {
+  color: #0369A1;
+}
+
+.bs-code-display--light .bs-token-type {
+  color: #92400E;
+}
+
+.bs-code-display--light .bs-token-operator {
+  color: #BE123C;
+}
+
+/* Minimal Theme Syntax Colors */
+.bs-code-display--minimal .bs-token-keyword {
+  color: #6D28D9;
+}
+
+.bs-code-display--minimal .bs-token-string {
+  color: #047857;
+}
+
+.bs-code-display--minimal .bs-token-comment {
+  color: #475569;
+}
+
+.bs-code-display--minimal .bs-token-number {
+  color: #C2410C;
+}
+
+.bs-code-display--minimal .bs-token-function {
+  color: #0369A1;
+}
+
+.bs-code-display--minimal .bs-token-type {
+  color: #92400E;
+}
+
+.bs-code-display--minimal .bs-token-operator {
+  color: #BE123C;
+}
+
+
+
+

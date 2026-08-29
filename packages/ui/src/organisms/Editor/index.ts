@@ -8,3 +8,7 @@ export * from "./SchemaNav";
 export * from "./TextEditor";
 export * from "./TextEditorInput";
 export * from "./ContentEditorInput";
+export * from "./CodeEditor";
+export * from "./TerminalEditor";
+export * from "./JsonEditor";
+export * from "./TextEditorDisplay";

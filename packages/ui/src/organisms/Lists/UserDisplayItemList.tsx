@@ -90,6 +90,10 @@ export interface UserDisplayItemListClassNames {
   actions?: string;
 }
 
+/**
+ * UserDisplayItemList renders a compact horizontal row list of user profiles optimized for pickers, assignees,
+ * and permission assignment modals. Supports inline search filtering, checkbox selection, and action triggers.
+ */
 export function UserDisplayItemList({
   users = [],
   searchable = true,
@@ -107,6 +111,7 @@ export function UserDisplayItemList({
 }: UserDisplayItemListProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Search filter across name, email, and role string fields
   const filteredUsers = users.filter(
     (u) =>
       u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -177,7 +182,7 @@ export function UserDisplayItemList({
                   else if (onUserClick) onUserClick(user);
                 }}
               >
-                {/* Select Checkbox */}
+                {/* Select Checkbox (stopPropagation prevents triggering row click handler twice) */}
                 {selectable && (
                   <input
                     type="checkbox"
@@ -218,7 +223,7 @@ export function UserDisplayItemList({
                   </div>
                 </div>
 
-                {/* Row Action Button */}
+                {/* Row Action Button (stopPropagation isolates button trigger from row click) */}
                 {onUserAction && (
                   <div
                     className={["bs-user-list-actions", classNames?.actions].filter(Boolean).join(" ")}

@@ -37,6 +37,9 @@ export interface ToastClassNames {
   message?: string;
 }
 
+/**
+ * Toast renders a temporary notification alert banner with variant styling (info, success, warning, danger).
+ */
 export function Toast({
   id,
   title,
@@ -47,6 +50,7 @@ export function Toast({
   className = "",
   classNames,
 }: ToastProps) {
+  // Infer semantic icon based on notification severity level
   const getIconName = (): IconName => {
     switch (variant) {
       case "success":
@@ -108,6 +112,9 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | null>(null);
 
+/**
+ * Hook to trigger global toast notification messages (`showToast`, `hideToast`).
+ */
 export function useToast() {
   const ctx = useContext(ToastContext);
   if (!ctx) {
@@ -118,6 +125,9 @@ export function useToast() {
   return ctx;
 }
 
+/**
+ * ToastProvider renders a global floating portal container that stacks active toasts with configurable auto-dismiss timers.
+ */
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
@@ -132,6 +142,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
       setToasts((prev) => [...prev, newToast]);
 
+      // Schedule auto-dismiss timer unless autoClose is explicitly set to false
       const autoCloseMs = item.autoClose !== undefined ? item.autoClose : 4000;
       if (autoCloseMs !== false) {
         setTimeout(() => {
@@ -147,6 +158,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ showToast, hideToast }}>
       {children}
+      {/* Portal toast container to fixed overlay target */}
       {typeof document !== "undefined" &&
         createPortal(
           <div className="bs-toast-container">

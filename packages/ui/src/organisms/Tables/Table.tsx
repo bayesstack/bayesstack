@@ -172,6 +172,10 @@ export interface TableClassNames {
   footer?: string;
 }
 
+/**
+ * Table provides a data grid supporting column cell rendering, client/server sorting,
+ * batch row selection with indeterminate header checkboxes, skeleton load placeholders, and pagination integration.
+ */
 export function Table<T extends Record<string, any>>({
   data = [],
   columns = [],
@@ -195,7 +199,7 @@ export function Table<T extends Record<string, any>>({
   style,
   ...props
 }: TableProps<T>) {
-  // Internal state for uncontrolled row selection
+  // Dual-control state resolution for row selection checkboxes (controlled vs uncontrolled internal state)
   const [internalSelectedKeys, setInternalSelectedKeys] = useState<
     (string | number)[]
   >([]);
@@ -204,7 +208,7 @@ export function Table<T extends Record<string, any>>({
     ? controlledSelectedKeys
     : internalSelectedKeys;
 
-  // Internal state for uncontrolled sorting
+  // Dual-control state resolution for column header sorting
   const [internalSortCol, setInternalSortCol] = useState<string | undefined>();
   const [internalSortDir, setInternalSortDir] = useState<
     "asc" | "desc" | null
@@ -214,7 +218,7 @@ export function Table<T extends Record<string, any>>({
   const activeSortDir =
     controlledSortDir !== undefined ? controlledSortDir : internalSortDir;
 
-  // Helper to extract unique row ID
+  // Extract unique key identifier per dataset row based on key string property or custom evaluator function
   const getRowId = (row: T, index: number): string | number => {
     if (typeof rowKey === "function") {
       return rowKey(row, index);
@@ -222,7 +226,7 @@ export function Table<T extends Record<string, any>>({
     return row[rowKey] !== undefined ? row[rowKey] : index;
   };
 
-  // Selection handlers
+  // Toggle select-all state across all current dataset rows
   const handleSelectAll = (checked: boolean) => {
     const nextKeys = checked ? data.map((r, i) => getRowId(r, i)) : [];
     const nextRows = checked ? [...data] : [];
@@ -256,7 +260,7 @@ export function Table<T extends Record<string, any>>({
     }
   };
 
-  // Sort header click handler
+  // Toggle sort direction on column header click
   const handleHeaderSort = (colKey: string) => {
     let nextDir: "asc" | "desc" = "asc";
     if (activeSortCol === colKey) {
@@ -273,7 +277,7 @@ export function Table<T extends Record<string, any>>({
     }
   };
 
-  // Process data sorting if uncontrolled and sorting is active
+  // Perform client-side array sorting if active sorting column is set without an explicit server-side `onSortChange` listener
   let processedData = [...data];
   if (!onSortChange && activeSortCol && activeSortDir) {
     processedData.sort((a, b) => {
@@ -415,6 +419,7 @@ export function Table<T extends Record<string, any>>({
                       if (onRowClick) onRowClick(row, rIdx, e);
                     }}
                   >
+                    {/* Checkbox cell stopPropagation isolates selection check from triggering onRowClick */}
                     {selectable && (
                       <td
                         className={["bs-table-td bs-table-td--checkbox", classNames?.td].filter(Boolean).join(" ")}
@@ -458,7 +463,7 @@ export function Table<T extends Record<string, any>>({
         </table>
       </div>
 
-      {/* Optional Integrated Pager Footer */}
+      {/* Integrated Pager Toolbar Footer */}
       {pagination && pagination.enabled !== false && (
         <div className={["bs-table-footer", classNames?.footer].filter(Boolean).join(" ")}>
           <Pager

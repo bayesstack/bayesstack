@@ -71,6 +71,10 @@ export interface DescriptionsClassNames {
   value?: string;
 }
 
+/**
+ * Descriptions displays key-value pairs in a responsive grid layout. Ideal for model metrics,
+ * system specifications, user profile summaries, and entity property sheets.
+ */
 export function Descriptions({
   title,
   extra,
@@ -99,7 +103,7 @@ export function Descriptions({
       style={style}
       {...props}
     >
-      {/* Header */}
+      {/* Header section rendered only if title or top-right extra action is defined */}
       {(title || extra) && (
         <div className={["bs-descriptions-header", classNames?.header].filter(Boolean).join(" ")}>
           {title && <div className={["bs-descriptions-title", classNames?.title].filter(Boolean).join(" ")}>{title}</div>}
@@ -107,7 +111,7 @@ export function Descriptions({
         </div>
       )}
 
-      {/* Grid Container */}
+      {/* CSS Grid dynamically computes columns inline to avoid hardcoding N column CSS classes */}
       <div
         className={["bs-descriptions-grid", classNames?.grid].filter(Boolean).join(" ")}
         style={{
@@ -115,6 +119,7 @@ export function Descriptions({
         }}
       >
         {items.map((item, idx) => {
+          // Clamp item column span to the max defined column count to prevent grid wrapping breaks
           const gridSpan = item.span ? Math.min(item.span, column) : 1;
           return (
             <div

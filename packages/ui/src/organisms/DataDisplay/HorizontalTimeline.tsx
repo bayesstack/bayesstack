@@ -53,6 +53,10 @@ export interface HorizontalTimelineClassNames {
   description?: string;
 }
 
+/**
+ * HorizontalTimeline renders step milestones along a horizontal track. Used for CI/CD build stages,
+ * multi-step workflow progress monitors, and release roadmap histories.
+ */
 export function HorizontalTimeline({
   items = [],
   activeStepId,
@@ -63,7 +67,11 @@ export function HorizontalTimeline({
   ...props
 }: HorizontalTimelineProps) {
   return (
+    // TabIndex 0 & region role allow keyboard users to focus and scroll wide horizontal tracks
     <div
+      tabIndex={0}
+      role="region"
+      aria-label="Horizontal timeline"
       className={[
         "bs-horizontal-timeline",
         className,
@@ -94,12 +102,12 @@ export function HorizontalTimeline({
                 .filter(Boolean)
                 .join(" ")}
             >
-              {/* Connector line */}
+              {/* Horizontal line connector connecting to the next milestone; omitted on the final node */}
               {!isLast && (
                 <div className={["bs-horizontal-timeline-line", classNames?.line].filter(Boolean).join(" ")} />
               )}
 
-              {/* Icon Marker Bullet */}
+              {/* Icon Marker Bullet fallback to simple dot if no explicit icon is specified */}
               <div className={["bs-horizontal-timeline-marker", classNames?.marker].filter(Boolean).join(" ")}>
                 {item.icon ? (
                   <Icon name={item.icon} size={14} />

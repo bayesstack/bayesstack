@@ -75,6 +75,10 @@ export interface SpotlightClassNames {
   footer?: string;
 }
 
+/**
+ * Spotlight provides a Raycast/Mac-style Command Palette (`Cmd+K` / `Ctrl+K`) for quick navigation,
+ * categorized action execution, keyboard shortcut discovery, and multi-property search filtering.
+ */
 export function Spotlight({
   open,
   onClose,
@@ -91,7 +95,7 @@ export function Spotlight({
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Global Cmd+K / Ctrl+K listener
+  // Global Cmd+K / Ctrl+K listener to toggle command palette from anywhere in application
   useEffect(() => {
     if (!shortcutListener) return;
 
@@ -107,7 +111,7 @@ export function Spotlight({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open, shortcutListener, onClose]);
 
-  // Focus search input on open
+  // Focus search input and lock background scrolling upon palette opening
   useEffect(() => {
     if (open) {
       setTimeout(() => inputRef.current?.focus(), 50);
@@ -121,7 +125,7 @@ export function Spotlight({
     };
   }, [open]);
 
-  // Filter actions based on query
+  // Multi-property fuzzy match search filter (title, description, group category, keyword tags)
   const filteredActions = actions.filter((act) => {
     if (!query.trim()) return true;
     const q = query.toLowerCase();
@@ -132,7 +136,7 @@ export function Spotlight({
     return titleMatch || descMatch || groupMatch || kwMatch;
   });
 
-  // Group filtered actions by category
+  // Group filtered actions into visual category buckets
   const groupedActions: { [group: string]: SpotlightActionItem[] } = {};
   filteredActions.forEach((act) => {
     const grp = act.group || "General Commands";
@@ -140,13 +144,13 @@ export function Spotlight({
     groupedActions[grp].push(act);
   });
 
-  // Flatten for keyboard navigation index calculation
+  // Flatten categorized items into 1D array to enable simple keyboard ArrowUp/ArrowDown index calculations
   const flatList: SpotlightActionItem[] = [];
   Object.values(groupedActions).forEach((groupList) => {
     flatList.push(...groupList);
   });
 
-  // Keyboard navigation handler
+  // Handle keyboard list navigation and Enter selection
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
       onClose();

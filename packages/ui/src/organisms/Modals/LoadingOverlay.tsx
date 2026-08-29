@@ -44,6 +44,10 @@ export interface LoadingOverlayClassNames {
   message?: string;
 }
 
+/**
+ * LoadingOverlay renders an semi-transparent blocking spinner mask over parent DOM containers
+ * or the entire viewport (`fullScreen`) during asynchronous fetch operations or submission states.
+ */
 export function LoadingOverlay({
   visible = true,
   fullScreen = false,

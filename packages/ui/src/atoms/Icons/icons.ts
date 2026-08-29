@@ -40,6 +40,17 @@ import {
   Certificate01Icon,
   BookBookmark01Icon,
   LibraryIcon,
+  FunctionOfXIcon,
+  BoardMathIcon,
+  FunctionIcon,
+  PiIcon,
+  SigmaIcon,
+  LeftToRightListBulletIcon,
+  LeftToRightListNumberIcon,
+  TextAlignLeftIcon,
+  TextAlignCenterIcon,
+  TextAlignRightIcon,
+  TextAlignJustifyIcon,
 
   // AI, Tech & Science
   AiBrain01Icon,
@@ -99,6 +110,7 @@ import {
   CloudUploadIcon,
   CloudDownloadIcon,
   PaintBrush01Icon,
+  EraserIcon,
 
   // Interface & Layout
   DashboardSquare01Icon,
@@ -308,6 +320,18 @@ export const ICON_CATALOGUE: IconDefinition[] = [
   { name: "Certificate", component: Certificate01Icon, category: "Education & Learning", tags: ["certificate", "verified"] },
   { name: "BookBookmark", component: BookBookmark01Icon, category: "Education & Learning", tags: ["book", "bookmark"] },
   { name: "Library", component: LibraryIcon, category: "Education & Learning", tags: ["library", "books"] },
+  { name: "FunctionOfX", component: FunctionOfXIcon, category: "Education & Learning", tags: ["function", "math", "latex", "formula"] },
+  { name: "BoardMath", component: BoardMathIcon, category: "Education & Learning", tags: ["board", "math", "latex", "equation"] },
+  { name: "Function", component: FunctionIcon, category: "Education & Learning", tags: ["function", "math", "latex"] },
+  { name: "Pi", component: PiIcon, category: "Education & Learning", tags: ["pi", "math", "greek"] },
+  { name: "Sigma", component: SigmaIcon, category: "Education & Learning", tags: ["sigma", "math", "sum"] },
+  { name: "ListBullet", component: LeftToRightListBulletIcon, category: "Interface & Layout", tags: ["list", "bullet", "unordered"] },
+  { name: "ListNumber", component: LeftToRightListNumberIcon, category: "Interface & Layout", tags: ["list", "number", "ordered"] },
+  { name: "AlignLeft", component: TextAlignLeftIcon, category: "Interface & Layout", tags: ["align", "left", "text"] },
+  { name: "AlignCenter", component: TextAlignCenterIcon, category: "Interface & Layout", tags: ["align", "center", "text"] },
+  { name: "AlignRight", component: TextAlignRightIcon, category: "Interface & Layout", tags: ["align", "right", "text"] },
+  { name: "AlignJustify", component: TextAlignJustifyIcon, category: "Interface & Layout", tags: ["align", "justify", "text"] },
+  { name: "Table", component: GridTableIcon, category: "Data & Analytics", tags: ["table", "grid", "data"] },
 
   // AI, Tech & Science
   { name: "AiBrain", component: AiBrain01Icon, category: "AI, Tech & Science", tags: ["ai", "brain", "smart"] },
@@ -368,6 +392,7 @@ export const ICON_CATALOGUE: IconDefinition[] = [
   { name: "CloudUpload", component: CloudUploadIcon, category: "Actions & Controls", tags: ["cloud", "upload"] },
   { name: "CloudDownload", component: CloudDownloadIcon, category: "Actions & Controls", tags: ["cloud", "download"] },
   { name: "PaintBrush", component: PaintBrush01Icon, category: "Actions & Controls", tags: ["paint", "brush", "canvas"] },
+  { name: "Eraser", component: EraserIcon, category: "Actions & Controls", tags: ["eraser", "clear", "format"] },
 
   // Interface & Layout
   { name: "Dashboard", component: DashboardSquare01Icon, category: "Interface & Layout", tags: ["dashboard", "overview"] },
