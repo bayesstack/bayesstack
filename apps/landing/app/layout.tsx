@@ -1,9 +1,12 @@
+import React from "react";
 import "./globals.css";
+import { Providers } from "./providers";
 
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
-  title: "BayesStack | Platform",
-  description: "BayesStack Learning & Execution Platform",
+  title: "BayesStack | Enterprise Learning Infrastructure",
+  description: "Next-generation institutional learning infrastructure, AI studio tools, and interactive curriculum engines powered by BayesStack.",
+  keywords: ["BayesStack", "Learning Infrastructure", "Education Technology", "AI Studio", "Curriculum Engine", "Data Driven Learning"],
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -13,8 +16,8 @@ export const metadata = {
   },
   manifest: "/site.webmanifest",
   openGraph: {
-    title: "BayesStack",
-    description: "BayesStack Platform",
+    title: "BayesStack | Enterprise Learning Infrastructure",
+    description: "Empowering modern educational institutions with AI-driven learning, data analytics, and interactive studios.",
     images: [{ url: "/opengraph-image.png" }],
   },
 };
@@ -22,7 +25,19 @@ export const metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body>
+        <Providers>
+          {children}
+        </Providers>
+      </body>
     </html>
   );
 }

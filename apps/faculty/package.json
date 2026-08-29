@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@bayesstack/assets": "workspace:*",
+    "@bayesstack/ui": "workspace:*",
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:"
