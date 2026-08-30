@@ -344,7 +344,7 @@ if [[ "$MODE" != "docker" ]]; then
       setup_python_api
       echo "Starting API backend at http://localhost:8000/health..."
       cd "$ROOT_DIR/services/api"
-      "$ROOT_DIR/services/api/.venv/bin/python" -m uvicorn api.main:app --reload --host 0.0.0.0 --port 8000 &
+      "$ROOT_DIR/services/api/.venv/bin/python" -m uvicorn main:app --app-dir src --reload --host 0.0.0.0 --port 8000 &
       PIDS+=("$!")
       wait "$!" 2>/dev/null || cleanup_on_exit
       ;;
@@ -355,7 +355,7 @@ if [[ "$MODE" != "docker" ]]; then
 
       (
         cd "$ROOT_DIR/services/api"
-        exec "$ROOT_DIR/services/api/.venv/bin/python" -m uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
+        exec "$ROOT_DIR/services/api/.venv/bin/python" -m uvicorn main:app --app-dir src --reload --host 0.0.0.0 --port 8000
       ) & PIDS+=("$!")
 
       start_app() {

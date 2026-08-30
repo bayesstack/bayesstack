@@ -22,14 +22,17 @@ There is no database, authentication implementation, studio runtime, or microser
 - `apps/faculty` — course builder and authoring frontend
 - `apps/admin` — institutional administration frontend
 
-## Prerequisites
+## Setup Paths: Docker vs Native PostgreSQL
 
-Choose either setup path:
+Choose the setup path appropriate for your machine:
 
-1. Docker path: install Docker Desktop on Windows/macOS or Docker Engine plus the Compose plugin on Linux.
-2. Native path: install Node.js 22+, Python 3.12+, and a Python installation that can create virtual environments. The startup script can use pnpm, Corepack, or `npx` to obtain pnpm.
+1. **Level 1 — Docker Mode (Linux / Docker Desktop)**:
+   Containers for PostgreSQL, PgAdmin, FastAPI, and Next.js are managed via Docker Compose (`compose.yaml`). PostgreSQL runs on port `5432` and PgAdmin web viewer runs at `http://localhost:5050`.
 
-You do not need to understand pnpm, Turborepo, FastAPI, or Docker before starting. The scripts below are the supported entry points.
+2. **Level 2 — Native Local Mode (Windows / Machine without Docker)**:
+   If you have Node.js 22+, Python 3.12+, and PostgreSQL installed natively (e.g. running via Windows service or `psql`), copy `.env.example` to `services/api/.env` and set your local PostgreSQL credentials (`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST=localhost`). The API will connect directly to your local PostgreSQL server and auto-create the `bayesstack` database if missing.
+
+The scripts below provide standard entry points for both setup paths.
 
 ## Start services
 
@@ -85,18 +88,19 @@ The first native startup creates `services/api/.venv` and installs the API's sma
 | Admin | <http://localhost:3003> |
 | Design Studio / Storybook | <http://localhost:6001> |
 | API health | <http://localhost:8000/health> |
+| PgAdmin Viewer | <http://localhost:5050> |
 
 ## Docker commands
 
-The root [`compose.yaml`](compose.yaml) starts one container for the API and one container for each Next.js app. The four apps share [`infra/docker/next.Dockerfile`](infra/docker/next.Dockerfile); the API has [`services/api/Dockerfile`](services/api/Dockerfile). This keeps images separate while keeping the Docker configuration small and consistent.
+The root [`compose.yaml`](compose.yaml) starts PostgreSQL, PgAdmin, the FastAPI service, and each Next.js app. The four apps share [`infra/docker/next.Dockerfile`](infra/docker/next.Dockerfile); the API has [`services/api/Dockerfile`](services/api/Dockerfile).
 
 ```bash
 docker compose up --build
 docker compose down
-docker compose logs -f api
+docker compose logs -f api postgres pgadmin
 ```
 
-PostgreSQL is not in Compose yet because no feature uses a database. It should be added when the first persistence-backed feature is implemented, together with migrations and local seed data.
+PostgreSQL runs on port `5432` (`bayesstack` DB) and PgAdmin web viewer runs at `http://localhost:5050` (login: `admin@bayesstack.local` / `admin`).
 
 ## Development commands
 
@@ -126,9 +130,9 @@ Run only the API natively:
 ```bash
 cd services/api
 python -m venv .venv
-source .venv/bin/activate       # Windows: .venv\\Scripts\\Activate.ps1
+source .venv/bin/activate       # Windows: .venv\Scripts\Activate.ps1
 pip install -e .
-uvicorn api.main:app --reload --port 8000
+uvicorn main:app --app-dir src --reload --port 8000
 ```
 
 ## Repository map

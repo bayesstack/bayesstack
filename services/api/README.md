@@ -2,17 +2,55 @@
 
 This is the only backend process in version one. It is a FastAPI modular monolith, not a collection of microservices.
 
-Future functionality belongs in internal modules under `src/api/` (for example, `auth/`, `content/`, or `progress/`). A module should become a separate service only when there is a concrete operational reason to do so.
+Functional layout inside `src/`:
+- `src/core/` — settings (`config.py`) and async database setup (`database.py`)
+- `src/db/` — database models and schema definitions
+- `src/auth/` — reserved identity, tenant membership, and RBAC module
+- `src/main.py` — FastAPI application entry point
 
-## Run natively
+Future functionality belongs in internal functional modules under `src/` (for example, `auth/`, `content/`, or `progress/`). A module should become a separate service only when there is a concrete operational reason to do so.
 
-From the repository root:
+---
 
+## Dual Setup Support (Docker vs Native PostgreSQL)
+
+The BayesStack API supports two developer workflows out of the box:
+
+### Level 1: Docker Setup (Linux / Docker Desktop)
+When using Docker, container services for PostgreSQL, PgAdmin, FastAPI, and Next.js applications are fully orchestrated via `compose.yaml`:
 ```bash
-python -m venv services/api/.venv
-source services/api/.venv/bin/activate       # Windows: services\\api\\.venv\\Scripts\\Activate.ps1
-pip install -e services/api
-uvicorn api.main:app --app-dir services/api/src --reload --port 8000
+docker compose up --build
 ```
+* **PostgreSQL**: Port `5432` (`bayesstack` DB)
+* **PgAdmin Viewer**: `http://localhost:5050` (Email: `admin@bayesstack.local`, Password: `admin`)
+* **API**: `http://localhost:8000/health` (Automatically configured to connect to `postgres:5432`)
 
-The current endpoint is `GET /health`.
+---
+
+### Level 2: Local / Native Setup (Windows / Machine without Docker, with local PostgreSQL installed)
+If you have PostgreSQL installed natively on Windows or Linux (e.g. running via `psql` / Windows Service):
+
+1. **Configure Environment Credentials**:
+   Copy `.env.example` to `.env` (or `services/api/.env`):
+   ```ini
+   POSTGRES_HOST=localhost
+   POSTGRES_PORT=5432
+   POSTGRES_USER=postgres
+   POSTGRES_PASSWORD=your_local_password
+   POSTGRES_DB=bayesstack
+   ```
+2. **Start the API natively**:
+   On Windows (PowerShell):
+   ```powershell
+   .\scripts\start-local.ps1 -Local -Api
+   ```
+   On Linux/macOS (Bash):
+   ```bash
+   ./scripts/start-local.sh --local api
+   ```
+   *Note: On API startup, if the database `bayesstack` does not exist on your local PostgreSQL server, the API automatically attempts to create it for you!*
+
+---
+
+## Endpoint Verification
+- `GET /health` — Returns status of API service, environment mode, and live PostgreSQL connection check.

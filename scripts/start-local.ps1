@@ -154,7 +154,7 @@ switch ($Service) {
     $VenvPython = Setup-PythonApi
     Write-Host "Starting API backend at http://localhost:8000/health..."
     Set-Location (Join-Path $Root "services/api")
-    & $VenvPython -m uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
+    & $VenvPython -m uvicorn main:app --app-dir src --reload --host 0.0.0.0 --port 8000
   }
   "all" {
     Invoke-Pnpm @("install")
@@ -183,7 +183,7 @@ switch ($Service) {
     }
 
     $Processes = @()
-    $Processes += Start-Process $VenvPython -ArgumentList @("-m", "uvicorn", "api.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000") -WorkingDirectory (Join-Path $Root "services/api") -NoNewWindow -PassThru
+    $Processes += Start-Process $VenvPython -ArgumentList @("-m", "uvicorn", "main:app", "--app-dir", "src", "--reload", "--host", "0.0.0.0", "--port", "8000") -WorkingDirectory (Join-Path $Root "services/api") -NoNewWindow -PassThru
     $Processes += Start-PnpmApp "landing" 3000
     $Processes += Start-PnpmApp "learner" 3001
     $Processes += Start-PnpmApp "faculty" 3002
