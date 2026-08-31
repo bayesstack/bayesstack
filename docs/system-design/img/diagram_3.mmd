@@ -1,0 +1,26 @@
+flowchart TD
+    subgraph Registry["Studio Plugin Registry"]
+        Types["Plugin Catalog & Versioning<br/>(Video, Coding, MCQ, SQL, Math, Terminal, etc.)"]
+    end
+
+    subgraph Concept["Concept Domain Model"]
+        C1["Concept<br/>(Atomic Learning Unit)"]
+        C2["Ordered Studio Instances<br/>[Studio Instance 1 → 2 → 3]"]
+        C3["Lightweight Studio Contract JSON<br/>{ studio_type, studio_version, config }"]
+        
+        C1 --> C2
+        C2 --> C3
+    end
+
+    subgraph Pipeline["Two-Phase Rendering Pipeline"]
+        P1["Phase 1: UI Shell Render<br/>(Mount Studio Screen via Contract)"]
+        P2["Phase 2: Lazy Data Hydration<br/>(Fetch Heavy Assets via API)"]
+        
+        P1 --> P2
+    end
+
+    BackendServices["Backend Services / CDN / Database"]
+
+    Types -. "Plugin Implementation" .-> C3
+    C3 --> P1
+    P2 -->|"API Fetch (e.g. Problem ID / CDN Link)"| BackendServices

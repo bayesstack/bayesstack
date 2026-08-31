@@ -1,0 +1,52 @@
+flowchart TD
+    subgraph CorePlatform["BayesStack Platform Core"]
+        direction TB
+        P1["Identity & Tenant Resolution"]
+        P2["Curriculum & Composition Engine"]
+        P4["Session & RBAC Security Guard"]
+    end
+
+    subgraph StudioGateway["Studio Gateway & SDK Layer"]
+        direction TB
+        C1["1. Studio Gateway Launch API"]
+        C2["2. Studio SDK Contract (Definition + Context)"]
+        C1 --> C2
+    end
+
+    subgraph AutonomousStudios["Autonomous Studio Learning Runtimes"]
+        subgraph VideoStudioRuntime["Video Studio Runtime"]
+            direction TB
+            V1["Video Player UI"] --> V2["Signed Media Guard"] --> V3[("CDN Media Stream")]
+        end
+
+        subgraph CodingStudioRuntime["Coding Judge Studio Runtime"]
+            direction TB
+            K1["Editor & Terminal UI"] --> K2["Judge & Submission API"] --> K3["Container Sandbox Pool"]
+        end
+
+        subgraph FinanceStudioRuntime["Finance Simulation Studio Runtime"]
+            direction TB
+            F1["Market & Portfolio UI"] --> F2["Tick Stream API"] --> F3["Simulation Market Engine"]
+        end
+    end
+
+    subgraph ProgressEngine["Platform Progress State Engine"]
+        direction TB
+        E1["3. Platform Event Protocol (studio_started, studio_completed)"]
+        E2["4. Student Live Progress State Engine"]
+        E1 --> E2
+    end
+
+    DB[("PostgreSQL Database<br/>(student_progress_state)")]
+
+    CorePlatform --> StudioGateway
+    
+    C2 --> V1
+    C2 --> K1
+    C2 --> F1
+
+    V3 --> E1
+    K3 --> E1
+    F3 --> E1
+
+    E2 --> DB

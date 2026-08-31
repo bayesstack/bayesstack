@@ -1,0 +1,80 @@
+erDiagram
+    direction TB
+
+    TENANTS ||--o{ TENANT_COURSES : "owns"
+    TENANTS ||--o{ TENANT_CHAPTERS : "owns"
+    TENANTS ||--o{ TENANT_CONCEPTS : "owns"
+
+    TENANTS {
+        uuid id PK
+        string name
+        jsonb metadata
+    }
+
+    CANONICAL_COURSES ||--o{ TENANT_COURSES : "sources (optional)"
+    CANONICAL_CHAPTERS ||--o{ TENANT_CHAPTERS : "sources (optional)"
+    CANONICAL_CONCEPTS ||--o{ TENANT_CONCEPTS : "sources (optional)"
+
+    CANONICAL_COURSES {
+        uuid id PK
+        string code
+        int version
+        jsonb metadata
+    }
+
+    CANONICAL_CHAPTERS {
+        uuid id PK
+        string code
+        int version
+        jsonb metadata
+    }
+
+    CANONICAL_CONCEPTS {
+        uuid id PK
+        string code
+        int version
+        jsonb metadata
+    }
+
+    TENANT_COURSES {
+        uuid id PK
+        uuid tenant_id FK
+        uuid source_course_id FK
+        int source_version
+        string origin_type "canonical | custom | derived"
+        string local_code
+        string local_title
+    }
+
+    TENANT_CHAPTERS {
+        uuid id PK
+        uuid tenant_id FK
+        uuid source_chapter_id FK
+        int source_version
+        string origin_type "canonical | custom | derived"
+        string local_title
+    }
+
+    TENANT_CONCEPTS {
+        uuid id PK
+        uuid tenant_id FK
+        uuid source_concept_id FK
+        int source_version
+        string origin_type "canonical | custom | derived"
+    }
+
+    TENANT_COURSE_CHAPTERS }|--|| TENANT_COURSES : "belongs to"
+    TENANT_COURSE_CHAPTERS }|--|| TENANT_CHAPTERS : "references"
+    TENANT_COURSE_CHAPTERS {
+        uuid tenant_course_id FK
+        uuid tenant_chapter_id FK
+        int position
+    }
+
+    TENANT_CHAPTER_CONCEPTS }|--|| TENANT_CHAPTERS : "belongs to"
+    TENANT_CHAPTER_CONCEPTS }|--|| TENANT_CONCEPTS : "references"
+    TENANT_CHAPTER_CONCEPTS {
+        uuid tenant_chapter_id FK
+        uuid tenant_concept_id FK
+        int position
+    }

@@ -1,0 +1,37 @@
+sequenceDiagram
+    autonumber
+    actor Faculty as Faculty Member
+    box Faculty UI (App Container)
+    participant UI as Faculty Frontend<br/>(Course Builder)
+    end
+    box Backend (App Container)
+    participant Auth as Auth & RBAC Guard
+    participant API as Course Builder Service
+    end
+    box Storage
+    participant DB as PostgreSQL Database
+    end
+    box Student UI (App Container)
+    participant StudentUI as Student Frontend<br/>(Learning Platform)
+    end
+
+    Faculty->>UI: 1. Select Parent Program & Click "Create Course"
+    UI->>Auth: 2. POST /api/tenant-courses (Payload + Session Token)
+    Auth-->>API: 3. Permission Verified (Role = Faculty)
+    API->>DB: 4. INSERT INTO tenant_courses (origin_type, local_code, local_title)
+    DB-->>API: 5. Course ID Created (AC9-001)
+
+    Faculty->>UI: 6. Add/Reorder Chapters (Canonical or Custom)
+    UI->>API: 7. POST /api/tenant-course-chapters (chapter_ids, positions)
+    API->>DB: 8. UPSERT tenant_chapters & tenant_course_chapters
+
+    Faculty->>UI: 9. Stitch Concepts (Canonical or Custom)
+    UI->>API: 10. POST /api/tenant-chapter-concepts (concept_ids, positions)
+    API->>DB: 11. UPSERT tenant_concepts & tenant_chapter_concepts
+
+    Faculty->>UI: 12. Click "Publish Course"
+    UI->>API: 13. PUT /api/tenant-courses/AC9-001/publish
+    API->>DB: 14. UPDATE tenant_courses SET status = 'published'
+    DB-->>API: 15. Status Updated & Enrollment Bounds Validated
+
+    API-->>StudentUI: 16. Course Manifested on Student Learning Platform

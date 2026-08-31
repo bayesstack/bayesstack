@@ -1,0 +1,15 @@
+flowchart LR
+    User["User / Client"]
+    DNS[("DNS")]
+    Edge["CDN / ALB / Reverse Proxy Layer"]
+    
+    subgraph Services["Independently Deployable Applications"]
+        LandingPage["Marketing Frontend Container<br/>(bayesstack.com)"]
+        AppFrontend["Application Frontend Container<br/>({tenant}.bayesstack.com)"]
+    end
+
+    User --> DNS
+    DNS --> Edge
+    
+    Edge -- "Host: bayesstack.com" --> LandingPage
+    Edge -- "Host: {tenant}.bayesstack.com" --> AppFrontend

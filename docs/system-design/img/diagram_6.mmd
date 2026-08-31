@@ -1,0 +1,52 @@
+flowchart TD
+    subgraph FrontendContainer["Student Frontend (Learning Platform UI)"]
+        direction TB
+        S1["1. Dashboard Loaded<br/>(Student Authenticated)"]
+        S2["2. Progressive Navigation Tree<br/>(Lazy-Load Resolved Tenant Hierarchy)"]
+        S3["5. Click Concept & Mount Studio Shell<br/>(Parse Published Concept Version Contract)"]
+        
+        subgraph StudioPlugins["Studio Plugin Isolation Layer"]
+            direction TB
+            SP1["Video Studio<br/>(Phase 2 Signed Stream Hydration)"]
+            SP2["Coding Judge Studio<br/>(Phase 2 Problem Hydration & Attempt State)"]
+            SP3["Subjective MCQ Studio<br/>(Phase 2 Validation & Attempt State)"]
+        end
+        
+        S4["8. Emit Learning Event & Telemetry<br/>(studio_completed, attempt_id)"]
+    end
+
+    subgraph BackendContainer["Backend Container (API Services)"]
+        direction TB
+        B1["3. Progressive Hierarchy Resolver<br/>(GET /api/student/courses/{id}/chapters)"]
+        B2["6. Authoritative Asset & Media Guard<br/>(GET /api/studios/{id}/signed-url)"]
+        B3["7. Online Code Execution Judge"]
+        B4["9. Learning Event API & Progress Processor"]
+    end
+
+    DB[("PostgreSQL Database<br/>(Materialized Progress & Append-Only Event Store)")]
+    CDN[("CDN / Stream Storage")]
+
+    S1 -- "2. Request Progressive Tree" --> B1
+    B1 -- "Query Resolved Tenant View" --> DB
+    DB -- "Return Resolved Hierarchy Projection" --> B1
+    B1 -- "3. Return Navigation Projection JSON" --> S2
+
+    S2 -- "4. Request Published Concept Version" --> S3
+    S3 -- "5. Mount Bare Shell (Config + Context)" --> StudioPlugins
+
+    SP1 -- "Fetch Signed Stream URL" --> B2
+    B2 -- "Validate Token & Sign URL" --> CDN
+    CDN -- "Stream Media" --> SP1
+
+    SP2 -- "Fetch Problem Data" --> B2
+    SP2 -- "Submit Code Attempt" --> B3
+    B3 -- "Verdict (Pass/Fail)" --> SP2
+
+    SP1 -- "Heartbeat / Watched" --> S4
+    SP2 -- "Required Test Cases Passed" --> S4
+    SP3 -- "MCQs Submitted" --> S4
+
+    S4 -- "10. Post Learning Event" --> B4
+    B4 -- "11. Log Append-Only Event & Process State" --> DB
+    DB -- "12. Evaluate Required Completion Criteria" --> B4
+    B4 -- "13. Materialize Progress State & Update UI" --> S2

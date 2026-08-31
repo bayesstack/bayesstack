@@ -1,0 +1,35 @@
+flowchart TD
+    subgraph FrontendContainer["Application Frontend Container"]
+        direction TB
+        F1["1. Receive Request<br/>(ashoka.bayesstack.com)"]
+        F2["2. Parse Host Header<br/>(Extract tenant = 'ashoka')"]
+        F3["6. Receive & Store Tenant Config"]
+        F4["7. Check Session<br/>(GET /api/me)"]
+        F5["10a. Unauthenticated:<br/>Authenticate via Login / Tenant SSO"]
+        F6["10b. Authenticated:<br/>Receive User Profile & Role"]
+        F7["11. Render Role-Based UI<br/>(Tenant Config + User + Role)"]
+
+        F1 --> F2
+        F3 --> F4
+        F5 -- "Authenticates & returns User+Role" --> F6
+        F6 --> F7
+    end
+
+    subgraph BackendContainer["Backend Container"]
+        direction TB
+        B1["3. Tenant Resolution Service<br/>(api.bayesstack.com/api/tenant-config)"]
+        B2["8. Auth & Identity Service<br/>(api.bayesstack.com/api/me)"]
+    end
+
+    DB[("PostgreSQL Database")]
+
+    F2 -- "3. GET /api/tenant-config?tenant=ashoka" --> B1
+    B1 -- "4. Query Tenant Metadata" --> DB
+    DB -- "5. Return Tenant Record" --> B1
+    B1 -- "6. Return Config & Auth Settings JSON" --> F3
+
+    F4 -- "7. GET /api/me (Session Cookie)" --> B2
+    B2 -- "8. Validate Session & Query User + Role" --> DB
+    DB -- "9. Return User Record with Role" --> B2
+    B2 -- "10a. Unauthenticated (401)" --> F5
+    B2 -- "10b. Authenticated (200)" --> F6
