@@ -19,11 +19,15 @@ import {
   type SpotlightActionItem,
 } from "@bayesstack/ui";
 
+import { useTenant } from "@bayesstack/tenant";
+
 export default function LearnerPage() {
+  const { tenant, isTenant } = useTenant();
   const [spotlightOpen, setSpotlightOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [completed, setCompleted] = useState(false);
   const { showToast } = useToast();
+
 
   const spotlightActions: SpotlightActionItem[] = [
     { id: "1", title: "Module 01: Probability Foundations", description: "Completed - Score 98%", group: "Curriculum", icon: "CheckCircle" },
@@ -57,6 +61,11 @@ export default function LearnerPage() {
               <Badge variant="subtle" size="sm">
                 Module 4 of 12
               </Badge>
+              {isTenant && tenant && (
+                <Badge variant="solid" size="sm">
+                  {tenant.name}
+                </Badge>
+              )}
             </div>
           </div>
 

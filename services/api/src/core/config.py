@@ -1,6 +1,6 @@
 """Configuration settings for BayesStack API."""
 
-from pydantic import Field, field_validator
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,6 +15,13 @@ class Settings(BaseSettings):
     VERSION: str = "0.1.0"
     BAYESSTACK_ENV: str = Field(default="development", validation_alias="BAYESSTACK_ENV")
 
+    # Multi-tenant domain settings
+    BASE_DOMAINS: str = Field(
+        default="localhost,bayesstack.com",
+        validation_alias="BASE_DOMAINS",
+        description="Comma-separated base domains used for tenant subdomain extraction",
+    )
+
     # PostgreSQL configuration
     POSTGRES_USER: str = Field(default="bayesstack", validation_alias="POSTGRES_USER")
     POSTGRES_PASSWORD: str = Field(default="bayesstack_dev", validation_alias="POSTGRES_PASSWORD")
@@ -25,8 +32,17 @@ class Settings(BaseSettings):
     DATABASE_URL: str | None = Field(default=None, validation_alias="DATABASE_URL")
 
     @property
+    def parsed_base_domains(self) -> list[str]:
+        """Return a clean list of allowed base domains for tenant resolution."""
+        domains = [d.strip().lower() for d in self.BASE_DOMAINS.split(",") if d.strip()]
+        return domains if domains else ["localhost", "bayesstack.com"]
+
+    @property
     def async_database_url(self) -> str:
-        """Return a SQLAlchemy-compatible async PostgreSQL URL."""
+        """Return a SQLAlchemy-compatible async PostgreSQL or SQLite URL."""
+        if self.BAYESSTACK_ENV == "testing":
+            return "sqlite+aiosqlite:///:memory:"
+
         if self.DATABASE_URL:
             url = self.DATABASE_URL
             if url.startswith("postgresql://"):

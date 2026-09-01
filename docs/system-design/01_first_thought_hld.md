@@ -11,8 +11,6 @@ Location:    docs/system-design/01_first_thought_hld.md
 
 ---
 
-# System Design
-
 ## Executive Summary & MVP Scope
 
 BayesStack is a multi-tenant learning infrastructure platform built for higher-education institutions to customize, author, and run domain-specific learning environments at scale.
