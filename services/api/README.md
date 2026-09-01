@@ -52,5 +52,38 @@ If you have PostgreSQL installed natively on Windows or Linux (e.g. running via 
 
 ---
 
+## Database Migrations & Cross-Machine Seed Synchronization
+
+BayesStack uses **Alembic** for schema migrations and version-controlled idempotent seed definitions in `src/db/seed.py`.
+
+### Running Migrations Across Developer Machines
+When pulling new changes from `git`:
+
+1. **Apply Latest Migrations**:
+   ```bash
+   cd services/api
+   .venv/bin/alembic upgrade head
+   ```
+
+2. **Sync Seed Data (Includes Bayes Institute)**:
+   ```bash
+   cd services/api
+   PYTHONPATH=src .venv/bin/python src/db/seed.py
+   ```
+   *Note: Application startup automatically runs table initialization & seeding if missing, keeping developer environments in sync.*
+
+### Default Seed Tenants Included
+
+| Tenant Name | Slug | Subdomain / Base URL |
+| :--- | :--- | :--- |
+| **Bayes Institute** | `bayes` | `bayes.bayesstack.com` / `bayes.localhost` |
+| **Ashoka University** | `ashoka` | `ashoka.bayesstack.com` / `ashoka.localhost` |
+| **COEP Technological University** | `coep` | `coep.bayesstack.com` / `coep.localhost` |
+| **VJTI Mumbai** | `vjti` | `vjti.bayesstack.com` / `vjti.localhost` |
+
+---
+
 ## Endpoint Verification
 - `GET /health` — Returns status of API service, environment mode, and live PostgreSQL connection check.
+- `GET /api/tenant-config` — Resolves active tenant context based on `Host` header (`bayes.localhost`, `ashoka.localhost`).
+

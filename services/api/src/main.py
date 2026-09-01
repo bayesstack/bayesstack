@@ -10,6 +10,7 @@ from core.config import settings
 from core.database import engine, ensure_database_exists, get_db
 from core.middleware import TenantMiddleware, get_optional_tenant, get_current_tenant
 from db.models import Tenant
+from auth.router import router as auth_router
 
 
 @asynccontextmanager
@@ -36,6 +37,9 @@ app.add_middleware(
 
 # Register request-hostname multi-tenant resolution middleware
 app.add_middleware(TenantMiddleware)
+
+# Register routers
+app.include_router(auth_router)
 
 
 @app.get("/health")

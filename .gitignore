@@ -22,4 +22,6 @@ venv/
 .turbo/
 .DS_Store
 coverage/
+*.db
+
 

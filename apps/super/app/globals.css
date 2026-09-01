@@ -1,0 +1,67 @@
+@import "@bayesstack/ui/styles.css";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bs-brand-teal: #0b6763;
+  --bs-brand-deep: #084c49;
+  --bs-brand-soft: #e4f2ef;
+  --bs-ink: #123333;
+  --bs-muted: #4a6360;
+  --bs-line: #d7e8e4;
+  --bs-surface: #ffffff;
+  --bs-canvas: #f1f8f6;
+  --bs-font-main: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  --bs-font-mono: 'JetBrains Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  min-height: 100vh;
+  background-color: var(--bs-canvas);
+  color: var(--bs-ink);
+  font-family: var(--bs-font-main);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.super-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1.5rem 3rem 1.5rem;
+}
+
+.super-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--bs-line);
+  margin-bottom: 2rem;
+}
+
+.super-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+
+.super-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.super-card {
+  background: var(--bs-surface);
+  border: 1px solid var(--bs-line);
+  border-radius: 14px;
+  box-shadow: 0 4px 15px rgba(11, 103, 99, 0.05);
+  padding: 1.5rem;
+}

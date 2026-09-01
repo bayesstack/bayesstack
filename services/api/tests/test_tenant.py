@@ -4,7 +4,7 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 from main import app
-from core.tenant import extract_tenant_slug, is_valid_tenant_slug
+from core.middleware import extract_tenant_slug, is_valid_tenant_slug
 from core.database import ensure_database_exists
 
 
@@ -80,6 +80,19 @@ async def test_root_domain_tenant_config():
 async def test_valid_tenant_subdomains():
     """Valid local and production subdomains resolve to their respective tenant records."""
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://localhost") as ac:
+        # Bayes Institute localhost & production host
+        resp = await ac.get("/api/tenant-config", headers={"Host": "bayes.localhost:3000"})
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["is_tenant"] is True
+        assert data["tenant"]["slug"] == "bayes"
+        assert data["tenant"]["name"] == "Bayes Institute"
+        assert data["tenant"]["domain"] == "bayes.bayesstack.com"
+
+        resp = await ac.get("/api/tenant-config", headers={"Host": "bayes.bayesstack.com"})
+        assert resp.status_code == 200
+        assert resp.json()["tenant"]["slug"] == "bayes"
+
         # Ashoka localhost
         resp = await ac.get("/api/tenant-config", headers={"Host": "ashoka.localhost:3000"})
         assert resp.status_code == 200

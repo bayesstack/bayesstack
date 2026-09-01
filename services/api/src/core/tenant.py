@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.config import settings
 from db.models import Tenant
 
-RESERVED_SUBDOMAINS = {"www", "api", "static", "assets", "cdn", "mail", "system-admin"}
+RESERVED_SUBDOMAINS = {"www", "api", "super", "auth", "static", "assets", "cdn", "mail", "system-admin"}
 
 # Regex for valid tenant slugs: 1-63 alphanumeric chars or hyphens, starting and ending with alphanumeric
 SLUG_REGEX = re.compile(r"^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$")

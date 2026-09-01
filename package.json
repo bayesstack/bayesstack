@@ -12,6 +12,8 @@
     "dev:learner": "turbo run dev --filter=@bayesstack/learner",
     "dev:faculty": "turbo run dev --filter=@bayesstack/faculty",
     "dev:admin": "turbo run dev --filter=@bayesstack/admin",
+    "dev:auth": "turbo run dev --filter=@bayesstack/auth",
+    "dev:super": "turbo run dev --filter=@bayesstack/super",
     "dev:ui": "turbo run dev --filter=@bayesstack/ui",
     "dev:api": "./scripts/start-local.sh --api --local",
     "build": "turbo run build",

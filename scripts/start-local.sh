@@ -8,9 +8,10 @@ MODE="auto"
 SERVICE=""
 ACTION="start"
 TARGET_STOP=""
+SELECTED_SERVICES=()
 
 show_help() {
-  echo "Usage: ./scripts/start-local.sh [options] [service]"
+  echo "Usage: ./scripts/start-local.sh [options] [profile|service|list]"
   echo ""
   echo "Options:"
   echo "  --docker                   Force Docker mode"
@@ -18,23 +19,45 @@ show_help() {
   echo "  --stop, --kill, -k [name] Gracefully shut down process running on service port(s)"
   echo "  -h, --help                 Show this help message"
   echo ""
-  echo "Services:"
+  echo "Development Profiles (Lightweight):"
+  echo "  core                       API + Auth (Minimal CPU/RAM: http://bayes.localhost)"
+  echo "  learner-flow               API + Auth + Learner"
+  echo "  faculty-flow               API + Auth + Faculty"
+  echo "  admin-flow                 API + Auth + Admin"
+  echo "  super-flow                 API + SuperAdmin"
+  echo "  all                        Start all 9 services (High CPU/RAM)"
+  echo ""
+  echo "Individual Services:"
   echo "  landing                    Start Landing app (http://localhost:3000)"
   echo "  learner                    Start Learner app (http://localhost:3001)"
   echo "  faculty                    Start Faculty app (http://localhost:3002)"
   echo "  admin                      Start Admin app (http://localhost:3003)"
+  echo "  auth                       Start Auth app (http://localhost:3004)"
+  echo "  super                      Start SuperAdmin app (http://localhost:3005)"
   echo "  ui                         Start UI Storybook catalog (http://localhost:6001)"
   echo "  api                        Start FastAPI backend (http://localhost:8000)"
-  echo "  all                        Start all services simultaneously"
   echo ""
-  echo "Service Flags:"
-  echo "  --landing, --learner, --faculty, --admin, --ui, --api, --all, -a"
-  echo "  --service <name>"
+  echo "Custom Selection:"
+  echo "  --services api,auth,learner  Run specific comma-separated list of services"
   echo ""
-  echo "Stop / Free Port Examples:"
-  echo "  ./scripts/start-local.sh --stop ui       # Gracefully shut down process on port 6001"
-  echo "  ./scripts/start-local.sh --stop all      # Gracefully shut down processes on all service ports"
-  echo "  ./scripts/start-local.sh --stop 6001     # Gracefully shut down process on port 6001"
+  echo "Examples:"
+  echo "  ./scripts/start-local.sh --core"
+  echo "  ./scripts/start-local.sh --learner-flow"
+  echo "  ./scripts/start-local.sh --services api,auth"
+  echo "  ./scripts/start-local.sh --stop core"
+}
+
+expand_profile() {
+  local target="$1"
+  case "$target" in
+    core|minimal) echo "api auth nginx" ;;
+    learner-flow) echo "api auth learner nginx" ;;
+    faculty-flow) echo "api auth faculty nginx" ;;
+    admin-flow)   echo "api auth admin nginx" ;;
+    super-flow)   echo "api super nginx" ;;
+    all)          echo "api landing learner faculty admin auth super ui nginx" ;;
+    *)            echo "$target" ;;
+  esac
 }
 
 while [[ $# -gt 0 ]]; do
@@ -60,18 +83,25 @@ while [[ $# -gt 0 ]]; do
       fi
       ;;
     --all|-a) SERVICE="all"; shift ;;
+    --core|--minimal) SERVICE="core"; shift ;;
+    --learner-flow) SERVICE="learner-flow"; shift ;;
+    --faculty-flow) SERVICE="faculty-flow"; shift ;;
+    --admin-flow) SERVICE="admin-flow"; shift ;;
+    --super-flow) SERVICE="super-flow"; shift ;;
     --landing) SERVICE="landing"; shift ;;
     --learner) SERVICE="learner"; shift ;;
     --faculty) SERVICE="faculty"; shift ;;
     --admin) SERVICE="admin"; shift ;;
+    --auth) SERVICE="auth"; shift ;;
+    --super) SERVICE="super"; shift ;;
     --ui) SERVICE="ui"; shift ;;
     --api) SERVICE="api"; shift ;;
-    --service)
+    --services)
       if [[ -n "${2:-}" ]]; then
         SERVICE="$2"
         shift 2
       else
-        echo "Error: --service requires a service name" >&2
+        echo "Error: --services requires a comma-separated list (e.g. api,auth)" >&2
         exit 1
       fi
       ;;
@@ -79,14 +109,19 @@ while [[ $# -gt 0 ]]; do
       show_help
       exit 0
       ;;
-    landing|learner|faculty|admin|ui|api|all)
+    core|minimal|learner-flow|faculty-flow|admin-flow|super-flow|landing|learner|faculty|admin|auth|super|ui|api|all)
       SERVICE="$1"
       shift
       ;;
     *)
-      echo "Unknown option: $1" >&2
-      show_help >&2
-      exit 1
+      if [[ "$1" == *","* ]]; then
+        SERVICE="$1"
+        shift
+      else
+        echo "Unknown option: $1" >&2
+        show_help >&2
+        exit 1
+      fi
       ;;
   esac
 done
@@ -134,37 +169,32 @@ free_port() {
 }
 
 free_service_ports() {
-  local target="${1:-$SERVICE}"
-  case "$target" in
-    landing) free_port 3000 ;;
-    learner) free_port 3001 ;;
-    faculty) free_port 3002 ;;
-    admin)   free_port 3003 ;;
-    ui)      free_port 6001 ;;
-    api)     free_port 8000 ;;
-    all)
-      free_port 3000
-      free_port 3001
-      free_port 3002
-      free_port 3003
-      free_port 6001
-      free_port 8000
-      ;;
-    [0-9]*)
-      free_port "$target"
-      ;;
-    *)
-      echo "Unknown service or port: $target" >&2
-      return 1
-      ;;
-  esac
+  local raw_target="${1:-$SERVICE}"
+  local list
+  list=$(expand_profile "$raw_target" | tr ',' ' ')
+  
+  for item in $list; do
+    case "$item" in
+      landing) free_port 3000 ;;
+      learner) free_port 3001 ;;
+      faculty) free_port 3002 ;;
+      admin)   free_port 3003 ;;
+      auth)    free_port 3004 ;;
+      super)   free_port 3005 ;;
+      ui)      free_port 6001 ;;
+      api)     free_port 8000 ;;
+      nginx)   free_port 80 ;;
+      [0-9]*)  free_port "$item" ;;
+      *)       ;;
+    esac
+  done
 }
 
 if [[ "$ACTION" == "stop" ]]; then
   TARGET="${TARGET_STOP:-$SERVICE}"
   if [[ -z "$TARGET" ]]; then
     if [[ -t 0 ]]; then
-      read -r -p "Enter service or port to stop [landing|learner|faculty|admin|ui|api|all|port] (default: all): " TARGET
+      read -r -p "Enter profile/service/port to stop [core|all|landing|api|port] (default: all): " TARGET
       TARGET="${TARGET:-all}"
     else
       TARGET="all"
@@ -180,33 +210,49 @@ if [[ -z "$SERVICE" ]]; then
     echo "=========================================="
     echo "       BayesStack Service Selector        "
     echo "=========================================="
-    echo "Which service would you like to start?"
-    echo "  1) landing   (App - http://localhost:3000)"
-    echo "  2) learner   (App - http://localhost:3001)"
-    echo "  3) faculty   (App - http://localhost:3002)"
-    echo "  4) admin     (App - http://localhost:3003)"
-    echo "  5) ui        (Storybook - http://localhost:6001)"
-    echo "  6) api       (FastAPI - http://localhost:8000)"
-    echo "  7) all       (Start all services - High CPU/RAM)"
-    echo "  8) stop      (Gracefully shut down running port(s))"
+    echo "Lightweight Profiles (Low CPU/RAM):"
+    echo "  1) core          (API + Auth Gateway - http://bayes.localhost)"
+    echo "  2) learner-flow  (API + Auth + Learner)"
+    echo "  3) faculty-flow  (API + Auth + Faculty)"
+    echo "  4) admin-flow    (API + Auth + Admin)"
+    echo "  5) super-flow    (API + SuperAdmin - http://super.localhost)"
+    echo "------------------------------------------"
+    echo "Individual App Services:"
+    echo "  6) landing       (App - http://localhost:3000)"
+    echo "  7) learner       (App - http://localhost:3001)"
+    echo "  8) faculty       (App - http://localhost:3002)"
+    echo "  9) admin         (App - http://localhost:3003)"
+    echo " 10) auth          (App - http://localhost:3004)"
+    echo " 11) super         (App - http://localhost:3005)"
+    echo " 12) ui            (Storybook - http://localhost:6001)"
+    echo " 13) api           (FastAPI - http://localhost:8000)"
+    echo " 14) all           (Start all services - High CPU/RAM)"
+    echo " 15) stop          (Gracefully shut down running ports)"
     echo "=========================================="
-    read -r -p "Enter choice [1-8] (default: 1): " choice
+    read -r -p "Enter choice [1-15] (default: 1 [core]): " choice
     case "$choice" in
-      1|landing) SERVICE="landing" ;;
-      2|learner) SERVICE="learner" ;;
-      3|faculty) SERVICE="faculty" ;;
-      4|admin)   SERVICE="admin" ;;
-      5|ui)      SERVICE="ui" ;;
-      6|api)     SERVICE="api" ;;
-      7|all)     SERVICE="all" ;;
-      8|stop)
-        read -r -p "Enter service or port to stop [landing|learner|faculty|admin|ui|api|all|port] (default: all): " TARGET_STOP
+      1|core|minimal) SERVICE="core" ;;
+      2|learner-flow) SERVICE="learner-flow" ;;
+      3|faculty-flow) SERVICE="faculty-flow" ;;
+      4|admin-flow)   SERVICE="admin-flow" ;;
+      5|super-flow)   SERVICE="super-flow" ;;
+      6|landing)      SERVICE="landing" ;;
+      7|learner)      SERVICE="learner" ;;
+      8|faculty)      SERVICE="faculty" ;;
+      9|admin)        SERVICE="admin" ;;
+      10|auth)        SERVICE="auth" ;;
+      11|super)       SERVICE="super" ;;
+      12|ui)          SERVICE="ui" ;;
+      13|api)         SERVICE="api" ;;
+      14|all)         SERVICE="all" ;;
+      15|stop)
+        read -r -p "Enter service/port to stop [core|all|auth|api|port] (default: all): " TARGET_STOP
         TARGET_STOP="${TARGET_STOP:-all}"
         echo "Stopping running process(es) for '$TARGET_STOP'..."
         free_service_ports "$TARGET_STOP"
         exit 0
         ;;
-      "")        SERVICE="landing" ;;
+      "")             SERVICE="core" ;;
       *)
         echo "Invalid selection: $choice" >&2
         exit 1
@@ -214,23 +260,25 @@ if [[ -z "$SERVICE" ]]; then
     esac
   else
     echo "No service specified and running in non-interactive mode." >&2
-    echo "Usage: $0 [landing|learner|faculty|admin|ui|api|all] or $0 --stop" >&2
+    echo "Usage: $0 [--core|--learner-flow|--super-flow|--services api,auth|all] or $0 --stop" >&2
     exit 1
   fi
 fi
+
+# Expand selected profile / comma list into list of service names
+EXPANDED_SERVICES=$(expand_profile "$SERVICE" | tr ',' ' ')
+IFS=' ' read -r -a SELECTED_SERVICES <<< "$EXPANDED_SERVICES"
 
 # Signal trap for graceful cleanup on Ctrl+C (INT) or SIGTERM
 PIDS=()
 cleanup_on_exit() {
   trap - INT TERM EXIT
   echo ""
-  echo "Received interrupt signal. Gracefully shutting down '$SERVICE'..."
+  echo "Received interrupt signal. Gracefully shutting down '${SELECTED_SERVICES[*]}'..."
   if [[ -n "${PIDS:-}" && ${#PIDS[@]} -gt 0 ]]; then
     kill "${PIDS[@]}" 2>/dev/null || true
   fi
-  if [[ -n "$SERVICE" ]]; then
-    free_service_ports "$SERVICE"
-  fi
+  free_service_ports "$SERVICE"
   echo "BayesStack service(s) shut down gracefully."
   exit 0
 }
@@ -245,16 +293,22 @@ if [[ "$MODE" == "docker" ]] || [[ "$MODE" == "auto" && docker_ready ]]; then
     echo "Docker and Docker Compose must be installed and running." >&2
     exit 1
   fi
-  if [[ "$SERVICE" == "all" ]]; then
-    echo "Starting all services in Docker mode..."
-    exec docker compose -f "$ROOT_DIR/compose.yaml" up --build
-  elif [[ "$SERVICE" == "ui" ]]; then
-    echo "UI (Storybook) is not configured in Docker Compose. Running UI locally..."
-    MODE="local"
-  else
-    echo "Starting $SERVICE in Docker mode..."
-    exec docker compose -f "$ROOT_DIR/compose.yaml" up --build "$SERVICE"
+
+  # Filter out non-docker services like 'ui'
+  DOCKER_TARGETS=()
+  for svc in "${SELECTED_SERVICES[@]}"; do
+    if [[ "$svc" != "ui" ]]; then
+      DOCKER_TARGETS+=("$svc")
+    fi
+  done
+
+  # Include postgres database container if api is part of the request
+  if [[ " ${DOCKER_TARGETS[*]} " =~ " api " ]] && ! [[ " ${DOCKER_TARGETS[*]} " =~ " postgres " ]]; then
+    DOCKER_TARGETS+=("postgres")
   fi
+
+  echo "Starting BayesStack in Docker mode for target services: ${DOCKER_TARGETS[*]}..."
+  exec docker compose -f "$ROOT_DIR/compose.yaml" up --build "${DOCKER_TARGETS[@]}"
 fi
 
 if [[ "$MODE" != "docker" ]]; then
@@ -297,96 +351,72 @@ if [[ "$MODE" != "docker" ]]; then
   }
 
   cd "$ROOT_DIR"
+  echo "Starting BayesStack in Local mode for targets: ${SELECTED_SERVICES[*]}..."
+  free_service_ports "$SERVICE"
 
-  case "$SERVICE" in
-    landing)
-      free_service_ports "landing"
-      run_pnpm install
-      echo "Starting Landing app at http://localhost:3000..."
-      run_pnpm --filter "@bayesstack/landing" dev --hostname 0.0.0.0 --port 3000 &
-      PIDS+=("$!")
-      wait "$!" 2>/dev/null || cleanup_on_exit
-      ;;
-    learner)
-      free_service_ports "learner"
-      run_pnpm install
-      echo "Starting Learner app at http://localhost:3001..."
-      run_pnpm --filter "@bayesstack/learner" dev --hostname 0.0.0.0 --port 3001 &
-      PIDS+=("$!")
-      wait "$!" 2>/dev/null || cleanup_on_exit
-      ;;
-    faculty)
-      free_service_ports "faculty"
-      run_pnpm install
-      echo "Starting Faculty app at http://localhost:3002..."
-      run_pnpm --filter "@bayesstack/faculty" dev --hostname 0.0.0.0 --port 3002 &
-      PIDS+=("$!")
-      wait "$!" 2>/dev/null || cleanup_on_exit
-      ;;
-    admin)
-      free_service_ports "admin"
-      run_pnpm install
-      echo "Starting Admin app at http://localhost:3003..."
-      run_pnpm --filter "@bayesstack/admin" dev --hostname 0.0.0.0 --port 3003 &
-      PIDS+=("$!")
-      wait "$!" 2>/dev/null || cleanup_on_exit
-      ;;
-    ui)
-      free_service_ports "ui"
-      run_pnpm install
-      echo "Starting UI catalog (Storybook) at http://localhost:6001..."
-      run_pnpm --filter "@bayesstack/ui" dev &
-      PIDS+=("$!")
-      wait "$!" 2>/dev/null || cleanup_on_exit
-      ;;
-    api)
-      free_service_ports "api"
-      setup_python_api
-      echo "Starting API backend at http://localhost:8000/health..."
-      cd "$ROOT_DIR/services/api"
-      "$ROOT_DIR/services/api/.venv/bin/python" -m uvicorn main:app --app-dir src --reload --host 0.0.0.0 --port 8000 &
-      PIDS+=("$!")
-      wait "$!" 2>/dev/null || cleanup_on_exit
-      ;;
-    all)
-      free_service_ports "all"
-      run_pnpm install
-      setup_python_api
+  RUNS_NODE=0
+  RUNS_API=0
 
-      (
-        cd "$ROOT_DIR/services/api"
-        exec "$ROOT_DIR/services/api/.venv/bin/python" -m uvicorn main:app --app-dir src --reload --host 0.0.0.0 --port 8000
-      ) & PIDS+=("$!")
+  for svc in "${SELECTED_SERVICES[@]}"; do
+    if [[ "$svc" == "api" ]]; then
+      RUNS_API=1
+    elif [[ "$svc" != "nginx" ]]; then
+      RUNS_NODE=1
+    fi
+  done
 
-      start_app() {
-        local name="$1"
-        local port="$2"
-        (cd "$ROOT_DIR" && run_pnpm --filter "@bayesstack/$name" dev --hostname 0.0.0.0 --port "$port") & PIDS+=("$!")
-      }
+  if [[ $RUNS_NODE -eq 1 ]]; then
+    run_pnpm install
+  fi
+  if [[ $RUNS_API -eq 1 ]]; then
+    setup_python_api
+  fi
 
-      start_app landing 3000
-      start_app learner 3001
-      start_app faculty 3002
-      start_app admin 3003
+  for svc in "${SELECTED_SERVICES[@]}"; do
+    case "$svc" in
+      api)
+        echo "Starting API backend at http://localhost:8000/health..."
+        (
+          cd "$ROOT_DIR/services/api"
+          exec "$ROOT_DIR/services/api/.venv/bin/python" -m uvicorn main:app --app-dir src --reload --host 0.0.0.0 --port 8000
+        ) & PIDS+=("$!")
+        ;;
+      landing)
+        echo "Starting Landing app at http://localhost:3000..."
+        (cd "$ROOT_DIR" && run_pnpm --filter "@bayesstack/landing" dev --hostname 0.0.0.0 --port 3000) & PIDS+=("$!")
+        ;;
+      learner)
+        echo "Starting Learner app at http://localhost:3001..."
+        (cd "$ROOT_DIR" && run_pnpm --filter "@bayesstack/learner" dev --hostname 0.0.0.0 --port 3001) & PIDS+=("$!")
+        ;;
+      faculty)
+        echo "Starting Faculty app at http://localhost:3002..."
+        (cd "$ROOT_DIR" && run_pnpm --filter "@bayesstack/faculty" dev --hostname 0.0.0.0 --port 3002) & PIDS+=("$!")
+        ;;
+      admin)
+        echo "Starting Admin app at http://localhost:3003..."
+        (cd "$ROOT_DIR" && run_pnpm --filter "@bayesstack/admin" dev --hostname 0.0.0.0 --port 3003) & PIDS+=("$!")
+        ;;
+      auth)
+        echo "Starting Auth app at http://localhost:3004..."
+        (cd "$ROOT_DIR" && run_pnpm --filter "@bayesstack/auth" dev --hostname 0.0.0.0 --port 3004) & PIDS+=("$!")
+        ;;
+      super)
+        echo "Starting SuperAdmin app at http://localhost:3005..."
+        (cd "$ROOT_DIR" && run_pnpm --filter "@bayesstack/super" dev --hostname 0.0.0.0 --port 3005) & PIDS+=("$!")
+        ;;
+      ui)
+        echo "Starting UI catalog (Storybook) at http://localhost:6001..."
+        (cd "$ROOT_DIR" && run_pnpm --filter "@bayesstack/ui" dev) & PIDS+=("$!")
+        ;;
+      nginx)
+        if command -v nginx >/dev/null 2>&1; then
+          echo "Local NGINX detected. Ensure /etc/nginx/conf.d/bayesstack.conf is loaded."
+        fi
+        ;;
+    esac
+  done
 
-      (
-        cd "$ROOT_DIR"
-        run_pnpm --filter "@bayesstack/ui" dev
-      ) & PIDS+=("$!")
-
-      echo "BayesStack is running all services in local mode. Press Ctrl+C to stop."
-      echo "Landing: http://localhost:3000"
-      echo "Learner: http://localhost:3001"
-      echo "Faculty: http://localhost:3002"
-      echo "Admin:   http://localhost:3003"
-      echo "UI:      http://localhost:6001"
-      echo "API:     http://localhost:8000/health"
-
-      wait
-      ;;
-    *)
-      echo "Unknown service: $SERVICE" >&2
-      exit 1
-      ;;
-  esac
+  echo "Selected services running locally. Press Ctrl+C to stop."
+  wait
 fi

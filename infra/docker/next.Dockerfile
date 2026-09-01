@@ -10,6 +10,23 @@ ENV npm_config_fetch_timeout=600000
 RUN corepack enable && corepack install --global pnpm@11.23.0
 WORKDIR /app
 
+FROM base AS dev
+ARG APP_NAME
+ENV APP_NAME=${APP_NAME}
+ENV NODE_ENV=development
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV WATCHPACK_POLLING=true
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY apps ./apps
+COPY packages ./packages
+COPY studios ./studios
+
+RUN --mount=type=cache,id=bayesstack-pnpm-store,target=/root/.local/share/pnpm/store pnpm install --prefer-offline
+
+EXPOSE 3000
+CMD ["sh", "-c", "pnpm --filter @bayesstack/${APP_NAME} dev --hostname 0.0.0.0 --port ${PORT:-3000}"]
+
 FROM base AS build
 ENV NEXT_TELEMETRY_DISABLED=1
 
