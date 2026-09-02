@@ -73,7 +73,15 @@ export interface DropdownMenuItem {
 }
 
 export type DropdownTrigger = "click" | "hover" | "contextMenu";
-export type DropdownPlacement = "bottomLeft" | "bottomRight" | "topLeft" | "topRight";
+export type DropdownPlacement =
+  | "bottomLeft"
+  | "bottomRight"
+  | "topLeft"
+  | "topRight"
+  | "rightTop"
+  | "rightBottom"
+  | "leftTop"
+  | "leftBottom";
 
 export interface DropdownProps {
   /**

@@ -453,4 +453,379 @@
   text-overflow: ellipsis;
 }
 
+/* ==========================================================================
+   6. Sidebar Component
+   ========================================================================== */
+
+.bs-sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
+  font-family: var(--bs-font-family, 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif);
+  transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  position: relative;
+  overflow: visible;
+}
+
+/* Theme Variants */
+.bs-sidebar--default {
+  background-color: var(--bs-color-bg-surface, #FFFFFF);
+  border-right: 1px solid var(--bs-color-border-subtle, #E2E8F0);
+  color: var(--bs-color-text-primary, #123333);
+}
+
+.bs-sidebar--subtle {
+  background-color: var(--bs-color-bg-subtle, #F8FAFC);
+  border-right: 1px solid var(--bs-color-border-subtle, #E2E8F0);
+  color: var(--bs-color-text-primary, #123333);
+}
+
+.bs-sidebar--dark {
+  background-color: #0F172A;
+  border-right: 1px solid #1E293B;
+  color: #F8FAFC;
+}
+
+/* Header Slot */
+.bs-sidebar-header {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--bs-color-border-subtle, #F1F5F9);
+  min-height: 64px;
+  box-sizing: border-box;
+}
+
+.bs-logo-text-group--collapsed {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.bs-logo-text-group--expanded {
+  opacity: 1;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.bs-sidebar--dark .bs-sidebar-header {
+  border-bottom-color: #1E293B;
+}
+
+/* Body Content */
+.bs-sidebar-content {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bs-sidebar--collapsed .bs-sidebar-content {
+  padding: 12px;
+  align-items: stretch;
+}
+
+/* Section Groups */
+.bs-sidebar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.bs-sidebar-group-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--bs-color-text-muted, #64748B);
+  padding: 8px 12px 4px 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.bs-sidebar-group-label--collapsed {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bs-sidebar--dark .bs-sidebar-group-label {
+  color: #64748B;
+}
+
+.bs-sidebar-divider {
+  height: 1px;
+  background-color: var(--bs-color-border-subtle, #E2E8F0);
+  margin: 8px 0;
+  width: 100%;
+}
+
+.bs-sidebar--dark .bs-sidebar-divider {
+  background-color: #1E293B;
+}
+
+/* Menu Lists */
+.bs-sidebar-menu-list,
+.bs-sidebar-sub-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+
+.bs-sidebar-item-wrapper {
+  width: 100%;
+}
+
+/* Main Navigation Item */
+.bs-sidebar-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--bs-radius-md, 8px);
+  border: none;
+  background: transparent;
+  color: var(--bs-color-text-secondary, #475569);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  box-sizing: border-box;
+  transition: background-color 0.16s ease, color 0.16s ease;
+  text-align: left;
+}
+
+.bs-sidebar--collapsed .bs-sidebar-item {
+  justify-content: flex-start;
+  padding: 10px 12px;
+  width: 100%;
+  height: auto;
+  margin: 0;
+}
+
+.bs-sidebar-item:hover:not(.bs-sidebar-item--disabled) {
+  background-color: var(--bs-color-teal-subtle, #F0FDF4);
+  color: var(--bs-color-teal-primary, #0B6763);
+}
+
+.bs-sidebar--dark .bs-sidebar-item {
+  color: #94A3B8;
+}
+
+.bs-sidebar--dark .bs-sidebar-item:hover:not(.bs-sidebar-item--disabled) {
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #F8FAFC;
+}
+
+/* Active Navigation Item */
+.bs-sidebar-item--active {
+  background-color: #EBF5F5 !important;
+  color: var(--bs-color-teal-primary, #0B6763) !important;
+  font-weight: 600;
+}
+
+.bs-sidebar--dark .bs-sidebar-item--active {
+  background-color: rgba(11, 103, 99, 0.3) !important;
+  color: #2DD4BF !important;
+}
+
+.bs-sidebar-item--parent-active {
+  color: var(--bs-color-teal-primary, #0B6763);
+  font-weight: 600;
+}
+
+.bs-sidebar-item--disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Item Slots */
+.bs-sidebar-item-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color 0.16s ease;
+}
+
+.bs-sidebar-item-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.bs-sidebar-item-label--collapsed,
+.bs-sidebar-item-badge--collapsed {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bs-sidebar-item-badge {
+  margin-left: auto;
+  flex-shrink: 0;
+  display: inline-flex;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.bs-sidebar-item-caret {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+  color: var(--bs-color-text-muted, #94A3B8);
+}
+
+.bs-sidebar-item-caret--open {
+  transform: rotate(180deg);
+}
+
+/* Sub-menu tree structure */
+.bs-sidebar-sub-list {
+  padding-left: 20px;
+  margin-top: 2px;
+  margin-bottom: 4px;
+  border-left: 1.5px dashed var(--bs-color-border-subtle, #CBD5E1);
+  margin-left: 22px;
+}
+
+.bs-sidebar--dark .bs-sidebar-sub-list {
+  border-left-color: #334155;
+}
+
+.bs-sidebar-sub-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--bs-radius-sm, 6px);
+  border: none;
+  background: transparent;
+  color: var(--bs-color-text-secondary, #59716E);
+  font-size: 13.5px;
+  font-weight: 400;
+  cursor: pointer;
+  text-decoration: none;
+  box-sizing: border-box;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.bs-sidebar-sub-item:hover:not(.bs-sidebar-sub-item--disabled) {
+  color: var(--bs-color-teal-primary, #0B6763);
+  background-color: var(--bs-color-teal-subtle, #F4F9F8);
+}
+
+.bs-sidebar--dark .bs-sidebar-sub-item {
+  color: #94A3B8;
+}
+
+.bs-sidebar--dark .bs-sidebar-sub-item:hover:not(.bs-sidebar-sub-item--disabled) {
+  color: #F8FAFC;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.bs-sidebar-sub-item--active {
+  color: var(--bs-color-teal-primary, #0B6763) !important;
+  font-weight: 600;
+  background-color: #EBF5F5 !important;
+}
+
+.bs-sidebar--dark .bs-sidebar-sub-item--active {
+  color: #2DD4BF !important;
+  background-color: rgba(11, 103, 99, 0.25) !important;
+}
+
+.bs-sidebar-sub-item--disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.bs-sidebar-sub-item-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Footer Container & Collapse Button */
+.bs-sidebar-footer-container {
+  padding: 12px;
+  border-top: 1px solid var(--bs-color-border-subtle, #F1F5F9);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  overflow: visible;
+  z-index: 100;
+}
+
+.bs-sidebar--dark .bs-sidebar-footer-container {
+  border-top-color: #1E293B;
+}
+
+.bs-sidebar-footer {
+  width: 100%;
+}
+
+.bs-sidebar-collapse-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: var(--bs-radius-md, 8px);
+  border: 1px solid var(--bs-color-border-subtle, #E2E8F0);
+  background-color: transparent;
+  color: var(--bs-color-text-secondary, #59716E);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.bs-sidebar--collapsed .bs-sidebar-collapse-btn {
+  padding: 9px 0;
+  width: 44px;
+  margin: 0 auto;
+}
+
+.bs-sidebar-collapse-btn:hover {
+  background-color: var(--bs-color-bg-subtle, #F1F5F9);
+  color: var(--bs-color-teal-primary, #0B6763);
+  border-color: var(--bs-color-teal-primary, #0B6763);
+}
+
+.bs-sidebar--dark .bs-sidebar-collapse-btn {
+  border-color: #334155;
+  color: #94A3B8;
+}
+
+.bs-sidebar--dark .bs-sidebar-collapse-btn:hover {
+  background-color: #1E293B;
+  color: #F8FAFC;
+  border-color: #475569;
+}
+
+.bs-sidebar-collapse-text {
+  white-space: nowrap;
+}
+
+
 

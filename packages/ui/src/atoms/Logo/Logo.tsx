@@ -95,14 +95,11 @@ const FallbackVectorMark: React.FC<{ size: number; theme: "light" | "dark" }> = 
       rx="12"
       fill={theme === "dark" ? "url(#bsLogoGradDark)" : "url(#bsLogoGradPrimary)"}
     />
-    {/* Bayesian Nodes */}
-    <circle cx="14" cy="24" r="4.5" fill="#FFFFFF" />
-    <circle cx="34" cy="14" r="4.5" fill="#FFFFFF" />
-    <circle cx="34" cy="34" r="4.5" fill="#FFFFFF" />
-    {/* Edges */}
-    <path d="M17.5 22.5L30.5 15.5" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" opacity="0.9" />
-    <path d="M17.5 25.5L30.5 32.5" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" opacity="0.9" />
-    <path d="M34 18.5V29.5" stroke="#FFFFFF" strokeWidth="2" strokeDasharray="3 3" opacity="0.7" />
+    {/* Stylized 'B' Logo Mark */}
+    <path
+      d="M15 13H25C28.866 13 32 15.6863 32 19C32 21.4 30.4 23.4 28 24.3C31 25.1 33 27.4 33 30.2C33 33.9553 29.4183 37 25 37H15V13ZM21 18V22.5H24.5C25.8807 22.5 27 21.6046 27 20.25C27 18.8954 25.8807 18 24.5 18H21ZM21 27.5V32H25.5C27.1569 32 28.5 30.9926 28.5 29.75C28.5 28.5074 27.1569 27.5 25.5 27.5H21Z"
+      fill="#FFFFFF"
+    />
   </svg>
 );
 
@@ -113,7 +110,7 @@ export const Logo = React.forwardRef<HTMLDivElement, LogoProps>(
       theme = "light",
       size = "md",
       title = "BayesStack",
-      subtitle = "Design Studio",
+      subtitle,
       badge,
       logoSrc,
       className = "",
@@ -196,9 +193,17 @@ export const Logo = React.forwardRef<HTMLDivElement, LogoProps>(
           <div className={["bs-logo-text-group", classNames?.textGroup].filter(Boolean).join(" ")}>
             <div className={["bs-logo-title-row", classNames?.titleRow].filter(Boolean).join(" ")}>
               <span className={["bs-logo-title", classNames?.title].filter(Boolean).join(" ")}>{title}</span>
-              {badge && <span className={["bs-logo-badge", classNames?.badge].filter(Boolean).join(" ")}>{badge}</span>}
+              {badge && subtitle && (
+                <span className={["bs-logo-badge", classNames?.badge].filter(Boolean).join(" ")}>{badge}</span>
+              )}
             </div>
-            {subtitle && <span className={["bs-logo-subtitle", classNames?.subtitle].filter(Boolean).join(" ")}>{subtitle}</span>}
+            {subtitle ? (
+              <span className={["bs-logo-subtitle", classNames?.subtitle].filter(Boolean).join(" ")}>{subtitle}</span>
+            ) : badge ? (
+              <div style={{ marginTop: "2px", display: "flex" }}>
+                <span className={["bs-logo-badge", classNames?.badge].filter(Boolean).join(" ")}>{badge}</span>
+              </div>
+            ) : null}
           </div>
         )}
       </div>

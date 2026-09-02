@@ -25,8 +25,8 @@
 .bs-logo-img {
   display: block;
   user-select: none;
-  filter: drop-shadow(0 2px 8px rgba(11, 103, 99, 0.18));
-  transition: filter 200ms ease, transform 200ms ease;
+  filter: none;
+  transition: transform 200ms ease;
 }
 
 .bs-logo-container:hover .bs-logo-mark-wrapper {
@@ -34,7 +34,7 @@
 }
 
 .bs-logo-container:hover .bs-logo-img {
-  filter: drop-shadow(0 4px 12px rgba(20, 184, 166, 0.35));
+  filter: none;
 }
 
 .bs-logo-text-group {
@@ -123,5 +123,5 @@
 }
 
 .bs-logo--dark .bs-logo-img {
-  filter: drop-shadow(0 2px 10px rgba(45, 212, 191, 0.35));
+  filter: none;
 }

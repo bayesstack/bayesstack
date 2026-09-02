@@ -2,7 +2,8 @@
 
 .bs-dropdown-wrapper {
   position: relative;
-  display: inline-block;
+  display: block;
+  width: 100%;
 }
 
 /* Base Floating Overlay Container */
@@ -113,6 +114,48 @@
   bottom: calc(100% + 6px);
   right: 0;
   transform-origin: bottom right;
+}
+
+.bs-dropdown-overlay--rightTop {
+  top: 0;
+  left: calc(100% + 8px);
+  transform-origin: top left;
+}
+
+.bs-dropdown-overlay--rightBottom {
+  bottom: 0;
+  left: calc(100% + 8px);
+  transform-origin: bottom left;
+}
+
+.bs-dropdown-overlay--leftTop {
+  top: 0;
+  right: calc(100% + 8px);
+  transform-origin: top right;
+}
+
+.bs-dropdown-overlay--leftBottom {
+  bottom: 0;
+  right: calc(100% + 8px);
+  transform-origin: bottom right;
+}
+
+.bs-dropdown-overlay--rightTop .bs-dropdown-arrow {
+  top: 14px;
+  left: -6px;
+  border-right: none;
+  border-top: none;
+  border-left: 1px solid #E2ECEB;
+  border-bottom: 1px solid #E2ECEB;
+}
+
+.bs-dropdown-overlay--rightBottom .bs-dropdown-arrow {
+  bottom: 14px;
+  left: -6px;
+  border-right: none;
+  border-top: none;
+  border-left: 1px solid #E2ECEB;
+  border-bottom: 1px solid #E2ECEB;
 }
 
 /* Menu List Box */

@@ -56,6 +56,12 @@ export interface CodeEditorProps
   showLineNumbers?: boolean;
 
   /**
+   * Show header language dropdown selector
+   * @default true
+   */
+  showLanguageSelect?: boolean;
+
+  /**
    * Show header copy button
    * @default true
    */
@@ -131,6 +137,7 @@ export function CodeEditor({
   variant = "dark",
   readOnly = false,
   showLineNumbers = true,
+  showLanguageSelect = true,
   showCopy = true,
   showStatusFooter = true,
   tabSize = 2,
@@ -373,43 +380,47 @@ export function CodeEditor({
       {...props}
     >
       {/* Header Toolbar */}
-      <div className={["bs-code-editor-header", classNames?.header].filter(Boolean).join(" ")}>
-        <select
-          value={currentLang}
-          disabled={readOnly}
-          onChange={(e) => {
-            const nextLang = e.target.value;
-            setInternalLang(nextLang);
-            if (onLanguageChange) onLanguageChange(nextLang);
-          }}
-          className={["bs-code-editor-lang-select", classNames?.langSelect].filter(Boolean).join(" ")}
-          aria-label="Select programming language"
-        >
-          {SUPPORTED_LANGUAGES.map((lang) => (
-            <option key={lang.value} value={lang.value}>
-              {lang.label}
-            </option>
-          ))}
-        </select>
+      {(showLanguageSelect || showCopy) && (
+        <div className={["bs-code-editor-header", classNames?.header].filter(Boolean).join(" ")}>
+          {showLanguageSelect ? (
+            <select
+              value={currentLang}
+              disabled={readOnly}
+              onChange={(e) => {
+                const nextLang = e.target.value;
+                setInternalLang(nextLang);
+                if (onLanguageChange) onLanguageChange(nextLang);
+              }}
+              className={["bs-code-editor-lang-select", classNames?.langSelect].filter(Boolean).join(" ")}
+              aria-label="Select programming language"
+            >
+              {SUPPORTED_LANGUAGES.map((lang) => (
+                <option key={lang.value} value={lang.value}>
+                  {lang.label}
+                </option>
+              ))}
+            </select>
+          ) : <div />}
 
-        {showCopy && (
-          <button
-            type="button"
-            onClick={handleCopy}
-            className={[
-              "bs-code-editor-copy-btn",
-              copied ? "bs-code-editor-copy-btn--copied" : "",
-              classNames?.copyBtn,
-            ]
-              .filter(Boolean)
-              .join(" ")}
-            aria-label="Copy code to clipboard"
-          >
-            <Icon name={copied ? "CheckCircle" : "Copy"} size={13} />
-            <span>{copied ? "Copied" : "Copy"}</span>
-          </button>
-        )}
-      </div>
+          {showCopy && (
+            <button
+              type="button"
+              onClick={handleCopy}
+              className={[
+                "bs-code-editor-copy-btn",
+                copied ? "bs-code-editor-copy-btn--copied" : "",
+                classNames?.copyBtn,
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              aria-label="Copy code to clipboard"
+            >
+              <Icon name={copied ? "CheckCircle" : "Copy"} size={13} />
+              <span>{copied ? "Copied" : "Copy"}</span>
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Editor Main Stage */}
       <div className={["bs-code-editor-stage", classNames?.stage].filter(Boolean).join(" ")}>
