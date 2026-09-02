@@ -45,6 +45,7 @@ free_port() {
 
 free_service_ports() {
   local target_list="$1"
+  local preserve_infrastructure="${2:-false}"
   for item in $target_list; do
     case "$item" in
       landing) free_port 3000 ;;
@@ -57,7 +58,13 @@ free_service_ports() {
       api)     free_port 8000 ;;
       nginx)   free_port 80 ;;
       pgadmin) free_port 5050 ;;
-      postgres) free_port 5432 ;;
+      # PostgreSQL can be a separately managed local service (or a persistent
+      # Docker container), so do not stop it as part of a native app restart.
+      postgres)
+        if [[ "$preserve_infrastructure" != "true" ]]; then
+          free_port 5432
+        fi
+        ;;
       [0-9]*)  free_port "$item" ;;
       *)       ;;
     esac
@@ -65,17 +72,21 @@ free_service_ports() {
 }
 
 setup_signal_traps() {
-  local -n pids_ref="$1"
-  local target_svcs="$2"
+  # Trap handlers run after this function returns, so store their state in
+  # globals instead of function-local variables.
+  BAYESSTACK_TRAP_PIDS_REF="$1"
+  BAYESSTACK_TRAP_TARGET_SVCS="$2"
 
   cleanup_on_exit() {
     trap - INT TERM EXIT
+    local -n pids_ref="$BAYESSTACK_TRAP_PIDS_REF"
+    local target_svcs="$BAYESSTACK_TRAP_TARGET_SVCS"
     echo ""
     log_info "Received interrupt signal. Shutting down '${target_svcs}'..."
     if [[ -n "${pids_ref:-}" && ${#pids_ref[@]} -gt 0 ]]; then
       kill "${pids_ref[@]}" 2>/dev/null || true
     fi
-    free_service_ports "${target_svcs}"
+    free_service_ports "${target_svcs}" true
     log_success "BayesStack services shut down gracefully."
     exit 0
   }

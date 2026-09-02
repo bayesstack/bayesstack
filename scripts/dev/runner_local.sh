@@ -25,7 +25,10 @@ run_local_mode() {
   print_header "Starting BayesStack in LOCAL (Native) Shell Mode"
   log_info "Selected Native Services: ${selected_services[*]}"
 
-  free_service_ports "${selected_services[*]}"
+  # PostgreSQL is persistent infrastructure, not a child of this runner.
+  # Preserve an existing native service or Docker container on application
+  # restarts; it is also reused by subsequent local runs.
+  free_service_ports "${selected_services[*]}" true
 
   local runs_node=0
   local runs_api=0
@@ -38,8 +41,9 @@ run_local_mode() {
     fi
   done
 
-  # Auto-start PostgreSQL container if API is running locally and local postgres daemon is missing
-  if [[ $runs_api -eq 1 ]]; then
+  # Reuse native PostgreSQL when present; otherwise start the lightweight
+  # PostgreSQL Compose service. This also makes `--local postgres` useful.
+  if [[ $runs_api -eq 1 || " ${selected_services[*]} " =~ " postgres " ]]; then
     local pg_port_open=0
     if command -v lsof >/dev/null 2>&1 && lsof -i:5432 >/dev/null 2>&1; then
       pg_port_open=1
@@ -50,7 +54,21 @@ run_local_mode() {
     if [[ $pg_port_open -eq 0 ]] && command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
       log_info "No local PostgreSQL service detected on port 5432. Auto-starting Docker PostgreSQL container..."
       docker compose -f "$root_dir/compose.yaml" up -d postgres
-      sleep 2
+      for _ in {1..30}; do
+        if command -v lsof >/dev/null 2>&1 && lsof -i:5432 >/dev/null 2>&1; then
+          pg_port_open=1
+          break
+        elif command -v ss >/dev/null 2>&1 && ss -lptn "sport = :5432" 2>/dev/null | grep -q "5432"; then
+          pg_port_open=1
+          break
+        fi
+        sleep 1
+      done
+    fi
+
+    if [[ $pg_port_open -eq 0 ]]; then
+      log_error "PostgreSQL is not reachable on port 5432. Start PostgreSQL or Docker, then try again."
+      exit 1
     fi
   fi
 
@@ -72,7 +90,11 @@ run_local_mode() {
         log_info "Starting API backend at http://localhost:8000..."
         (
           cd "$root_dir/services/api"
-          exec "$root_dir/services/api/.venv/bin/python" -m uvicorn main:app --app-dir src --reload --host 0.0.0.0 --port 8000
+          # A repository .env may have POSTGRES_HOST=postgres for Compose.
+          # Native processes must instead reach the host-published database.
+          POSTGRES_HOST="${BAYESSTACK_LOCAL_POSTGRES_HOST:-localhost}" \
+          DATABASE_URL="${BAYESSTACK_LOCAL_DATABASE_URL:-}" \
+            exec "$root_dir/services/api/.venv/bin/python" -m uvicorn main:app --app-dir src --reload --host 0.0.0.0 --port 8000
         ) & PIDS+=("$!")
         ;;
       landing)
