@@ -65,10 +65,8 @@ services:
   landing:
     build:
       context: .
-      dockerfile: infra/docker/next.Dockerfile
+      dockerfile: apps/landing/Dockerfile
       target: dev
-      args:
-        APP_NAME: landing
     ports:
       - "3000:3000"
     environment:
@@ -88,10 +86,8 @@ services:
   learner:
     build:
       context: .
-      dockerfile: infra/docker/next.Dockerfile
+      dockerfile: apps/learner/Dockerfile
       target: dev
-      args:
-        APP_NAME: learner
     ports:
       - "3001:3000"
     environment:
@@ -111,10 +107,8 @@ services:
   faculty:
     build:
       context: .
-      dockerfile: infra/docker/next.Dockerfile
+      dockerfile: apps/faculty/Dockerfile
       target: dev
-      args:
-        APP_NAME: faculty
     ports:
       - "3002:3000"
     environment:
@@ -134,10 +128,8 @@ services:
   admin:
     build:
       context: .
-      dockerfile: infra/docker/next.Dockerfile
+      dockerfile: apps/admin/Dockerfile
       target: dev
-      args:
-        APP_NAME: admin
     ports:
       - "3003:3000"
     environment:
@@ -157,10 +149,8 @@ services:
   auth:
     build:
       context: .
-      dockerfile: infra/docker/next.Dockerfile
+      dockerfile: apps/auth/Dockerfile
       target: dev
-      args:
-        APP_NAME: auth
     ports:
       - "3004:3000"
     environment:
@@ -180,10 +170,8 @@ services:
   super:
     build:
       context: .
-      dockerfile: infra/docker/next.Dockerfile
+      dockerfile: apps/super/Dockerfile
       target: dev
-      args:
-        APP_NAME: super
     ports:
       - "3005:3000"
     environment:

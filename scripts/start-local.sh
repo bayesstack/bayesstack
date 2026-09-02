@@ -5,61 +5,67 @@ export PATH="/usr/local/lib/node_modules/corepack/shims:$PATH"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MODE="auto"
-SERVICE=""
 ACTION="start"
 TARGET_STOP=""
-SELECTED_SERVICES=()
+RAW_SERVICE_ARGS=()
 
 show_help() {
-  echo "Usage: ./scripts/start-local.sh [options] [profile|service|list]"
+  echo "Usage: ./scripts/start-local.sh [options] [core|profile|service1 service2 ...]"
   echo ""
   echo "Options:"
-  echo "  --docker                   Force Docker mode"
-  echo "  --local                    Force Local (native) mode"
+  echo "  --docker                   Force Docker mode (run services in containerized format)"
+  echo "  --local                    Force Local (native) mode (run services directly in shell)"
   echo "  --stop, --kill, -k [name] Gracefully shut down process running on service port(s)"
   echo "  -h, --help                 Show this help message"
   echo ""
-  echo "Development Profiles (Lightweight):"
-  echo "  core                       API + Auth (Minimal CPU/RAM: http://bayes.localhost)"
-  echo "  learner-flow               API + Auth + Learner"
-  echo "  faculty-flow               API + Auth + Faculty"
-  echo "  admin-flow                 API + Auth + Admin"
-  echo "  super-flow                 API + SuperAdmin"
-  echo "  all                        Start all 9 services (High CPU/RAM)"
+  echo "1. Core Services Profile (EC2 / Production Ready):"
+  echo "  core                       Starts all core services needed to run BayesStack end-to-end:"
+  echo "                             (postgres, api, auth, super, learner, faculty, admin, landing, nginx)"
+  echo "                             Note: Omits dev-only bloat (pgadmin visualizer, storybook UI)."
   echo ""
-  echo "Individual Services:"
-  echo "  landing                    Start Landing app (http://localhost:3000)"
-  echo "  learner                    Start Learner app (http://localhost:3001)"
-  echo "  faculty                    Start Faculty app (http://localhost:3002)"
-  echo "  admin                      Start Admin app (http://localhost:3003)"
-  echo "  auth                       Start Auth app (http://localhost:3004)"
-  echo "  super                      Start SuperAdmin app (http://localhost:3005)"
-  echo "  ui                         Start UI Storybook catalog (http://localhost:6001)"
-  echo "  api                        Start FastAPI backend (http://localhost:8000)"
+  echo "2. Selective Dockerized/Local Service Execution:"
+  echo "  Pass specific service names to run only those services:"
+  echo "  - landing                  Landing website (http://localhost:3000)"
+  echo "  - learner                  Learner Portal (http://localhost:3001)"
+  echo "  - faculty                  Faculty Portal (http://localhost:3002)"
+  echo "  - admin                    Admin Portal (http://localhost:3003)"
+  echo "  - auth                     Auth Gateway (http://localhost:3004)"
+  echo "  - super                    SuperAdmin Studio (http://localhost:3005)"
+  echo "  - api                      FastAPI Backend (http://localhost:8000)"
+  echo "  - postgres                 PostgreSQL Database (port 5432)"
+  echo "  - nginx                    Reverse Proxy Router (port 80)"
+  echo "  - ui                       Storybook Component Catalog (port 6001)"
+  echo "  - pgadmin                  PgAdmin Database Visualizer (port 5050)"
   echo ""
-  echo "Custom Selection:"
-  echo "  --services api,auth,learner  Run specific comma-separated list of services"
+  echo "Execution Examples:"
+  echo "  # Case 1: Run all core services end-to-end in Docker"
+  echo "  ./scripts/start-local.sh --docker core"
   echo ""
-  echo "Examples:"
-  echo "  ./scripts/start-local.sh --core"
-  echo "  ./scripts/start-local.sh --learner-flow"
-  echo "  ./scripts/start-local.sh --services api,auth"
+  echo "  # Case 2: Run specific custom services in Docker"
+  echo "  ./scripts/start-local.sh --docker api super nginx"
+  echo "  ./scripts/start-local.sh --docker landing nginx"
+  echo "  ./scripts/start-local.sh --docker api,super,nginx"
+  echo ""
+  echo "  # Local native mode examples"
+  echo "  ./scripts/start-local.sh core"
+  echo "  ./scripts/start-local.sh api super"
   echo "  ./scripts/start-local.sh --stop core"
 }
 
 expand_profile() {
   local target="$1"
   case "$target" in
-    core|minimal) echo "api auth nginx" ;;
-    learner-flow) echo "api auth learner nginx" ;;
-    faculty-flow) echo "api auth faculty nginx" ;;
-    admin-flow)   echo "api auth admin nginx" ;;
-    super-flow)   echo "api super nginx" ;;
-    all)          echo "api landing learner faculty admin auth super ui nginx" ;;
+    core|minimal) echo "postgres api auth super learner faculty admin landing nginx" ;;
+    learner-flow) echo "postgres api auth learner nginx" ;;
+    faculty-flow) echo "postgres api auth faculty nginx" ;;
+    admin-flow)   echo "postgres api auth admin nginx" ;;
+    super-flow)   echo "postgres api super nginx" ;;
+    all)          echo "postgres api landing learner faculty admin auth super ui pgadmin nginx" ;;
     *)            echo "$target" ;;
   esac
 }
 
+# Parse command line flags & arguments
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --docker) MODE="docker"; shift ;;
@@ -82,26 +88,18 @@ while [[ $# -gt 0 ]]; do
         shift
       fi
       ;;
-    --all|-a) SERVICE="all"; shift ;;
-    --core|--minimal) SERVICE="core"; shift ;;
-    --learner-flow) SERVICE="learner-flow"; shift ;;
-    --faculty-flow) SERVICE="faculty-flow"; shift ;;
-    --admin-flow) SERVICE="admin-flow"; shift ;;
-    --super-flow) SERVICE="super-flow"; shift ;;
-    --landing) SERVICE="landing"; shift ;;
-    --learner) SERVICE="learner"; shift ;;
-    --faculty) SERVICE="faculty"; shift ;;
-    --admin) SERVICE="admin"; shift ;;
-    --auth) SERVICE="auth"; shift ;;
-    --super) SERVICE="super"; shift ;;
-    --ui) SERVICE="ui"; shift ;;
-    --api) SERVICE="api"; shift ;;
+    --all|-a) RAW_SERVICE_ARGS+=("all"); shift ;;
+    --core|--minimal) RAW_SERVICE_ARGS+=("core"); shift ;;
+    --learner-flow) RAW_SERVICE_ARGS+=("learner-flow"); shift ;;
+    --faculty-flow) RAW_SERVICE_ARGS+=("faculty-flow"); shift ;;
+    --admin-flow) RAW_SERVICE_ARGS+=("admin-flow"); shift ;;
+    --super-flow) RAW_SERVICE_ARGS+=("super-flow"); shift ;;
     --services)
       if [[ -n "${2:-}" ]]; then
-        SERVICE="$2"
+        RAW_SERVICE_ARGS+=("$2")
         shift 2
       else
-        echo "Error: --services requires a comma-separated list (e.g. api,auth)" >&2
+        echo "Error: --services requires a comma-separated or space-separated list of services" >&2
         exit 1
       fi
       ;;
@@ -109,19 +107,9 @@ while [[ $# -gt 0 ]]; do
       show_help
       exit 0
       ;;
-    core|minimal|learner-flow|faculty-flow|admin-flow|super-flow|landing|learner|faculty|admin|auth|super|ui|api|all)
-      SERVICE="$1"
-      shift
-      ;;
     *)
-      if [[ "$1" == *","* ]]; then
-        SERVICE="$1"
-        shift
-      else
-        echo "Unknown option: $1" >&2
-        show_help >&2
-        exit 1
-      fi
+      RAW_SERVICE_ARGS+=("$1")
+      shift
       ;;
   esac
 done
@@ -169,11 +157,8 @@ free_port() {
 }
 
 free_service_ports() {
-  local raw_target="${1:-$SERVICE}"
-  local list
-  list=$(expand_profile "$raw_target" | tr ',' ' ')
-  
-  for item in $list; do
+  local target_list="$1"
+  for item in $target_list; do
     case "$item" in
       landing) free_port 3000 ;;
       learner) free_port 3001 ;;
@@ -184,38 +169,40 @@ free_service_ports() {
       ui)      free_port 6001 ;;
       api)     free_port 8000 ;;
       nginx)   free_port 80 ;;
+      pgadmin) free_port 5050 ;;
+      postgres) free_port 5432 ;;
       [0-9]*)  free_port "$item" ;;
       *)       ;;
     esac
   done
 }
 
+# Process Stop Action
 if [[ "$ACTION" == "stop" ]]; then
-  TARGET="${TARGET_STOP:-$SERVICE}"
-  if [[ -z "$TARGET" ]]; then
-    if [[ -t 0 ]]; then
-      read -r -p "Enter profile/service/port to stop [core|all|landing|api|port] (default: all): " TARGET
-      TARGET="${TARGET:-all}"
-    else
-      TARGET="all"
-    fi
+  TARGET="${TARGET_STOP:-core}"
+  if [[ ${#RAW_SERVICE_ARGS[@]} -gt 0 ]]; then
+    TARGET="${RAW_SERVICE_ARGS[*]}"
   fi
-  echo "Stopping running process(es) for '$TARGET'..."
-  free_service_ports "$TARGET"
+  EXPANDED_STOP=$(for item in $TARGET; do expand_profile "$item"; done | tr ',' ' ')
+  echo "Stopping running process(es) for: $EXPANDED_STOP..."
+  free_service_ports "$EXPANDED_STOP"
   exit 0
 fi
 
-if [[ -z "$SERVICE" ]]; then
+# Interactive selector if no services specified
+if [[ ${#RAW_SERVICE_ARGS[@]} -eq 0 ]]; then
   if [[ -t 0 ]]; then
     echo "=========================================="
     echo "       BayesStack Service Selector        "
     echo "=========================================="
-    echo "Lightweight Profiles (Low CPU/RAM):"
-    echo "  1) core          (API + Auth Gateway - http://bayes.localhost)"
-    echo "  2) learner-flow  (API + Auth + Learner)"
-    echo "  3) faculty-flow  (API + Auth + Faculty)"
-    echo "  4) admin-flow    (API + Auth + Admin)"
-    echo "  5) super-flow    (API + SuperAdmin - http://super.localhost)"
+    echo "Core Services (EC2 / Production Ready):"
+    echo "  1) core          (All core services: postgres, api, auth, super, learner, faculty, admin, landing, nginx)"
+    echo ""
+    echo "Lightweight Workflows:"
+    echo "  2) super-flow    (postgres, api, super, nginx)"
+    echo "  3) learner-flow  (postgres, api, auth, learner, nginx)"
+    echo "  4) faculty-flow  (postgres, api, auth, faculty, nginx)"
+    echo "  5) admin-flow    (postgres, api, auth, admin, nginx)"
     echo "------------------------------------------"
     echo "Individual App Services:"
     echo "  6) landing       (App - http://localhost:3000)"
@@ -224,35 +211,38 @@ if [[ -z "$SERVICE" ]]; then
     echo "  9) admin         (App - http://localhost:3003)"
     echo " 10) auth          (App - http://localhost:3004)"
     echo " 11) super         (App - http://localhost:3005)"
-    echo " 12) ui            (Storybook - http://localhost:6001)"
-    echo " 13) api           (FastAPI - http://localhost:8000)"
-    echo " 14) all           (Start all services - High CPU/RAM)"
-    echo " 15) stop          (Gracefully shut down running ports)"
+    echo " 12) api           (FastAPI - http://localhost:8000)"
+    echo " 13) nginx         (Nginx Router - port 80)"
+    echo " 14) ui            (Storybook - http://localhost:6001)"
+    echo " 15) all           (Start all services + dev tools)"
+    echo " 16) stop          (Shut down running ports)"
     echo "=========================================="
-    read -r -p "Enter choice [1-15] (default: 1 [core]): " choice
+    read -r -p "Enter choice [1-16] (default: 1 [core]): " choice
     case "$choice" in
-      1|core|minimal) SERVICE="core" ;;
-      2|learner-flow) SERVICE="learner-flow" ;;
-      3|faculty-flow) SERVICE="faculty-flow" ;;
-      4|admin-flow)   SERVICE="admin-flow" ;;
-      5|super-flow)   SERVICE="super-flow" ;;
-      6|landing)      SERVICE="landing" ;;
-      7|learner)      SERVICE="learner" ;;
-      8|faculty)      SERVICE="faculty" ;;
-      9|admin)        SERVICE="admin" ;;
-      10|auth)        SERVICE="auth" ;;
-      11|super)       SERVICE="super" ;;
-      12|ui)          SERVICE="ui" ;;
-      13|api)         SERVICE="api" ;;
-      14|all)         SERVICE="all" ;;
-      15|stop)
-        read -r -p "Enter service/port to stop [core|all|auth|api|port] (default: all): " TARGET_STOP
-        TARGET_STOP="${TARGET_STOP:-all}"
-        echo "Stopping running process(es) for '$TARGET_STOP'..."
-        free_service_ports "$TARGET_STOP"
+      1|core|minimal) RAW_SERVICE_ARGS+=("core") ;;
+      2|super-flow)   RAW_SERVICE_ARGS+=("super-flow") ;;
+      3|learner-flow) RAW_SERVICE_ARGS+=("learner-flow") ;;
+      4|faculty-flow) RAW_SERVICE_ARGS+=("faculty-flow") ;;
+      5|admin-flow)   RAW_SERVICE_ARGS+=("admin-flow") ;;
+      6|landing)      RAW_SERVICE_ARGS+=("landing") ;;
+      7|learner)      RAW_SERVICE_ARGS+=("learner") ;;
+      8|faculty)      RAW_SERVICE_ARGS+=("faculty") ;;
+      9|admin)        RAW_SERVICE_ARGS+=("admin") ;;
+      10|auth)        RAW_SERVICE_ARGS+=("auth") ;;
+      11|super)       RAW_SERVICE_ARGS+=("super") ;;
+      12|api)         RAW_SERVICE_ARGS+=("api") ;;
+      13|nginx)       RAW_SERVICE_ARGS+=("nginx") ;;
+      14|ui)          RAW_SERVICE_ARGS+=("ui") ;;
+      15|all)         RAW_SERVICE_ARGS+=("all") ;;
+      16|stop)
+        read -r -p "Enter service/port to stop [core|all|auth|api|port] (default: core): " TARGET_STOP
+        TARGET_STOP="${TARGET_STOP:-core}"
+        EXPANDED_STOP=$(expand_profile "$TARGET_STOP" | tr ',' ' ')
+        echo "Stopping running process(es) for '$EXPANDED_STOP'..."
+        free_service_ports "$EXPANDED_STOP"
         exit 0
         ;;
-      "")             SERVICE="core" ;;
+      "")             RAW_SERVICE_ARGS+=("core") ;;
       *)
         echo "Invalid selection: $choice" >&2
         exit 1
@@ -260,14 +250,24 @@ if [[ -z "$SERVICE" ]]; then
     esac
   else
     echo "No service specified and running in non-interactive mode." >&2
-    echo "Usage: $0 [--core|--learner-flow|--super-flow|--services api,auth|all] or $0 --stop" >&2
+    echo "Usage: $0 [--docker|--local] [core|api super nginx|all] or $0 --stop" >&2
     exit 1
   fi
 fi
 
-# Expand selected profile / comma list into list of service names
-EXPANDED_SERVICES=$(expand_profile "$SERVICE" | tr ',' ' ')
-IFS=' ' read -r -a SELECTED_SERVICES <<< "$EXPANDED_SERVICES"
+# Expand profiles & resolve all requested service names
+EXPANDED_STR=""
+for item in "${RAW_SERVICE_ARGS[@]}"; do
+  EXPANDED_STR="$EXPANDED_STR $(expand_profile "$item" | tr ',' ' ')"
+done
+
+# Deduplicate resolved service list preserving order
+SELECTED_SERVICES=()
+for svc in $EXPANDED_STR; do
+  if [[ ! " ${SELECTED_SERVICES[*]:-} " =~ " ${svc} " ]]; then
+    SELECTED_SERVICES+=("$svc")
+  fi
+done
 
 # Signal trap for graceful cleanup on Ctrl+C (INT) or SIGTERM
 PIDS=()
@@ -278,7 +278,7 @@ cleanup_on_exit() {
   if [[ -n "${PIDS:-}" && ${#PIDS[@]} -gt 0 ]]; then
     kill "${PIDS[@]}" 2>/dev/null || true
   fi
-  free_service_ports "$SERVICE"
+  free_service_ports "${SELECTED_SERVICES[*]}"
   echo "BayesStack service(s) shut down gracefully."
   exit 0
 }
@@ -307,7 +307,11 @@ if [[ "$MODE" == "docker" ]] || [[ "$MODE" == "auto" && docker_ready ]]; then
     DOCKER_TARGETS+=("postgres")
   fi
 
-  echo "Starting BayesStack in Docker mode for target services: ${DOCKER_TARGETS[*]}..."
+  echo "========================================================="
+  echo "  Starting BayesStack in DOCKER Mode                     "
+  echo "  Selected Core/Docker Services: ${DOCKER_TARGETS[*]}"
+  echo "========================================================="
+  
   exec docker compose -f "$ROOT_DIR/compose.yaml" up --build "${DOCKER_TARGETS[@]}"
 fi
 
@@ -351,8 +355,12 @@ if [[ "$MODE" != "docker" ]]; then
   }
 
   cd "$ROOT_DIR"
-  echo "Starting BayesStack in Local mode for targets: ${SELECTED_SERVICES[*]}..."
-  free_service_ports "$SERVICE"
+  echo "========================================================="
+  echo "  Starting BayesStack in LOCAL (Native) Mode             "
+  echo "  Selected Services: ${SELECTED_SERVICES[*]}"
+  echo "========================================================="
+
+  free_service_ports "${SELECTED_SERVICES[*]}"
 
   RUNS_NODE=0
   RUNS_API=0
@@ -360,7 +368,7 @@ if [[ "$MODE" != "docker" ]]; then
   for svc in "${SELECTED_SERVICES[@]}"; do
     if [[ "$svc" == "api" ]]; then
       RUNS_API=1
-    elif [[ "$svc" != "nginx" ]]; then
+    elif [[ "$svc" != "nginx" && "$svc" != "postgres" && "$svc" != "pgadmin" ]]; then
       RUNS_NODE=1
     fi
   done
@@ -375,7 +383,7 @@ if [[ "$MODE" != "docker" ]]; then
   for svc in "${SELECTED_SERVICES[@]}"; do
     case "$svc" in
       api)
-        echo "Starting API backend at http://localhost:8000/health..."
+        echo "Starting API backend at http://localhost:8000..."
         (
           cd "$ROOT_DIR/services/api"
           exec "$ROOT_DIR/services/api/.venv/bin/python" -m uvicorn main:app --app-dir src --reload --host 0.0.0.0 --port 8000
