@@ -330,7 +330,8 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
             flex: 1,
             overflow: "auto",
             position: "relative",
-            backgroundImage: "radial-gradient(#1e293b 1px, transparent 1px)",
+            background: "#0b0f19",
+            backgroundImage: "radial-gradient(rgba(148, 163, 184, 0.07) 1px, transparent 1px)",
             backgroundSize: "24px 24px",
           }}
         >
