@@ -6,11 +6,65 @@ import { Icon, Badge, type DbTable } from "@bayesstack/ui";
 export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
   const [search, setSearch] = useState<string>("");
   const [zoom, setZoom] = useState<number>(100);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
   const [hoveredTableId, setHoveredTableId] = useState<string | null>(null);
   const [hoveredColKey, setHoveredColKey] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"detailed" | "compact">("detailed");
   const [linesMode, setLinesMode] = useState<"smart" | "all" | "none">("smart");
+
+  const isLight = theme === "light";
+
+  const t = {
+    canvasBg: isLight ? "#f8fafc" : "#0b0f19",
+    dotColor: isLight ? "rgba(100, 116, 139, 0.18)" : "rgba(148, 163, 184, 0.07)",
+    toolbarBg: isLight ? "#ffffff" : "#0f172a",
+    toolbarBorder: isLight ? "#e2e8f0" : "#1e293b",
+    toolbarText: isLight ? "#0f172a" : "#f8fafc",
+    subtleText: isLight ? "#64748b" : "#94a3b8",
+    inputBg: isLight ? "#f1f5f9" : "#1e293b",
+    inputBorder: isLight ? "#cbd5e1" : "#334155",
+
+    // Card Tokens
+    cardBg: isLight ? "#ffffff" : "#0f172a",
+    cardHeaderBg: isLight ? "#f8fafc" : "#111827",
+    cardHeaderSelectedBg: isLight ? "#e4f2ef" : "#1e293b",
+    cardBorder: isLight ? "#e2e8f0" : "#1e293b",
+    cardBorderHover: isLight ? "#0b6763" : "#0284c7",
+    cardBorderSelected: isLight ? "#0b6763" : "#38bdf8",
+    cardShadow: isLight
+      ? "0 4px 14px rgba(15, 23, 42, 0.06)"
+      : "0 4px 12px rgba(0,0,0,0.4)",
+    cardShadowSelected: isLight
+      ? "0 0 20px rgba(11, 103, 99, 0.2)"
+      : "0 0 20px rgba(56, 189, 248, 0.3)",
+
+    cardTitle: isLight ? "#0f172a" : "#f8fafc",
+    colRowHover: isLight ? "rgba(11, 103, 99, 0.06)" : "rgba(56, 189, 248, 0.1)",
+    colRowBorder: isLight ? "#f1f5f9" : "rgba(255,255,255,0.03)",
+    colName: isLight ? "#1e293b" : "#e2e8f0",
+    colType: isLight ? "#64748b" : "#64748b",
+
+    // Key Badges
+    pkBg: isLight ? "#fef3c7" : "#fbbf24",
+    pkColor: isLight ? "#92400e" : "#78350f",
+    fkBg: isLight ? "#e0f2fe" : "#38bdf8",
+    fkColor: isLight ? "#0369a1" : "#0c4a6e",
+
+    // Connectors
+    strokeNormal: isLight ? "#cbd5e1" : "#475569",
+    strokeHighlighted: isLight ? "#0b6763" : "#38bdf8",
+    strokeHovered: isLight ? "#d97706" : "#f59e0b",
+    markerFill: isLight ? "#0b6763" : "#38bdf8",
+    markerActiveFill: isLight ? "#d97706" : "#f59e0b",
+
+    // Inspector Side Drawer
+    inspectorBg: isLight ? "#ffffff" : "#0f172a",
+    inspectorBorder: isLight ? "#e2e8f0" : "#1e293b",
+    inspectorHeaderBg: isLight ? "#f8fafc" : "#1e293b",
+    inspectorCardBg: isLight ? "#f1f5f9" : "#162032",
+    inspectorCardBorder: isLight ? "#e2e8f0" : "#1e293b",
+  };
 
   // Filter schema tables (excluding sql console tabs)
   const schemaTables = useMemo(() => {
@@ -128,8 +182,8 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        background: "var(--bs-ui-canvas, #080c14)",
-        color: "#f8fafc",
+        background: t.canvasBg,
+        color: t.toolbarText,
         overflow: "hidden",
         position: "relative",
       }}
@@ -141,31 +195,31 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
           alignItems: "center",
           justifyContent: "space-between",
           padding: "10px 18px",
-          background: "#0f172a",
-          borderBottom: "1px solid #1e293b",
+          background: t.toolbarBg,
+          borderBottom: `1px solid ${t.toolbarBorder}`,
           zIndex: 20,
           gap: "12px",
           flexWrap: "wrap",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+          boxShadow: isLight ? "0 1px 3px rgba(0,0,0,0.05)" : "0 2px 8px rgba(0,0,0,0.3)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "32px", height: "32px", borderRadius: "8px", background: "rgba(56, 189, 248, 0.1)", border: "1px solid rgba(56, 189, 248, 0.2)" }}>
-            <Icon name="Flowchart" size={18} color="#38bdf8" />
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "32px", height: "32px", borderRadius: "8px", background: isLight ? "#e4f2ef" : "rgba(56, 189, 248, 0.1)", border: `1px solid ${isLight ? "#bce3dc" : "rgba(56, 189, 248, 0.2)"}` }}>
+            <Icon name="Flowchart" size={18} color={isLight ? "#0b6763" : "#38bdf8"} />
           </div>
           <div>
-            <div style={{ fontWeight: 700, fontSize: "0.925rem", color: "#f8fafc", lineHeight: 1.2 }}>
+            <div style={{ fontWeight: 700, fontSize: "0.925rem", color: t.toolbarText, lineHeight: 1.2 }}>
               Database ER Visualizer
             </div>
-            <div style={{ fontSize: "0.725rem", color: "#64748b" }}>
+            <div style={{ fontSize: "0.725rem", color: t.subtleText }}>
               Relational Architecture & Dependency Inspector
             </div>
           </div>
 
-          <Badge variant="subtle" size="sm" style={{ background: "#1e293b", color: "#38bdf8", border: "1px solid #334155", marginLeft: "8px" }}>
+          <Badge variant="subtle" size="sm" style={{ background: t.inputBg, color: isLight ? "#0b6763" : "#38bdf8", border: `1px solid ${t.inputBorder}`, marginLeft: "8px" }}>
             {schemaTables.length} Entities
           </Badge>
-          <Badge variant="subtle" size="sm" style={{ background: "#1e293b", color: "#a7f3d0", border: "1px solid #334155" }}>
+          <Badge variant="subtle" size="sm" style={{ background: t.inputBg, color: isLight ? "#15803d" : "#a7f3d0", border: `1px solid ${t.inputBorder}` }}>
             {relationships.length} Connectors
           </Badge>
         </div>
@@ -178,13 +232,13 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
               display: "flex",
               alignItems: "center",
               gap: "6px",
-              background: "#1e293b",
-              border: "1px solid #334155",
+              background: t.inputBg,
+              border: `1px solid ${t.inputBorder}`,
               borderRadius: "6px",
               padding: "5px 10px",
             }}
           >
-            <Icon name="Search" size={14} color="#94a3b8" />
+            <Icon name="Search" size={14} color={t.subtleText} />
             <input
               type="text"
               placeholder="Search table / column..."
@@ -194,7 +248,7 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
                 background: "transparent",
                 border: "none",
                 outline: "none",
-                color: "#f8fafc",
+                color: t.toolbarText,
                 fontSize: "0.8rem",
                 width: "150px",
               }}
@@ -202,7 +256,7 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
           </div>
 
           {/* Connection Lines Toggle */}
-          <div style={{ display: "flex", alignItems: "center", background: "#1e293b", borderRadius: "6px", border: "1px solid #334155", padding: "2px" }}>
+          <div style={{ display: "flex", alignItems: "center", background: t.inputBg, borderRadius: "6px", border: `1px solid ${t.inputBorder}`, padding: "2px" }}>
             <button
               type="button"
               onClick={() => setLinesMode("smart")}
@@ -213,7 +267,7 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
                 borderRadius: "4px",
                 border: "none",
                 background: linesMode === "smart" ? "var(--bs-ui-brand, #0b6763)" : "transparent",
-                color: linesMode === "smart" ? "#ffffff" : "#94a3b8",
+                color: linesMode === "smart" ? "#ffffff" : t.subtleText,
                 cursor: "pointer",
               }}
               title="Highlight relationship connectors on selection/hover"
@@ -230,7 +284,7 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
                 borderRadius: "4px",
                 border: "none",
                 background: linesMode === "all" ? "var(--bs-ui-brand, #0b6763)" : "transparent",
-                color: linesMode === "all" ? "#ffffff" : "#94a3b8",
+                color: linesMode === "all" ? "#ffffff" : t.subtleText,
                 cursor: "pointer",
               }}
               title="Show all connector lines"
@@ -247,7 +301,7 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
                 borderRadius: "4px",
                 border: "none",
                 background: linesMode === "none" ? "var(--bs-ui-brand, #0b6763)" : "transparent",
-                color: linesMode === "none" ? "#ffffff" : "#94a3b8",
+                color: linesMode === "none" ? "#ffffff" : t.subtleText,
                 cursor: "pointer",
               }}
               title="Hide connector lines"
@@ -257,7 +311,7 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
           </div>
 
           {/* View Mode Toggle */}
-          <div style={{ display: "flex", alignItems: "center", background: "#1e293b", borderRadius: "6px", border: "1px solid #334155", padding: "2px" }}>
+          <div style={{ display: "flex", alignItems: "center", background: t.inputBg, borderRadius: "6px", border: `1px solid ${t.inputBorder}`, padding: "2px" }}>
             <button
               type="button"
               onClick={() => setViewMode("detailed")}
@@ -267,8 +321,8 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
                 fontWeight: 600,
                 borderRadius: "4px",
                 border: "none",
-                background: viewMode === "detailed" ? "#0284c7" : "transparent",
-                color: viewMode === "detailed" ? "#ffffff" : "#94a3b8",
+                background: viewMode === "detailed" ? (isLight ? "#0b6763" : "#0284c7") : "transparent",
+                color: viewMode === "detailed" ? "#ffffff" : t.subtleText,
                 cursor: "pointer",
               }}
             >
@@ -283,8 +337,8 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
                 fontWeight: 600,
                 borderRadius: "4px",
                 border: "none",
-                background: viewMode === "compact" ? "#0284c7" : "transparent",
-                color: viewMode === "compact" ? "#ffffff" : "#94a3b8",
+                background: viewMode === "compact" ? (isLight ? "#0b6763" : "#0284c7") : "transparent",
+                color: viewMode === "compact" ? "#ffffff" : t.subtleText,
                 cursor: "pointer",
               }}
             >
@@ -292,21 +346,44 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
             </button>
           </div>
 
+          {/* Theme Mode Toggle (Light / Dark) */}
+          <button
+            type="button"
+            onClick={() => setTheme(isLight ? "dark" : "light")}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "5px",
+              padding: "5px 10px",
+              borderRadius: "6px",
+              background: t.inputBg,
+              border: `1px solid ${t.inputBorder}`,
+              color: t.toolbarText,
+              fontWeight: 600,
+              fontSize: "0.75rem",
+              cursor: "pointer",
+            }}
+            title="Toggle Light / Dark mode"
+          >
+            <Icon name={isLight ? "Moon" : "Sun"} size={14} />
+            <span>{isLight ? "Dark" : "Light"}</span>
+          </button>
+
           {/* Zoom Buttons */}
           <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
             <button
               type="button"
               onClick={() => setZoom((z) => Math.max(50, z - 10))}
-              style={{ background: "#1e293b", border: "1px solid #334155", color: "#94a3b8", padding: "5px 8px", borderRadius: "4px", cursor: "pointer" }}
+              style={{ background: t.inputBg, border: `1px solid ${t.inputBorder}`, color: t.subtleText, padding: "5px 8px", borderRadius: "4px", cursor: "pointer" }}
               title="Zoom out"
             >
               <Icon name="Remove" size={12} />
             </button>
-            <span style={{ fontSize: "0.75rem", color: "#94a3b8", minWidth: "38px", textAlign: "center" }}>{zoom}%</span>
+            <span style={{ fontSize: "0.75rem", color: t.subtleText, minWidth: "38px", textAlign: "center" }}>{zoom}%</span>
             <button
               type="button"
               onClick={() => setZoom((z) => Math.min(150, z + 10))}
-              style={{ background: "#1e293b", border: "1px solid #334155", color: "#94a3b8", padding: "5px 8px", borderRadius: "4px", cursor: "pointer" }}
+              style={{ background: t.inputBg, border: `1px solid ${t.inputBorder}`, color: t.subtleText, padding: "5px 8px", borderRadius: "4px", cursor: "pointer" }}
               title="Zoom in"
             >
               <Icon name="Add" size={12} />
@@ -314,7 +391,7 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
             <button
               type="button"
               onClick={() => setZoom(100)}
-              style={{ background: "#1e293b", border: "1px solid #334155", color: "#94a3b8", padding: "5px 8px", borderRadius: "4px", cursor: "pointer", fontSize: "0.75rem" }}
+              style={{ background: t.inputBg, border: `1px solid ${t.inputBorder}`, color: t.subtleText, padding: "5px 8px", borderRadius: "4px", cursor: "pointer", fontSize: "0.75rem" }}
             >
               Reset
             </button>
@@ -330,8 +407,8 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
             flex: 1,
             overflow: "auto",
             position: "relative",
-            background: "#0b0f19",
-            backgroundImage: "radial-gradient(rgba(148, 163, 184, 0.07) 1px, transparent 1px)",
+            background: t.canvasBg,
+            backgroundImage: `radial-gradient(${t.dotColor} 1px, transparent 1px)`,
             backgroundSize: "24px 24px",
           }}
         >
@@ -369,7 +446,7 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
                     markerHeight="7"
                     orient="auto-start-reverse"
                   >
-                    <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#38bdf8" />
+                    <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill={t.markerFill} />
                   </marker>
                   <marker
                     id="er-arrowhead-active"
@@ -380,7 +457,7 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
                     markerHeight="8"
                     orient="auto-start-reverse"
                   >
-                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#f59e0b" />
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill={t.markerActiveFill} />
                   </marker>
                 </defs>
 
@@ -396,15 +473,14 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
 
                   const isHighlighted = isRelatedToSelected || isRelatedToHovered || isExactColHovered;
 
-                  // If smart connectors mode and nothing selected/hovered -> render subtle lines
                   const opacity =
                     linesMode === "all"
                       ? isHighlighted ? 1 : 0.6
-                      : isHighlighted ? 1 : (selectedTableId || hoveredTableId) ? 0.08 : 0.4;
+                      : isHighlighted ? 1 : (selectedTableId || hoveredTableId) ? 0.08 : 0.45;
 
                   const strokeColor = isHighlighted
-                    ? isExactColHovered ? "#f59e0b" : "#38bdf8"
-                    : "#475569";
+                    ? isExactColHovered ? t.strokeHovered : t.strokeHighlighted
+                    : t.strokeNormal;
 
                   const strokeWidth = isHighlighted ? 3 : 1.5;
 
@@ -433,13 +509,14 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
                         <text
                           x={(rel.x1 + rel.x2) / 2}
                           y={(rel.y1 + rel.y2) / 2 - 8}
-                          fill="#38bdf8"
+                          fill={t.strokeHighlighted}
                           fontSize="11"
                           fontWeight="700"
                           textAnchor="middle"
                           style={{
-                            background: "#0f172a",
-                            textShadow: "0 1px 4px rgba(0,0,0,0.8)",
+                            textShadow: isLight
+                              ? "0 1px 3px rgba(255,255,255,0.9)"
+                              : "0 1px 4px rgba(0,0,0,0.8)",
                           }}
                         >
                           {rel.fromCol} → {rel.toTable}
@@ -476,18 +553,18 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
                     left: `${pos.x}px`,
                     top: `${pos.y}px`,
                     width: `${pos.width}px`,
-                    background: "#0f172a",
+                    background: t.cardBg,
                     borderRadius: "10px",
                     border: isSelected
-                      ? "2px solid #38bdf8"
+                      ? `2px solid ${t.cardBorderSelected}`
                       : isHovered
-                      ? "1px solid #0284c7"
-                      : "1px solid #1e293b",
+                      ? `1px solid ${t.cardBorderHover}`
+                      : `1px solid ${t.cardBorder}`,
                     boxShadow: isSelected
-                      ? "0 0 20px rgba(56, 189, 248, 0.3)"
+                      ? t.cardShadowSelected
                       : isHovered
-                      ? "0 4px 16px rgba(2, 132, 199, 0.2)"
-                      : "0 4px 12px rgba(0,0,0,0.4)",
+                      ? t.cardShadow
+                      : t.cardShadow,
                     overflow: "hidden",
                     cursor: "pointer",
                     transition: "border 0.15s ease, box-shadow 0.15s ease",
@@ -499,25 +576,25 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
                     style={{
                       padding: "10px 14px",
                       background: isSelected
-                        ? "linear-gradient(90deg, #1e293b, #0f172a)"
+                        ? t.cardHeaderSelectedBg
                         : isHovered
-                        ? "#162032"
-                        : "#111827",
-                      borderBottom: "1px solid #1e293b",
+                        ? isLight ? "#f1f5f9" : "#162032"
+                        : t.cardHeaderBg,
+                      borderBottom: `1px solid ${t.cardBorder}`,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
                     }}
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      <Icon name={table.icon || "Database"} size={16} color="#38bdf8" />
-                      <span style={{ fontWeight: 700, fontSize: "0.875rem", color: "#f8fafc" }}>
+                      <Icon name={table.icon || "Database"} size={16} color={isLight ? "#0b6763" : "#38bdf8"} />
+                      <span style={{ fontWeight: 700, fontSize: "0.875rem", color: t.cardTitle }}>
                         {table.name}
                       </span>
                     </div>
 
                     <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                      <span style={{ fontSize: "0.7rem", color: "#94a3b8", background: "#1e293b", padding: "2px 6px", borderRadius: "4px" }}>
+                      <span style={{ fontSize: "0.7rem", color: t.subtleText, background: t.inputBg, padding: "2px 6px", borderRadius: "4px" }}>
                         {table.columns?.length || 0} cols
                       </span>
                     </div>
@@ -542,33 +619,33 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
                               justifyContent: "space-between",
                               padding: "5px 14px",
                               fontSize: "0.78rem",
-                              background: isColHovered ? "rgba(56, 189, 248, 0.1)" : "transparent",
-                              borderBottom: "1px solid rgba(255,255,255,0.03)",
+                              background: isColHovered ? t.colRowHover : "transparent",
+                              borderBottom: `1px solid ${t.colRowBorder}`,
                               transition: "background 0.1s ease",
                             }}
                           >
                             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                               {col.primaryKey && (
-                                <span style={{ background: "#fbbf24", color: "#78350f", fontWeight: 800, fontSize: "0.6rem", padding: "1px 4px", borderRadius: "3px" }}>
+                                <span style={{ background: t.pkBg, color: t.pkColor, fontWeight: 800, fontSize: "0.6rem", padding: "1px 4px", borderRadius: "3px" }}>
                                   PK
                                 </span>
                               )}
                               {isFk && (
-                                <span style={{ background: "#38bdf8", color: "#0c4a6e", fontWeight: 800, fontSize: "0.6rem", padding: "1px 4px", borderRadius: "3px" }}>
+                                <span style={{ background: t.fkBg, color: t.fkColor, fontWeight: 800, fontSize: "0.6rem", padding: "1px 4px", borderRadius: "3px" }}>
                                   FK
                                 </span>
                               )}
-                              <span style={{ color: col.primaryKey ? "#fde68a" : isFk ? "#7dd3fc" : "#e2e8f0", fontWeight: col.primaryKey ? 600 : 400 }}>
+                              <span style={{ color: col.primaryKey ? (isLight ? "#92400e" : "#fde68a") : isFk ? (isLight ? "#0369a1" : "#7dd3fc") : t.colName, fontWeight: col.primaryKey ? 600 : 400 }}>
                                 {col.name}
                               </span>
                             </div>
 
                             <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                              <span style={{ fontSize: "0.7rem", color: "#64748b", fontFamily: "monospace" }}>
+                              <span style={{ fontSize: "0.7rem", color: t.colType, fontFamily: "monospace" }}>
                                 {col.type}
                               </span>
                               {col.nullable && (
-                                <span style={{ fontSize: "0.65rem", color: "#475569" }} title="Nullable">?</span>
+                                <span style={{ fontSize: "0.65rem", color: t.subtleText }} title="Nullable">?</span>
                               )}
                             </div>
                           </div>
@@ -579,10 +656,10 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
 
                   {/* Card Footer Relations Bar */}
                   {tableRel.length > 0 && (
-                    <div style={{ padding: "6px 14px", background: "#080e1a", borderTop: "1px solid #1e293b", fontSize: "0.7rem", color: "#94a3b8", display: "flex", gap: "6px", flexWrap: "wrap", alignItems: "center" }}>
-                      <span style={{ fontWeight: 600, color: "#64748b" }}>Refs:</span>
+                    <div style={{ padding: "6px 14px", background: isLight ? "#f8fafc" : "#080e1a", borderTop: `1px solid ${t.cardBorder}`, fontSize: "0.7rem", color: t.subtleText, display: "flex", gap: "6px", flexWrap: "wrap", alignItems: "center" }}>
+                      <span style={{ fontWeight: 600, color: t.subtleText }}>Refs:</span>
                       {tableRel.map((r, i) => (
-                        <span key={i} style={{ color: r.fromTable === table.name ? "#38bdf8" : "#a7f3d0", fontWeight: 500 }}>
+                        <span key={i} style={{ color: r.fromTable === table.name ? (isLight ? "#0b6763" : "#38bdf8") : (isLight ? "#15803d" : "#a7f3d0"), fontWeight: 500 }}>
                           {r.fromTable === table.name ? `→ ${r.toTable}` : `← ${r.fromTable}`}
                         </span>
                       ))}
@@ -599,23 +676,23 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
           <div
             style={{
               width: "320px",
-              background: "#0f172a",
-              borderLeft: "1px solid #1e293b",
+              background: t.inspectorBg,
+              borderLeft: `1px solid ${t.inspectorBorder}`,
               display: "flex",
               flexDirection: "column",
               zIndex: 25,
-              boxShadow: "-4px 0 16px rgba(0,0,0,0.4)",
+              boxShadow: isLight ? "-4px 0 16px rgba(15, 23, 42, 0.08)" : "-4px 0 16px rgba(0,0,0,0.4)",
             }}
           >
             {/* Inspector Header */}
-            <div style={{ padding: "14px 16px", background: "#1e293b", borderBottom: "1px solid #334155", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ padding: "14px 16px", background: t.inspectorHeaderBg, borderBottom: `1px solid ${t.inspectorBorder}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <Icon name={activeTable.icon || "Database"} size={18} color="#38bdf8" />
+                <Icon name={activeTable.icon || "Database"} size={18} color={isLight ? "#0b6763" : "#38bdf8"} />
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: "0.95rem", color: "#f8fafc" }}>
+                  <div style={{ fontWeight: 700, fontSize: "0.95rem", color: t.toolbarText }}>
                     {activeTable.name}
                   </div>
-                  <div style={{ fontSize: "0.725rem", color: "#64748b" }}>
+                  <div style={{ fontSize: "0.725rem", color: t.subtleText }}>
                     Schema: {activeTable.schema}
                   </div>
                 </div>
@@ -624,7 +701,7 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
               <button
                 type="button"
                 onClick={() => setSelectedTableId(null)}
-                style={{ background: "transparent", border: "none", color: "#94a3b8", cursor: "pointer", padding: "4px" }}
+                style={{ background: "transparent", border: "none", color: t.subtleText, cursor: "pointer", padding: "4px" }}
               >
                 <Icon name="Close" size={16} />
               </button>
@@ -634,23 +711,23 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
             <div style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column", gap: "16px" }}>
               {/* Quick Metrics */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-                <div style={{ padding: "10px", background: "#162032", borderRadius: "6px", border: "1px solid #1e293b" }}>
-                  <div style={{ fontSize: "0.7rem", color: "#64748b" }}>Total Columns</div>
-                  <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "#38bdf8" }}>{activeTable.columns?.length || 0}</div>
+                <div style={{ padding: "10px", background: t.inspectorCardBg, borderRadius: "6px", border: `1px solid ${t.inspectorCardBorder}` }}>
+                  <div style={{ fontSize: "0.7rem", color: t.subtleText }}>Total Columns</div>
+                  <div style={{ fontSize: "1.1rem", fontWeight: 700, color: isLight ? "#0b6763" : "#38bdf8" }}>{activeTable.columns?.length || 0}</div>
                 </div>
-                <div style={{ padding: "10px", background: "#162032", borderRadius: "6px", border: "1px solid #1e293b" }}>
-                  <div style={{ fontSize: "0.7rem", color: "#64748b" }}>Record Count</div>
-                  <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "#a7f3d0" }}>{activeTable.rowCount ?? 0}</div>
+                <div style={{ padding: "10px", background: t.inspectorCardBg, borderRadius: "6px", border: `1px solid ${t.inspectorCardBorder}` }}>
+                  <div style={{ fontSize: "0.7rem", color: t.subtleText }}>Record Count</div>
+                  <div style={{ fontSize: "1.1rem", fontWeight: 700, color: isLight ? "#15803d" : "#a7f3d0" }}>{activeTable.rowCount ?? 0}</div>
                 </div>
               </div>
 
               {/* Inbound & Outbound Relationships */}
               <div>
-                <div style={{ fontSize: "0.8rem", fontWeight: 600, color: "#cbd5e1", marginBottom: "8px" }}>
+                <div style={{ fontSize: "0.8rem", fontWeight: 600, color: t.toolbarText, marginBottom: "8px" }}>
                   Connected Relationships
                 </div>
                 {relationships.filter(r => r.fromTable === activeTable.name || r.toTable === activeTable.name).length === 0 ? (
-                  <div style={{ fontSize: "0.78rem", color: "#64748b", fontStyle: "italic" }}>
+                  <div style={{ fontSize: "0.78rem", color: t.subtleText, fontStyle: "italic" }}>
                     No foreign key relationships detected for this entity.
                   </div>
                 ) : (
@@ -662,9 +739,9 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
                           key={idx}
                           style={{
                             padding: "8px 10px",
-                            background: "#162032",
+                            background: t.inspectorCardBg,
                             borderRadius: "6px",
-                            border: "1px solid #1e293b",
+                            border: `1px solid ${t.inspectorCardBorder}`,
                             fontSize: "0.78rem",
                             display: "flex",
                             alignItems: "center",
@@ -672,11 +749,11 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
                           }}
                         >
                           <div>
-                            <span style={{ color: rel.fromTable === activeTable.name ? "#38bdf8" : "#a7f3d0", fontWeight: 600 }}>
+                            <span style={{ color: rel.fromTable === activeTable.name ? (isLight ? "#0b6763" : "#38bdf8") : (isLight ? "#15803d" : "#a7f3d0"), fontWeight: 600 }}>
                               {rel.fromTable === activeTable.name ? `FK: ${rel.fromCol}` : `Referenced By: ${rel.fromTable}`}
                             </span>
                           </div>
-                          <span style={{ color: "#94a3b8" }}>
+                          <span style={{ color: t.subtleText }}>
                             → {rel.toTable}
                           </span>
                         </div>
@@ -687,7 +764,7 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
 
               {/* Column Specification Table */}
               <div>
-                <div style={{ fontSize: "0.8rem", fontWeight: 600, color: "#cbd5e1", marginBottom: "8px" }}>
+                <div style={{ fontSize: "0.8rem", fontWeight: 600, color: t.toolbarText, marginBottom: "8px" }}>
                   Schema Columns
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
@@ -696,7 +773,7 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
                       key={col.name}
                       style={{
                         padding: "6px 10px",
-                        background: "#162032",
+                        background: t.inspectorCardBg,
                         borderRadius: "4px",
                         fontSize: "0.75rem",
                         display: "flex",
@@ -704,10 +781,10 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
                         justifyContent: "space-between",
                       }}
                     >
-                      <span style={{ color: col.primaryKey ? "#fde68a" : "#e2e8f0", fontWeight: col.primaryKey ? 600 : 400 }}>
+                      <span style={{ color: col.primaryKey ? (isLight ? "#92400e" : "#fde68a") : t.colName, fontWeight: col.primaryKey ? 600 : 400 }}>
                         {col.name}
                       </span>
-                      <span style={{ color: "#64748b", fontFamily: "monospace" }}>
+                      <span style={{ color: t.subtleText, fontFamily: "monospace" }}>
                         {col.type}
                       </span>
                     </div>
