@@ -23,6 +23,11 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
     initialNodeY: number;
   } | null>(null);
 
+  // Canvas Panning State
+  const [panOffset, setPanOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isPanningCanvas, setIsPanningCanvas] = useState<boolean>(false);
+  const [panStart, setPanStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+
   const isLight = theme === "light";
 
   const t = {
@@ -130,10 +135,32 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
     });
 
     setNodePositions(resetPos);
+    setPanOffset({ x: 0, y: 0 });
+    setZoom(100);
   };
 
-  // Drag handlers
-  const handleMouseDown = (e: React.MouseEvent, tableName: string) => {
+  const handleAutoFocus = () => {
+    setPanOffset({ x: 0, y: 0 });
+    setZoom(100);
+  };
+
+  // Canvas Panning & Card Dragging Mouse Handlers
+  const handleCanvasMouseDown = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (
+      target.tagName === "DIV" ||
+      target.tagName === "SVG" ||
+      target.tagName === "path"
+    ) {
+      setIsPanningCanvas(true);
+      setPanStart({
+        x: e.clientX - panOffset.x,
+        y: e.clientY - panOffset.y,
+      });
+    }
+  };
+
+  const handleCardMouseDown = (e: React.MouseEvent, tableName: string) => {
     e.stopPropagation();
     const current = nodePositions[tableName] || { x: 40, y: 40 };
     setDragState({
@@ -146,24 +173,32 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!dragState) return;
-    const scale = zoom / 100;
-    const deltaX = (e.clientX - dragState.startX) / scale;
-    const deltaY = (e.clientY - dragState.startY) / scale;
+    if (isPanningCanvas) {
+      setPanOffset({
+        x: e.clientX - panStart.x,
+        y: e.clientY - panStart.y,
+      });
+      return;
+    }
 
-    const newX = Math.max(10, dragState.initialNodeX + deltaX);
-    const newY = Math.max(10, dragState.initialNodeY + deltaY);
+    if (dragState) {
+      const scale = zoom / 100;
+      const deltaX = (e.clientX - dragState.startX) / scale;
+      const deltaY = (e.clientY - dragState.startY) / scale;
 
-    setNodePositions((prev) => ({
-      ...prev,
-      [dragState.tableName]: { x: newX, y: newY },
-    }));
+      const newX = Math.max(10, dragState.initialNodeX + deltaX);
+      const newY = Math.max(10, dragState.initialNodeY + deltaY);
+
+      setNodePositions((prev) => ({
+        ...prev,
+        [dragState.tableName]: { x: newX, y: newY },
+      }));
+    }
   };
 
   const handleMouseUp = () => {
-    if (dragState) {
-      setDragState(null);
-    }
+    if (isPanningCanvas) setIsPanningCanvas(false);
+    if (dragState) setDragState(null);
   };
 
   // Compute 2D positions for entity nodes
@@ -303,7 +338,7 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
               Database ER Visualizer
             </div>
             <div style={{ fontSize: "0.725rem", color: t.subtleText }}>
-              Draggable Architecture Nodes & Connector Lines
+              Pan Canvas • Drag Entity Nodes • Auto-Focus View
             </div>
           </div>
 
@@ -341,7 +376,7 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
                 outline: "none",
                 color: t.toolbarText,
                 fontSize: "0.8rem",
-                width: "150px",
+                width: "140px",
               }}
             />
           </div>
@@ -437,6 +472,29 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
             </button>
           </div>
 
+          {/* Auto-Focus View Button */}
+          <button
+            type="button"
+            onClick={handleAutoFocus}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "4px",
+              padding: "5px 10px",
+              borderRadius: "6px",
+              background: isLight ? "#e4f2ef" : "rgba(56, 189, 248, 0.1)",
+              border: `1px solid ${isLight ? "#bce3dc" : "rgba(56, 189, 248, 0.3)"}`,
+              color: isLight ? "#0b6763" : "#38bdf8",
+              fontWeight: 700,
+              fontSize: "0.75rem",
+              cursor: "pointer",
+            }}
+            title="Center and reset canvas view"
+          >
+            <Icon name="Maximize" size={14} />
+            <span>Auto Focus</span>
+          </button>
+
           {/* Reset Layout */}
           <button
             type="button"
@@ -502,13 +560,6 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
             >
               <Icon name="Add" size={12} />
             </button>
-            <button
-              type="button"
-              onClick={() => setZoom(100)}
-              style={{ background: t.inputBg, border: `1px solid ${t.inputBorder}`, color: t.subtleText, padding: "5px 8px", borderRadius: "4px", cursor: "pointer", fontSize: "0.75rem" }}
-            >
-              Reset
-            </button>
           </div>
         </div>
       </div>
@@ -517,6 +568,7 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
       <div style={{ flex: 1, display: "flex", overflow: "hidden", position: "relative" }}>
         {/* Scrollable Diagram Surface */}
         <div
+          onMouseDown={handleCanvasMouseDown}
           style={{
             flex: 1,
             overflow: "auto",
@@ -524,6 +576,8 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
             background: t.canvasBg,
             backgroundImage: `radial-gradient(${t.dotColor} 1px, transparent 1px)`,
             backgroundSize: "24px 24px",
+            backgroundPosition: `${panOffset.x}px ${panOffset.y}px`,
+            cursor: isPanningCanvas ? "grabbing" : "grab",
           }}
         >
           <div
@@ -531,9 +585,9 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
               width: `${totalWidth}px`,
               height: `${totalHeight}px`,
               position: "relative",
-              transform: `scale(${zoom / 100})`,
+              transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom / 100})`,
               transformOrigin: "top left",
-              transition: dragState ? "none" : "transform 0.1s ease-out",
+              transition: dragState || isPanningCanvas ? "none" : "transform 0.15s ease-out",
             }}
           >
             {/* SVG Connection Lines Overlay */}
@@ -608,7 +662,7 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
                   const pathD = `M ${rel.x1} ${rel.y1} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${rel.x2} ${rel.y2}`;
 
                   return (
-                    <g key={rel.id} style={{ opacity, transition: dragState ? "none" : "opacity 0.2s ease" }}>
+                    <g key={rel.id} style={{ opacity, transition: dragState || isPanningCanvas ? "none" : "opacity 0.2s ease" }}>
                       <path
                         d={pathD}
                         fill="none"
@@ -686,13 +740,13 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
                       : t.cardShadow,
                     overflow: "hidden",
                     cursor: "pointer",
-                    transition: isDragging ? "none" : "border 0.15s ease, box-shadow 0.15s ease",
+                    transition: isDragging || isPanningCanvas ? "none" : "border 0.15s ease, box-shadow 0.15s ease",
                     zIndex: isDragging ? 30 : isSelected ? 15 : isHovered ? 12 : 10,
                   }}
                 >
                   {/* Card Header (Drag Handle) */}
                   <div
-                    onMouseDown={(e) => handleMouseDown(e, table.name)}
+                    onMouseDown={(e) => handleCardMouseDown(e, table.name)}
                     style={{
                       padding: "10px 14px",
                       background: isSelected
