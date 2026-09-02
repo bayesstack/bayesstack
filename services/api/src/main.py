@@ -1,17 +1,45 @@
 """Single FastAPI server for the BayesStack modular monolith."""
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import text, select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.config import settings
-from core.database import engine, ensure_database_exists, get_db
-from core.middleware import TenantMiddleware, get_optional_tenant, get_current_tenant
-from db.models import Tenant
+from core.database import ensure_database_exists
+from core.middleware import TenantMiddleware
+
 from auth.router import router as auth_router
 from db_explorer import db_explorer_router
+from routers.crud import crud_router
+from routers.health import router as health_router
+from routers.tenants import router as tenants_router
+
+tags_metadata = [
+    {
+        "name": "Health",
+        "description": "System status, health probes, and runtime environment checks.",
+    },
+    {
+        "name": "Auth",
+        "description": "Multi-tenant authentication, session management, and SuperAdmin login control plane.",
+    },
+    {
+        "name": "Tenants",
+        "description": "Institutional tenant discovery, host resolution, and branding metadata services.",
+    },
+    {
+        "name": "Universal CRUD - Tenants",
+        "description": "Universal CRUD operations endpoint generator for `Tenant` models.",
+    },
+    {
+        "name": "Universal CRUD - Users",
+        "description": "Universal CRUD operations endpoint generator for `User` models.",
+    },
+    {
+        "name": "Database Explorer",
+        "description": "SuperAdmin studio database schema inspection and metadata discovery.",
+    },
+]
 
 
 @asynccontextmanager
@@ -22,9 +50,24 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title=settings.PROJECT_NAME,
+    title="BayesStack Core Monolith API",
+    description=(
+        "Universal API Monolith serving multi-tenant host routing, authentication, "
+        "academic hierarchy, and database studio for the BayesStack AI learning platform."
+    ),
     version=settings.VERSION,
+    openapi_tags=tags_metadata,
+    contact={
+        "name": "BayesStack Engineering Team",
+        "url": "https://bayesstack.com",
+    },
+    license_info={
+        "name": "MIT License",
+    },
     lifespan=lifespan,
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json",
 )
 
 # Enable CORS supporting localhost and production institutional domain patterns
@@ -39,81 +82,9 @@ app.add_middleware(
 # Register request-hostname multi-tenant resolution middleware
 app.add_middleware(TenantMiddleware)
 
-# Register routers
+# Register modular routers
+app.include_router(health_router)
+app.include_router(tenants_router)
 app.include_router(auth_router)
+app.include_router(crud_router)
 app.include_router(db_explorer_router)
-
-
-@app.get("/health")
-async def health(request: Request, tenant: Tenant | None = Depends(get_optional_tenant)):
-    """Health check endpoint checking API operational status, database, and tenant context."""
-    db_status = "disconnected"
-    try:
-        async with engine.connect() as conn:
-            await conn.execute(text("SELECT 1"))
-            db_status = "connected"
-    except Exception as exc:
-        db_status = f"unreachable ({type(exc).__name__})"
-
-    return {
-        "service": "api",
-        "status": "ok",
-        "database": db_status,
-        "environment": settings.BAYESSTACK_ENV,
-        "tenant_id": tenant.id if tenant else None,
-        "tenant_slug": tenant.slug if tenant else None,
-        "request_host": request.headers.get("host"),
-    }
-
-
-@app.get("/api/tenant-config")
-async def get_tenant_config(tenant: Tenant | None = Depends(get_optional_tenant)):
-    """Return institutional tenant configuration based on request hostname resolution."""
-    if not tenant:
-        return {
-            "is_tenant": False,
-            "tenant": None,
-            "message": "Root platform context",
-            "allowed_base_domains": settings.parsed_base_domains,
-        }
-
-    return {
-        "is_tenant": True,
-        "tenant": tenant.to_dict(),
-        "branding": tenant.branding,
-    }
-
-
-@app.get("/api/tenants")
-async def list_tenants(db: AsyncSession = Depends(get_db)):
-    """List all active institutional tenants on the platform."""
-    stmt = select(Tenant).where(Tenant.is_active == True)
-    result = await db.execute(stmt)
-    tenants = result.scalars().all()
-    return {
-        "tenants": [t.to_dict() for t in tenants]
-    }
-
-
-@app.get("/api/me")
-async def get_me(tenant: Tenant | None = Depends(get_optional_tenant)):
-    """Return user context bound to the active resolved tenant."""
-    if not tenant:
-        return {
-            "authenticated": False,
-            "tenant": None,
-            "user": None,
-        }
-
-    return {
-        "authenticated": True,
-        "tenant_id": tenant.id,
-        "tenant_slug": tenant.slug,
-        "tenant_name": tenant.name,
-        "user": {
-            "id": "usr_demo_001",
-            "name": "Alex Vance",
-            "email": f"alex@{tenant.slug}.edu",
-            "role": "learner",
-        },
-    }

@@ -1,13 +1,12 @@
 """Authentication Router for BayesStack API."""
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
-from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from core.database import get_db
-from db.models import User, Tenant
+from db.models import User
 from auth.security import verify_password
 from auth.session import (
     SESSION_COOKIE_NAME,
@@ -16,32 +15,29 @@ from auth.session import (
     set_session_cookie,
     clear_session_cookie,
 )
+from schemas.auth import (
+    LoginRequest,
+    LoginResponse,
+    LoginResponseUser,
+    LogoutResponse,
+    SessionUserResponse,
+    SuperLoginResponse,
+)
+from schemas.common import ErrorResponse
 
-router = APIRouter(prefix="/api/auth", tags=["auth"])
-
-
-class LoginRequest(BaseModel):
-    email: str
-    password: str
-
-
-class LoginResponseUser(BaseModel):
-    id: str
-    email: str
-    full_name: str
-    role: str
-    tenant_slug: str
-    tenant_name: str
+router = APIRouter(prefix="/api/auth", tags=["Auth"])
 
 
-class SuperLoginResponse(BaseModel):
-    status: str
-    message: str
-    token: str
-    user: LoginResponseUser
-
-
-@router.post("/super-login", response_model=SuperLoginResponse)
+@router.post(
+    "/super-login",
+    response_model=SuperLoginResponse,
+    summary="SuperAdmin Portal Login",
+    description="Authenticate platform SuperAdmin accounts, returning a JWT token and setting an HttpOnly session cookie scoped to host.",
+    responses={
+        401: {"model": ErrorResponse, "description": "Invalid SuperAdmin credentials provided."},
+        403: {"model": ErrorResponse, "description": "Access denied due to insufficient privileges or inactive status."},
+    },
+)
 async def super_login(
     credentials: LoginRequest,
     request: Request,
@@ -103,7 +99,16 @@ async def super_login(
     )
 
 
-@router.post("/login")
+@router.post(
+    "/login",
+    response_model=LoginResponse,
+    summary="Tenant Portal Login",
+    description="General user authentication for learner, faculty, or institutional admin portals with HttpOnly session cookie attachment.",
+    responses={
+        401: {"model": ErrorResponse, "description": "Invalid credentials provided."},
+        403: {"model": ErrorResponse, "description": "Account is inactive."},
+    },
+)
 async def login(
     credentials: LoginRequest,
     request: Request,
@@ -138,41 +143,46 @@ async def login(
 
     set_session_cookie(response, token, request.headers.get("host"))
 
-    return {
-        "status": "success",
-        "message": f"Welcome back, {user.full_name}!",
-        "token": token,
-        "user": user.to_dict(),
-    }
+    return LoginResponse(
+        status="success",
+        message=f"Welcome back, {user.full_name}!",
+        token=token,
+        user=user.to_dict(),
+    )
 
 
-@router.get("/me")
+@router.get(
+    "/me",
+    response_model=SessionUserResponse,
+    summary="Validate Session & Retrieve Active User Profile",
+    description="Validate active session cookie or Bearer authorization header token and return user profile details.",
+)
 async def get_current_user_session(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
     """Validate current session cookie or Bearer token and return active user profile."""
     token = request.cookies.get(SESSION_COOKIE_NAME)
-    
+
     if not token:
         auth_header = request.headers.get("Authorization")
         if auth_header and auth_header.startswith("Bearer "):
             token = auth_header.split(" ", 1)[1]
 
     if not token:
-        return {
-            "authenticated": False,
-            "user": None,
-            "message": "No active session cookie or authorization header found.",
-        }
+        return SessionUserResponse(
+            authenticated=False,
+            user=None,
+            message="No active session cookie or authorization header found.",
+        )
 
     payload = verify_session_token(token)
     if not payload or "sub" not in payload:
-        return {
-            "authenticated": False,
-            "user": None,
-            "message": "Invalid or expired session token.",
-        }
+        return SessionUserResponse(
+            authenticated=False,
+            user=None,
+            message="Invalid or expired session token.",
+        )
 
     user_id = payload["sub"]
     result = await db.execute(
@@ -181,23 +191,28 @@ async def get_current_user_session(
     user = result.scalar_one_or_none()
 
     if not user or not user.is_active:
-        return {
-            "authenticated": False,
-            "user": None,
-            "message": "User session is invalid or account is disabled.",
-        }
+        return SessionUserResponse(
+            authenticated=False,
+            user=None,
+            message="User session is invalid or account is disabled.",
+        )
 
-    return {
-        "authenticated": True,
-        "user": user.to_dict(),
-    }
+    return SessionUserResponse(
+        authenticated=True,
+        user=user.to_dict(),
+    )
 
 
-@router.post("/logout")
+@router.post(
+    "/logout",
+    response_model=LogoutResponse,
+    summary="Log Out Active User",
+    description="Logs out the current user session and clears the HttpOnly session cookie.",
+)
 async def logout(request: Request, response: Response):
     """Log out current user and clear session cookie."""
     clear_session_cookie(response, request.headers.get("host"))
-    return {
-        "status": "success",
-        "message": "Successfully logged out.",
-    }
+    return LogoutResponse(
+        status="success",
+        message="Successfully logged out.",
+    )

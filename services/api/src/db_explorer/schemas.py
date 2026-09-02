@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ColumnSchema(BaseModel):
@@ -20,8 +20,7 @@ class TableSchema(BaseModel):
     icon: Optional[str] = "Database"
     columns: List[ColumnSchema] = []
 
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class DbExplorerResponse(BaseModel):
