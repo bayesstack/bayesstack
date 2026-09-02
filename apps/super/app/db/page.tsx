@@ -7,6 +7,7 @@ import { bayesStackDbRibbonTabs } from "../../config/ribbons";
 import { useDatabaseExplorer } from "./hooks/useDatabaseExplorer";
 import { TableDataGrid } from "./components/TableDataGrid";
 import { SqlQueryConsole } from "./components/SqlQueryConsole";
+import { ErDiagramViewer } from "./components/ErDiagramViewer";
 import {
   DatabasePlaceholdersModal,
   getRibbonPlaceholderModalConfig,
@@ -20,6 +21,7 @@ export default function BayesStackDbPage() {
     selectedTableId,
     dbEngine,
     handleCreateNewQuery,
+    handleCreateErDiagram,
     handleTabRename,
   } = useDatabaseExplorer();
 
@@ -32,6 +34,8 @@ export default function BayesStackDbPage() {
   const handleRibbonAction = (actionId: string) => {
     if (actionId === "queryEditor") {
       handleCreateNewQuery();
+    } else if (actionId === "erDiagram") {
+      handleCreateErDiagram();
     } else {
       setModalConfig(getRibbonPlaceholderModalConfig(actionId));
     }
@@ -70,6 +74,9 @@ export default function BayesStackDbPage() {
           {(activeTable) => {
             if (activeTable?.schema === "sql" || activeTable?.id.startsWith("query-editor")) {
               return <SqlQueryConsole dbEngine={dbEngine} />;
+            }
+            if (activeTable?.schema === "er_diagram" || activeTable?.id.startsWith("er-diagram")) {
+              return <ErDiagramViewer tables={tables} />;
             }
             return <TableDataGrid activeTable={activeTable} />;
           }}

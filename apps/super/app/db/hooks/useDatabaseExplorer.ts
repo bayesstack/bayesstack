@@ -79,12 +79,38 @@ export function useDatabaseExplorer() {
     );
   };
 
+  const handleCreateErDiagram = () => {
+    const erDiagramTab: DbTable = {
+      id: "er-diagram-viewer",
+      name: "ER Diagram",
+      schema: "er_diagram",
+      icon: "Flowchart",
+      description: "Interactive Schema ER Diagram",
+    };
+
+    setTables((prev) => {
+      const exists = prev.some((t) => t.id === erDiagramTab.id);
+      if (!exists) return [erDiagramTab, ...prev];
+      return prev;
+    });
+
+    setOpenedTableIds((prev) => {
+      if (!prev.includes(erDiagramTab.id)) {
+        return [...prev, erDiagramTab.id];
+      }
+      return prev;
+    });
+
+    setSelectedTableId(erDiagramTab.id);
+  };
+
   return {
     tables,
     openedTableIds,
     selectedTableId,
     dbEngine,
     handleCreateNewQuery,
+    handleCreateErDiagram,
     handleTabRename,
   };
 }
