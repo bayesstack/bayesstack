@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BayesStackLogo } from "@bayesstack/assets";
 import {
   Button,
@@ -17,14 +17,30 @@ import {
   type SpotlightActionItem,
 } from "@bayesstack/ui";
 
+import { useTenant } from "@bayesstack/tenant";
+
 export default function AdminPage() {
+  const { tenant, tenantSlug, isTenant } = useTenant();
   const [spotlightOpen, setSpotlightOpen] = useState(false);
   const [securityModalOpen, setSecurityModalOpen] = useState(false);
+  const [adminName, setAdminName] = useState("Bayes Administrator");
   const { showToast } = useToast();
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("bayes_user");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed.full_name) setAdminName(parsed.full_name);
+        } catch (e) {}
+      }
+    }
+  }, []);
+
   const sampleUsers = [
-    { id: "USR-101", name: "Dr. Elena Rostova", email: "elena.rostova@bayesstack.edu", role: "Faculty Lead", status: "Active", courses: 4, telemetry: "99.8%" },
-    { id: "USR-102", name: "Marcus Vance", email: "marcus.vance@bayesstack.edu", role: "Graduate Student", status: "Active", courses: 6, telemetry: "97.4%" },
+    { id: "USR-101", name: "Prof. Alan Bayes", email: "faculty@bayes.edu", role: "Faculty Lead", status: "Active", courses: 4, telemetry: "99.8%" },
+    { id: "USR-102", name: "Bayes Institute Learner", email: "learner@bayes.edu", role: "Graduate Student", status: "Active", courses: 6, telemetry: "97.4%" },
     { id: "USR-103", name: "Sophia Chen", email: "sophia.chen@bayesstack.edu", role: "System Admin", status: "Active", courses: 12, telemetry: "100%" },
     { id: "USR-104", name: "Devon Miller", email: "devon.miller@bayesstack.edu", role: "Research Associate", status: "Offline", courses: 2, telemetry: "94.1%" },
     { id: "USR-105", name: "Claire Dupont", email: "claire.dupont@bayesstack.edu", role: "Adjunct Faculty", status: "Active", courses: 3, telemetry: "98.9%" },
@@ -62,6 +78,27 @@ export default function AdminPage() {
     });
   };
 
+  const handleLogout = async () => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    try {
+      await fetch(`${apiUrl}/api/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (err) {}
+    localStorage.removeItem("bayes_auth_token");
+    localStorage.removeItem("bayes_user");
+
+    if (typeof window !== "undefined") {
+      const host = window.location.hostname;
+      const isLocal = host.endsWith(".localhost") || host === "localhost";
+      const slug = tenantSlug || "bayes";
+      window.location.href = isLocal
+        ? `http://${slug}.localhost:3004`
+        : `https://${slug}.bayesstack.com/login`;
+    }
+  };
+
   return (
     <div style={{ minHeight: "100vh", background: "var(--bs-canvas)" }}>
       {/* Admin Header Navigation */}
@@ -72,14 +109,13 @@ export default function AdminPage() {
             <span style={{ height: "20px", width: "1px", background: "#d7e8e4" }} />
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
               <Title as="h3" style={{ fontSize: "1.05rem", fontWeight: 700, color: "#123333" }}>
-                Admin Telemetry & Governance Portal
+                Admin Governance Portal
               </Title>
-              <Badge variant="subtle" size="sm">
-                <span style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", color: "#0b6763", fontWeight: 600 }}>
-                  <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#0b6763" }} />
-                  All Systems Operational
-                </span>
-              </Badge>
+              {isTenant && tenant && (
+                <Badge variant="solid" size="sm">
+                  {tenant.name} Admin
+                </Badge>
+              )}
             </div>
           </div>
 
@@ -101,13 +137,39 @@ export default function AdminPage() {
             >
               Security Settings
             </Button>
-            <Avatar name="Sophia Chen" color="#0b6763" size="sm" />
+
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <Avatar name={adminName} color="#0b6763" size="sm" />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+                style={{ color: "#718096", borderColor: "#e2e8f0" }}
+              >
+                Sign Out
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Main Admin Body */}
       <main className="admin-container" style={{ paddingTop: "2rem", paddingBottom: "4rem" }}>
+        {/* Welcome Banner */}
+        <Paper style={{ padding: "1.25rem 1.5rem", marginBottom: "1.75rem", background: "linear-gradient(135deg, #0d47a1 0%, #0b6763 100%)", color: "#ffffff", borderRadius: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <Title as="h2" style={{ fontSize: "1.35rem", fontWeight: 800, color: "#ffffff", marginBottom: "0.25rem" }}>
+              Welcome back, {adminName}! 🏛️
+            </Title>
+            <Text style={{ color: "rgba(255, 255, 255, 0.85)", fontSize: "0.9rem" }}>
+              Institutional Governance & Access Telemetry Portal for {isTenant && tenant ? tenant.name : "Bayes Institute"}.
+            </Text>
+          </div>
+          <Badge variant="solid" size="sm" style={{ background: "rgba(255, 255, 255, 0.2)", color: "#ffffff" }}>
+            Tenant Admin Role
+          </Badge>
+        </Paper>
+
         {/* Telemetry Metric Scorecards */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.25rem", marginBottom: "2rem" }}>
           <Paper className="admin-stat-card">

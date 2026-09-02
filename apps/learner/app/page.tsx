@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BayesStackLogo } from "@bayesstack/assets";
 import {
   Button,
@@ -22,12 +22,24 @@ import {
 import { useTenant } from "@bayesstack/tenant";
 
 export default function LearnerPage() {
-  const { tenant, isTenant } = useTenant();
+  const { tenant, tenantSlug, isTenant } = useTenant();
   const [spotlightOpen, setSpotlightOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [completed, setCompleted] = useState(false);
+  const [userName, setUserName] = useState("Alex Vance");
   const { showToast } = useToast();
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("bayes_user");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed.full_name) setUserName(parsed.full_name);
+        } catch (e) {}
+      }
+    }
+  }, []);
 
   const spotlightActions: SpotlightActionItem[] = [
     { id: "1", title: "Module 01: Probability Foundations", description: "Completed - Score 98%", group: "Curriculum", icon: "CheckCircle" },
@@ -44,6 +56,27 @@ export default function LearnerPage() {
       message: "Your progress has been synchronized with the institutional gradebook.",
       variant: "success",
     });
+  };
+
+  const handleLogout = async () => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    try {
+      await fetch(`${apiUrl}/api/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (err) {}
+    localStorage.removeItem("bayes_auth_token");
+    localStorage.removeItem("bayes_user");
+    
+    if (typeof window !== "undefined") {
+      const host = window.location.hostname;
+      const isLocal = host.endsWith(".localhost") || host === "localhost";
+      const slug = tenantSlug || "bayes";
+      window.location.href = isLocal
+        ? `http://${slug}.localhost:3004`
+        : `https://${slug}.bayesstack.com/login`;
+    }
   };
 
   return (
@@ -63,7 +96,7 @@ export default function LearnerPage() {
               </Badge>
               {isTenant && tenant && (
                 <Badge variant="solid" size="sm">
-                  {tenant.name}
+                  {tenant.name} Learner Portal
                 </Badge>
               )}
             </div>
@@ -79,13 +112,39 @@ export default function LearnerPage() {
             >
               Search Modules <span style={{ opacity: 0.6, fontSize: "0.75rem", marginLeft: "0.5rem" }}>Cmd+K</span>
             </Button>
-            <Avatar name="Alex Vance" color="#0b6763" size="sm" />
+
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <Avatar name={userName} color="#0b6763" size="sm" />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+                style={{ color: "#718096", borderColor: "#e2e8f0" }}
+              >
+                Sign Out
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Main Studio Body */}
       <main className="learner-container" style={{ paddingTop: "2rem", paddingBottom: "4rem" }}>
+        {/* Welcome Banner */}
+        <Paper style={{ padding: "1.25rem 1.5rem", marginBottom: "1.75rem", background: "linear-gradient(135deg, #0b6763 0%, #084c49 100%)", color: "#ffffff", borderRadius: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <Title as="h2" style={{ fontSize: "1.35rem", fontWeight: 800, color: "#ffffff", marginBottom: "0.25rem" }}>
+              Welcome back, {userName}! 🎓
+            </Title>
+            <Text style={{ color: "rgba(255, 255, 255, 0.85)", fontSize: "0.9rem" }}>
+              You are signed in to {isTenant && tenant ? tenant.name : "Bayes Institute"}'s official Learner Portal.
+            </Text>
+          </div>
+          <Badge variant="solid" size="sm" style={{ background: "rgba(255, 255, 255, 0.2)", color: "#ffffff" }}>
+            Learner Role
+          </Badge>
+        </Paper>
+
         <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "1.75rem" }}>
           {/* Left Column: Video Lecture Player & Course Tabs */}
           <div>
@@ -188,11 +247,11 @@ def metropolis_hastings(target_pdf, proposal_sd, n_samples=10000):
               <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "1rem", overflowY: "auto", marginBottom: "1rem" }}>
                 <ChatMessage
                   user={{ name: "Bayes AI Copilot" }}
-                  content="Hi Alex! I'm tracking your progress in Module 4. Ask me any questions about MCMC sampling convergence or acceptance ratios."
+                  content={`Hi ${userName.split(" ")[0]}! I'm tracking your progress in Module 4. Ask me any questions about MCMC sampling convergence or acceptance ratios.`}
                   timestamp="10:30 AM"
                 />
                 <ChatMessage
-                  user={{ name: "Alex (Learner)" }}
+                  user={{ name: `${userName.split(" ")[0]} (Learner)` }}
                   content="Why does selecting a large proposal standard deviation slow down convergence?"
                   timestamp="10:32 AM"
                   isOwn
