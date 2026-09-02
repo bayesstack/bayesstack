@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Icon, Badge, type DbTable } from "@bayesstack/ui";
 
 export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
@@ -12,6 +12,16 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
   const [hoveredColKey, setHoveredColKey] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"detailed" | "compact">("detailed");
   const [linesMode, setLinesMode] = useState<"smart" | "all" | "none">("smart");
+
+  // Dynamic positions for draggable entity cards
+  const [nodePositions, setNodePositions] = useState<Record<string, { x: number; y: number }>>({});
+  const [dragState, setDragState] = useState<{
+    tableName: string;
+    startX: number;
+    startY: number;
+    initialNodeX: number;
+    initialNodeY: number;
+  } | null>(null);
 
   const isLight = theme === "light";
 
@@ -79,31 +89,110 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
     );
   }, [schemaTables, search]);
 
-  // Compute 2D Grid positions for entity nodes
-  const tablePositions = useMemo(() => {
-    const positions: Record<string, { x: number; y: number; width: number; height: number }> = {};
+  // Auto-initialize node positions in grid layout
+  useEffect(() => {
+    const initialPos: Record<string, { x: number; y: number }> = {};
     const CARD_WIDTH = 300;
-    const GAP_X = 80;
+    const GAP_X = 90;
+    const GAP_Y = 60;
+    const COLS_PER_ROW = 3;
+
+    schemaTables.forEach((table, index) => {
+      if (!nodePositions[table.name]) {
+        const colIndex = index % COLS_PER_ROW;
+        const rowIndex = Math.floor(index / COLS_PER_ROW);
+        initialPos[table.name] = {
+          x: 40 + colIndex * (CARD_WIDTH + GAP_X),
+          y: 40 + rowIndex * (360 + GAP_Y),
+        };
+      }
+    });
+
+    if (Object.keys(initialPos).length > 0) {
+      setNodePositions((prev) => ({ ...initialPos, ...prev }));
+    }
+  }, [schemaTables]);
+
+  const handleResetLayout = () => {
+    const resetPos: Record<string, { x: number; y: number }> = {};
+    const CARD_WIDTH = 300;
+    const GAP_X = 90;
     const GAP_Y = 60;
     const COLS_PER_ROW = 3;
 
     schemaTables.forEach((table, index) => {
       const colIndex = index % COLS_PER_ROW;
       const rowIndex = Math.floor(index / COLS_PER_ROW);
+      resetPos[table.name] = {
+        x: 40 + colIndex * (CARD_WIDTH + GAP_X),
+        y: 40 + rowIndex * (360 + GAP_Y),
+      };
+    });
+
+    setNodePositions(resetPos);
+  };
+
+  // Drag handlers
+  const handleMouseDown = (e: React.MouseEvent, tableName: string) => {
+    e.stopPropagation();
+    const current = nodePositions[tableName] || { x: 40, y: 40 };
+    setDragState({
+      tableName,
+      startX: e.clientX,
+      startY: e.clientY,
+      initialNodeX: current.x,
+      initialNodeY: current.y,
+    });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!dragState) return;
+    const scale = zoom / 100;
+    const deltaX = (e.clientX - dragState.startX) / scale;
+    const deltaY = (e.clientY - dragState.startY) / scale;
+
+    const newX = Math.max(10, dragState.initialNodeX + deltaX);
+    const newY = Math.max(10, dragState.initialNodeY + deltaY);
+
+    setNodePositions((prev) => ({
+      ...prev,
+      [dragState.tableName]: { x: newX, y: newY },
+    }));
+  };
+
+  const handleMouseUp = () => {
+    if (dragState) {
+      setDragState(null);
+    }
+  };
+
+  // Compute 2D positions for entity nodes
+  const tablePositions = useMemo(() => {
+    const positions: Record<string, { x: number; y: number; width: number; height: number }> = {};
+    const CARD_WIDTH = 300;
+    const COLS_PER_ROW = 3;
+    const GAP_X = 90;
+    const GAP_Y = 60;
+
+    schemaTables.forEach((table, index) => {
+      const pos = nodePositions[table.name] || {
+        x: 40 + (index % COLS_PER_ROW) * (CARD_WIDTH + GAP_X),
+        y: 40 + Math.floor(index / COLS_PER_ROW) * (360 + GAP_Y),
+      };
 
       const colCount = table.columns?.length || 0;
       const estimatedHeight = viewMode === "detailed" ? 50 + colCount * 28 + 36 : 80;
 
       positions[table.name] = {
-        x: 40 + colIndex * (CARD_WIDTH + GAP_X),
-        y: 40 + rowIndex * (360 + GAP_Y),
+        x: pos.x,
+        y: pos.y,
         width: CARD_WIDTH,
         height: estimatedHeight,
       };
     });
 
     return positions;
-  }, [schemaTables, viewMode]);
+  }, [schemaTables, nodePositions, viewMode]);
 
   // Helper to calculate relationships & exact connector anchor points
   const relationships = useMemo(() => {
@@ -167,12 +256,12 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
   const activeTable = schemaTables.find((t) => t.id === selectedTableId) || null;
 
   const totalWidth = Math.max(
-    1200,
-    ...Object.values(tablePositions).map((p) => p.x + p.width + 100)
+    1400,
+    ...Object.values(tablePositions).map((p) => p.x + p.width + 200)
   );
   const totalHeight = Math.max(
     800,
-    ...Object.values(tablePositions).map((p) => p.y + p.height + 150)
+    ...Object.values(tablePositions).map((p) => p.y + p.height + 200)
   );
 
   return (
@@ -187,6 +276,8 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
         overflow: "hidden",
         position: "relative",
       }}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
     >
       {/* Top Controls Toolbar */}
       <div
@@ -212,7 +303,7 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
               Database ER Visualizer
             </div>
             <div style={{ fontSize: "0.725rem", color: t.subtleText }}>
-              Relational Architecture & Dependency Inspector
+              Draggable Architecture Nodes & Connector Lines
             </div>
           </div>
 
@@ -346,6 +437,29 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
             </button>
           </div>
 
+          {/* Reset Layout */}
+          <button
+            type="button"
+            onClick={handleResetLayout}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "4px",
+              padding: "5px 10px",
+              borderRadius: "6px",
+              background: t.inputBg,
+              border: `1px solid ${t.inputBorder}`,
+              color: t.toolbarText,
+              fontWeight: 600,
+              fontSize: "0.75rem",
+              cursor: "pointer",
+            }}
+            title="Reset cards to default grid layout"
+          >
+            <Icon name="Refresh" size={14} />
+            <span>Reset Grid</span>
+          </button>
+
           {/* Theme Mode Toggle (Light / Dark) */}
           <button
             type="button"
@@ -419,7 +533,7 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
               position: "relative",
               transform: `scale(${zoom / 100})`,
               transformOrigin: "top left",
-              transition: "transform 0.1s ease-out",
+              transition: dragState ? "none" : "transform 0.1s ease-out",
             }}
           >
             {/* SVG Connection Lines Overlay */}
@@ -494,7 +608,7 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
                   const pathD = `M ${rel.x1} ${rel.y1} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${rel.x2} ${rel.y2}`;
 
                   return (
-                    <g key={rel.id} style={{ opacity, transition: "opacity 0.2s ease" }}>
+                    <g key={rel.id} style={{ opacity, transition: dragState ? "none" : "opacity 0.2s ease" }}>
                       <path
                         d={pathD}
                         fill="none"
@@ -533,6 +647,7 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
               const pos = tablePositions[table.name] || { x: 0, y: 0, width: 300 };
               const isSelected = selectedTableId === table.id;
               const isHovered = hoveredTableId === table.name;
+              const isDragging = dragState?.tableName === table.name;
 
               // Compute relations count
               const tableRel = relationships.filter(
@@ -555,24 +670,29 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
                     width: `${pos.width}px`,
                     background: t.cardBg,
                     borderRadius: "10px",
-                    border: isSelected
+                    border: isDragging
+                      ? `2px dashed ${t.cardBorderSelected}`
+                      : isSelected
                       ? `2px solid ${t.cardBorderSelected}`
                       : isHovered
                       ? `1px solid ${t.cardBorderHover}`
                       : `1px solid ${t.cardBorder}`,
-                    boxShadow: isSelected
+                    boxShadow: isDragging
+                      ? "0 12px 30px rgba(0,0,0,0.2)"
+                      : isSelected
                       ? t.cardShadowSelected
                       : isHovered
                       ? t.cardShadow
                       : t.cardShadow,
                     overflow: "hidden",
                     cursor: "pointer",
-                    transition: "border 0.15s ease, box-shadow 0.15s ease",
-                    zIndex: isSelected ? 15 : isHovered ? 12 : 10,
+                    transition: isDragging ? "none" : "border 0.15s ease, box-shadow 0.15s ease",
+                    zIndex: isDragging ? 30 : isSelected ? 15 : isHovered ? 12 : 10,
                   }}
                 >
-                  {/* Card Header */}
+                  {/* Card Header (Drag Handle) */}
                   <div
+                    onMouseDown={(e) => handleMouseDown(e, table.name)}
                     style={{
                       padding: "10px 14px",
                       background: isSelected
@@ -584,6 +704,8 @@ export function ErDiagramViewer({ tables }: { tables: DbTable[] }) {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
+                      cursor: isDragging ? "grabbing" : "grab",
+                      userSelect: "none",
                     }}
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
