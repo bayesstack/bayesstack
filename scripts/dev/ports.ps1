@@ -26,7 +26,7 @@ function Free-Port([int]$port) {
   }
 }
 
-function Free-ServicePorts([string[]]$targetList) {
+function Free-ServicePorts([string[]]$targetList, [switch]$PreserveInfrastructure) {
   foreach ($item in $targetList) {
     switch ($item) {
       "landing"  { Free-Port 3000 }
@@ -39,7 +39,9 @@ function Free-ServicePorts([string[]]$targetList) {
       "api"      { Free-Port 8000 }
       "nginx"    { Free-Port 80 }
       "pgadmin"  { Free-Port 5050 }
-      "postgres" { Free-Port 5432 }
+      "postgres" {
+        if (-not $PreserveInfrastructure) { Free-Port 5432 }
+      }
     }
   }
 }

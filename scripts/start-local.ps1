@@ -1,5 +1,5 @@
 # PowerShell Master Developer Environment Orchestrator for Windows
-[CmdletBinding()]
+[CmdletBinding(PositionalBinding=$false)]
 param(
   [switch]$Docker,
   [switch]$Local,
@@ -66,7 +66,7 @@ if ($DbReset)  { Run-DbReset $Root }
 if ($Stop) {
   $stopTargets = Expand-Profile $Stop
   Write-LogInfo "Stopping running processes for: $stopTargets..."
-  Free-ServicePorts $stopTargets
+  Free-ServicePorts $stopTargets -PreserveInfrastructure
   exit 0
 }
 
@@ -126,7 +126,7 @@ if ($RawArgs.Count -eq 0) {
     "19" {
       $stopSvc = Read-Host "Enter service/port to stop (default: core)"
       if ([string]::IsNullOrWhiteSpace($stopSvc)) { $stopSvc = "core" }
-      Free-ServicePorts (Expand-Profile $stopSvc)
+      Free-ServicePorts (Expand-Profile $stopSvc) -PreserveInfrastructure
       exit 0
     }
     ""   { $RawArgs += "core" }

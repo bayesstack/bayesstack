@@ -81,9 +81,9 @@ function Run-SystemCheck {
 
   Write-Host "=========================================================" -ForegroundColor Cyan
   if ($errors -eq 0) {
-    Write-LogSuccess "🎉 System Check Passed! Your local system is fully prepared."
+    Write-LogSuccess "System Check Passed! Your local system is fully prepared."
   } else {
-    Write-LogError "⚠️ System Check Found $errors Requirement Issue(s)."
+    Write-LogError "System Check Found $errors Requirement Issue(s)."
   }
   Write-Host "=========================================================" -ForegroundColor Cyan
   if ($errors -gt 0) { exit 1 } else { exit 0 }

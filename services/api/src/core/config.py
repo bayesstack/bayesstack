@@ -1,12 +1,18 @@
 """Configuration settings for BayesStack API."""
 
+from pathlib import Path
+
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+API_DIRECTORY = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = API_DIRECTORY.parents[1]
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=(".env", "services/api/.env", "../.env"),
+        env_file=(API_DIRECTORY / ".env", PROJECT_ROOT / ".env"),
         env_file_encoding="utf-8",
         extra="ignore",
     )

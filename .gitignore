@@ -20,6 +20,7 @@ venv/
 
 # Local tooling
 .turbo/
+.local-tools/
 .DS_Store
 coverage/
 *.db

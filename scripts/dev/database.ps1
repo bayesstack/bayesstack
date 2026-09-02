@@ -9,14 +9,23 @@ function Setup-PythonApi([string]$root) {
   $Venv = Join-Path $root "services/api/.venv"
   $VenvPython = Join-Path $Venv "Scripts/python.exe"
   if (-not (Test-Path $VenvPython)) {
-    $VenvPython = Join-Path $Venv "bin/python"
-  }
-  if (-not (Test-Path $VenvPython)) {
     Write-LogInfo "Setting up Python virtual environment at $Venv..."
     & $pyCmd -m venv $Venv
   }
+  if (-not (Test-Path $VenvPython)) {
+    throw "Python virtual environment was not created correctly. Expected executable at: $VenvPython"
+  }
   Write-LogInfo "Verifying FastAPI backend dependencies..."
-  & $VenvPython -m pip install -e (Join-Path $root "services/api") *> $null
+  $apiPath = Join-Path $root "services/api"
+  $packageIndex = $env:BAYESSTACK_PYPI_INDEX_URL
+  if ([string]::IsNullOrWhiteSpace($packageIndex)) {
+    $packageIndex = "https://pypi.org/simple"
+  }
+  Write-LogInfo "Using Python package index: $packageIndex"
+  & $VenvPython -m pip install -e $apiPath --index-url $packageIndex --disable-pip-version-check *> $null
+  if ($LASTEXITCODE -ne 0) {
+    throw "FastAPI backend dependency installation failed. Check the package index and network connection: $packageIndex"
+  }
   return $VenvPython
 }
 
