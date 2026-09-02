@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTenant } from "@bayesstack/tenant";
 import { Button, Badge, TextInput } from "@bayesstack/ui";
 
@@ -15,6 +15,7 @@ export default function AuthPage() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isCheckingSession, setIsCheckingSession] = useState<boolean>(true);
 
   const getRedirectUrlForRole = (userRole: string, slug?: string): string => {
     if (typeof window === "undefined") return "/";
@@ -65,6 +66,40 @@ export default function AuthPage() {
     }
   };
 
+  // Pre-flight Session Persistence Check (/api/auth/me)
+  useEffect(() => {
+    let isMounted = true;
+    const checkActiveSession = async () => {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      try {
+        const res = await fetch(`${apiUrl}/api/auth/me`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.authenticated && data.user && isMounted) {
+            const role = data.user.role || "learner";
+            const slug = data.user.tenant_slug || tenantSlug || "bayes";
+            setStatusMessage(`Active session detected for ${data.user.full_name || data.user.email}. Bypassing login...`);
+            setTimeout(() => {
+              window.location.href = getRedirectUrlForRole(role, slug);
+            }, 600);
+            return;
+          }
+        }
+      } catch (err) {
+        // If API is offline or unreachable, fall back to login UI
+      } finally {
+        if (isMounted) setIsCheckingSession(false);
+      }
+    };
+
+    checkActiveSession();
+    return () => { isMounted = false; };
+  }, [tenantSlug]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
@@ -77,6 +112,7 @@ export default function AuthPage() {
       const response = await fetch(`${apiUrl}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email: email.trim(), password }),
       });
 
@@ -155,8 +191,8 @@ export default function AuthPage() {
     }
   };
 
-  // 1. Loading state while resolving tenant from backend
-  if (isTenantLoading) {
+  // 1. Loading state while resolving tenant from backend or checking session persistence
+  if (isTenantLoading || isCheckingSession) {
     return (
       <div className="auth-container">
         <div className="auth-card" style={{ textAlign: "center", padding: "3rem 2rem" }}>
@@ -164,7 +200,7 @@ export default function AuthPage() {
             BayesStack Platform Gateway
           </div>
           <p style={{ color: "var(--bs-muted)", fontSize: "0.9rem" }}>
-            Checking institutional tenant record for {tenantSlug ? `'${tenantSlug}'` : "request"}...
+            {statusMessage ? statusMessage : `Verifying session and institutional tenant for ${tenantSlug ? `'${tenantSlug}'` : "request"}...`}
           </p>
         </div>
       </div>
