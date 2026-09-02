@@ -17,7 +17,7 @@ export default function AuthPage() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isCheckingSession, setIsCheckingSession] = useState<boolean>(true);
 
-  const getRedirectUrlForRole = (userRole: string, slug?: string): string => {
+  const getRedirectUrlForRole = (userRole: string, slug?: string | null): string => {
     if (typeof window === "undefined") return "/";
     const host = window.location.hostname;
     const currentPort = window.location.port ? `:${window.location.port}` : "";
