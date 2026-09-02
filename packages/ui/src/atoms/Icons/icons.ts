@@ -90,6 +90,8 @@ import {
 
   // Actions & Controls
   Add01Icon,
+  Remove01Icon,
+  MinusIcon,
   Delete02Icon,
   Edit02Icon,
   Copy01Icon,
@@ -371,6 +373,8 @@ export const ICON_CATALOGUE: IconDefinition[] = [
 
   // Actions & Controls
   { name: "Add", component: Add01Icon, category: "Actions & Controls", tags: ["add", "plus", "create"] },
+  { name: "Remove", component: Remove01Icon, category: "Actions & Controls", tags: ["remove", "minus", "subtract"] },
+  { name: "Minus", component: MinusIcon, category: "Actions & Controls", tags: ["minus", "subtract", "zoom out"] },
   { name: "Delete", component: Delete02Icon, category: "Actions & Controls", tags: ["delete", "trash", "remove"] },
   { name: "Edit", component: Edit02Icon, category: "Actions & Controls", tags: ["edit", "pencil"] },
   { name: "Copy", component: Copy01Icon, category: "Actions & Controls", tags: ["copy", "duplicate"] },
