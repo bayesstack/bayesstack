@@ -19,31 +19,44 @@ export default function AuthPage() {
   const getRedirectUrlForRole = (userRole: string, slug?: string): string => {
     if (typeof window === "undefined") return "/";
     const host = window.location.hostname;
+    const currentPort = window.location.port ? `:${window.location.port}` : "";
     const isLocal = host.endsWith(".localhost") || host === "localhost" || host === "127.0.0.1";
     const currentSlug = slug || tenantSlug || "bayes";
 
     if (isLocal) {
+      // In local dev, redirect to port or Nginx proxy subdomain endpoint for specific micro-frontend app
       switch (userRole) {
         case "learner":
-          return `http://${currentSlug}.localhost:3001`;
+          return currentPort === "" || currentPort === ":80"
+            ? `http://${currentSlug}.localhost/learner`
+            : `http://${currentSlug}.localhost:3001`;
         case "faculty":
-          return `http://${currentSlug}.localhost:3002`;
+          return currentPort === "" || currentPort === ":80"
+            ? `http://${currentSlug}.localhost/faculty`
+            : `http://${currentSlug}.localhost:3002`;
         case "admin":
-          return `http://${currentSlug}.localhost:3003`;
+          return currentPort === "" || currentPort === ":80"
+            ? `http://${currentSlug}.localhost/admin`
+            : `http://${currentSlug}.localhost:3003`;
         case "superadmin":
-          return `http://super.localhost:3005`;
+          return currentPort === "" || currentPort === ":80"
+            ? `http://super.localhost`
+            : `http://super.localhost:3005`;
         default:
-          return `http://${currentSlug}.localhost:3001`;
+          return currentPort === "" || currentPort === ":80"
+            ? `http://${currentSlug}.localhost/learner`
+            : `http://${currentSlug}.localhost:3001`;
       }
     } else {
-      const baseDomain = host.split(".").slice(-2).join(".");
+      const parts = host.split(".");
+      const baseDomain = parts.length > 2 ? parts.slice(-2).join(".") : host;
       switch (userRole) {
         case "learner":
-          return `https://${currentSlug}.${baseDomain}`;
+          return `https://learner.${baseDomain}`;
         case "faculty":
-          return `https://${currentSlug}.${baseDomain}/faculty`;
+          return `https://faculty.${baseDomain}`;
         case "admin":
-          return `https://${currentSlug}.${baseDomain}/admin`;
+          return `https://admin.${baseDomain}`;
         case "superadmin":
           return `https://super.${baseDomain}`;
         default:
@@ -80,7 +93,7 @@ export default function AuthPage() {
       const derivedRole = user.role || "learner";
       const targetSlug = user.tenant_slug || tenantSlug || "bayes";
 
-      setStatusMessage(`Welcome back, ${user.full_name}! Redirecting to your ${derivedRole.toUpperCase()} portal...`);
+      setStatusMessage(`Welcome back, ${user.full_name}! Redirecting to ${derivedRole.toUpperCase()} Portal...`);
 
       // Store auth session locally
       localStorage.setItem("bayes_auth_token", "authenticated");
@@ -115,7 +128,7 @@ export default function AuthPage() {
       localStorage.setItem("bayes_auth_token", "authenticated");
       localStorage.setItem("bayes_user", JSON.stringify(fallbackUser));
 
-      setStatusMessage(`Authenticated (${fallbackRole.toUpperCase()}). Redirecting...`);
+      setStatusMessage(`Authenticated (${fallbackRole.toUpperCase()}). Redirecting to app portal...`);
       setTimeout(() => {
         window.location.href = getRedirectUrlForRole(fallbackRole, tenantSlug);
       }, 800);
@@ -292,7 +305,7 @@ export default function AuthPage() {
           </div>
         )}
 
-        {/* Login Form (Role is strictly derived from DB record) */}
+        {/* Login Form */}
         {activeTab === "login" && (
           <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
@@ -321,7 +334,7 @@ export default function AuthPage() {
           </form>
         )}
 
-        {/* Signup Form (No Role Dropdown - Role is assigned dynamically by DB/System) */}
+        {/* Signup Form */}
         {activeTab === "signup" && (
           <form onSubmit={handleSignup} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
