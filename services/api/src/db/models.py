@@ -73,3 +73,9 @@ class User(Base):
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
+
+
+# Importing registers the content graph with the shared SQLAlchemy metadata.
+# Keep the tenant/user models here because existing modules import them from
+# ``db.models``; the graph itself lives in a focused module.
+import db.content_models  # noqa: E402, F401

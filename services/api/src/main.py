@@ -9,6 +9,7 @@ from core.database import ensure_database_exists
 from core.middleware import TenantMiddleware
 
 from auth.router import router as auth_router
+from content.router import router as content_router
 from db_explorer import db_explorer_router
 from routers.crud import crud_router
 from routers.health import router as health_router
@@ -38,6 +39,10 @@ tags_metadata = [
     {
         "name": "Database Explorer",
         "description": "SuperAdmin studio database schema inspection and metadata discovery.",
+    },
+    {
+        "name": "Content Composition",
+        "description": "Canonical release catalog, tenant-specific course composition, publishing, and learner projections.",
     },
 ]
 
@@ -86,5 +91,6 @@ app.add_middleware(TenantMiddleware)
 app.include_router(health_router)
 app.include_router(tenants_router)
 app.include_router(auth_router)
+app.include_router(content_router)
 app.include_router(crud_router)
 app.include_router(db_explorer_router)

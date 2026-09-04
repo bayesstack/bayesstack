@@ -87,3 +87,19 @@ When pulling new changes from `git`:
 - `GET /health` — Returns status of API service, environment mode, and live PostgreSQL connection check.
 - `GET /api/tenant-config` — Resolves active tenant context based on `Host` header (`bayes.localhost`, `ashoka.localhost`).
 
+## Content Composition Engine
+
+Migration `0003_create_content_composition_engine` adds the six-tier academic graph:
+
+- Immutable, version-pinned canonical programs, courses, chapters, concepts, and studio instances.
+- Tenant curricula/programs/course/chapter/concept wrappers with `canonical`, `custom`, or `derived` provenance.
+- Ordered composition edges that point directly to either a canonical release or a same-tenant wrapper, avoiding cloned canonical trees.
+- Faculty program/course assignments, program/curriculum enrollment records, and immutable `course_publications` snapshots.
+
+Canonical releases use database triggers to reject updates and deletes; publish a new version instead. A direct canonical course adoption has no tenant child edges. Forking it creates a `derived` draft with explicit composition edges, which can then be reordered or supplemented with custom content.
+
+The Course Builder API is available through `/docs`. Its main paths are:
+
+- `POST /api/tenant-courses`, `POST /api/tenant-course-chapters`, and `POST /api/tenant-chapter-concepts` (with RESTful `PUT` path aliases)
+- `POST /api/tenant-courses/{id}/draft` and `PUT /api/tenant-courses/{id}/publish`
+- `GET /api/student/courses/{id}/chapters` and `GET /api/student/concepts/{id}`
