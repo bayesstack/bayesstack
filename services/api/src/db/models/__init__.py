@@ -9,7 +9,7 @@ This package provides a clean, function-first organization:
 - `guards.py`: Kernel-level database immutability triggers
 """
 
-from db.models.tenant import Tenant, User
+from db.models.tenant import Tenant, User, TenantMembership, TenantRole
 from db.models.library import (
     LibraryCurriculum,
     LibraryCurriculumProgram,
@@ -54,6 +54,7 @@ from db.models.operations import (
     LearnerConceptProgress,
     AssessmentSubmission,
     CourseGrade,
+    StudentAcademicProfile,
 )
 from db.models.enrollment import (
     FacultyCourseAssignment,
@@ -70,6 +71,8 @@ __all__ = [
     # Tenant & Identity
     "Tenant",
     "User",
+    "TenantMembership",
+    "TenantRole",
     # Platform Master Learning Library
     "LibraryCurriculum",
     "LibraryCurriculumProgram",
@@ -113,6 +116,7 @@ __all__ = [
     "LearnerConceptProgress",
     "AssessmentSubmission",
     "CourseGrade",
+    "StudentAcademicProfile",
     # Assignments & Enrollments
     "FacultyCourseAssignment",
     "FacultyProgramAssignment",

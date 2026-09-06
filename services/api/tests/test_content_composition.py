@@ -366,8 +366,8 @@ async def test_dedicated_edge_tables_isolated_foreign_keys():
         lib_edge = UniversityCourseLibraryChapter(
             tenant_id="tenant-ashoka",
             university_course_id=test_course.id,
-            library_chapter_id="chap_optimization",
-            library_version=1,
+            library_chapter_id="CH-OPTIMIZATION",
+            library_version=2,
             order_rank=1_000_000,
             lineage_type="inherited",
         )
@@ -405,8 +405,8 @@ async def test_dedicated_edge_tables_isolated_foreign_keys():
             )
         ).all()
         assert len(lib_edges) == 1
-        assert lib_edges[0].library_chapter_id == "chap_optimization"
-        assert lib_edges[0].library_version == 1
+        assert lib_edges[0].library_chapter_id == "CH-OPTIMIZATION"
+        assert lib_edges[0].library_version == 2
 
         custom_edges = (
             await session.scalars(

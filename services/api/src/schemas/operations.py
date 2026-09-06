@@ -126,6 +126,8 @@ class SectionInstructorResponse(BaseModel):
 class SectionEnrollmentBase(BaseModel):
     course_section_id: uuid.UUID
     student_id: str
+    registration_type: str = "credit"  # 'credit' | 'audit' | 'pass_fail'
+    attempt_number: int = 1
     enrollment_status: str = "enrolled"  # 'enrolled' | 'waitlisted' | 'dropped' | 'withdrawn' | 'completed'
 
 
@@ -135,6 +137,8 @@ class SectionEnrollmentCreate(SectionEnrollmentBase):
 
 class SectionEnrollmentUpdate(BaseModel):
     enrollment_status: Optional[str] = None
+    registration_type: Optional[str] = None
+    attempt_number: Optional[int] = None
     dropped_at: Optional[datetime] = None
 
 
@@ -153,6 +157,7 @@ class SectionEnrollmentResponse(SectionEnrollmentBase):
 
 class LearnerConceptProgressBase(BaseModel):
     section_enrollment_id: uuid.UUID
+    content_type: str = "library"  # 'library' | 'university'
     concept_id: str
     concept_version: int = 1
     status: str = "not_started"  # 'not_started' | 'in_progress' | 'completed' | 'mastered'
@@ -184,6 +189,8 @@ class LearnerConceptProgressResponse(LearnerConceptProgressBase):
 
 class AssessmentSubmissionCreate(BaseModel):
     section_enrollment_id: uuid.UUID
+    studio_type: str = "coding"
+    studio_version: str = "1.0.0"
     studio_instance_id: str
     attempt_number: int = 1
     submission_payload: Dict[str, Any]
@@ -203,6 +210,8 @@ class AssessmentSubmissionResponse(BaseModel):
     id: uuid.UUID
     tenant_id: str
     section_enrollment_id: uuid.UUID
+    studio_type: str = "coding"
+    studio_version: str = "1.0.0"
     studio_instance_id: str
     attempt_number: int
     submission_payload: Dict[str, Any]
@@ -248,4 +257,37 @@ class CourseGradeResponse(BaseModel):
     is_final: bool
     finalized_by_user_id: Optional[str] = None
     finalized_at: Optional[datetime] = None
+    created_at: datetime
+
+
+# ============================================================================
+# 8. Student Academic Profiles (Governance & Matriculation)
+# ============================================================================
+
+class StudentAcademicProfileBase(BaseModel):
+    student_id: str
+    matriculation_number: str
+    cohort_year: int
+    degree_curriculum_id: Optional[str] = None
+    academic_standing: str = "good_standing"
+    cumulative_gpa: float = 0.00
+    total_credits_earned: int = 0
+
+
+class StudentAcademicProfileCreate(StudentAcademicProfileBase):
+    pass
+
+
+class StudentAcademicProfileUpdate(BaseModel):
+    degree_curriculum_id: Optional[str] = None
+    academic_standing: Optional[str] = None
+    cumulative_gpa: Optional[float] = None
+    total_credits_earned: Optional[int] = None
+
+
+class StudentAcademicProfileResponse(StudentAcademicProfileBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    tenant_id: str
     created_at: datetime

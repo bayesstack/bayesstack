@@ -21,12 +21,14 @@ from sqlalchemy import (
     BigInteger,
     DateTime,
     ForeignKey,
+    ForeignKeyConstraint,
     Integer,
     JSON,
     String,
     Text,
     UniqueConstraint,
     Index,
+    text,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, synonym
@@ -87,15 +89,19 @@ class CoursePublication(Base):
     __tablename__ = "course_publications"
     __table_args__ = (
         UniqueConstraint("tenant_id", "university_course_id", "publication_number", name="uq_course_publication_number"),
-        # Sub-millisecond index seek for currently active student syllabus
-        Index("idx_course_pub_active", "tenant_id", "university_course_id", postgresql_where="status = 'active'"),
+        UniqueConstraint("tenant_id", "university_course_id", "id", name="uq_course_pub_consistent_tuple"),
+        ForeignKeyConstraint(
+            ["tenant_id", "university_course_id"],
+            ["university_courses.tenant_id", "university_courses.id"],
+            ondelete="CASCADE",
+        ),
+        # Unique partial index: exactly one active publication per institutional course
+        Index("uq_active_course_publication", "tenant_id", "university_course_id", unique=True, postgresql_where=text("status = 'active'"), sqlite_where=text("status = 'active'")),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
-    university_course_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("university_courses.id", ondelete="CASCADE"), nullable=False
-    )
+    university_course_id: Mapped[str] = mapped_column(String(64), nullable=False)
     publication_number: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     source_revision: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     published_by_user_id: Mapped[str] = mapped_column(String(64), nullable=False)

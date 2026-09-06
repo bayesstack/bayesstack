@@ -27,6 +27,7 @@ from sqlalchemy import (
     DateTime,
     Float,
     ForeignKey,
+    ForeignKeyConstraint,
     Integer,
     JSON,
     String,
@@ -49,6 +50,7 @@ class AcademicTerm(Base):
     __tablename__ = "academic_terms"
     __table_args__ = (
         UniqueConstraint("tenant_id", "code", name="uq_academic_term_tenant_code"),
+        UniqueConstraint("tenant_id", "id", name="uq_academic_term_tenant_id"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -69,20 +71,25 @@ class CourseOffering(Base):
     __tablename__ = "course_offerings"
     __table_args__ = (
         UniqueConstraint("tenant_id", "academic_term_id", "university_course_id", name="uq_course_offering_term_course"),
+        UniqueConstraint("tenant_id", "id", name="uq_course_offering_tenant_id"),
+        ForeignKeyConstraint(
+            ["tenant_id", "academic_term_id"],
+            ["academic_terms.tenant_id", "academic_terms.id"],
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["tenant_id", "university_course_id", "course_publication_id"],
+            ["course_publications.tenant_id", "course_publications.university_course_id", "course_publications.id"],
+            ondelete="RESTRICT",
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
-    academic_term_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("academic_terms.id", ondelete="CASCADE"), nullable=False
-    )
-    university_course_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("university_courses.id", ondelete="RESTRICT"), nullable=False
-    )
+    academic_term_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    university_course_id: Mapped[str] = mapped_column(String(64), nullable=False)
     # The immutable bridge: exactly which compiled release artifact is taught this term
-    course_publication_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("course_publications.id", ondelete="RESTRICT"), nullable=False
-    )
+    course_publication_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     status: Mapped[str] = mapped_column(
         String(32), default="scheduled", nullable=False
     )  # 'scheduled' | 'enrollment_open' | 'active' | 'grading' | 'concluded'
@@ -96,13 +103,17 @@ class CourseSection(Base):
     __tablename__ = "course_sections"
     __table_args__ = (
         UniqueConstraint("course_offering_id", "section_code", name="uq_course_section_offering_code"),
+        UniqueConstraint("tenant_id", "id", name="uq_course_section_tenant_id"),
+        ForeignKeyConstraint(
+            ["tenant_id", "course_offering_id"],
+            ["course_offerings.tenant_id", "course_offerings.id"],
+            ondelete="CASCADE",
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
-    course_offering_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("course_offerings.id", ondelete="CASCADE"), nullable=False
-    )
+    course_offering_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     section_code: Mapped[str] = mapped_column(String(32), nullable=False)  # e.g. "SEC-A", "SEC-B", "LAB-01"
     name: Mapped[str] = mapped_column(String(128), nullable=False)  # e.g. "Section A - Morning Lecture"
     delivery_mode: Mapped[str] = mapped_column(
@@ -119,13 +130,16 @@ class SectionInstructor(Base):
     __tablename__ = "section_instructors"
     __table_args__ = (
         UniqueConstraint("course_section_id", "faculty_id", name="uq_section_instructor_section_faculty"),
+        ForeignKeyConstraint(
+            ["tenant_id", "course_section_id"],
+            ["course_sections.tenant_id", "course_sections.id"],
+            ondelete="CASCADE",
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
-    course_section_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("course_sections.id", ondelete="CASCADE"), nullable=False
-    )
+    course_section_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     faculty_id: Mapped[str] = mapped_column(String(64), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     role: Mapped[str] = mapped_column(
         String(32), default="primary_instructor", nullable=False
@@ -139,14 +153,22 @@ class SectionEnrollment(Base):
     __tablename__ = "section_enrollments"
     __table_args__ = (
         UniqueConstraint("course_section_id", "student_id", name="uq_section_enrollment_section_student"),
+        UniqueConstraint("tenant_id", "id", name="uq_section_enrollment_tenant_id"),
+        ForeignKeyConstraint(
+            ["tenant_id", "course_section_id"],
+            ["course_sections.tenant_id", "course_sections.id"],
+            ondelete="CASCADE",
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
-    course_section_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("course_sections.id", ondelete="CASCADE"), nullable=False
-    )
+    course_section_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     student_id: Mapped[str] = mapped_column(String(64), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    registration_type: Mapped[str] = mapped_column(
+        String(32), default="credit", nullable=False
+    )  # 'credit' | 'audit' | 'pass_fail'
+    attempt_number: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     enrollment_status: Mapped[str] = mapped_column(
         String(32), default="enrolled", nullable=False
     )  # 'enrolled' | 'waitlisted' | 'dropped' | 'withdrawn' | 'completed'
@@ -159,14 +181,18 @@ class LearnerConceptProgress(Base):
 
     __tablename__ = "learner_concept_progress"
     __table_args__ = (
-        UniqueConstraint("section_enrollment_id", "concept_id", "concept_version", name="uq_learner_concept_progress"),
+        UniqueConstraint("section_enrollment_id", "content_type", "concept_id", "concept_version", name="uq_learner_concept_progress"),
+        ForeignKeyConstraint(
+            ["tenant_id", "section_enrollment_id"],
+            ["section_enrollments.tenant_id", "section_enrollments.id"],
+            ondelete="CASCADE",
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
-    section_enrollment_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("section_enrollments.id", ondelete="CASCADE"), nullable=False
-    )
+    section_enrollment_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    content_type: Mapped[str] = mapped_column(String(32), default="library", nullable=False)  # 'library' | 'university'
     concept_id: Mapped[str] = mapped_column(String(64), nullable=False)
     concept_version: Mapped[int] = mapped_column(Integer, nullable=False)
     status: Mapped[str] = mapped_column(
@@ -183,13 +209,18 @@ class AssessmentSubmission(Base):
     __tablename__ = "assessment_submissions"
     __table_args__ = (
         UniqueConstraint("section_enrollment_id", "studio_instance_id", "attempt_number", name="uq_assessment_submission_attempt"),
+        ForeignKeyConstraint(
+            ["tenant_id", "section_enrollment_id"],
+            ["section_enrollments.tenant_id", "section_enrollments.id"],
+            ondelete="CASCADE",
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
-    section_enrollment_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("section_enrollments.id", ondelete="CASCADE"), nullable=False
-    )
+    section_enrollment_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    studio_type: Mapped[str] = mapped_column(String(32), default="coding", nullable=False)
+    studio_version: Mapped[str] = mapped_column(String(16), default="1.0.0", nullable=False)
     studio_instance_id: Mapped[str] = mapped_column(String(64), nullable=False)
     attempt_number: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     submission_payload: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
@@ -212,13 +243,16 @@ class CourseGrade(Base):
     __tablename__ = "course_grades"
     __table_args__ = (
         UniqueConstraint("section_enrollment_id", name="uq_course_grade_enrollment"),
+        ForeignKeyConstraint(
+            ["tenant_id", "section_enrollment_id"],
+            ["section_enrollments.tenant_id", "section_enrollments.id"],
+            ondelete="CASCADE",
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
-    section_enrollment_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("section_enrollments.id", ondelete="CASCADE"), nullable=False
-    )
+    section_enrollment_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     letter_grade: Mapped[str] = mapped_column(String(8), nullable=False)  # 'A', 'A-', 'B+', 'P', 'F'
     numeric_score: Mapped[float] = mapped_column(Float, nullable=False)  # 94.5
     gpa_points: Mapped[float] = mapped_column(Float, nullable=False)  # 4.0
@@ -228,3 +262,40 @@ class CourseGrade(Base):
     )
     finalized_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+
+class StudentAcademicProfile(Base):
+    """Student institutional academic record, cohort placement, and academic standing."""
+
+    __tablename__ = "student_academic_profiles"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "student_id", name="uq_student_academic_profile_tenant_user"),
+        UniqueConstraint("tenant_id", "id", name="uq_student_academic_profile_tenant_id"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    student_id: Mapped[str] = mapped_column(String(64), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    matriculation_number: Mapped[str] = mapped_column(String(64), nullable=False)  # e.g. "ASH-2024-CS-0042"
+    cohort_year: Mapped[int] = mapped_column(Integer, nullable=False)  # e.g. 2024
+    degree_curriculum_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    academic_standing: Mapped[str] = mapped_column(
+        String(32), default="good_standing", nullable=False
+    )  # 'good_standing' | 'probation' | 'honors' | 'suspended'
+    cumulative_gpa: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    total_credits_earned: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    def to_dict(self) -> dict:
+        return {
+            "id": str(self.id),
+            "tenant_id": self.tenant_id,
+            "student_id": self.student_id,
+            "matriculation_number": self.matriculation_number,
+            "cohort_year": self.cohort_year,
+            "degree_curriculum_id": self.degree_curriculum_id,
+            "academic_standing": self.academic_standing,
+            "cumulative_gpa": self.cumulative_gpa,
+            "total_credits_earned": self.total_credits_earned,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }

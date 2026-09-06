@@ -11,6 +11,7 @@ from db.models.enrollment import (
     StudentCurriculumEnrollment,
     StudentProgramEnrollment,
 )
+from db.models.operations import StudentAcademicProfile
 from schemas.governance import (
     StudentCurriculumEnrollmentCreate,
     StudentCurriculumEnrollmentResponse,
@@ -18,6 +19,11 @@ from schemas.governance import (
     StudentProgramEnrollmentCreate,
     StudentProgramEnrollmentResponse,
     StudentProgramEnrollmentUpdate,
+)
+from schemas.operations import (
+    StudentAcademicProfileCreate,
+    StudentAcademicProfileResponse,
+    StudentAcademicProfileUpdate,
 )
 
 router = APIRouter(prefix="/students", tags=["Governance - Student Matriculation"])
@@ -187,3 +193,86 @@ async def delete_student_program(
     await db.delete(enrollment)
     await db.commit()
     return None
+
+
+# ============================================================================
+# Student Institutional Academic Profiles
+# ============================================================================
+
+@router.get("/profiles", response_model=List[StudentAcademicProfileResponse], summary="List Student Academic Profiles")
+async def list_student_profiles(
+    cohort_year: Optional[int] = Query(None),
+    standing: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_current_tenant_id),
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = select(StudentAcademicProfile).where(StudentAcademicProfile.tenant_id == tenant_id)
+    if cohort_year:
+        stmt = stmt.where(StudentAcademicProfile.cohort_year == cohort_year)
+    if standing:
+        stmt = stmt.where(StudentAcademicProfile.academic_standing == standing)
+    result = await db.execute(stmt)
+    return result.scalars().all()
+
+
+@router.get("/profiles/{student_id}", response_model=StudentAcademicProfileResponse, summary="Get Student Academic Profile")
+async def get_student_profile(
+    student_id: str,
+    tenant_id: str = Depends(get_current_tenant_id),
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = select(StudentAcademicProfile).where(
+        StudentAcademicProfile.student_id == student_id,
+        StudentAcademicProfile.tenant_id == tenant_id,
+    )
+    profile = (await db.execute(stmt)).scalar_one_or_none()
+    if not profile:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Academic profile for student '{student_id}' not found")
+    return profile
+
+
+@router.post("/profiles", response_model=StudentAcademicProfileResponse, status_code=status.HTTP_201_CREATED, summary="Create Student Academic Profile")
+async def create_student_profile(
+    payload: StudentAcademicProfileCreate,
+    tenant_id: str = Depends(get_current_tenant_id),
+    db: AsyncSession = Depends(get_db),
+):
+    data = payload.model_dump()
+    data["tenant_id"] = tenant_id
+    profile = StudentAcademicProfile(**data)
+    db.add(profile)
+    try:
+        await db.commit()
+        await db.refresh(profile)
+        return profile
+    except Exception as exc:
+        await db.rollback()
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to create profile: {str(exc)}")
+
+
+@router.put("/profiles/{student_id}", response_model=StudentAcademicProfileResponse, summary="Update Student Academic Profile")
+async def update_student_profile(
+    student_id: str,
+    payload: StudentAcademicProfileUpdate,
+    tenant_id: str = Depends(get_current_tenant_id),
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = select(StudentAcademicProfile).where(
+        StudentAcademicProfile.student_id == student_id,
+        StudentAcademicProfile.tenant_id == tenant_id,
+    )
+    profile = (await db.execute(stmt)).scalar_one_or_none()
+    if not profile:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Academic profile for student '{student_id}' not found")
+
+    update_data = payload.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(profile, field, value)
+
+    try:
+        await db.commit()
+        await db.refresh(profile)
+        return profile
+    except Exception as exc:
+        await db.rollback()
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to update profile: {str(exc)}")

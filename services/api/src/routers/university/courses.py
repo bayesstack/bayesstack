@@ -112,6 +112,7 @@ async def fork_course(
         status="draft",
     )
     db.add(new_course)
+    await db.flush()
 
     chapter_stmt = (
         select(LibraryCourseChapter)

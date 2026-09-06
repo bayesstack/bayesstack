@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from typing import Any, Iterable
 
 from fastapi import HTTPException, Request, status
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth.session import SESSION_COOKIE_NAME, verify_session_token
@@ -365,6 +365,17 @@ async def publish_course_snapshot(
     )
     next_number = (current_max or 0) + 1
 
+    # Deactivate previous active publications to honor unique partial index
+    await db.execute(
+        update(CoursePublication)
+        .where(
+            CoursePublication.tenant_id == tenant_id,
+            CoursePublication.university_course_id == course_id,
+            CoursePublication.status == "active",
+        )
+        .values(status="archived")
+    )
+
     new_pub = CoursePublication(
         tenant_id=tenant_id,
         university_course_id=course_id,
@@ -393,7 +404,7 @@ async def rollback_course_publication(
 ) -> CoursePublication:
     """Atomically swap the current publication pointer on university_courses.
 
-    Zero mutations to course_publications rows (preserves strict relational immutability).
+    Maintains single active publication invariant by archiving other publications.
     """
     from db.models import UniversityCourse
 
@@ -411,6 +422,18 @@ async def rollback_course_publication(
     if not target_pub:
         raise _not_found(f"Publication #{target_publication_number} not found for course {course_id}")
 
+    # Deactivate previous active publications
+    await db.execute(
+        update(CoursePublication)
+        .where(
+            CoursePublication.tenant_id == tenant_id,
+            CoursePublication.university_course_id == course_id,
+            CoursePublication.status == "active",
+        )
+        .values(status="archived")
+    )
+
+    target_pub.status = "active"
     course.current_publication_id = target_pub.id
     await db.flush()
     return target_pub

@@ -12,6 +12,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     ForeignKey,
+    ForeignKeyConstraint,
     Integer,
     String,
     UniqueConstraint,
@@ -31,14 +32,17 @@ class FacultyProgramAssignment(Base):
     __tablename__ = "faculty_program_assignments"
     __table_args__ = (
         UniqueConstraint("faculty_id", "university_program_id", name="uq_faculty_program_assignment"),
+        ForeignKeyConstraint(
+            ["tenant_id", "university_program_id"],
+            ["university_programs.tenant_id", "university_programs.id"],
+            ondelete="CASCADE",
+        ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
     faculty_id: Mapped[str] = mapped_column(String(64), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    university_program_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("university_programs.id", ondelete="CASCADE"), nullable=False
-    )
+    university_program_id: Mapped[str] = mapped_column(String(64), nullable=False)
     assigned_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
 
     tenant_program_id = synonym("university_program_id")
@@ -50,14 +54,17 @@ class FacultyCourseAssignment(Base):
     __tablename__ = "faculty_course_assignments"
     __table_args__ = (
         UniqueConstraint("faculty_id", "university_course_id", name="uq_faculty_course_assignment"),
+        ForeignKeyConstraint(
+            ["tenant_id", "university_course_id"],
+            ["university_courses.tenant_id", "university_courses.id"],
+            ondelete="CASCADE",
+        ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
     faculty_id: Mapped[str] = mapped_column(String(64), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    university_course_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("university_courses.id", ondelete="CASCADE"), nullable=False
-    )
+    university_course_id: Mapped[str] = mapped_column(String(64), nullable=False)
     assigned_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
 
     tenant_course_id = synonym("university_course_id")
@@ -69,14 +76,17 @@ class StudentProgramEnrollment(Base):
     __tablename__ = "student_program_enrollments"
     __table_args__ = (
         UniqueConstraint("student_id", "university_program_id", name="uq_student_program_enrollment"),
+        ForeignKeyConstraint(
+            ["tenant_id", "university_program_id"],
+            ["university_programs.tenant_id", "university_programs.id"],
+            ondelete="CASCADE",
+        ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
     student_id: Mapped[str] = mapped_column(String(64), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    university_program_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("university_programs.id", ondelete="CASCADE"), nullable=False
-    )
+    university_program_id: Mapped[str] = mapped_column(String(64), nullable=False)
     enrolled_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
@@ -89,14 +99,17 @@ class StudentCurriculumEnrollment(Base):
     __tablename__ = "student_curriculum_enrollments"
     __table_args__ = (
         UniqueConstraint("student_id", "university_curriculum_id", name="uq_student_curriculum_enrollment"),
+        ForeignKeyConstraint(
+            ["tenant_id", "university_curriculum_id"],
+            ["university_curriculums.tenant_id", "university_curriculums.id"],
+            ondelete="CASCADE",
+        ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
     student_id: Mapped[str] = mapped_column(String(64), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    university_curriculum_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("university_curriculums.id", ondelete="CASCADE"), nullable=False
-    )
+    university_curriculum_id: Mapped[str] = mapped_column(String(64), nullable=False)
     enrolled_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 

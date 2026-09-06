@@ -114,6 +114,7 @@ async def fork_chapter(
         status="draft",
     )
     db.add(new_chapter)
+    await db.flush()
 
     # 3. Clone concept links into dedicated edge table
     concept_stmt = (

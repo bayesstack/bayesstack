@@ -54,14 +54,20 @@ class UniversityCurriculum(Base):
     """Institutional degree roadmap (e.g. Ashoka 4-Year B.Tech Computer Science 2026)."""
 
     __tablename__ = "university_curriculums"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "id", name="uq_uni_curr_tenant_id"),
+        ForeignKeyConstraint(
+            ["tenant_id", "source_university_curriculum_id"],
+            ["university_curriculums.tenant_id", "university_curriculums.id"],
+            ondelete="SET NULL",
+        ),
+    )
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
     source_library_curriculum_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     source_library_version: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    source_university_curriculum_id: Mapped[Optional[str]] = mapped_column(
-        String(64), ForeignKey("university_curriculums.id", ondelete="SET NULL"), nullable=True
-    )
+    source_university_curriculum_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     local_code: Mapped[str] = mapped_column(String(64), nullable=False)
     local_title: Mapped[str] = mapped_column(String(255), nullable=False)
     composition_type: Mapped[str] = mapped_column(String(32), default="custom", nullable=False)  # 'library' | 'custom' | 'hybrid'
@@ -86,18 +92,24 @@ class UniversityCurriculumProgram(Base):
     __tablename__ = "university_curriculum_programs"
     __table_args__ = (
         UniqueConstraint("university_curriculum_id", "order_rank", name="uq_uni_curr_prog_rank"),
+        ForeignKeyConstraint(
+            ["tenant_id", "university_curriculum_id"],
+            ["university_curriculums.tenant_id", "university_curriculums.id"],
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["tenant_id", "university_program_id"],
+            ["university_programs.tenant_id", "university_programs.id"],
+            ondelete="CASCADE",
+        ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
-    university_curriculum_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("university_curriculums.id", ondelete="CASCADE"), nullable=False
-    )
+    university_curriculum_id: Mapped[str] = mapped_column(String(64), nullable=False)
     library_program_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     library_version: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    university_program_id: Mapped[Optional[str]] = mapped_column(
-        String(64), ForeignKey("university_programs.id", ondelete="CASCADE"), nullable=True
-    )
+    university_program_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     order_rank: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
     adoption_mode: Mapped[str] = mapped_column(String(16), default="pinned", server_default="pinned", nullable=False)
     release_channel: Mapped[str] = mapped_column(String(32), default="stable", server_default="stable", nullable=False)
@@ -119,14 +131,20 @@ class UniversityProgram(Base):
     """Institutional semester or module track (e.g. Semester 3 Sophomore Fall)."""
 
     __tablename__ = "university_programs"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "id", name="uq_uni_prog_tenant_id"),
+        ForeignKeyConstraint(
+            ["tenant_id", "source_university_program_id"],
+            ["university_programs.tenant_id", "university_programs.id"],
+            ondelete="SET NULL",
+        ),
+    )
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
     source_library_program_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     source_library_version: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    source_university_program_id: Mapped[Optional[str]] = mapped_column(
-        String(64), ForeignKey("university_programs.id", ondelete="SET NULL"), nullable=True
-    )
+    source_university_program_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     local_code: Mapped[str] = mapped_column(String(64), nullable=False)
     local_title: Mapped[str] = mapped_column(String(255), nullable=False)
     program_type: Mapped[str] = mapped_column(String(32), default="semester", nullable=False)
@@ -155,18 +173,24 @@ class UniversityProgramCourse(Base):
     __tablename__ = "university_program_courses"
     __table_args__ = (
         UniqueConstraint("university_program_id", "order_rank", name="uq_uni_prog_course_rank"),
+        ForeignKeyConstraint(
+            ["tenant_id", "university_program_id"],
+            ["university_programs.tenant_id", "university_programs.id"],
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["tenant_id", "university_course_id"],
+            ["university_courses.tenant_id", "university_courses.id"],
+            ondelete="CASCADE",
+        ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
-    university_program_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("university_programs.id", ondelete="CASCADE"), nullable=False
-    )
+    university_program_id: Mapped[str] = mapped_column(String(64), nullable=False)
     library_course_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     library_version: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    university_course_id: Mapped[Optional[str]] = mapped_column(
-        String(64), ForeignKey("university_courses.id", ondelete="CASCADE"), nullable=True
-    )
+    university_course_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     order_rank: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
     adoption_mode: Mapped[str] = mapped_column(String(16), default="pinned", server_default="pinned", nullable=False)
     release_channel: Mapped[str] = mapped_column(String(32), default="stable", server_default="stable", nullable=False)
@@ -194,18 +218,24 @@ class UniversityCourse(Base):
     """Institutional course with local codes and branding (e.g. ML-101 Intro to ML)."""
 
     __tablename__ = "university_courses"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "id", name="uq_uni_course_tenant_id"),
+        ForeignKeyConstraint(
+            ["tenant_id", "source_university_course_id"],
+            ["university_courses.tenant_id", "university_courses.id"],
+            ondelete="SET NULL",
+        ),
+    )
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
     source_library_course_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     source_library_version: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    source_university_course_id: Mapped[Optional[str]] = mapped_column(
-        String(64), ForeignKey("university_courses.id", ondelete="SET NULL"), nullable=True
-    )
+    source_university_course_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     local_code: Mapped[str] = mapped_column(String(64), nullable=False)
     local_title: Mapped[str] = mapped_column(String(255), nullable=False)
     composition_type: Mapped[str] = mapped_column(String(32), default="custom", nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    description: Mapped[Optional[Text]] = mapped_column(Text, nullable=True)
     metadata_: Mapped[dict[str, Any]] = mapped_column("metadata", JSON, default=dict, nullable=False)
     status: Mapped[str] = mapped_column(String(16), default="draft", nullable=False)
     adoption_mode: Mapped[str] = mapped_column(String(16), default="pinned", server_default="pinned", nullable=False)
@@ -237,20 +267,26 @@ class UniversityCourseChapter(Base):
     __tablename__ = "university_course_chapters"
     __table_args__ = (
         UniqueConstraint("university_course_id", "order_rank", name="uq_uni_course_chap_rank"),
+        ForeignKeyConstraint(
+            ["tenant_id", "university_course_id"],
+            ["university_courses.tenant_id", "university_courses.id"],
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["tenant_id", "university_chapter_id"],
+            ["university_chapters.tenant_id", "university_chapters.id"],
+            ondelete="CASCADE",
+        ),
         # Reverse partial index for library impact analysis (avoids full table scans)
         Index("idx_ucc_borrowed_lib_chap", "library_chapter_id", "library_version", postgresql_where="library_chapter_id IS NOT NULL"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
-    university_course_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("university_courses.id", ondelete="CASCADE"), nullable=False
-    )
+    university_course_id: Mapped[str] = mapped_column(String(64), nullable=False)
     library_chapter_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     library_version: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    university_chapter_id: Mapped[Optional[str]] = mapped_column(
-        String(64), ForeignKey("university_chapters.id", ondelete="CASCADE"), nullable=True
-    )
+    university_chapter_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     order_rank: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
     adoption_mode: Mapped[str] = mapped_column(String(16), default="pinned", server_default="pinned", nullable=False)
     release_channel: Mapped[str] = mapped_column(String(32), default="stable", server_default="stable", nullable=False)
@@ -271,18 +307,24 @@ class UniversityChapter(Base):
     """Institutional chapter (custom built or forked via Copy-on-Write from library)."""
 
     __tablename__ = "university_chapters"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "id", name="uq_uni_chap_tenant_id"),
+        ForeignKeyConstraint(
+            ["tenant_id", "source_university_chapter_id"],
+            ["university_chapters.tenant_id", "university_chapters.id"],
+            ondelete="SET NULL",
+        ),
+    )
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
     source_library_chapter_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     source_library_version: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    source_university_chapter_id: Mapped[Optional[str]] = mapped_column(
-        String(64), ForeignKey("university_chapters.id", ondelete="SET NULL"), nullable=True
-    )
+    source_university_chapter_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     local_code: Mapped[str] = mapped_column(String(64), nullable=False)
     local_title: Mapped[str] = mapped_column(String(255), nullable=False)
     composition_type: Mapped[str] = mapped_column(String(32), default="custom", nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    description: Mapped[Optional[Text]] = mapped_column(Text, nullable=True)
     metadata_: Mapped[dict[str, Any]] = mapped_column("metadata", JSON, default=dict, nullable=False)
     status: Mapped[str] = mapped_column(String(16), default="draft", nullable=False)
     adoption_mode: Mapped[str] = mapped_column(String(16), default="pinned", server_default="pinned", nullable=False)
@@ -311,6 +353,16 @@ class UniversityChapterConcept(Base):
     __tablename__ = "university_chapter_concepts"
     __table_args__ = (
         UniqueConstraint("university_chapter_id", "order_rank", name="uq_uni_chap_cpt_rank"),
+        ForeignKeyConstraint(
+            ["tenant_id", "university_chapter_id"],
+            ["university_chapters.tenant_id", "university_chapters.id"],
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["tenant_id", "university_concept_id"],
+            ["university_concepts.tenant_id", "university_concepts.id"],
+            ondelete="CASCADE",
+        ),
         # Reverse partial indexes for zero-copy reverse lookups
         Index("idx_ucc_borrowed_lib_cpt", "library_concept_id", "library_concept_version", postgresql_where="library_concept_id IS NOT NULL"),
         Index("idx_ucc_custom_uni_cpt", "tenant_id", "university_concept_id", postgresql_where="university_concept_id IS NOT NULL"),
@@ -318,14 +370,10 @@ class UniversityChapterConcept(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
-    university_chapter_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("university_chapters.id", ondelete="CASCADE"), nullable=False
-    )
+    university_chapter_id: Mapped[str] = mapped_column(String(64), nullable=False)
     library_concept_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     library_concept_version: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    university_concept_id: Mapped[Optional[str]] = mapped_column(
-        String(64), ForeignKey("university_concepts.id", ondelete="CASCADE"), nullable=True
-    )
+    university_concept_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     order_rank: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
     adoption_mode: Mapped[str] = mapped_column(String(16), default="pinned", server_default="pinned", nullable=False)
     release_channel: Mapped[str] = mapped_column(String(32), default="stable", server_default="stable", nullable=False)
@@ -351,6 +399,9 @@ class UniversityConcept(Base):
     """Institutional proprietary concept created by university faculty."""
 
     __tablename__ = "university_concepts"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "id", name="uq_uni_cpt_tenant_id"),
+    )
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
@@ -393,13 +444,17 @@ class UniversityStudioInstance(Base):
     __tablename__ = "university_studio_instances"
     __table_args__ = (
         UniqueConstraint("concept_id", "order_rank", name="uq_uni_studio_rank"),
+        UniqueConstraint("tenant_id", "id", name="uq_uni_studio_tenant_id"),
+        ForeignKeyConstraint(
+            ["tenant_id", "concept_id"],
+            ["university_concepts.tenant_id", "university_concepts.id"],
+            ondelete="CASCADE",
+        ),
     )
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
-    concept_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("university_concepts.id", ondelete="CASCADE"), nullable=False
-    )
+    concept_id: Mapped[str] = mapped_column(String(64), nullable=False)
     studio_type: Mapped[str] = mapped_column(String(32), nullable=False)
     studio_version: Mapped[str] = mapped_column(String(16), default="1.0.0", nullable=False)
     order_rank: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)

@@ -25,8 +25,11 @@ from db.models import (
     LearnerConceptProgress,
     SectionEnrollment,
     SectionInstructor,
+    StudentAcademicProfile,
     StudioAsset,
     Tenant,
+    TenantMembership,
+    TenantRole,
     UniversityCourse,
     User,
 )
@@ -654,6 +657,24 @@ async def seed_academic_operations(session):
             CourseGrade.section_enrollment_id == enrollment.id,
         )
 
+        # Student Academic Profile (Bayes Institute)
+        await _add_if_missing(
+            session,
+            StudentAcademicProfile,
+            {
+                "tenant_id": "tenant-bayes",
+                "student_id": "user-bayes-learner",
+                "matriculation_number": "BAYES-2024-AI-0001",
+                "cohort_year": 2024,
+                "degree_curriculum_id": "curriculum-bayes-ai-ml",
+                "academic_standing": "good_standing",
+                "cumulative_gpa": 4.0,
+                "total_credits_earned": 48,
+            },
+            StudentAcademicProfile.tenant_id == "tenant-bayes",
+            StudentAcademicProfile.student_id == "user-bayes-learner",
+        )
+
     # 11. Ashoka University Academic Operations Seed
     ashoka_term = await _add_if_missing(
         session,
@@ -808,6 +829,24 @@ async def seed_academic_operations(session):
             LearnerConceptProgress.concept_version == 4,
         )
 
+        # Student Academic Profile (Ashoka University)
+        await _add_if_missing(
+            session,
+            StudentAcademicProfile,
+            {
+                "tenant_id": "tenant-ashoka",
+                "student_id": "user-ashoka-learner",
+                "matriculation_number": "ASH-2024-CS-0042",
+                "cohort_year": 2024,
+                "degree_curriculum_id": None,
+                "academic_standing": "good_standing",
+                "cumulative_gpa": 3.85,
+                "total_credits_earned": 32,
+            },
+            StudentAcademicProfile.tenant_id == "tenant-ashoka",
+            StudentAcademicProfile.student_id == "user-ashoka-learner",
+        )
+
 
 
 async def seed_database():
@@ -845,7 +884,7 @@ async def seed_database():
         await session.commit()
         logger.info("Tenants seeding completed: %d created, %d updated.", t_created, t_updated)
 
-        # 2. Seed Users
+        # 2. Seed Users & Institutional Memberships
         u_created, u_updated = 0, 0
         for seed in DEFAULT_USERS:
             result = await session.execute(select(User).where(User.email == seed["email"]))
@@ -856,22 +895,53 @@ async def seed_database():
                 existing_user.role = seed["role"]
                 existing_user.tenant_id = seed["tenant_id"]
                 existing_user.hashed_password = hash_password(seed["password"])
+                user_obj = existing_user
                 u_updated += 1
             else:
-                user = User(
+                user_obj = User(
                     id=seed["id"],
                     email=seed["email"],
                     hashed_password=hash_password(seed["password"]),
                     full_name=seed["full_name"],
                     role=seed["role"],
                     tenant_id=seed["tenant_id"],
+                    is_superadmin=(seed["role"] == "superadmin"),
                     is_active=True,
                 )
-                session.add(user)
+                session.add(user_obj)
                 u_created += 1
 
+            await session.flush()
+
+            # Seed TenantMembership & TenantRole
+            if seed.get("tenant_id"):
+                await _add_if_missing(
+                    session,
+                    TenantMembership,
+                    {
+                        "tenant_id": seed["tenant_id"],
+                        "user_id": user_obj.id,
+                        "is_active": True,
+                    },
+                    TenantMembership.tenant_id == seed["tenant_id"],
+                    TenantMembership.user_id == user_obj.id,
+                )
+                await session.flush()
+                await _add_if_missing(
+                    session,
+                    TenantRole,
+                    {
+                        "tenant_id": seed["tenant_id"],
+                        "user_id": user_obj.id,
+                        "role": seed["role"],
+                    },
+                    TenantRole.tenant_id == seed["tenant_id"],
+                    TenantRole.user_id == user_obj.id,
+                    TenantRole.role == seed["role"],
+                )
+
         await session.commit()
-        logger.info("Users seeding completed: %d created, %d updated.", u_created, u_updated)
+        logger.info("Users and memberships seeding completed: %d created, %d updated.", u_created, u_updated)
 
         await seed_content_library(session)
         await session.commit()
