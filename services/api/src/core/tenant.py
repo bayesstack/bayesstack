@@ -81,9 +81,12 @@ def extract_tenant_slug(raw_host: str, base_domains: Optional[list[str]] = None)
 
 
 async def resolve_tenant_by_slug(db: AsyncSession, slug: str) -> Optional[Tenant]:
-    """Look up active tenant in database by slug."""
+    """Look up active tenant in database by slug or ID."""
     if not slug:
         return None
-    stmt = select(Tenant).where(Tenant.slug == slug.lower(), Tenant.is_active == True)
+    stmt = select(Tenant).where(
+        (Tenant.slug == slug.lower()) | (Tenant.id == slug),
+        Tenant.is_active == True,
+    )
     result = await db.execute(stmt)
     return result.scalar_one_or_none()

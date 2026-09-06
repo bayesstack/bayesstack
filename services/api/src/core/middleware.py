@@ -29,8 +29,9 @@ class TenantMiddleware(BaseHTTPMiddleware):
         request.state.tenant_slug = None
 
         if slug is not None:
-            # Check for malformed tenant slug syntax
-            if not is_valid_tenant_slug(slug):
+            # Check for malformed tenant slug syntax only when extracted from hostname
+            is_from_header = bool(not extract_tenant_slug(raw_host) and x_tenant_id)
+            if not is_from_header and not is_valid_tenant_slug(slug):
                 return JSONResponse(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     content={

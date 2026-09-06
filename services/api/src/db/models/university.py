@@ -370,8 +370,12 @@ class UniversityConcept(Base):
         return None
 
     @property
-    def description(self) -> None:
+    def description(self) -> Optional[str]:
         return None
+
+    @description.setter
+    def description(self, value: Any) -> None:
+        pass
 
     @property
     def metadata_json(self) -> dict[str, Any]:
@@ -380,6 +384,7 @@ class UniversityConcept(Base):
     @property
     def origin_type(self) -> str:
         return "custom"
+
 
 
 class UniversityStudioInstance(Base):

@@ -94,6 +94,8 @@ class LibraryCurriculumProgram(Base):
     order_rank: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
     display_label: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
 
+    position = synonym("order_rank")
+
 
 class LibraryProgram(Base):
     """A major academic term or specialization track (e.g. Semester 1, Year 1 Core)."""

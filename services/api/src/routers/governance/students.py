@@ -1,0 +1,189 @@
+"""Institutional Governance: Student Matriculation Router (student_curriculum_enrollments, student_program_enrollments)."""
+
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from core.database import get_db
+from core.dependencies import get_current_tenant_id
+from db.models.enrollment import (
+    StudentCurriculumEnrollment,
+    StudentProgramEnrollment,
+)
+from schemas.governance import (
+    StudentCurriculumEnrollmentCreate,
+    StudentCurriculumEnrollmentResponse,
+    StudentCurriculumEnrollmentUpdate,
+    StudentProgramEnrollmentCreate,
+    StudentProgramEnrollmentResponse,
+    StudentProgramEnrollmentUpdate,
+)
+
+router = APIRouter(prefix="/students", tags=["Governance - Student Matriculation"])
+
+
+# ============================================================================
+# Degree / Curriculum Matriculation
+# ============================================================================
+
+@router.get("/curriculums", response_model=List[StudentCurriculumEnrollmentResponse], summary="List Student Degree Enrollments")
+async def list_student_curriculums(
+    student_id: Optional[str] = Query(None),
+    curriculum_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_current_tenant_id),
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = select(StudentCurriculumEnrollment).where(StudentCurriculumEnrollment.tenant_id == tenant_id)
+    if student_id:
+        stmt = stmt.where(StudentCurriculumEnrollment.student_id == student_id)
+    if curriculum_id:
+        stmt = stmt.where(StudentCurriculumEnrollment.university_curriculum_id == curriculum_id)
+    result = await db.execute(stmt)
+    return result.scalars().all()
+
+
+@router.post("/curriculums", response_model=StudentCurriculumEnrollmentResponse, status_code=status.HTTP_201_CREATED, summary="Matriculate Student into Degree Curriculum")
+async def matriculate_student_curriculum(
+    payload: StudentCurriculumEnrollmentCreate,
+    tenant_id: str = Depends(get_current_tenant_id),
+    db: AsyncSession = Depends(get_db),
+):
+    data = payload.model_dump()
+    data["tenant_id"] = tenant_id
+    enrollment = StudentCurriculumEnrollment(**data)
+    db.add(enrollment)
+    try:
+        await db.commit()
+        await db.refresh(enrollment)
+        return enrollment
+    except Exception as exc:
+        await db.rollback()
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to matriculate student: {str(exc)}")
+
+
+@router.put("/curriculums/{enrollment_id}", response_model=StudentCurriculumEnrollmentResponse, summary="Update Student Degree Enrollment")
+async def update_student_curriculum(
+    enrollment_id: int,
+    payload: StudentCurriculumEnrollmentUpdate,
+    tenant_id: str = Depends(get_current_tenant_id),
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = select(StudentCurriculumEnrollment).where(
+        StudentCurriculumEnrollment.id == enrollment_id, StudentCurriculumEnrollment.tenant_id == tenant_id
+    )
+    enrollment = (await db.execute(stmt)).scalar_one_or_none()
+    if not enrollment:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Enrollment not found")
+
+    update_data = payload.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(enrollment, field, value)
+
+    try:
+        await db.commit()
+        await db.refresh(enrollment)
+        return enrollment
+    except Exception as exc:
+        await db.rollback()
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to update enrollment: {str(exc)}")
+
+
+@router.delete("/curriculums/{enrollment_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete Student Degree Enrollment")
+async def delete_student_curriculum(
+    enrollment_id: int,
+    tenant_id: str = Depends(get_current_tenant_id),
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = select(StudentCurriculumEnrollment).where(
+        StudentCurriculumEnrollment.id == enrollment_id, StudentCurriculumEnrollment.tenant_id == tenant_id
+    )
+    enrollment = (await db.execute(stmt)).scalar_one_or_none()
+    if not enrollment:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Enrollment not found")
+    await db.delete(enrollment)
+    await db.commit()
+    return None
+
+
+# ============================================================================
+# Semester / Program Stage Matriculation
+# ============================================================================
+
+@router.get("/programs", response_model=List[StudentProgramEnrollmentResponse], summary="List Student Program Enrollments")
+async def list_student_programs(
+    student_id: Optional[str] = Query(None),
+    program_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_current_tenant_id),
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = select(StudentProgramEnrollment).where(StudentProgramEnrollment.tenant_id == tenant_id)
+    if student_id:
+        stmt = stmt.where(StudentProgramEnrollment.student_id == student_id)
+    if program_id:
+        stmt = stmt.where(StudentProgramEnrollment.university_program_id == program_id)
+    result = await db.execute(stmt)
+    return result.scalars().all()
+
+
+@router.post("/programs", response_model=StudentProgramEnrollmentResponse, status_code=status.HTTP_201_CREATED, summary="Enroll Student in Program Stage")
+async def enroll_student_program(
+    payload: StudentProgramEnrollmentCreate,
+    tenant_id: str = Depends(get_current_tenant_id),
+    db: AsyncSession = Depends(get_db),
+):
+    data = payload.model_dump()
+    data["tenant_id"] = tenant_id
+    enrollment = StudentProgramEnrollment(**data)
+    db.add(enrollment)
+    try:
+        await db.commit()
+        await db.refresh(enrollment)
+        return enrollment
+    except Exception as exc:
+        await db.rollback()
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to enroll student: {str(exc)}")
+
+
+@router.put("/programs/{enrollment_id}", response_model=StudentProgramEnrollmentResponse, summary="Update Student Program Enrollment")
+async def update_student_program(
+    enrollment_id: int,
+    payload: StudentProgramEnrollmentUpdate,
+    tenant_id: str = Depends(get_current_tenant_id),
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = select(StudentProgramEnrollment).where(
+        StudentProgramEnrollment.id == enrollment_id, StudentProgramEnrollment.tenant_id == tenant_id
+    )
+    enrollment = (await db.execute(stmt)).scalar_one_or_none()
+    if not enrollment:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Enrollment not found")
+
+    update_data = payload.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(enrollment, field, value)
+
+    try:
+        await db.commit()
+        await db.refresh(enrollment)
+        return enrollment
+    except Exception as exc:
+        await db.rollback()
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to update enrollment: {str(exc)}")
+
+
+@router.delete("/programs/{enrollment_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete Student Program Enrollment")
+async def delete_student_program(
+    enrollment_id: int,
+    tenant_id: str = Depends(get_current_tenant_id),
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = select(StudentProgramEnrollment).where(
+        StudentProgramEnrollment.id == enrollment_id, StudentProgramEnrollment.tenant_id == tenant_id
+    )
+    enrollment = (await db.execute(stmt)).scalar_one_or_none()
+    if not enrollment:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Enrollment not found")
+    await db.delete(enrollment)
+    await db.commit()
+    return None
