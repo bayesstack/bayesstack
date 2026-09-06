@@ -49,15 +49,15 @@ async def test_academic_term_and_course_offering_creation():
         term = await create_academic_term(
             session,
             tenant_id="tenant-bayes",
-            code="2026-FALL",
-            name="Fall 2026 Semester",
+            code="2026-FALL-CREATION-TEST",
+            name="Fall 2026 Creation Test",
             start_date=date(2026, 8, 25),
             end_date=date(2026, 12, 15),
             census_date=date(2026, 9, 10),
             is_active=True,
         )
         assert term.id is not None
-        assert term.code == "2026-FALL"
+        assert term.code == "2026-FALL-CREATION-TEST"
 
         # 2. Publish Course Snapshot for ML-101
         course = await session.get(UniversityCourse, "course-bayes-ml-001")
@@ -106,11 +106,12 @@ async def test_section_cohort_isolation_and_instructor_assignment():
         term = await create_academic_term(
             session,
             tenant_id="tenant-bayes",
-            code="2026-SPRING",
-            name="Spring 2026 Semester",
+            code="2026-SPRING-ISOLATION-TEST",
+            name="Spring 2026 Isolation Test",
             start_date=date(2026, 1, 15),
             end_date=date(2026, 5, 20),
         )
+
         course = await session.get(UniversityCourse, "course-bayes-ml-001")
         pub = await publish_course_snapshot(
             session,

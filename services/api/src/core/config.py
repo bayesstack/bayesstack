@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 API_DIRECTORY = Path(__file__).resolve().parents[2]
-PROJECT_ROOT = API_DIRECTORY.parents[1]
+PROJECT_ROOT = API_DIRECTORY.parents[1] if len(API_DIRECTORY.parents) > 1 else API_DIRECTORY
 
 
 class Settings(BaseSettings):

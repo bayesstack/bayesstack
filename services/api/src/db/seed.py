@@ -12,9 +12,24 @@ import os
 # Ensure 'src' directory is in python path when run directly
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from datetime import date, datetime, timezone
 from sqlalchemy import select
 from core.database import AsyncSessionLocal, engine, Base
-from db.models import Tenant, User
+from db.models import (
+    AcademicTerm,
+    AssessmentSubmission,
+    CourseGrade,
+    CourseOffering,
+    CoursePublication,
+    CourseSection,
+    LearnerConceptProgress,
+    SectionEnrollment,
+    SectionInstructor,
+    StudioAsset,
+    Tenant,
+    UniversityCourse,
+    User,
+)
 from db.content_models import (
     CanonicalChapter,
     CanonicalChapterConcept,
@@ -108,6 +123,14 @@ DEFAULT_USERS = [
         "tenant_id": "tenant-bayes",
     },
     {
+        "id": "user-ashoka-faculty",
+        "email": "faculty@ashoka.edu",
+        "password": "password123",
+        "full_name": "Prof. Nandini Sundar",
+        "role": "faculty",
+        "tenant_id": "tenant-ashoka",
+    },
+    {
         "id": "user-ashoka-learner",
         "email": "alex@ashoka.edu",
         "password": "password123",
@@ -138,7 +161,11 @@ async def _add_if_missing(session, model, values: dict, *where):
     """Add an immutable/edge seed row only when its natural key is absent."""
     existing = (await session.execute(select(model).where(*where))).scalar_one_or_none()
     if not existing:
-        session.add(model(**values))
+        obj = model(**values)
+        session.add(obj)
+        await session.flush()
+        return obj
+    return existing
 
 
 async def seed_content_library(session):
@@ -371,6 +398,416 @@ async def seed_content_library(session):
         StudentProgramEnrollment.student_id == "user-bayes-learner",
         StudentProgramEnrollment.tenant_program_id == "program-bayes-ai-ml",
     )
+
+    await seed_academic_operations(session)
+
+
+async def seed_academic_operations(session):
+    """Seed production delivery artifacts, academic terms, offerings, sections, and learner records."""
+    # 1. StudioAsset (Content-Addressed Storage metadata)
+    await _add_if_missing(
+        session,
+        StudioAsset,
+        {
+            "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "storage_provider": "s3",
+            "storage_uri": "s3://bayes-assets/studios/coding/gradient_descent_starter.py",
+            "byte_size": 4096,
+            "mime_type": "application/x-python",
+        },
+        StudioAsset.content_hash == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    )
+
+    # 2. CoursePublication (Immutable Release Artifact #1 for ML-101)
+    bayes_pub = await _add_if_missing(
+        session,
+        CoursePublication,
+        {
+            "tenant_id": "tenant-bayes",
+            "university_course_id": "course-bayes-ml-001",
+            "publication_number": 1,
+            "source_revision": 1,
+            "published_by_user_id": "user-bayes-faculty",
+            "status": "active",
+            "compiled_tree": {
+                "id": "course-bayes-ml-001",
+                "code": "BAYES-ML-001",
+                "title": "Introduction to Machine Learning",
+                "chapters": [
+                    {
+                        "id": "CH-OPTIMIZATION",
+                        "version": 2,
+                        "title": "Optimisation Fundamentals",
+                        "order_rank": 1000000,
+                        "concepts": [
+                            {
+                                "id": "C-GRADIENT-DESCENT",
+                                "version": 4,
+                                "title": "Gradient Descent",
+                                "order_rank": 1000000,
+                                "studios": [
+                                    {
+                                        "id": "SI-GRADIENT-DESCENT-VIDEO-V1",
+                                        "type": "video",
+                                        "config": {"video_id": "VID-GRADIENT-DESCENT-01"},
+                                    }
+                                ],
+                            }
+                        ],
+                    }
+                ],
+            },
+            "content_hash": "a1b2c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef0",
+        },
+        CoursePublication.tenant_id == "tenant-bayes",
+        CoursePublication.university_course_id == "course-bayes-ml-001",
+        CoursePublication.publication_number == 1,
+    )
+
+    # Link active pointer on university_courses
+    bayes_course = await session.get(UniversityCourse, "course-bayes-ml-001")
+    if bayes_course and bayes_pub and not bayes_course.current_publication_id:
+        bayes_course.current_publication_id = bayes_pub.id
+        await session.flush()
+
+    # 3. Academic Terms (Fall 2026 and Spring 2027 for Bayes Institute)
+    term_fall = await _add_if_missing(
+        session,
+        AcademicTerm,
+        {
+            "tenant_id": "tenant-bayes",
+            "code": "2026-FALL",
+            "name": "Fall 2026 Semester",
+            "start_date": date(2026, 8, 25),
+            "end_date": date(2026, 12, 18),
+            "census_date": date(2026, 9, 10),
+            "grade_deadline": date(2026, 12, 24),
+            "is_active": True,
+        },
+        AcademicTerm.tenant_id == "tenant-bayes",
+        AcademicTerm.code == "2026-FALL",
+    )
+
+    await _add_if_missing(
+        session,
+        AcademicTerm,
+        {
+            "tenant_id": "tenant-bayes",
+            "code": "2027-SPRING",
+            "name": "Spring 2027 Semester",
+            "start_date": date(2027, 1, 15),
+            "end_date": date(2027, 5, 20),
+            "census_date": date(2027, 2, 1),
+            "grade_deadline": date(2027, 5, 28),
+            "is_active": False,
+        },
+        AcademicTerm.tenant_id == "tenant-bayes",
+        AcademicTerm.code == "2027-SPRING",
+    )
+
+    # 4. Course Offering (Fall 2026 ML-101 bound to Publication #1)
+    if term_fall and bayes_pub:
+        offering = await _add_if_missing(
+            session,
+            CourseOffering,
+            {
+                "tenant_id": "tenant-bayes",
+                "academic_term_id": term_fall.id,
+                "university_course_id": "course-bayes-ml-001",
+                "course_publication_id": bayes_pub.id,
+                "status": "active",
+                "syllabus_override": {
+                    "office_hours": "Tuesdays & Thursdays 14:00-16:00",
+                    "teaching_assistant": "ta@bayes.edu",
+                },
+            },
+            CourseOffering.tenant_id == "tenant-bayes",
+            CourseOffering.academic_term_id == term_fall.id,
+            CourseOffering.university_course_id == "course-bayes-ml-001",
+        )
+
+        # 5. Course Sections (Section A & Section B)
+        sec_a = await _add_if_missing(
+            session,
+            CourseSection,
+            {
+                "tenant_id": "tenant-bayes",
+                "course_offering_id": offering.id,
+                "section_code": "SEC-A",
+                "name": "Section A - Morning Lecture",
+                "delivery_mode": "in_person",
+                "capacity": 60,
+                "schedule_info": {
+                    "days": ["Mon", "Wed", "Fri"],
+                    "time": "10:00-11:30",
+                    "room": "Turing Hall 101",
+                },
+            },
+            CourseSection.course_offering_id == offering.id,
+            CourseSection.section_code == "SEC-A",
+        )
+
+        await _add_if_missing(
+            session,
+            CourseSection,
+            {
+                "tenant_id": "tenant-bayes",
+                "course_offering_id": offering.id,
+                "section_code": "SEC-B",
+                "name": "Section B - Afternoon Lecture",
+                "delivery_mode": "in_person",
+                "capacity": 60,
+                "schedule_info": {
+                    "days": ["Tue", "Thu"],
+                    "time": "14:00-15:30",
+                    "room": "Shannon Hall 202",
+                },
+            },
+            CourseSection.course_offering_id == offering.id,
+            CourseSection.section_code == "SEC-B",
+        )
+
+        # 6. Section Instructor Assignment (Prof. Alan Bayes to Section A)
+        await _add_if_missing(
+            session,
+            SectionInstructor,
+            {
+                "tenant_id": "tenant-bayes",
+                "course_section_id": sec_a.id,
+                "faculty_id": "user-bayes-faculty",
+                "role": "primary_instructor",
+            },
+            SectionInstructor.course_section_id == sec_a.id,
+            SectionInstructor.faculty_id == "user-bayes-faculty",
+        )
+
+        # 7. Section Enrollment (Bayes Learner enrolled in Section A)
+        enrollment = await _add_if_missing(
+            session,
+            SectionEnrollment,
+            {
+                "tenant_id": "tenant-bayes",
+                "course_section_id": sec_a.id,
+                "student_id": "user-bayes-learner",
+                "enrollment_status": "enrolled",
+            },
+            SectionEnrollment.course_section_id == sec_a.id,
+            SectionEnrollment.student_id == "user-bayes-learner",
+        )
+
+        # 8. Learner Concept Progress (Gradient Descent completed)
+        await _add_if_missing(
+            session,
+            LearnerConceptProgress,
+            {
+                "tenant_id": "tenant-bayes",
+                "section_enrollment_id": enrollment.id,
+                "concept_id": "C-GRADIENT-DESCENT",
+                "concept_version": 4,
+                "status": "completed",
+                "progress_percent": 100.0,
+                "completed_at": datetime(2026, 9, 1, 12, 0, 0, tzinfo=timezone.utc),
+            },
+            LearnerConceptProgress.section_enrollment_id == enrollment.id,
+            LearnerConceptProgress.concept_id == "C-GRADIENT-DESCENT",
+            LearnerConceptProgress.concept_version == 4,
+        )
+
+        # 9. Assessment Submission (Studio Video / Quiz attempt)
+        await _add_if_missing(
+            session,
+            AssessmentSubmission,
+            {
+                "tenant_id": "tenant-bayes",
+                "section_enrollment_id": enrollment.id,
+                "studio_instance_id": "SI-GRADIENT-DESCENT-VIDEO-V1",
+                "attempt_number": 1,
+                "submission_payload": {
+                    "completed_duration_seconds": 720,
+                    "quiz_answers": {"q1": "learning_rate", "q2": "convex"},
+                },
+                "grading_status": "manually_graded",
+                "score": 95.0,
+                "max_score": 100.0,
+                "grader_feedback": "Great conceptual understanding and quiz execution.",
+                "graded_by_user_id": "user-bayes-faculty",
+                "graded_at": datetime(2026, 9, 2, 15, 30, 0, tzinfo=timezone.utc),
+            },
+            AssessmentSubmission.section_enrollment_id == enrollment.id,
+            AssessmentSubmission.studio_instance_id == "SI-GRADIENT-DESCENT-VIDEO-V1",
+            AssessmentSubmission.attempt_number == 1,
+        )
+
+        # 10. Course Grade (Active Term Gradebook entry)
+        await _add_if_missing(
+            session,
+            CourseGrade,
+            {
+                "tenant_id": "tenant-bayes",
+                "section_enrollment_id": enrollment.id,
+                "letter_grade": "A",
+                "numeric_score": 95.0,
+                "gpa_points": 4.0,
+                "is_final": False,
+                "finalized_by_user_id": "user-bayes-faculty",
+            },
+            CourseGrade.section_enrollment_id == enrollment.id,
+        )
+
+    # 11. Ashoka University Academic Operations Seed
+    ashoka_term = await _add_if_missing(
+        session,
+        AcademicTerm,
+        {
+            "tenant_id": "tenant-ashoka",
+            "code": "2026-FALL",
+            "name": "Fall 2026 Semester",
+            "start_date": date(2026, 8, 20),
+            "end_date": date(2026, 12, 15),
+            "census_date": date(2026, 9, 5),
+            "grade_deadline": date(2026, 12, 22),
+            "is_active": True,
+        },
+        AcademicTerm.tenant_id == "tenant-ashoka",
+        AcademicTerm.code == "2026-FALL",
+    )
+
+    # Ashoka Course
+    ashoka_course = await _add_if_missing(
+        session,
+        TenantCourse,
+        {
+            "id": "course-ashoka-cs101",
+            "tenant_id": "tenant-ashoka",
+            "source_course_id": "ML-001",
+            "source_version": 7,
+            "origin_type": "canonical",
+            "local_code": "CS-101",
+            "local_title": "Introduction to Machine Learning",
+            "status": "published",
+            "created_by_user_id": "user-ashoka-faculty",
+        },
+        TenantCourse.id == "course-ashoka-cs101",
+    )
+
+    # Ashoka Publication
+    ashoka_pub = await _add_if_missing(
+        session,
+        CoursePublication,
+        {
+            "tenant_id": "tenant-ashoka",
+            "university_course_id": "course-ashoka-cs101",
+            "publication_number": 1,
+            "source_revision": 1,
+            "published_by_user_id": "user-ashoka-faculty",
+            "status": "active",
+            "compiled_tree": {
+                "id": "course-ashoka-cs101",
+                "code": "CS-101",
+                "title": "Introduction to Machine Learning",
+                "chapters": [
+                    {
+                        "id": "CH-OPTIMIZATION",
+                        "version": 2,
+                        "title": "Optimisation Fundamentals",
+                        "order_rank": 1000000,
+                    }
+                ],
+            },
+            "content_hash": "b2c3d4e5f6a7b8c90123456789abcdef0123456789abcdef0123456789abcdef",
+        },
+        CoursePublication.tenant_id == "tenant-ashoka",
+        CoursePublication.university_course_id == "course-ashoka-cs101",
+        CoursePublication.publication_number == 1,
+    )
+
+
+    if ashoka_course and ashoka_pub and not ashoka_course.current_publication_id:
+        ashoka_course.current_publication_id = ashoka_pub.id
+        await session.flush()
+
+    if ashoka_term and ashoka_pub:
+        ashoka_offering = await _add_if_missing(
+            session,
+            CourseOffering,
+            {
+                "tenant_id": "tenant-ashoka",
+                "academic_term_id": ashoka_term.id,
+                "university_course_id": "course-ashoka-cs101",
+                "course_publication_id": ashoka_pub.id,
+                "status": "active",
+                "syllabus_override": {
+                    "office_hours": "Wednesdays 15:00-17:00",
+                    "room": "AC04-301",
+                },
+            },
+            CourseOffering.tenant_id == "tenant-ashoka",
+            CourseOffering.academic_term_id == ashoka_term.id,
+            CourseOffering.university_course_id == "course-ashoka-cs101",
+        )
+
+        ashoka_sec = await _add_if_missing(
+            session,
+            CourseSection,
+            {
+                "tenant_id": "tenant-ashoka",
+                "course_offering_id": ashoka_offering.id,
+                "section_code": "SEC-01",
+                "name": "Section 1 - Main Cohort",
+                "delivery_mode": "in_person",
+                "capacity": 50,
+                "schedule_info": {
+                    "days": ["Mon", "Wed"],
+                    "time": "13:30-15:00",
+                    "room": "Lecture Hall AC04",
+                },
+            },
+            CourseSection.course_offering_id == ashoka_offering.id,
+            CourseSection.section_code == "SEC-01",
+        )
+
+        await _add_if_missing(
+            session,
+            SectionInstructor,
+            {
+                "tenant_id": "tenant-ashoka",
+                "course_section_id": ashoka_sec.id,
+                "faculty_id": "user-ashoka-faculty",
+                "role": "primary_instructor",
+            },
+            SectionInstructor.course_section_id == ashoka_sec.id,
+            SectionInstructor.faculty_id == "user-ashoka-faculty",
+        )
+
+        ashoka_enrollment = await _add_if_missing(
+            session,
+            SectionEnrollment,
+            {
+                "tenant_id": "tenant-ashoka",
+                "course_section_id": ashoka_sec.id,
+                "student_id": "user-ashoka-learner",
+                "enrollment_status": "enrolled",
+            },
+            SectionEnrollment.course_section_id == ashoka_sec.id,
+            SectionEnrollment.student_id == "user-ashoka-learner",
+        )
+
+        await _add_if_missing(
+            session,
+            LearnerConceptProgress,
+            {
+                "tenant_id": "tenant-ashoka",
+                "section_enrollment_id": ashoka_enrollment.id,
+                "concept_id": "C-GRADIENT-DESCENT",
+                "concept_version": 4,
+                "status": "in_progress",
+                "progress_percent": 65.0,
+            },
+            LearnerConceptProgress.section_enrollment_id == ashoka_enrollment.id,
+            LearnerConceptProgress.concept_id == "C-GRADIENT-DESCENT",
+            LearnerConceptProgress.concept_version == 4,
+        )
+
 
 
 async def seed_database():
