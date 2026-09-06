@@ -1,8 +1,8 @@
 """End-to-end domain CRUD API tests for all BayesStack tables.
 
 Verifies:
-1. Platform Master Library APIs (/api/v1/library/...)
-2. University Composition Layer APIs & Dedicated Edges (/api/v1/university/...)
+1. Platform Master Catalog APIs (/api/v1/catalog/...)
+2. Institution Composition Layer APIs & Dedicated Edges (/api/v1/institution/...)
 3. Copy-on-Write forks and spaced integer reordering bisection
 4. CQRS Delivery & CAS Storage (/api/v1/delivery/...)
 5. Academic Operations & Student Delivery (/api/v1/operations/...)
@@ -28,8 +28,8 @@ async def setup_test_db():
 
 
 @pytest.mark.asyncio
-async def test_library_crud_full_hierarchy():
-    """Scenario 1 & 2: Authoring Master Concepts, Studios, Chapters, Courses, Programs, and Curriculums."""
+async def test_catalog_crud_full_hierarchy():
+    """Scenario 1 & 2: Authoring Master Concepts, Studios, Chapters, Courses, Programs, and Curricula."""
     u = uuid.uuid4().hex[:6]
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://localhost") as client:
         # 1. Master Concept
@@ -43,9 +43,9 @@ async def test_library_crud_full_hierarchy():
             "topic_category": "Optimization",
             "tags": ["ml", "sgd"],
             "estimated_minutes": 25,
-            "status": "draft",
+            "content_status": "draft",
         }
-        resp = await client.post("/api/v1/library/concepts", json=concept_payload)
+        resp = await client.post("/api/v1/catalog/concepts", json=concept_payload)
         assert resp.status_code == 201, resp.text
         assert resp.json()["id"] == f"cpt_test_sgd_{u}"
 
@@ -54,20 +54,20 @@ async def test_library_crud_full_hierarchy():
             "id": f"studio_inst_sgd_code_{u}",
             "concept_id": f"cpt_test_sgd_{u}",
             "concept_version": 1,
-            "studio_type": "coding",
-            "studio_version": "v1.0",
+            "activity_type": "coding",
+            "activity_version": "v1.0",
             "position": 1,
             "is_required": True,
             "title": "Lab: Code SGD in Python",
             "config": {"language": "python", "timeout_ms": 3000},
         }
-        resp = await client.post("/api/v1/library/studios", json=studio_payload)
+        resp = await client.post("/api/v1/catalog/activities", json=studio_payload)
         assert resp.status_code == 201, resp.text
 
         # Verify studio is loaded in concept query
-        resp = await client.get(f"/api/v1/library/concepts/cpt_test_sgd_{u}")
+        resp = await client.get(f"/api/v1/catalog/concepts/cpt_test_sgd_{u}")
         assert resp.status_code == 200
-        assert len(resp.json()["studios"]) == 1
+        assert len(resp.json()["activities"]) == 1
 
         # 3. Master Chapter & Link Concept
         chapter_payload = {
@@ -77,14 +77,14 @@ async def test_library_crud_full_hierarchy():
             "title": "Numerical Optimization Chapter",
             "slug": f"numerical-optimization-{u}",
             "estimated_minutes": 90,
-            "status": "draft",
+            "content_status": "draft",
         }
-        resp = await client.post("/api/v1/library/chapters", json=chapter_payload)
+        resp = await client.post("/api/v1/catalog/chapters", json=chapter_payload)
         assert resp.status_code == 201
 
         # Link concept into chapter
         resp = await client.post(
-            f"/api/v1/library/chapters/chap_test_opt_{u}/concepts",
+            f"/api/v1/catalog/chapters/chap_test_opt_{u}/concepts",
             json={"concept_id": f"cpt_test_sgd_{u}", "concept_version": 1, "position": 1},
         )
         assert resp.status_code == 201
@@ -98,13 +98,13 @@ async def test_library_crud_full_hierarchy():
             "slug": f"multivariate-opt-{u}",
             "difficulty": "intermediate",
             "credits": 4,
-            "status": "draft",
+            "content_status": "draft",
         }
-        resp = await client.post("/api/v1/library/courses", json=course_payload)
+        resp = await client.post("/api/v1/catalog/courses", json=course_payload)
         assert resp.status_code == 201
 
         resp = await client.post(
-            f"/api/v1/library/courses/course_test_math_{u}/chapters",
+            f"/api/v1/catalog/courses/course_test_math_{u}/chapters",
             json={"chapter_id": f"chap_test_opt_{u}", "chapter_version": 1, "position": 1},
         )
         assert resp.status_code == 201
@@ -117,13 +117,13 @@ async def test_library_crud_full_hierarchy():
             "title": "Foundations of DS Program",
             "slug": f"ds-foundations-{u}",
             "program_type": "semester",
-            "status": "draft",
+            "content_status": "draft",
         }
-        resp = await client.post("/api/v1/library/programs", json=prog_payload)
+        resp = await client.post("/api/v1/catalog/programs", json=prog_payload)
         assert resp.status_code == 201
 
         resp = await client.post(
-            f"/api/v1/library/programs/prog_test_ds_{u}/courses",
+            f"/api/v1/catalog/programs/prog_test_ds_{u}/courses",
             json={"course_id": f"course_test_math_{u}", "course_version": 1, "position": 1, "is_elective": False, "credits": 4},
         )
         assert resp.status_code == 201
@@ -137,24 +137,24 @@ async def test_library_crud_full_hierarchy():
             "slug": f"ai-master-{u}",
             "credential_type": "bachelors",
             "estimated_duration": "4 Years",
-            "status": "draft",
+            "content_status": "draft",
         }
-        resp = await client.post("/api/v1/library/curriculums", json=curr_payload)
+        resp = await client.post("/api/v1/catalog/curricula", json=curr_payload)
         assert resp.status_code == 201
 
         resp = await client.post(
-            f"/api/v1/library/curriculums/curr_test_ai_{u}/programs",
+            f"/api/v1/catalog/curricula/curr_test_ai_{u}/programs",
             json={"program_id": f"prog_test_ds_{u}", "program_version": 1, "position": 1, "display_label": "Year 1"},
         )
         assert resp.status_code == 201
 
 
 @pytest.mark.asyncio
-async def test_university_composition_and_forks():
+async def test_institution_composition_and_forks():
     """Scenarios 3, 4, 5, 6: Zero-copy adoption, Copy-on-Write forks, and Spaced Integer Reordering."""
     u = uuid.uuid4().hex[:6]
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://localhost") as client:
-        # Pre-seed source library entities for hermetic test execution
+        # Pre-seed source catalog entities for hermetic test execution
         lib_cpt = {
             "id": f"lib_cpt_opt_{u}",
             "version": 1,
@@ -162,9 +162,9 @@ async def test_university_composition_and_forks():
             "title": "Gradient Descent Core",
             "slug": f"opt-gd-{u}",
             "topic_category": "algorithms",
-            "status": "published",
+            "content_status": "published",
         }
-        await client.post("/api/v1/library/concepts", json=lib_cpt)
+        await client.post("/api/v1/catalog/concepts", json=lib_cpt)
 
         lib_chap = {
             "id": f"lib_chap_opt_{u}",
@@ -172,12 +172,12 @@ async def test_university_composition_and_forks():
             "code": f"OPT-CHAP-{u.upper()}",
             "title": "Optimization Techniques",
             "slug": f"opt-chap-{u}",
-            "status": "published",
+            "content_status": "published",
         }
-        await client.post("/api/v1/library/chapters", json=lib_chap)
+        await client.post("/api/v1/catalog/chapters", json=lib_chap)
 
         await client.post(
-            f"/api/v1/library/chapters/lib_chap_opt_{u}/concepts",
+            f"/api/v1/catalog/chapters/lib_chap_opt_{u}/concepts",
             json={"concept_id": f"lib_cpt_opt_{u}", "concept_version": 1, "position": 1},
         )
 
@@ -187,11 +187,11 @@ async def test_university_composition_and_forks():
             "code": f"NN-CHAP-{u.upper()}",
             "title": "Neural Networks Core",
             "slug": f"nn-chap-{u}",
-            "status": "published",
+            "content_status": "published",
         }
-        await client.post("/api/v1/library/chapters", json=lib_chap_nn)
+        await client.post("/api/v1/catalog/chapters", json=lib_chap_nn)
 
-        # 1. Proprietary university concept & studio
+        # 1. Proprietary institution concept & studio
         uconcept_payload = {
             "id": f"uconcept_ashoka_style_{u}",
             "local_code": f"CPT-PEP8-{u.upper()}",
@@ -199,17 +199,17 @@ async def test_university_composition_and_forks():
             "description": "Departmental code submission rules",
             "estimated_minutes": 20,
         }
-        resp = await client.post("/api/v1/university/concepts", json=uconcept_payload, headers=TENANT_HEADERS)
+        resp = await client.post("/api/v1/institution/concepts", json=uconcept_payload, headers=TENANT_HEADERS)
         assert resp.status_code == 201, resp.text
 
         ustudio_payload = {
             "id": f"ustudio_ashoka_style_{u}",
             "concept_id": f"uconcept_ashoka_style_{u}",
-            "studio_type": "coding",
+            "activity_type": "coding",
             "position": 1,
             "config": {"linter": "flake8"},
         }
-        resp = await client.post("/api/v1/university/studios", json=ustudio_payload, headers=TENANT_HEADERS)
+        resp = await client.post("/api/v1/institution/activities", json=ustudio_payload, headers=TENANT_HEADERS)
         assert resp.status_code == 201
 
         # 2. Scenario 4: Copy-on-Write Fork of a Chapter
@@ -217,23 +217,23 @@ async def test_university_composition_and_forks():
             "new_chapter_id": f"uchap_ashoka_opt_{u}",
             "new_local_code": f"OPT-FORK-{u.upper()}",
             "new_local_title": "Ashoka Custom Optimization",
-            "source_library_chapter_id": f"lib_chap_opt_{u}",
-            "source_library_version": 1,
+            "source_catalog_chapter_id": f"lib_chap_opt_{u}",
+            "catalog_version": 1,
         }
-        resp = await client.post("/api/v1/university/chapters/fork", json=fork_chapter_payload, headers=TENANT_HEADERS)
+        resp = await client.post("/api/v1/institution/chapters/fork", json=fork_chapter_payload, headers=TENANT_HEADERS)
         assert resp.status_code == 201, resp.text
         assert resp.json()["id"] == f"uchap_ashoka_opt_{u}"
 
-        # Verify cloned library concept edges exist
-        resp = await client.get(f"/api/v1/university/chapters/uchap_ashoka_opt_{u}/concepts", headers=TENANT_HEADERS)
+        # Verify cloned catalog concept edges exist
+        resp = await client.get(f"/api/v1/institution/chapters/uchap_ashoka_opt_{u}/concepts", headers=TENANT_HEADERS)
         assert resp.status_code == 200
         concept_edges = resp.json()
         assert len(concept_edges) >= 1
 
         # Inject proprietary concept into this forked chapter
         resp = await client.post(
-            f"/api/v1/university/chapters/uchap_ashoka_opt_{u}/concepts/custom",
-            json={"university_concept_id": f"uconcept_ashoka_style_{u}", "display_label": "Ashoka Submission Standard"},
+            f"/api/v1/institution/chapters/uchap_ashoka_opt_{u}/concepts/custom",
+            json={"institution_concept_id": f"uconcept_ashoka_style_{u}", "display_label": "Ashoka Submission Standard"},
             headers=TENANT_HEADERS,
         )
         assert resp.status_code == 201
@@ -242,46 +242,46 @@ async def test_university_composition_and_forks():
         # 3. Spaced Integer Reorder Bisection (single-row update)
         reorder_payload = {
             "edge_id": custom_edge_id,
-            "before_rank": 500_000,
-            "after_rank": 1_000_000,
+            "before_position": 500_000,
+            "after_position": 1_000_000,
         }
         resp = await client.put(
-            "/api/v1/university/chapters/concepts/reorder?is_custom=true",
+            "/api/v1/institution/chapters/concepts/reorder?is_custom=true",
             json=reorder_payload,
             headers=TENANT_HEADERS,
         )
         assert resp.status_code == 200
-        assert resp.json()["new_order_rank"] == 750_000
+        assert resp.json()["new_position"] == 750_000
 
-        # 4. University Course creation & Chapter composition
+        # 4. Institution Course creation & Chapter composition
         course_payload = {
             "id": f"ucourse_ashoka_ml_{u}",
             "local_code": f"CS-402-{u.upper()}",
             "local_title": "Advanced Machine Learning at Ashoka",
-            "composition_type": "hybrid",
-            "status": "draft",
+            "source_type": "hybrid",
+            "content_status": "draft",
         }
-        resp = await client.post("/api/v1/university/courses", json=course_payload, headers=TENANT_HEADERS)
+        resp = await client.post("/api/v1/institution/courses", json=course_payload, headers=TENANT_HEADERS)
         assert resp.status_code == 201
 
         # Link forked chapter into custom course
         resp = await client.post(
-            f"/api/v1/university/courses/ucourse_ashoka_ml_{u}/chapters/custom",
-            json={"university_chapter_id": f"uchap_ashoka_opt_{u}", "display_label": "Core Chapter 1"},
+            f"/api/v1/institution/courses/ucourse_ashoka_ml_{u}/chapters/custom",
+            json={"institution_chapter_id": f"uchap_ashoka_opt_{u}", "display_label": "Core Chapter 1"},
             headers=TENANT_HEADERS,
         )
         assert resp.status_code == 201
 
-        # Also link an as-is borrowed library chapter (Scenario 3: Zero-Copy)
+        # Also link an as-is borrowed catalog chapter (Scenario 3: Zero-Copy)
         resp = await client.post(
-            f"/api/v1/university/courses/ucourse_ashoka_ml_{u}/chapters/library",
-            json={"library_chapter_id": f"lib_chap_nn_{u}", "library_version": 1, "adoption_mode": "pinned"},
+            f"/api/v1/institution/courses/ucourse_ashoka_ml_{u}/chapters/catalog",
+            json={"catalog_chapter_id": f"lib_chap_nn_{u}", "catalog_version": 1, "reference_policy": "pinned"},
             headers=TENANT_HEADERS,
         )
         assert resp.status_code == 201
 
         # Verify course chapter edges
-        resp = await client.get(f"/api/v1/university/courses/ucourse_ashoka_ml_{u}/chapters", headers=TENANT_HEADERS)
+        resp = await client.get(f"/api/v1/institution/courses/ucourse_ashoka_ml_{u}/chapters", headers=TENANT_HEADERS)
         assert resp.status_code == 200
         assert len(resp.json()) == 2
 
@@ -311,7 +311,7 @@ async def test_delivery_cas_and_publication_pipeline():
         )
         assert resp.status_code == 201, resp.text
         pub_data = resp.json()
-        assert pub_data["status"] == "active"
+        assert pub_data["publication_status"] == "active"
         assert len(pub_data["content_hash"]) == 64
         assert "chapters" in pub_data["compiled_syllabus_tree"]
         pub_id = pub_data["id"]
@@ -351,9 +351,9 @@ async def test_academic_operations_full_lifecycle():
         # 3. Schedule Course Offering bound to Publication
         offering_payload = {
             "academic_term_id": term_id,
-            "university_course_id": "course-ashoka-cs101",
+            "institution_course_id": "course-ashoka-cs101",
             "course_publication_id": publication_id,
-            "status": "enrollment_open",
+            "offering_status": "enrollment_open",
             "syllabus_override": {"office_hours": "MWF 2-4 PM"},
         }
         resp = await client.post("/api/v1/operations/offerings", json=offering_payload, headers=TENANT_HEADERS)
@@ -373,9 +373,9 @@ async def test_academic_operations_full_lifecycle():
         assert resp.status_code == 201, resp.text
         section_id = resp.json()["id"]
 
-        # 5. Assign Section Instructor
+        # 5. Assign Section Staff
         resp = await client.post(
-            f"/api/v1/operations/sections/{section_id}/instructors",
+            f"/api/v1/operations/sections/{section_id}/staff",
             json={"faculty_id": "user-ashoka-faculty", "role": "primary_instructor"},
             headers=TENANT_HEADERS,
         )
@@ -392,20 +392,20 @@ async def test_academic_operations_full_lifecycle():
 
         # 7. Record Learner Concept Progress
         progress_payload = {
-            "section_enrollment_id": enrollment_id,
+            "enrollment_id": enrollment_id,
             "concept_id": "lib-cpt-gradient-descent",
             "concept_version": 1,
-            "status": "completed",
+            "progress_status": "completed",
             "progress_percent": 100.00,
         }
         resp = await client.post("/api/v1/operations/progress", json=progress_payload, headers=TENANT_HEADERS)
         assert resp.status_code == 201, resp.text
-        assert resp.json()["status"] == "completed"
+        assert resp.json()["progress_status"] == "completed"
 
         # 8. Submit Assessment Lab Attempt
         submission_payload = {
-            "section_enrollment_id": enrollment_id,
-            "studio_instance_id": "lib-studio-gd-code",
+            "enrollment_id": enrollment_id,
+            "activity_id": "lib-studio-gd-code",
             "attempt_number": 1,
             "submission_payload": {"code": "def gradient_descent(): pass", "tests_passed": 5},
             "max_score": 100.00,
@@ -425,7 +425,7 @@ async def test_academic_operations_full_lifecycle():
 
         # 9. Record Final Course Grade
         grade_payload = {
-            "section_enrollment_id": enrollment_id,
+            "enrollment_id": enrollment_id,
             "letter_grade": "A",
             "numeric_score": 98.50,
             "gpa_points": 4.00,
@@ -447,14 +447,14 @@ async def test_governance_apis():
             "id": f"course_ashoka_gov_{u}",
             "local_code": f"GOV-{u.upper()}",
             "local_title": "Governance Systems",
-            "composition_type": "custom",
-            "status": "draft",
+            "source_type": "custom",
+            "content_status": "draft",
         }
-        await client.post("/api/v1/university/courses", json=u_course, headers=TENANT_HEADERS)
+        await client.post("/api/v1/institution/courses", json=u_course, headers=TENANT_HEADERS)
 
         resp = await client.post(
             "/api/v1/governance/faculty/courses",
-            json={"faculty_id": "user-ashoka-faculty", "university_course_id": f"course_ashoka_gov_{u}", "is_active": True},
+            json={"faculty_id": "user-ashoka-faculty", "institution_course_id": f"course_ashoka_gov_{u}", "is_active": True},
             headers=TENANT_HEADERS,
         )
         assert resp.status_code == 201, resp.text
@@ -471,16 +471,16 @@ async def test_governance_apis():
             "local_code": f"BTECH-{u.upper()}",
             "local_title": "B.Tech Computer Science Governance",
         }
-        await client.post("/api/v1/university/curriculums", json=u_curr, headers=TENANT_HEADERS)
+        await client.post("/api/v1/institution/curricula", json=u_curr, headers=TENANT_HEADERS)
 
         resp = await client.post(
-            "/api/v1/governance/students/curriculums",
-            json={"student_id": "user-ashoka-learner", "university_curriculum_id": f"ucurr_ashoka_btech_{u}", "is_active": True},
+            "/api/v1/governance/students/curricula",
+            json={"student_id": "user-ashoka-learner", "institution_curriculum_id": f"ucurr_ashoka_btech_{u}", "is_active": True},
             headers=TENANT_HEADERS,
         )
         assert resp.status_code == 201, resp.text
         matriculation_id = resp.json()["id"]
 
-        resp = await client.get("/api/v1/governance/students/curriculums", headers=TENANT_HEADERS)
+        resp = await client.get("/api/v1/governance/students/curricula", headers=TENANT_HEADERS)
         assert resp.status_code == 200
         assert any(m["id"] == matriculation_id for m in resp.json())

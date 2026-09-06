@@ -7,9 +7,9 @@ CoursePublications) from the Academic Operations Model (terms, course offerings,
 student enrollments, student submissions, and official gradebook records).
 
 Separation of Concerns:
-- Content Model: WHAT is taught (Curriculum -> Program -> Course -> Chapter -> Concept -> Studio).
+- Content Model: WHAT is taught (Curriculum -> Program -> Course -> Chapter -> Concept -> Activity).
 - Operations Model: WHO teaches WHOM, WHEN, and HOW THEY PERFORMED
-  (Term -> CourseOffering -> CourseSection -> SectionEnrollment -> Progress / Submissions / Grades).
+  (Term -> CourseOffering -> CourseSection -> Enrollment -> Progress / Submissions / Grades).
 
 The Essential Bridge:
 - A CourseOffering binds to an exact `course_publication_id`.
@@ -66,11 +66,11 @@ class AcademicTerm(Base):
 
 
 class CourseOffering(Base):
-    """An instance of a Course scheduled in a specific Term, bound to an exact Publication."""
+    """A course offering scheduled in a specific term and bound to an exact publication."""
 
     __tablename__ = "course_offerings"
     __table_args__ = (
-        UniqueConstraint("tenant_id", "academic_term_id", "university_course_id", name="uq_course_offering_term_course"),
+        UniqueConstraint("tenant_id", "academic_term_id", "institution_course_id", name="uq_course_offering_term_course"),
         UniqueConstraint("tenant_id", "id", name="uq_course_offering_tenant_id"),
         ForeignKeyConstraint(
             ["tenant_id", "academic_term_id"],
@@ -78,8 +78,8 @@ class CourseOffering(Base):
             ondelete="CASCADE",
         ),
         ForeignKeyConstraint(
-            ["tenant_id", "university_course_id", "course_publication_id"],
-            ["course_publications.tenant_id", "course_publications.university_course_id", "course_publications.id"],
+            ["tenant_id", "institution_course_id", "course_publication_id"],
+            ["course_publications.tenant_id", "course_publications.institution_course_id", "course_publications.id"],
             ondelete="RESTRICT",
         ),
     )
@@ -87,10 +87,10 @@ class CourseOffering(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
     academic_term_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
-    university_course_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    institution_course_id: Mapped[str] = mapped_column(String(64), nullable=False)
     # The immutable bridge: exactly which compiled release artifact is taught this term
     course_publication_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
-    status: Mapped[str] = mapped_column(
+    offering_status: Mapped[str] = mapped_column(
         String(32), default="scheduled", nullable=False
     )  # 'scheduled' | 'enrollment_open' | 'active' | 'grading' | 'concluded'
     syllabus_override: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
@@ -124,10 +124,10 @@ class CourseSection(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
 
 
-class SectionInstructor(Base):
+class SectionStaff(Base):
     """Faculty or TA assigned to instruct or grade a specific Section."""
 
-    __tablename__ = "section_instructors"
+    __tablename__ = "section_staff"
     __table_args__ = (
         UniqueConstraint("course_section_id", "faculty_id", name="uq_section_instructor_section_faculty"),
         ForeignKeyConstraint(
@@ -147,10 +147,10 @@ class SectionInstructor(Base):
     assigned_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
 
 
-class SectionEnrollment(Base):
+class Enrollment(Base):
     """Student membership and roster record in a specific Course Section."""
 
-    __tablename__ = "section_enrollments"
+    __tablename__ = "enrollments"
     __table_args__ = (
         UniqueConstraint("course_section_id", "student_id", name="uq_section_enrollment_section_student"),
         UniqueConstraint("tenant_id", "id", name="uq_section_enrollment_tenant_id"),
@@ -176,26 +176,26 @@ class SectionEnrollment(Base):
     dropped_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
-class LearnerConceptProgress(Base):
+class LearningProgress(Base):
     """Concept-level learning mastery for a student within their enrolled section."""
 
-    __tablename__ = "learner_concept_progress"
+    __tablename__ = "learning_progress"
     __table_args__ = (
-        UniqueConstraint("section_enrollment_id", "content_type", "concept_id", "concept_version", name="uq_learner_concept_progress"),
+        UniqueConstraint("enrollment_id", "source_type", "concept_id", "concept_version", name="uq_learning_progress"),
         ForeignKeyConstraint(
-            ["tenant_id", "section_enrollment_id"],
-            ["section_enrollments.tenant_id", "section_enrollments.id"],
+            ["tenant_id", "enrollment_id"],
+            ["enrollments.tenant_id", "enrollments.id"],
             ondelete="CASCADE",
         ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
-    section_enrollment_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
-    content_type: Mapped[str] = mapped_column(String(32), default="library", nullable=False)  # 'library' | 'university'
+    enrollment_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    source_type: Mapped[str] = mapped_column(String(32), default="catalog", nullable=False)  # 'catalog' | 'institution'
     concept_id: Mapped[str] = mapped_column(String(64), nullable=False)
     concept_version: Mapped[int] = mapped_column(Integer, nullable=False)
-    status: Mapped[str] = mapped_column(
+    progress_status: Mapped[str] = mapped_column(
         String(32), default="not_started", nullable=False
     )  # 'not_started' | 'in_progress' | 'completed' | 'mastered'
     progress_percent: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
@@ -204,24 +204,24 @@ class LearnerConceptProgress(Base):
 
 
 class AssessmentSubmission(Base):
-    """Student submission and attempt record on a Studio interactive lab or quiz."""
+    """Student submission and attempt record on an interactive activity or quiz."""
 
     __tablename__ = "assessment_submissions"
     __table_args__ = (
-        UniqueConstraint("section_enrollment_id", "studio_instance_id", "attempt_number", name="uq_assessment_submission_attempt"),
+        UniqueConstraint("enrollment_id", "activity_id", "attempt_number", name="uq_assessment_submission_attempt"),
         ForeignKeyConstraint(
-            ["tenant_id", "section_enrollment_id"],
-            ["section_enrollments.tenant_id", "section_enrollments.id"],
+            ["tenant_id", "enrollment_id"],
+            ["enrollments.tenant_id", "enrollments.id"],
             ondelete="CASCADE",
         ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
-    section_enrollment_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
-    studio_type: Mapped[str] = mapped_column(String(32), default="coding", nullable=False)
-    studio_version: Mapped[str] = mapped_column(String(16), default="1.0.0", nullable=False)
-    studio_instance_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    enrollment_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    activity_type: Mapped[str] = mapped_column(String(32), default="coding", nullable=False)
+    activity_version: Mapped[str] = mapped_column(String(16), default="1.0.0", nullable=False)
+    activity_id: Mapped[str] = mapped_column(String(64), nullable=False)
     attempt_number: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     submission_payload: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
     grading_status: Mapped[str] = mapped_column(
@@ -242,17 +242,17 @@ class CourseGrade(Base):
 
     __tablename__ = "course_grades"
     __table_args__ = (
-        UniqueConstraint("section_enrollment_id", name="uq_course_grade_enrollment"),
+        UniqueConstraint("enrollment_id", name="uq_course_grade_enrollment"),
         ForeignKeyConstraint(
-            ["tenant_id", "section_enrollment_id"],
-            ["section_enrollments.tenant_id", "section_enrollments.id"],
+            ["tenant_id", "enrollment_id"],
+            ["enrollments.tenant_id", "enrollments.id"],
             ondelete="CASCADE",
         ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
-    section_enrollment_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    enrollment_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     letter_grade: Mapped[str] = mapped_column(String(8), nullable=False)  # 'A', 'A-', 'B+', 'P', 'F'
     numeric_score: Mapped[float] = mapped_column(Float, nullable=False)  # 94.5
     gpa_points: Mapped[float] = mapped_column(Float, nullable=False)  # 4.0

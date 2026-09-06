@@ -1,33 +1,33 @@
-"""Request contracts for the tenant course builder."""
+"""Request contracts for the institution course builder."""
 
 from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field, model_validator
 
 
-OriginType = Literal["canonical", "custom", "derived"]
+OriginType = Literal["catalog", "custom", "hybrid"]
 
 
-class TenantCourseCreate(BaseModel):
+class InstitutionCourseCreate(BaseModel):
     id: str = Field(min_length=1, max_length=64)
     local_code: str = Field(min_length=1, max_length=128)
     local_title: str = Field(min_length=1, max_length=255)
-    origin_type: OriginType
-    source_course_id: Optional[str] = Field(default=None, max_length=64)
-    source_version: Optional[int] = Field(default=None, ge=1)
+    source_type: OriginType
+    source_catalog_course_id: Optional[str] = Field(default=None, max_length=64)
+    catalog_version: Optional[int] = Field(default=None, ge=1)
     description: Optional[str] = None
     metadata: dict[str, Any] = Field(default_factory=dict)
-    tenant_program_id: Optional[str] = Field(default=None, max_length=64)
+    institution_program_id: Optional[str] = Field(default=None, max_length=64)
 
     @model_validator(mode="after")
     def validate_provenance(self):
-        has_source = self.source_course_id is not None and self.source_version is not None
-        if self.origin_type == "custom" and has_source:
-            raise ValueError("custom courses cannot specify a canonical source")
-        if self.origin_type != "custom" and not has_source:
-            raise ValueError("canonical and derived courses must pin source_course_id and source_version")
-        if (self.source_course_id is None) != (self.source_version is None):
-            raise ValueError("source_course_id and source_version must be supplied together")
+        has_source = self.source_catalog_course_id is not None and self.catalog_version is not None
+        if self.source_type == "custom" and has_source:
+            raise ValueError("custom courses cannot specify a catalog source")
+        if self.source_type != "custom" and not has_source:
+            raise ValueError("catalog and hybrid courses must pin source_catalog_course_id and catalog_version")
+        if (self.source_catalog_course_id is None) != (self.catalog_version is None):
+            raise ValueError("source_catalog_course_id and catalog_version must be supplied together")
         return self
 
 
@@ -40,18 +40,18 @@ class CustomChapter(BaseModel):
 
 class ChapterPlacement(BaseModel):
     position: int = Field(ge=1)
-    canonical_chapter_id: Optional[str] = Field(default=None, max_length=64)
-    canonical_chapter_version: Optional[int] = Field(default=None, ge=1)
-    tenant_chapter_id: Optional[str] = Field(default=None, max_length=64)
+    catalog_chapter_id: Optional[str] = Field(default=None, max_length=64)
+    catalog_version: Optional[int] = Field(default=None, ge=1)
+    institution_chapter_id: Optional[str] = Field(default=None, max_length=64)
     custom_chapter: Optional[CustomChapter] = None
 
     @model_validator(mode="after")
     def validate_target(self):
-        canonical = self.canonical_chapter_id is not None or self.canonical_chapter_version is not None
-        if canonical and (self.canonical_chapter_id is None or self.canonical_chapter_version is None):
-            raise ValueError("canonical chapter id and version must be supplied together")
-        if sum((canonical, self.tenant_chapter_id is not None, self.custom_chapter is not None)) != 1:
-            raise ValueError("each placement needs exactly one canonical, tenant, or custom chapter target")
+        catalog = self.catalog_chapter_id is not None or self.catalog_version is not None
+        if catalog and (self.catalog_chapter_id is None or self.catalog_version is None):
+            raise ValueError("catalog chapter id and version must be supplied together")
+        if sum((catalog, self.institution_chapter_id is not None, self.custom_chapter is not None)) != 1:
+            raise ValueError("each placement needs exactly one catalog, institution, or custom chapter target")
         return self
 
 
@@ -69,7 +69,7 @@ class CourseChapterComposition(BaseModel):
 class CourseChapterUpsert(CourseChapterComposition):
     """Compatibility contract for the workflow's POST collection endpoint."""
 
-    tenant_course_id: str = Field(min_length=1, max_length=64)
+    institution_course_id: str = Field(min_length=1, max_length=64)
 
 
 class CustomConcept(BaseModel):
@@ -81,18 +81,18 @@ class CustomConcept(BaseModel):
 
 class ConceptPlacement(BaseModel):
     position: int = Field(ge=1)
-    canonical_concept_id: Optional[str] = Field(default=None, max_length=64)
-    canonical_concept_version: Optional[int] = Field(default=None, ge=1)
-    tenant_concept_id: Optional[str] = Field(default=None, max_length=64)
+    catalog_concept_id: Optional[str] = Field(default=None, max_length=64)
+    catalog_concept_version: Optional[int] = Field(default=None, ge=1)
+    institution_concept_id: Optional[str] = Field(default=None, max_length=64)
     custom_concept: Optional[CustomConcept] = None
 
     @model_validator(mode="after")
     def validate_target(self):
-        canonical = self.canonical_concept_id is not None or self.canonical_concept_version is not None
-        if canonical and (self.canonical_concept_id is None or self.canonical_concept_version is None):
-            raise ValueError("canonical concept id and version must be supplied together")
-        if sum((canonical, self.tenant_concept_id is not None, self.custom_concept is not None)) != 1:
-            raise ValueError("each placement needs exactly one canonical, tenant, or custom concept target")
+        catalog = self.catalog_concept_id is not None or self.catalog_concept_version is not None
+        if catalog and (self.catalog_concept_id is None or self.catalog_concept_version is None):
+            raise ValueError("catalog concept id and version must be supplied together")
+        if sum((catalog, self.institution_concept_id is not None, self.custom_concept is not None)) != 1:
+            raise ValueError("each placement needs exactly one catalog, institution, or custom concept target")
         return self
 
 
@@ -110,7 +110,7 @@ class ChapterConceptComposition(BaseModel):
 class ChapterConceptUpsert(ChapterConceptComposition):
     """Compatibility contract for the workflow's POST collection endpoint."""
 
-    tenant_chapter_id: str = Field(min_length=1, max_length=64)
+    institution_chapter_id: str = Field(min_length=1, max_length=64)
 
 
 class CourseDraftCreate(BaseModel):

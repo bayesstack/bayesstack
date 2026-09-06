@@ -39,10 +39,10 @@ class CoursePublicationResponse(BaseModel):
 
     id: uuid.UUID
     tenant_id: str
-    university_course_id: str
+    institution_course_id: str
     publication_number: int
     source_revision: Optional[int] = None
-    status: str
+    publication_status: str
     content_hash: str
     compiled_syllabus_tree: Dict[str, Any]
     published_by_user_id: Optional[str] = None

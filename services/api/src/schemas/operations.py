@@ -47,9 +47,9 @@ class AcademicTermResponse(AcademicTermBase):
 
 class CourseOfferingBase(BaseModel):
     academic_term_id: uuid.UUID
-    university_course_id: str
+    institution_course_id: str
     course_publication_id: uuid.UUID
-    status: str = "scheduled"  # 'scheduled' | 'enrollment_open' | 'active' | 'grading' | 'concluded'
+    offering_status: str = "scheduled"  # 'scheduled' | 'enrollment_open' | 'active' | 'grading' | 'concluded'
     syllabus_override: Dict[str, Any] = Field(default_factory=dict)
 
 
@@ -59,7 +59,7 @@ class CourseOfferingCreate(CourseOfferingBase):
 
 class CourseOfferingUpdate(BaseModel):
     course_publication_id: Optional[uuid.UUID] = None
-    status: Optional[str] = None
+    offering_status: Optional[str] = None
     syllabus_override: Optional[Dict[str, Any]] = None
 
 
@@ -72,7 +72,7 @@ class CourseOfferingResponse(CourseOfferingBase):
 
 
 # ============================================================================
-# 3. Course Sections & Instructors
+# 3. Course Sections & Staff
 # ============================================================================
 
 class CourseSectionBase(BaseModel):
@@ -103,12 +103,12 @@ class CourseSectionResponse(CourseSectionBase):
     created_at: datetime
 
 
-class SectionInstructorCreate(BaseModel):
+class SectionStaffCreate(BaseModel):
     faculty_id: str
     role: str = "primary_instructor"  # 'primary_instructor' | 'co_instructor' | 'teaching_assistant' | 'grader'
 
 
-class SectionInstructorResponse(BaseModel):
+class SectionStaffResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
@@ -120,10 +120,10 @@ class SectionInstructorResponse(BaseModel):
 
 
 # ============================================================================
-# 4. Section Enrollments (Student Rosters)
+# 4. Enrollments (Student Rosters)
 # ============================================================================
 
-class SectionEnrollmentBase(BaseModel):
+class EnrollmentBase(BaseModel):
     course_section_id: uuid.UUID
     student_id: str
     registration_type: str = "credit"  # 'credit' | 'audit' | 'pass_fail'
@@ -131,18 +131,18 @@ class SectionEnrollmentBase(BaseModel):
     enrollment_status: str = "enrolled"  # 'enrolled' | 'waitlisted' | 'dropped' | 'withdrawn' | 'completed'
 
 
-class SectionEnrollmentCreate(SectionEnrollmentBase):
+class EnrollmentCreate(EnrollmentBase):
     pass
 
 
-class SectionEnrollmentUpdate(BaseModel):
+class EnrollmentUpdate(BaseModel):
     enrollment_status: Optional[str] = None
     registration_type: Optional[str] = None
     attempt_number: Optional[int] = None
     dropped_at: Optional[datetime] = None
 
 
-class SectionEnrollmentResponse(SectionEnrollmentBase):
+class EnrollmentResponse(EnrollmentBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
@@ -155,26 +155,26 @@ class SectionEnrollmentResponse(SectionEnrollmentBase):
 # 5. Learner Progress Tracking
 # ============================================================================
 
-class LearnerConceptProgressBase(BaseModel):
-    section_enrollment_id: uuid.UUID
-    content_type: str = "library"  # 'library' | 'university'
+class LearningProgressBase(BaseModel):
+    enrollment_id: uuid.UUID
+    source_type: str = "catalog"  # 'catalog' | 'institution'
     concept_id: str
     concept_version: int = 1
-    status: str = "not_started"  # 'not_started' | 'in_progress' | 'completed' | 'mastered'
+    progress_status: str = "not_started"  # 'not_started' | 'in_progress' | 'completed' | 'mastered'
     progress_percent: float = 0.00
 
 
-class LearnerConceptProgressCreate(LearnerConceptProgressBase):
+class LearningProgressCreate(LearningProgressBase):
     pass
 
 
-class LearnerConceptProgressUpdate(BaseModel):
-    status: Optional[str] = None
+class LearningProgressUpdate(BaseModel):
+    progress_status: Optional[str] = None
     progress_percent: Optional[float] = None
     completed_at: Optional[datetime] = None
 
 
-class LearnerConceptProgressResponse(LearnerConceptProgressBase):
+class LearningProgressResponse(LearningProgressBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
@@ -188,10 +188,10 @@ class LearnerConceptProgressResponse(LearnerConceptProgressBase):
 # ============================================================================
 
 class AssessmentSubmissionCreate(BaseModel):
-    section_enrollment_id: uuid.UUID
-    studio_type: str = "coding"
-    studio_version: str = "1.0.0"
-    studio_instance_id: str
+    enrollment_id: uuid.UUID
+    activity_type: str = "coding"
+    activity_version: str = "1.0.0"
+    activity_id: str
     attempt_number: int = 1
     submission_payload: Dict[str, Any]
     max_score: float = 100.00
@@ -209,10 +209,10 @@ class AssessmentSubmissionResponse(BaseModel):
 
     id: uuid.UUID
     tenant_id: str
-    section_enrollment_id: uuid.UUID
-    studio_type: str = "coding"
-    studio_version: str = "1.0.0"
-    studio_instance_id: str
+    enrollment_id: uuid.UUID
+    activity_type: str = "coding"
+    activity_version: str = "1.0.0"
+    activity_id: str
     attempt_number: int
     submission_payload: Dict[str, Any]
     grading_status: str
@@ -229,7 +229,7 @@ class AssessmentSubmissionResponse(BaseModel):
 # ============================================================================
 
 class CourseGradeCreate(BaseModel):
-    section_enrollment_id: uuid.UUID
+    enrollment_id: uuid.UUID
     letter_grade: str  # 'A', 'A-', 'B+', 'P', 'F'
     numeric_score: float
     gpa_points: float = 4.00
@@ -250,7 +250,7 @@ class CourseGradeResponse(BaseModel):
 
     id: uuid.UUID
     tenant_id: str
-    section_enrollment_id: uuid.UUID
+    enrollment_id: uuid.UUID
     letter_grade: str
     numeric_score: float
     gpa_points: float

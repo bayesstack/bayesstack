@@ -1,4 +1,4 @@
-"""Academic Operations: Section Enrollments Router (section_enrollments)."""
+"""Academic Operations: Enrollments Router (enrollments)."""
 
 from datetime import datetime, timezone
 from typing import List, Optional
@@ -9,17 +9,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
 from core.dependencies import get_current_tenant_id
-from db.models.operations import SectionEnrollment
+from db.models.operations import Enrollment
 from schemas.operations import (
-    SectionEnrollmentCreate,
-    SectionEnrollmentResponse,
-    SectionEnrollmentUpdate,
+    EnrollmentCreate,
+    EnrollmentResponse,
+    EnrollmentUpdate,
 )
 
-router = APIRouter(prefix="/enrollments", tags=["Academic Operations - Section Enrollments"])
+router = APIRouter(prefix="/enrollments", tags=["Academic Operations - Enrollments"])
 
 
-@router.get("", response_model=List[SectionEnrollmentResponse], summary="List Section Enrollments")
+@router.get("", response_model=List[EnrollmentResponse], summary="List Enrollments")
 async def list_enrollments(
     section_id: Optional[uuid.UUID] = Query(None, description="Filter by course_section_id"),
     student_id: Optional[str] = Query(None, description="Filter by student user_id"),
@@ -29,26 +29,26 @@ async def list_enrollments(
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(SectionEnrollment).where(SectionEnrollment.tenant_id == tenant_id)
+    stmt = select(Enrollment).where(Enrollment.tenant_id == tenant_id)
     if section_id:
-        stmt = stmt.where(SectionEnrollment.course_section_id == section_id)
+        stmt = stmt.where(Enrollment.course_section_id == section_id)
     if student_id:
-        stmt = stmt.where(SectionEnrollment.student_id == student_id)
+        stmt = stmt.where(Enrollment.student_id == student_id)
     if enrollment_status:
-        stmt = stmt.where(SectionEnrollment.enrollment_status == enrollment_status)
-    stmt = stmt.order_by(SectionEnrollment.enrolled_at.desc()).limit(limit).offset(offset)
+        stmt = stmt.where(Enrollment.enrollment_status == enrollment_status)
+    stmt = stmt.order_by(Enrollment.enrolled_at.desc()).limit(limit).offset(offset)
     result = await db.execute(stmt)
     return result.scalars().all()
 
 
-@router.get("/{id}", response_model=SectionEnrollmentResponse, summary="Get Section Enrollment by UUID")
+@router.get("/{id}", response_model=EnrollmentResponse, summary="Get Enrollment by UUID")
 async def get_enrollment(
     id: uuid.UUID,
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(SectionEnrollment).where(
-        SectionEnrollment.id == id, SectionEnrollment.tenant_id == tenant_id
+    stmt = select(Enrollment).where(
+        Enrollment.id == id, Enrollment.tenant_id == tenant_id
     )
     enrollment = (await db.execute(stmt)).scalar_one_or_none()
     if not enrollment:
@@ -56,15 +56,15 @@ async def get_enrollment(
     return enrollment
 
 
-@router.post("", response_model=SectionEnrollmentResponse, status_code=status.HTTP_201_CREATED, summary="Enroll Student in Section")
+@router.post("", response_model=EnrollmentResponse, status_code=status.HTTP_201_CREATED, summary="Enroll Student in Section")
 async def enroll_student(
-    payload: SectionEnrollmentCreate,
+    payload: EnrollmentCreate,
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
     data = payload.model_dump()
     data["tenant_id"] = tenant_id
-    enrollment = SectionEnrollment(**data)
+    enrollment = Enrollment(**data)
     db.add(enrollment)
     try:
         await db.commit()
@@ -75,15 +75,15 @@ async def enroll_student(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to enroll student: {str(exc)}")
 
 
-@router.put("/{id}", response_model=SectionEnrollmentResponse, summary="Update Section Enrollment")
+@router.put("/{id}", response_model=EnrollmentResponse, summary="Update Section Enrollment")
 async def update_enrollment(
     id: uuid.UUID,
-    payload: SectionEnrollmentUpdate,
+    payload: EnrollmentUpdate,
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(SectionEnrollment).where(
-        SectionEnrollment.id == id, SectionEnrollment.tenant_id == tenant_id
+    stmt = select(Enrollment).where(
+        Enrollment.id == id, Enrollment.tenant_id == tenant_id
     )
     enrollment = (await db.execute(stmt)).scalar_one_or_none()
     if not enrollment:
@@ -105,14 +105,14 @@ async def update_enrollment(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to update enrollment: {str(exc)}")
 
 
-@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete Section Enrollment")
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete Enrollment")
 async def delete_enrollment(
     id: uuid.UUID,
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(SectionEnrollment).where(
-        SectionEnrollment.id == id, SectionEnrollment.tenant_id == tenant_id
+    stmt = select(Enrollment).where(
+        Enrollment.id == id, Enrollment.tenant_id == tenant_id
     )
     enrollment = (await db.execute(stmt)).scalar_one_or_none()
     if not enrollment:

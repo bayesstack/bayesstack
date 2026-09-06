@@ -1,9 +1,9 @@
-"""University Composition Layer: Curriculums & Dedicated Program Edges Router.
+"""Institution Composition Layer: Curricula & Dedicated Program Edges Router.
 
 Handles:
-- university_curriculums (Institutional degree/diploma roadmaps)
-- university_curriculum_library_programs (Dedicated library program edges)
-- university_curriculum_custom_programs (Dedicated custom program edges)
+- institution_curricula (Institutional degree/diploma roadmaps)
+- institution_curriculum_catalog_programs (Dedicated catalog program edges)
+- institution_curriculum_custom_programs (Dedicated custom program edges)
 - Spaced integer reordering bisection
 """
 
@@ -13,52 +13,52 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
-from core.dependencies import calculate_bisected_rank, get_current_tenant_id
+from core.dependencies import calculate_bisected_position, get_current_tenant_id
 from db.models.dedicated_edges import (
-    UniversityCurriculumCustomProgram,
-    UniversityCurriculumLibraryProgram,
+    InstitutionCurriculumCustomProgram,
+    InstitutionCurriculumCatalogProgram,
 )
-from db.models.university import UniversityCurriculum
-from schemas.university import (
+from db.models.institution import InstitutionCurriculum
+from schemas.institution import (
     ReorderEdgeRequest,
-    UniversityCurriculumCreate,
-    UniversityCurriculumCustomProgramEdgeCreate,
-    UniversityCurriculumEdgeResponse,
-    UniversityCurriculumLibraryProgramEdgeCreate,
-    UniversityCurriculumResponse,
-    UniversityCurriculumUpdate,
+    InstitutionCurriculumCreate,
+    InstitutionCurriculumCustomProgramEdgeCreate,
+    InstitutionCurriculumEdgeResponse,
+    InstitutionCurriculumCatalogProgramEdgeCreate,
+    InstitutionCurriculumResponse,
+    InstitutionCurriculumUpdate,
 )
 
-router = APIRouter(prefix="/curriculums", tags=["University - Curriculums & Program Composition"])
+router = APIRouter(prefix="/curricula", tags=["Institution - Curricula & Program Composition"])
 
 
-@router.get("", response_model=List[UniversityCurriculumResponse], summary="List University Curriculums")
-async def list_curriculums(
+@router.get("", response_model=List[InstitutionCurriculumResponse], summary="List Institution Curricula")
+async def list_curricula(
     credential_type: Optional[str] = Query(None),
-    status_filter: Optional[str] = Query(None, alias="status"),
+    content_status_filter: Optional[str] = Query(None, alias="content_status"),
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(UniversityCurriculum).where(UniversityCurriculum.tenant_id == tenant_id)
+    stmt = select(InstitutionCurriculum).where(InstitutionCurriculum.tenant_id == tenant_id)
     if credential_type:
-        stmt = stmt.where(UniversityCurriculum.credential_type == credential_type)
-    if status_filter:
-        stmt = stmt.where(UniversityCurriculum.status == status_filter)
-    stmt = stmt.order_by(UniversityCurriculum.local_code.asc()).limit(limit).offset(offset)
+        stmt = stmt.where(InstitutionCurriculum.credential_type == credential_type)
+    if content_status_filter:
+        stmt = stmt.where(InstitutionCurriculum.content_status == content_status_filter)
+    stmt = stmt.order_by(InstitutionCurriculum.local_code.asc()).limit(limit).offset(offset)
     result = await db.execute(stmt)
     return result.scalars().all()
 
 
-@router.get("/{id}", response_model=UniversityCurriculumResponse, summary="Get University Curriculum by ID")
+@router.get("/{id}", response_model=InstitutionCurriculumResponse, summary="Get Institution Curriculum by ID")
 async def get_curriculum(
     id: str,
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(UniversityCurriculum).where(
-        UniversityCurriculum.id == id, UniversityCurriculum.tenant_id == tenant_id
+    stmt = select(InstitutionCurriculum).where(
+        InstitutionCurriculum.id == id, InstitutionCurriculum.tenant_id == tenant_id
     )
     curriculum = (await db.execute(stmt)).scalar_one_or_none()
     if not curriculum:
@@ -66,23 +66,23 @@ async def get_curriculum(
     return curriculum
 
 
-@router.post("", response_model=UniversityCurriculumResponse, status_code=status.HTTP_201_CREATED, summary="Create University Curriculum")
+@router.post("", response_model=InstitutionCurriculumResponse, status_code=status.HTTP_201_CREATED, summary="Create Institution Curriculum")
 async def create_curriculum(
-    payload: UniversityCurriculumCreate,
+    payload: InstitutionCurriculumCreate,
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
     data = payload.model_dump()
     allowed_fields = {
-        "id", "source_library_curriculum_id", "source_library_version",
-        "source_university_curriculum_id", "local_code", "local_title",
-        "composition_type", "description", "metadata_", "status",
-        "adoption_mode", "release_channel", "managed_by_user_id"
+        "id", "source_catalog_curriculum_id", "catalog_version",
+        "source_institution_curriculum_id", "local_code", "local_title",
+        "source_type", "description", "metadata_", "content_status",
+        "reference_policy", "release_channel", "managed_by_user_id"
     }
     filtered_data = {k: v for k, v in data.items() if k in allowed_fields and v is not None}
     filtered_data["tenant_id"] = tenant_id
 
-    curriculum = UniversityCurriculum(**filtered_data)
+    curriculum = InstitutionCurriculum(**filtered_data)
     db.add(curriculum)
     try:
         await db.commit()
@@ -93,21 +93,21 @@ async def create_curriculum(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to create curriculum: {str(exc)}")
 
 
-@router.put("/{id}", response_model=UniversityCurriculumResponse, summary="Update University Curriculum")
+@router.put("/{id}", response_model=InstitutionCurriculumResponse, summary="Update Institution Curriculum")
 async def update_curriculum(
     id: str,
-    payload: UniversityCurriculumUpdate,
+    payload: InstitutionCurriculumUpdate,
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(UniversityCurriculum).where(
-        UniversityCurriculum.id == id, UniversityCurriculum.tenant_id == tenant_id
+    stmt = select(InstitutionCurriculum).where(
+        InstitutionCurriculum.id == id, InstitutionCurriculum.tenant_id == tenant_id
     )
     curriculum = (await db.execute(stmt)).scalar_one_or_none()
     if not curriculum:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Curriculum '{id}' not found")
 
-    allowed_fields = {"local_code", "local_title", "composition_type", "description", "status"}
+    allowed_fields = {"local_code", "local_title", "source_type", "description", "content_status"}
     update_data = payload.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         if field in allowed_fields and value is not None:
@@ -122,14 +122,14 @@ async def update_curriculum(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to update curriculum: {str(exc)}")
 
 
-@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete University Curriculum")
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete Institution Curriculum")
 async def delete_curriculum(
     id: str,
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(UniversityCurriculum).where(
-        UniversityCurriculum.id == id, UniversityCurriculum.tenant_id == tenant_id
+    stmt = select(InstitutionCurriculum).where(
+        InstitutionCurriculum.id == id, InstitutionCurriculum.tenant_id == tenant_id
     )
     curriculum = (await db.execute(stmt)).scalar_one_or_none()
     if not curriculum:
@@ -143,19 +143,19 @@ async def delete_curriculum(
 # Dedicated Program Edges & Spaced Reordering
 # ============================================================================
 
-@router.get("/{id}/programs", response_model=List[UniversityCurriculumEdgeResponse], summary="List Curriculum Program Edges")
+@router.get("/{id}/programs", response_model=List[InstitutionCurriculumEdgeResponse], summary="List Curriculum Program Edges")
 async def list_curriculum_program_edges(
     id: str,
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    lib_stmt = select(UniversityCurriculumLibraryProgram).where(
-        UniversityCurriculumLibraryProgram.university_curriculum_id == id,
-        UniversityCurriculumLibraryProgram.tenant_id == tenant_id,
+    lib_stmt = select(InstitutionCurriculumCatalogProgram).where(
+        InstitutionCurriculumCatalogProgram.institution_curriculum_id == id,
+        InstitutionCurriculumCatalogProgram.tenant_id == tenant_id,
     )
-    custom_stmt = select(UniversityCurriculumCustomProgram).where(
-        UniversityCurriculumCustomProgram.university_curriculum_id == id,
-        UniversityCurriculumCustomProgram.tenant_id == tenant_id,
+    custom_stmt = select(InstitutionCurriculumCustomProgram).where(
+        InstitutionCurriculumCustomProgram.institution_curriculum_id == id,
+        InstitutionCurriculumCustomProgram.tenant_id == tenant_id,
     )
     lib_edges = (await db.execute(lib_stmt)).scalars().all()
     custom_edges = (await db.execute(custom_stmt)).scalars().all()
@@ -165,12 +165,12 @@ async def list_curriculum_program_edges(
         edges.append({
             "id": e.id,
             "tenant_id": e.tenant_id,
-            "university_curriculum_id": e.university_curriculum_id,
-            "library_program_id": e.library_program_id,
-            "library_version": e.library_version,
-            "university_program_id": None,
-            "order_rank": e.order_rank,
-            "adoption_mode": e.adoption_mode,
+            "institution_curriculum_id": e.institution_curriculum_id,
+            "catalog_program_id": e.catalog_program_id,
+            "catalog_version": e.catalog_version,
+            "institution_program_id": None,
+            "position": e.position,
+            "reference_policy": e.reference_policy,
             "release_channel": e.release_channel,
             "lineage_type": e.lineage_type,
             "display_label": e.display_label,
@@ -179,51 +179,51 @@ async def list_curriculum_program_edges(
         edges.append({
             "id": e.id,
             "tenant_id": e.tenant_id,
-            "university_curriculum_id": e.university_curriculum_id,
-            "library_program_id": None,
-            "library_version": None,
-            "university_program_id": e.university_program_id,
-            "order_rank": e.order_rank,
-            "adoption_mode": e.adoption_mode,
+            "institution_curriculum_id": e.institution_curriculum_id,
+            "catalog_program_id": None,
+            "catalog_version": None,
+            "institution_program_id": e.institution_program_id,
+            "position": e.position,
+            "reference_policy": e.reference_policy,
             "release_channel": e.release_channel,
             "lineage_type": e.lineage_type,
             "display_label": e.display_label,
         })
 
-    edges.sort(key=lambda x: x["order_rank"])
+    edges.sort(key=lambda x: x["position"])
     return edges
 
 
 @router.post(
-    "/{id}/programs/library",
-    response_model=UniversityCurriculumEdgeResponse,
+    "/{id}/programs/catalog",
+    response_model=InstitutionCurriculumEdgeResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Add Library Program to Curriculum",
+    summary="Add Catalog Program to Curriculum",
 )
-async def add_library_program_to_curriculum(
+async def add_catalog_program_to_curriculum(
     id: str,
-    payload: UniversityCurriculumLibraryProgramEdgeCreate,
+    payload: InstitutionCurriculumCatalogProgramEdgeCreate,
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    rank = payload.order_rank
+    rank = payload.position
     if rank is None:
-        max_rank = (
+        max_position = (
             await db.execute(
-                select(func.max(UniversityCurriculumLibraryProgram.order_rank)).where(
-                    UniversityCurriculumLibraryProgram.university_curriculum_id == id
+                select(func.max(InstitutionCurriculumCatalogProgram.position)).where(
+                    InstitutionCurriculumCatalogProgram.institution_curriculum_id == id
                 )
             )
         ).scalar() or 0
-        rank = calculate_bisected_rank(before_rank=max_rank)
+        rank = calculate_bisected_position(before_position=max_position)
 
-    edge = UniversityCurriculumLibraryProgram(
+    edge = InstitutionCurriculumCatalogProgram(
         tenant_id=tenant_id,
-        university_curriculum_id=id,
-        library_program_id=payload.library_program_id,
-        library_version=payload.library_version,
-        order_rank=rank,
-        adoption_mode=payload.adoption_mode,
+        institution_curriculum_id=id,
+        catalog_program_id=payload.catalog_program_id,
+        catalog_version=payload.catalog_version,
+        position=rank,
+        reference_policy=payload.reference_policy,
         release_channel=payload.release_channel,
         display_label=payload.display_label,
     )
@@ -234,12 +234,12 @@ async def add_library_program_to_curriculum(
         return {
             "id": edge.id,
             "tenant_id": edge.tenant_id,
-            "university_curriculum_id": edge.university_curriculum_id,
-            "library_program_id": edge.library_program_id,
-            "library_version": edge.library_version,
-            "university_program_id": None,
-            "order_rank": edge.order_rank,
-            "adoption_mode": edge.adoption_mode,
+            "institution_curriculum_id": edge.institution_curriculum_id,
+            "catalog_program_id": edge.catalog_program_id,
+            "catalog_version": edge.catalog_version,
+            "institution_program_id": None,
+            "position": edge.position,
+            "reference_policy": edge.reference_policy,
             "release_channel": edge.release_channel,
             "lineage_type": edge.lineage_type,
             "display_label": edge.display_label,
@@ -251,32 +251,32 @@ async def add_library_program_to_curriculum(
 
 @router.post(
     "/{id}/programs/custom",
-    response_model=UniversityCurriculumEdgeResponse,
+    response_model=InstitutionCurriculumEdgeResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Add Custom Program to Curriculum",
 )
 async def add_custom_program_to_curriculum(
     id: str,
-    payload: UniversityCurriculumCustomProgramEdgeCreate,
+    payload: InstitutionCurriculumCustomProgramEdgeCreate,
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    rank = payload.order_rank
+    rank = payload.position
     if rank is None:
-        max_rank = (
+        max_position = (
             await db.execute(
-                select(func.max(UniversityCurriculumCustomProgram.order_rank)).where(
-                    UniversityCurriculumCustomProgram.university_curriculum_id == id
+                select(func.max(InstitutionCurriculumCustomProgram.position)).where(
+                    InstitutionCurriculumCustomProgram.institution_curriculum_id == id
                 )
             )
         ).scalar() or 0
-        rank = calculate_bisected_rank(before_rank=max_rank)
+        rank = calculate_bisected_position(before_position=max_position)
 
-    edge = UniversityCurriculumCustomProgram(
+    edge = InstitutionCurriculumCustomProgram(
         tenant_id=tenant_id,
-        university_curriculum_id=id,
-        university_program_id=payload.university_program_id,
-        order_rank=rank,
+        institution_curriculum_id=id,
+        institution_program_id=payload.institution_program_id,
+        position=rank,
         display_label=payload.display_label,
     )
     db.add(edge)
@@ -286,12 +286,12 @@ async def add_custom_program_to_curriculum(
         return {
             "id": edge.id,
             "tenant_id": edge.tenant_id,
-            "university_curriculum_id": edge.university_curriculum_id,
-            "library_program_id": None,
-            "library_version": None,
-            "university_program_id": edge.university_program_id,
-            "order_rank": edge.order_rank,
-            "adoption_mode": edge.adoption_mode,
+            "institution_curriculum_id": edge.institution_curriculum_id,
+            "catalog_program_id": None,
+            "catalog_version": None,
+            "institution_program_id": edge.institution_program_id,
+            "position": edge.position,
+            "reference_policy": edge.reference_policy,
             "release_channel": edge.release_channel,
             "lineage_type": edge.lineage_type,
             "display_label": edge.display_label,
@@ -301,15 +301,15 @@ async def add_custom_program_to_curriculum(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to add custom program edge: {str(exc)}")
 
 
-@router.delete("/programs/library/{edge_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Remove Library Program Edge")
-async def remove_library_program_edge(
+@router.delete("/programs/catalog/{edge_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Remove Catalog Program Edge")
+async def remove_catalog_program_edge(
     edge_id: int,
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(UniversityCurriculumLibraryProgram).where(
-        UniversityCurriculumLibraryProgram.id == edge_id,
-        UniversityCurriculumLibraryProgram.tenant_id == tenant_id,
+    stmt = select(InstitutionCurriculumCatalogProgram).where(
+        InstitutionCurriculumCatalogProgram.id == edge_id,
+        InstitutionCurriculumCatalogProgram.tenant_id == tenant_id,
     )
     edge = (await db.execute(stmt)).scalar_one_or_none()
     if not edge:
@@ -325,9 +325,9 @@ async def remove_custom_program_edge(
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(UniversityCurriculumCustomProgram).where(
-        UniversityCurriculumCustomProgram.id == edge_id,
-        UniversityCurriculumCustomProgram.tenant_id == tenant_id,
+    stmt = select(InstitutionCurriculumCustomProgram).where(
+        InstitutionCurriculumCustomProgram.id == edge_id,
+        InstitutionCurriculumCustomProgram.tenant_id == tenant_id,
     )
     edge = (await db.execute(stmt)).scalar_one_or_none()
     if not edge:
@@ -344,19 +344,19 @@ async def reorder_program_edge(
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    model = UniversityCurriculumCustomProgram if is_custom else UniversityCurriculumLibraryProgram
+    model = InstitutionCurriculumCustomProgram if is_custom else InstitutionCurriculumCatalogProgram
     stmt = select(model).where(model.id == payload.edge_id, model.tenant_id == tenant_id)
     edge = (await db.execute(stmt)).scalar_one_or_none()
     if not edge:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Edge not found")
 
-    new_rank = calculate_bisected_rank(payload.before_rank, payload.after_rank)
-    edge.order_rank = new_rank
+    new_position = calculate_bisected_position(payload.before_position, payload.after_position)
+    edge.position = new_position
 
     try:
         await db.commit()
         await db.refresh(edge)
-        return {"id": edge.id, "new_order_rank": edge.order_rank, "message": "Reordered successfully"}
+        return {"id": edge.id, "new_position": edge.position, "message": "Reordered successfully"}
     except Exception as exc:
         await db.rollback()
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Reordering failed: {str(exc)}")

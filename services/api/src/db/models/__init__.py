@@ -2,69 +2,69 @@
 
 This package provides a clean, function-first organization:
 - `tenant.py`: Institutional boundary & user identity
-- `library.py`: Platform Master Learning Library (`library_*`)
-- `university.py`: University Composition Layer (`university_*`)
+- `catalog.py`: Platform Master Learning Catalog (`catalog_*`)
+- `institution.py`: Institution Composition Layer (`institution_*`)
 - `delivery.py`: CQRS Publication snapshots & Content-Addressed Storage
 - `enrollment.py`: Faculty assignments & Student program/curriculum enrollments
 - `guards.py`: Kernel-level database immutability triggers
 """
 
 from db.models.tenant import Tenant, User, TenantMembership, TenantRole
-from db.models.library import (
-    LibraryCurriculum,
-    LibraryCurriculumProgram,
-    LibraryProgram,
-    LibraryProgramCourse,
-    LibraryCourse,
-    LibraryCourseChapter,
-    LibraryChapter,
-    LibraryChapterConcept,
-    LibraryConcept,
-    LibraryStudioInstance,
+from db.models.catalog import (
+    CatalogCurriculum,
+    CatalogCurriculumProgram,
+    CatalogProgram,
+    CatalogProgramCourse,
+    CatalogCourse,
+    CatalogCourseChapter,
+    CatalogChapter,
+    CatalogChapterConcept,
+    CatalogConcept,
+    CatalogActivity,
 )
-from db.models.university import (
-    UniversityCurriculum,
-    UniversityCurriculumProgram,
-    UniversityProgram,
-    UniversityProgramCourse,
-    UniversityCourse,
-    UniversityCourseChapter,
-    UniversityChapter,
-    UniversityChapterConcept,
-    UniversityConcept,
-    UniversityStudioInstance,
+from db.models.institution import (
+    InstitutionCurriculum,
+    InstitutionCurriculumProgram,
+    InstitutionProgram,
+    InstitutionProgramCourse,
+    InstitutionCourse,
+    InstitutionCourseChapter,
+    InstitutionChapter,
+    InstitutionChapterConcept,
+    InstitutionConcept,
+    InstitutionActivity,
 )
 from db.models.dedicated_edges import (
-    UniversityCurriculumLibraryProgram,
-    UniversityCurriculumCustomProgram,
-    UniversityProgramLibraryCourse,
-    UniversityProgramCustomCourse,
-    UniversityCourseLibraryChapter,
-    UniversityCourseCustomChapter,
-    UniversityChapterLibraryConcept,
-    UniversityChapterCustomConcept,
+    InstitutionCurriculumCatalogProgram,
+    InstitutionCurriculumCustomProgram,
+    InstitutionProgramCatalogCourse,
+    InstitutionProgramCustomCourse,
+    InstitutionCourseCatalogChapter,
+    InstitutionCourseCustomChapter,
+    InstitutionChapterCatalogConcept,
+    InstitutionChapterCustomConcept,
 )
 from db.models.delivery import CoursePublication, StudioAsset
 from db.models.operations import (
     AcademicTerm,
     CourseOffering,
     CourseSection,
-    SectionInstructor,
-    SectionEnrollment,
-    LearnerConceptProgress,
+    SectionStaff,
+    Enrollment,
+    LearningProgress,
     AssessmentSubmission,
     CourseGrade,
     StudentAcademicProfile,
 )
 from db.models.enrollment import (
-    FacultyCourseAssignment,
-    FacultyProgramAssignment,
-    StudentCurriculumEnrollment,
-    StudentProgramEnrollment,
+    CourseFaculty,
+    ProgramFaculty,
+    CurriculumEnrollment,
+    ProgramEnrollment,
 )
 from db.models.guards import (
-    LIBRARY_TABLE_NAMES,
-    ensure_library_immutability_guards,
+    CATALOG_TABLE_NAMES,
+    ensure_catalog_immutability_guards,
 )
 
 __all__ = [
@@ -73,37 +73,37 @@ __all__ = [
     "User",
     "TenantMembership",
     "TenantRole",
-    # Platform Master Learning Library
-    "LibraryCurriculum",
-    "LibraryCurriculumProgram",
-    "LibraryProgram",
-    "LibraryProgramCourse",
-    "LibraryCourse",
-    "LibraryCourseChapter",
-    "LibraryChapter",
-    "LibraryChapterConcept",
-    "LibraryConcept",
-    "LibraryStudioInstance",
-    # University Composition Layer (Unified)
-    "UniversityCurriculum",
-    "UniversityCurriculumProgram",
-    "UniversityProgram",
-    "UniversityProgramCourse",
-    "UniversityCourse",
-    "UniversityCourseChapter",
-    "UniversityChapter",
-    "UniversityChapterConcept",
-    "UniversityConcept",
-    "UniversityStudioInstance",
-    # University Dedicated Edge Models
-    "UniversityCurriculumLibraryProgram",
-    "UniversityCurriculumCustomProgram",
-    "UniversityProgramLibraryCourse",
-    "UniversityProgramCustomCourse",
-    "UniversityCourseLibraryChapter",
-    "UniversityCourseCustomChapter",
-    "UniversityChapterLibraryConcept",
-    "UniversityChapterCustomConcept",
+    # Platform Master Learning Catalog
+    "CatalogCurriculum",
+    "CatalogCurriculumProgram",
+    "CatalogProgram",
+    "CatalogProgramCourse",
+    "CatalogCourse",
+    "CatalogCourseChapter",
+    "CatalogChapter",
+    "CatalogChapterConcept",
+    "CatalogConcept",
+    "CatalogActivity",
+    # Institution Composition Layer (Unified)
+    "InstitutionCurriculum",
+    "InstitutionCurriculumProgram",
+    "InstitutionProgram",
+    "InstitutionProgramCourse",
+    "InstitutionCourse",
+    "InstitutionCourseChapter",
+    "InstitutionChapter",
+    "InstitutionChapterConcept",
+    "InstitutionConcept",
+    "InstitutionActivity",
+    # Institution Dedicated Edge Models
+    "InstitutionCurriculumCatalogProgram",
+    "InstitutionCurriculumCustomProgram",
+    "InstitutionProgramCatalogCourse",
+    "InstitutionProgramCustomCourse",
+    "InstitutionCourseCatalogChapter",
+    "InstitutionCourseCustomChapter",
+    "InstitutionChapterCatalogConcept",
+    "InstitutionChapterCustomConcept",
     # Delivery & Optimization
     "CoursePublication",
     "StudioAsset",
@@ -111,20 +111,19 @@ __all__ = [
     "AcademicTerm",
     "CourseOffering",
     "CourseSection",
-    "SectionInstructor",
-    "SectionEnrollment",
-    "LearnerConceptProgress",
+    "SectionStaff",
+    "Enrollment",
+    "LearningProgress",
     "AssessmentSubmission",
     "CourseGrade",
     "StudentAcademicProfile",
     # Assignments & Enrollments
-    "FacultyCourseAssignment",
-    "FacultyProgramAssignment",
-    "StudentCurriculumEnrollment",
-    "StudentProgramEnrollment",
+    "CourseFaculty",
+    "ProgramFaculty",
+    "CurriculumEnrollment",
+    "ProgramEnrollment",
     # Immutability Guards
-    "LIBRARY_TABLE_NAMES",
-    "ensure_library_immutability_guards",
+    "CATALOG_TABLE_NAMES",
+    "ensure_catalog_immutability_guards",
 ]
-
 

@@ -1,4 +1,4 @@
-"""Academic Operations: Course Sections & Instructors Router (course_sections, section_instructors)."""
+"""Academic Operations: Course Sections & Staff Router (course_sections, section_staff)."""
 
 from typing import List, Optional
 import uuid
@@ -8,16 +8,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
 from core.dependencies import get_current_tenant_id
-from db.models.operations import CourseSection, SectionInstructor
+from db.models.operations import CourseSection, SectionStaff
 from schemas.operations import (
     CourseSectionCreate,
     CourseSectionResponse,
     CourseSectionUpdate,
-    SectionInstructorCreate,
-    SectionInstructorResponse,
+    SectionStaffCreate,
+    SectionStaffResponse,
 )
 
-router = APIRouter(prefix="/sections", tags=["Academic Operations - Sections & Instructors"])
+router = APIRouter(prefix="/sections", tags=["Academic Operations - Sections & Staff"])
 
 
 @router.get("", response_model=List[CourseSectionResponse], summary="List Course Sections")
@@ -115,72 +115,72 @@ async def delete_section(
 
 
 # ============================================================================
-# Section Instructors Endpoints
+# Section Staff Endpoints
 # ============================================================================
 
-@router.get("/{id}/instructors", response_model=List[SectionInstructorResponse], summary="List Instructors for Section")
-async def list_section_instructors(
+@router.get("/{id}/staff", response_model=List[SectionStaffResponse], summary="List Staff for Section")
+async def list_section_staff(
     id: uuid.UUID,
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = (
-        select(SectionInstructor)
-        .where(SectionInstructor.course_section_id == id, SectionInstructor.tenant_id == tenant_id)
-        .order_by(SectionInstructor.assigned_at.asc())
+        select(SectionStaff)
+        .where(SectionStaff.course_section_id == id, SectionStaff.tenant_id == tenant_id)
+        .order_by(SectionStaff.assigned_at.asc())
     )
     result = await db.execute(stmt)
     return result.scalars().all()
 
 
 @router.post(
-    "/{id}/instructors",
-    response_model=SectionInstructorResponse,
+    "/{id}/staff",
+    response_model=SectionStaffResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Assign Instructor to Section",
+    summary="Assign Staff to Section",
 )
-async def assign_section_instructor(
+async def assign_section_staff(
     id: uuid.UUID,
-    payload: SectionInstructorCreate,
+    payload: SectionStaffCreate,
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    instructor = SectionInstructor(
+    staff = SectionStaff(
         id=uuid.uuid4(),
         tenant_id=tenant_id,
         course_section_id=id,
         faculty_id=payload.faculty_id,
         role=payload.role,
     )
-    db.add(instructor)
+    db.add(staff)
     try:
         await db.commit()
-        await db.refresh(instructor)
-        return instructor
+        await db.refresh(staff)
+        return staff
     except Exception as exc:
         await db.rollback()
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to assign instructor: {str(exc)}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to assign staff: {str(exc)}")
 
 
 @router.delete(
-    "/{id}/instructors/{instructor_id}",
+    "/{id}/staff/{staff_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    summary="Remove Instructor from Section",
+    summary="Remove Staff from Section",
 )
-async def remove_section_instructor(
+async def remove_section_staff(
     id: uuid.UUID,
-    instructor_id: uuid.UUID,
+    staff_id: uuid.UUID,
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(SectionInstructor).where(
-        SectionInstructor.id == instructor_id,
-        SectionInstructor.course_section_id == id,
-        SectionInstructor.tenant_id == tenant_id,
+    stmt = select(SectionStaff).where(
+        SectionStaff.id == staff_id,
+        SectionStaff.course_section_id == id,
+        SectionStaff.tenant_id == tenant_id,
     )
-    instructor = (await db.execute(stmt)).scalar_one_or_none()
-    if not instructor:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Instructor assignment not found")
-    await db.delete(instructor)
+    staff = (await db.execute(stmt)).scalar_one_or_none()
+    if not staff:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Section staff record not found")
+    await db.delete(staff)
     await db.commit()
     return None

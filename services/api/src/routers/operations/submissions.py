@@ -21,8 +21,8 @@ router = APIRouter(prefix="/submissions", tags=["Academic Operations - Assessmen
 
 @router.get("", response_model=List[AssessmentSubmissionResponse], summary="List Assessment Submissions")
 async def list_submissions(
-    enrollment_id: Optional[uuid.UUID] = Query(None, description="Filter by section_enrollment_id"),
-    studio_instance_id: Optional[str] = Query(None, description="Filter by studio_instance_id"),
+    enrollment_id: Optional[uuid.UUID] = Query(None, description="Filter by enrollment_id"),
+    activity_id: Optional[str] = Query(None, description="Filter by activity_id"),
     grading_status: Optional[str] = Query(None, description="'pending' | 'auto_graded' | 'manually_graded'"),
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
@@ -31,9 +31,9 @@ async def list_submissions(
 ):
     stmt = select(AssessmentSubmission).where(AssessmentSubmission.tenant_id == tenant_id)
     if enrollment_id:
-        stmt = stmt.where(AssessmentSubmission.section_enrollment_id == enrollment_id)
-    if studio_instance_id:
-        stmt = stmt.where(AssessmentSubmission.studio_instance_id == studio_instance_id)
+        stmt = stmt.where(AssessmentSubmission.enrollment_id == enrollment_id)
+    if activity_id:
+        stmt = stmt.where(AssessmentSubmission.activity_id == activity_id)
     if grading_status:
         stmt = stmt.where(AssessmentSubmission.grading_status == grading_status)
     stmt = stmt.order_by(AssessmentSubmission.submitted_at.desc()).limit(limit).offset(offset)
@@ -56,7 +56,7 @@ async def get_submission(
     return sub
 
 
-@router.post("", response_model=AssessmentSubmissionResponse, status_code=status.HTTP_201_CREATED, summary="Submit Studio Lab / Assessment Attempt")
+@router.post("", response_model=AssessmentSubmissionResponse, status_code=status.HTTP_201_CREATED, summary="Submit Activity / Assessment Attempt")
 async def submit_assessment(
     payload: AssessmentSubmissionCreate,
     tenant_id: str = Depends(get_current_tenant_id),

@@ -89,17 +89,17 @@ When pulling new changes from `git`:
 
 ## Content Composition Engine
 
-Migration `0003_create_content_composition_engine` adds the six-tier academic graph:
+Migrations `0003` through `0012` define and evolve the six-tier academic graph:
 
-- Immutable, version-pinned canonical programs, courses, chapters, concepts, and studio instances.
-- Tenant curricula/programs/course/chapter/concept wrappers with `canonical`, `custom`, or `derived` provenance.
-- Ordered composition edges that point directly to either a canonical release or a same-tenant wrapper, avoiding cloned canonical trees.
+- Immutable, version-pinned catalog programs, courses, chapters, concepts, and activities.
+- Institution curricula/programs/course/chapter/concept wrappers with `catalog`, `custom`, or `hybrid` provenance.
+- Ordered composition edges that point directly to either a catalog release or a same-institution wrapper, avoiding cloned catalog trees.
 - Faculty program/course assignments, program/curriculum enrollment records, and immutable `course_publications` snapshots.
 
-Canonical releases use database triggers to reject updates and deletes; publish a new version instead. A direct canonical course adoption has no tenant child edges. Forking it creates a `derived` draft with explicit composition edges, which can then be reordered or supplemented with custom content.
+Catalog releases use database triggers to reject updates and deletes; publish a new version instead. A direct catalog course adoption has no institution child edges. Forking it creates a `hybrid` draft with explicit composition edges, which can then be reordered or supplemented with custom content.
 
 The Course Builder API is available through `/docs`. Its main paths are:
 
-- `POST /api/tenant-courses`, `POST /api/tenant-course-chapters`, and `POST /api/tenant-chapter-concepts` (with RESTful `PUT` path aliases)
-- `POST /api/tenant-courses/{id}/draft` and `PUT /api/tenant-courses/{id}/publish`
+- `POST /api/institution-courses`, `POST /api/institution-course-chapters`, and `POST /api/institution-chapter-concepts` (with RESTful `PUT` path aliases)
+- `POST /api/institution-courses/{id}/draft` and `PUT /api/institution-courses/{id}/publish`
 - `GET /api/student/courses/{id}/chapters` and `GET /api/student/concepts/{id}`

@@ -99,7 +99,7 @@ async def test_valid_tenant_subdomains():
         data = resp.json()
         assert data["is_tenant"] is True
         assert data["tenant"]["slug"] == "ashoka"
-        assert data["tenant"]["name"] == "Ashoka University"
+        assert data["tenant"]["name"] == "Ashoka Institution"
 
         # COEP localhost
         resp = await ac.get("/api/tenant-config", headers={"Host": "coep.localhost:8000"})

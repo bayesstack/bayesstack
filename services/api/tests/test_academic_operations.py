@@ -13,7 +13,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from content.service import (
-    assign_section_instructor,
+    assign_section_staff,
     create_academic_term,
     create_course_offering,
     create_course_section,
@@ -32,10 +32,10 @@ from db.models import (
     CourseOffering,
     CoursePublication,
     CourseSection,
-    LearnerConceptProgress,
-    SectionEnrollment,
-    SectionInstructor,
-    UniversityCourse,
+    LearningProgress,
+    Enrollment,
+    SectionStaff,
+    InstitutionCourse,
     User,
 )
 from db.seed import seed_database
@@ -60,7 +60,7 @@ async def test_academic_term_and_course_offering_creation():
         assert term.code == "2026-FALL-CREATION-TEST"
 
         # 2. Publish Course Snapshot for ML-101
-        course = await session.get(UniversityCourse, "course-bayes-ml-001")
+        course = await session.get(InstitutionCourse, "course-bayes-ml-001")
         assert course is not None
         pub1 = await publish_course_snapshot(
             session,
@@ -76,14 +76,14 @@ async def test_academic_term_and_course_offering_creation():
             session,
             tenant_id="tenant-bayes",
             academic_term_id=term.id,
-            university_course_id=course.id,
+            institution_course_id=course.id,
             course_publication_id=pub1.id,
-            status="enrollment_open",
+            offering_status="enrollment_open",
             syllabus_override={"office_hours": "Tuesdays 2-4 PM"},
         )
         assert offering.id is not None
         assert offering.course_publication_id == pub1.id
-        assert offering.status == "enrollment_open"
+        assert offering.offering_status == "enrollment_open"
 
         # 4. Enforce uniqueness: Cannot schedule same course twice in same term
         with pytest.raises(IntegrityError):
@@ -92,7 +92,7 @@ async def test_academic_term_and_course_offering_creation():
                     inner_session,
                     tenant_id="tenant-bayes",
                     academic_term_id=term.id,
-                    university_course_id=course.id,
+                    institution_course_id=course.id,
                     course_publication_id=pub1.id,
                 )
                 await inner_session.commit()
@@ -112,7 +112,7 @@ async def test_section_cohort_isolation_and_instructor_assignment():
             end_date=date(2026, 5, 20),
         )
 
-        course = await session.get(UniversityCourse, "course-bayes-ml-001")
+        course = await session.get(InstitutionCourse, "course-bayes-ml-001")
         pub = await publish_course_snapshot(
             session,
             tenant_id="tenant-bayes",
@@ -123,7 +123,7 @@ async def test_section_cohort_isolation_and_instructor_assignment():
             session,
             tenant_id="tenant-bayes",
             academic_term_id=term.id,
-            university_course_id=course.id,
+            institution_course_id=course.id,
             course_publication_id=pub.id,
         )
 
@@ -147,7 +147,7 @@ async def test_section_cohort_isolation_and_instructor_assignment():
         assert sec_a.id != sec_b.id
 
         # 3. Assign Faculty to Section A
-        inst_a = await assign_section_instructor(
+        inst_a = await assign_section_staff(
             session,
             tenant_id="tenant-bayes",
             course_section_id=sec_a.id,
@@ -167,10 +167,10 @@ async def test_section_cohort_isolation_and_instructor_assignment():
 
         # 5. Verify Roster Cohort Isolation
         sec_a_enrollments = (await session.scalars(
-            select(SectionEnrollment).where(SectionEnrollment.course_section_id == sec_a.id)
+            select(Enrollment).where(Enrollment.course_section_id == sec_a.id)
         )).all()
         sec_b_enrollments = (await session.scalars(
-            select(SectionEnrollment).where(SectionEnrollment.course_section_id == sec_b.id)
+            select(Enrollment).where(Enrollment.course_section_id == sec_b.id)
         )).all()
 
         assert len(sec_a_enrollments) == 1
@@ -187,7 +187,7 @@ async def test_mid_semester_publication_immunity():
     await seed_database()
     async with AsyncSessionLocal() as session:
         # 1. Publish Release #1
-        course = await session.get(UniversityCourse, "course-bayes-ml-001")
+        course = await session.get(InstitutionCourse, "course-bayes-ml-001")
         pub1 = await publish_course_snapshot(
             session,
             tenant_id="tenant-bayes",
@@ -209,7 +209,7 @@ async def test_mid_semester_publication_immunity():
             session,
             tenant_id="tenant-bayes",
             academic_term_id=term.id,
-            university_course_id=course.id,
+            institution_course_id=course.id,
             course_publication_id=pub1.id,
         )
         section = await create_course_section(
@@ -258,7 +258,7 @@ async def test_learner_progress_assessment_submission_and_final_grade():
             start_date=date(2026, 8, 25),
             end_date=date(2026, 12, 15),
         )
-        course = await session.get(UniversityCourse, "course-bayes-ml-001")
+        course = await session.get(InstitutionCourse, "course-bayes-ml-001")
         pub = await publish_course_snapshot(
             session,
             tenant_id="tenant-bayes",
@@ -269,7 +269,7 @@ async def test_learner_progress_assessment_submission_and_final_grade():
             session,
             tenant_id="tenant-bayes",
             academic_term_id=term.id,
-            university_course_id=course.id,
+            institution_course_id=course.id,
             course_publication_id=pub.id,
         )
         section = await create_course_section(
@@ -290,22 +290,22 @@ async def test_learner_progress_assessment_submission_and_final_grade():
         progress = await record_concept_progress(
             session,
             tenant_id="tenant-bayes",
-            section_enrollment_id=enrollment.id,
+            enrollment_id=enrollment.id,
             concept_id="C-GRADIENT-DESCENT",
             concept_version=1,
-            status="completed",
+            progress_status="completed",
             progress_percent=100.0,
         )
-        assert progress.status == "completed"
+        assert progress.progress_status == "completed"
         assert progress.progress_percent == 100.0
         assert progress.completed_at is not None
 
-        # 3. Submit Assessment on Studio Lab
+        # 3. Submit Assessment on Activity
         submission = await submit_assessment(
             session,
             tenant_id="tenant-bayes",
-            section_enrollment_id=enrollment.id,
-            studio_instance_id="studio-coding-001",
+            enrollment_id=enrollment.id,
+            activity_id="studio-coding-001",
             submission_payload={"code": "def gradient_descent(x): return x * 0.1", "language": "python"},
             attempt_number=1,
         )
@@ -327,7 +327,7 @@ async def test_learner_progress_assessment_submission_and_final_grade():
         grade = await finalize_course_grade(
             session,
             tenant_id="tenant-bayes",
-            section_enrollment_id=enrollment.id,
+            enrollment_id=enrollment.id,
             letter_grade="A",
             numeric_score=96.5,
             gpa_points=4.0,

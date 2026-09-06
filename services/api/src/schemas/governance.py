@@ -9,12 +9,12 @@ from pydantic import BaseModel, ConfigDict, Field
 # 1. Faculty Assignments
 # ============================================================================
 
-class FacultyCourseAssignmentCreate(BaseModel):
+class CourseFacultyCreate(BaseModel):
     faculty_id: str
-    university_course_id: str
+    institution_course_id: str
 
 
-class FacultyCourseAssignmentResponse(FacultyCourseAssignmentCreate):
+class CourseFacultyResponse(CourseFacultyCreate):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -22,12 +22,12 @@ class FacultyCourseAssignmentResponse(FacultyCourseAssignmentCreate):
     assigned_at: datetime
 
 
-class FacultyProgramAssignmentCreate(BaseModel):
+class ProgramFacultyCreate(BaseModel):
     faculty_id: str
-    university_program_id: str
+    institution_program_id: str
 
 
-class FacultyProgramAssignmentResponse(FacultyProgramAssignmentCreate):
+class ProgramFacultyResponse(ProgramFacultyCreate):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -39,17 +39,17 @@ class FacultyProgramAssignmentResponse(FacultyProgramAssignmentCreate):
 # 2. Student Macro Matriculation
 # ============================================================================
 
-class StudentCurriculumEnrollmentCreate(BaseModel):
+class CurriculumEnrollmentCreate(BaseModel):
     student_id: str
-    university_curriculum_id: str
+    institution_curriculum_id: str
     is_active: bool = True
 
 
-class StudentCurriculumEnrollmentUpdate(BaseModel):
+class CurriculumEnrollmentUpdate(BaseModel):
     is_active: Optional[bool] = None
 
 
-class StudentCurriculumEnrollmentResponse(StudentCurriculumEnrollmentCreate):
+class CurriculumEnrollmentResponse(CurriculumEnrollmentCreate):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -57,17 +57,17 @@ class StudentCurriculumEnrollmentResponse(StudentCurriculumEnrollmentCreate):
     enrolled_at: datetime
 
 
-class StudentProgramEnrollmentCreate(BaseModel):
+class ProgramEnrollmentCreate(BaseModel):
     student_id: str
-    university_program_id: str
+    institution_program_id: str
     is_active: bool = True
 
 
-class StudentProgramEnrollmentUpdate(BaseModel):
+class ProgramEnrollmentUpdate(BaseModel):
     is_active: Optional[bool] = None
 
 
-class StudentProgramEnrollmentResponse(StudentProgramEnrollmentCreate):
+class ProgramEnrollmentResponse(ProgramEnrollmentCreate):
     model_config = ConfigDict(from_attributes=True)
 
     id: int

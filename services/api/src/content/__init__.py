@@ -1,1 +1,1 @@
-"""Canonical library, tenant composition, and publishing module."""
+"""Catalog, institution composition, and publishing module."""

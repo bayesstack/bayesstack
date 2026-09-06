@@ -15,8 +15,8 @@ from routers.crud import crud_router
 from routers.health import router as health_router
 from routers.tenants import router as tenants_router
 
-from routers.library import library_router
-from routers.university import university_router
+from routers.catalog import catalog_router
+from routers.institution import institution_router
 from routers.delivery import delivery_router
 from routers.operations import operations_router
 from routers.governance import governance_router
@@ -35,52 +35,52 @@ tags_metadata = [
         "description": "Institutional tenant discovery, host resolution, and branding metadata services.",
     },
     {
-        "name": "Library - Curriculums",
-        "description": "Platform Master Learning Library: Degree & roadmap curriculum catalog and program sequences.",
+        "name": "Catalog - Curricula",
+        "description": "Platform Master Learning Catalog: Degree & roadmap curriculum catalog and program sequences.",
     },
     {
-        "name": "Library - Programs",
-        "description": "Platform Master Learning Library: Academic terms, semesters, and course track mappings.",
+        "name": "Catalog - Programs",
+        "description": "Platform Master Learning Catalog: Academic terms, semesters, and course track mappings.",
     },
     {
-        "name": "Library - Courses",
-        "description": "Platform Master Learning Library: Course catalogs and chapter compositions.",
+        "name": "Catalog - Courses",
+        "description": "Platform Master Learning Catalog: Course catalogs and chapter compositions.",
     },
     {
-        "name": "Library - Chapters",
-        "description": "Platform Master Learning Library: Topic modules and concept sequences.",
+        "name": "Catalog - Chapters",
+        "description": "Platform Master Learning Catalog: Topic modules and concept sequences.",
     },
     {
-        "name": "Library - Concepts",
-        "description": "Platform Master Learning Library: Atomic, self-contained pedagogical knowledge units.",
+        "name": "Catalog - Concepts",
+        "description": "Platform Master Learning Catalog: Atomic, self-contained pedagogical knowledge units.",
     },
     {
-        "name": "Library - Studio Instances",
-        "description": "Platform Master Learning Library: Runtime interactive mini-app configurations (coding, video, mcq).",
+        "name": "Catalog - Activities",
+        "description": "Platform Master Learning Catalog: interactive activity configurations (coding, video, mcq).",
     },
     {
-        "name": "University - Curriculums & Program Composition",
-        "description": "University Composition: Institutional degree programs and dedicated edge sequences.",
+        "name": "Institution - Curricula & Program Composition",
+        "description": "Institution Composition: Institutional degree programs and dedicated edge sequences.",
     },
     {
-        "name": "University - Programs & Course Composition",
-        "description": "University Composition: Institutional semesters and dedicated course edge sequences.",
+        "name": "Institution - Programs & Course Composition",
+        "description": "Institution Composition: Institutional semesters and dedicated course edge sequences.",
     },
     {
-        "name": "University - Courses & Chapter Composition",
-        "description": "University Composition: Institutional course definitions, copy-on-write forks, and chapter composition.",
+        "name": "Institution - Courses & Chapter Composition",
+        "description": "Institution Composition: Institutional course definitions, copy-on-write forks, and chapter composition.",
     },
     {
-        "name": "University - Chapters & Concept Composition",
-        "description": "University Composition: Institutional chapters, copy-on-write forks, and concept edge sequences.",
+        "name": "Institution - Chapters & Concept Composition",
+        "description": "Institution Composition: Institutional chapters, copy-on-write forks, and concept edge sequences.",
     },
     {
-        "name": "University - Proprietary Concepts",
-        "description": "University Composition: Proprietary institutional concepts private to tenant.",
+        "name": "Institution - Proprietary Concepts",
+        "description": "Institution Composition: Proprietary institutional concepts private to tenant.",
     },
     {
-        "name": "University - Studio Instances",
-        "description": "University Composition: Proprietary studio mini-app configurations.",
+        "name": "Institution - Activities",
+        "description": "Institution Composition: proprietary interactive activity configurations.",
     },
     {
         "name": "Delivery - Course Publications",
@@ -99,28 +99,28 @@ tags_metadata = [
         "description": "Academic Operations: Scheduled course instances in terms, bound to immutable course publications.",
     },
     {
-        "name": "Academic Operations - Sections & Instructors",
-        "description": "Academic Operations: Cohort sections and instructor/TA assignments.",
+        "name": "Academic Operations - Sections & Staff",
+        "description": "Academic Operations: Cohort sections and instructional staff assignments.",
     },
     {
-        "name": "Academic Operations - Section Enrollments",
+        "name": "Academic Operations - Enrollments",
         "description": "Academic Operations: Student roster enrollments in course sections.",
     },
     {
-        "name": "Academic Operations - Learner Concept Progress",
-        "description": "Academic Operations: Real-time learner concept mastery and progress tracking.",
+        "name": "Academic Operations - Learning Progress",
+        "description": "Academic Operations: Real-time learner mastery and progress tracking.",
     },
     {
         "name": "Academic Operations - Assessment Submissions",
-        "description": "Academic Operations: Student studio lab attempts, auto-grading, and faculty feedback.",
+        "description": "Academic Operations: Student activity attempts, auto-grading, and faculty feedback.",
     },
     {
         "name": "Academic Operations - Course Grades",
         "description": "Academic Operations: Official final transcript grades and GPA calculations.",
     },
     {
-        "name": "Governance - Faculty Assignments",
-        "description": "Institutional Governance: Macro faculty teaching and program coordination assignments.",
+        "name": "Governance - Faculty",
+        "description": "Institutional Governance: Faculty teaching and program coordination relationships.",
     },
     {
         "name": "Governance - Student Matriculation",
@@ -144,7 +144,7 @@ app = FastAPI(
     title="BayesStack Core Monolith API",
     description=(
         "Universal API Monolith serving multi-tenant host routing, authentication, "
-        "Master Learning Library, University Composition, CQRS Delivery, Academic Operations, "
+        "Master Learning Catalog, Institution Composition, CQRS Delivery, Academic Operations, "
         "and Governance for the BayesStack AI learning platform."
     ),
     version=settings.VERSION,
@@ -183,8 +183,8 @@ app.include_router(crud_router)
 app.include_router(db_explorer_router)
 
 # Register new domain CRUD routers
-app.include_router(library_router)
-app.include_router(university_router)
+app.include_router(catalog_router)
+app.include_router(institution_router)
 app.include_router(delivery_router)
 app.include_router(operations_router)
 app.include_router(governance_router)

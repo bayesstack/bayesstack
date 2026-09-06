@@ -1,4 +1,4 @@
-"""Master Learning Library: Curriculums & Curriculum-Program Router (library_curriculums, library_curriculum_programs)."""
+"""Master Learning Catalog: Curricula & Curriculum-Program Router (catalog_curricula, catalog_curriculum_programs)."""
 
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -6,26 +6,26 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
-from db.models.library import LibraryCurriculum, LibraryCurriculumProgram
-from schemas.library import (
-    LibraryCurriculumCreate,
-    LibraryCurriculumProgramCreate,
-    LibraryCurriculumProgramResponse,
-    LibraryCurriculumResponse,
-    LibraryCurriculumUpdate,
+from db.models.catalog import CatalogCurriculum, CatalogCurriculumProgram
+from schemas.catalog import (
+    CatalogCurriculumCreate,
+    CatalogCurriculumProgramCreate,
+    CatalogCurriculumProgramResponse,
+    CatalogCurriculumResponse,
+    CatalogCurriculumUpdate,
 )
 
-router = APIRouter(prefix="/curriculums", tags=["Library - Curriculums"])
+router = APIRouter(prefix="/curricula", tags=["Catalog - Curricula"])
 
 
-async def _format_curriculum_response(db: AsyncSession, curriculum: LibraryCurriculum) -> LibraryCurriculumResponse:
+async def _format_curriculum_response(db: AsyncSession, curriculum: CatalogCurriculum) -> CatalogCurriculumResponse:
     programs_stmt = (
-        select(LibraryCurriculumProgram)
+        select(CatalogCurriculumProgram)
         .where(
-            LibraryCurriculumProgram.curriculum_id == curriculum.id,
-            LibraryCurriculumProgram.curriculum_version == curriculum.version,
+            CatalogCurriculumProgram.curriculum_id == curriculum.id,
+            CatalogCurriculumProgram.curriculum_version == curriculum.version,
         )
-        .order_by(LibraryCurriculumProgram.order_rank.asc())
+        .order_by(CatalogCurriculumProgram.position.asc())
     )
     programs = (await db.execute(programs_stmt)).scalars().all()
     data = {
@@ -37,44 +37,44 @@ async def _format_curriculum_response(db: AsyncSession, curriculum: LibraryCurri
         "description": curriculum.description,
         "credential_type": curriculum.credential_type,
         "estimated_duration": curriculum.estimated_duration,
-        "status": curriculum.status,
+        "content_status": curriculum.content_status,
         "metadata": curriculum.metadata_,
         "released_at": curriculum.released_at,
         "programs": programs,
     }
-    return LibraryCurriculumResponse(**data)
+    return CatalogCurriculumResponse(**data)
 
 
-@router.get("", response_model=List[LibraryCurriculumResponse], summary="List Master Curriculums")
-async def list_curriculums(
+@router.get("", response_model=List[CatalogCurriculumResponse], summary="List Master Curricula")
+async def list_curricula(
     credential_type: Optional[str] = Query(None),
-    status_filter: Optional[str] = Query(None, alias="status"),
+    content_status_filter: Optional[str] = Query(None, alias="content_status"),
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(LibraryCurriculum)
+    stmt = select(CatalogCurriculum)
     if credential_type:
-        stmt = stmt.where(LibraryCurriculum.credential_type == credential_type)
-    if status_filter:
-        stmt = stmt.where(LibraryCurriculum.status == status_filter)
-    stmt = stmt.order_by(LibraryCurriculum.code.asc(), LibraryCurriculum.version.desc()).limit(limit).offset(offset)
+        stmt = stmt.where(CatalogCurriculum.credential_type == credential_type)
+    if content_status_filter:
+        stmt = stmt.where(CatalogCurriculum.content_status == content_status_filter)
+    stmt = stmt.order_by(CatalogCurriculum.code.asc(), CatalogCurriculum.version.desc()).limit(limit).offset(offset)
     result = await db.execute(stmt)
-    curriculums = result.scalars().all()
-    return [await _format_curriculum_response(db, c) for c in curriculums]
+    curricula = result.scalars().all()
+    return [await _format_curriculum_response(db, c) for c in curricula]
 
 
-@router.get("/{id}", response_model=LibraryCurriculumResponse, summary="Get Master Curriculum by ID")
+@router.get("/{id}", response_model=CatalogCurriculumResponse, summary="Get Master Curriculum by ID")
 async def get_curriculum(
     id: str,
     version: Optional[int] = Query(None, description="Optional version. Defaults to latest."),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(LibraryCurriculum).where(LibraryCurriculum.id == id)
+    stmt = select(CatalogCurriculum).where(CatalogCurriculum.id == id)
     if version is not None:
-        stmt = stmt.where(LibraryCurriculum.version == version)
+        stmt = stmt.where(CatalogCurriculum.version == version)
     else:
-        stmt = stmt.order_by(LibraryCurriculum.version.desc())
+        stmt = stmt.order_by(CatalogCurriculum.version.desc())
 
     result = await db.execute(stmt)
     curriculum = result.scalars().first()
@@ -83,9 +83,9 @@ async def get_curriculum(
     return await _format_curriculum_response(db, curriculum)
 
 
-@router.post("", response_model=LibraryCurriculumResponse, status_code=status.HTTP_201_CREATED, summary="Create Master Curriculum")
-async def create_curriculum(payload: LibraryCurriculumCreate, db: AsyncSession = Depends(get_db)):
-    curriculum = LibraryCurriculum(**payload.model_dump())
+@router.post("", response_model=CatalogCurriculumResponse, status_code=status.HTTP_201_CREATED, summary="Create Master Curriculum")
+async def create_curriculum(payload: CatalogCurriculumCreate, db: AsyncSession = Depends(get_db)):
+    curriculum = CatalogCurriculum(**payload.model_dump())
     db.add(curriculum)
     try:
         await db.commit()
@@ -96,15 +96,15 @@ async def create_curriculum(payload: LibraryCurriculumCreate, db: AsyncSession =
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to create curriculum: {str(exc)}")
 
 
-@router.put("/{id}", response_model=LibraryCurriculumResponse, summary="Update Master Curriculum")
+@router.put("/{id}", response_model=CatalogCurriculumResponse, summary="Update Master Curriculum")
 async def update_curriculum(
     id: str,
-    payload: LibraryCurriculumUpdate,
+    payload: CatalogCurriculumUpdate,
     version: int = Query(1, description="Version to update"),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(LibraryCurriculum).where(
-        LibraryCurriculum.id == id, LibraryCurriculum.version == version
+    stmt = select(CatalogCurriculum).where(
+        CatalogCurriculum.id == id, CatalogCurriculum.version == version
     )
     curriculum = (await db.execute(stmt)).scalar_one_or_none()
     if not curriculum:
@@ -129,7 +129,7 @@ async def delete_curriculum(
     version: int = Query(1, description="Version to delete"),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(LibraryCurriculum).where(LibraryCurriculum.id == id, LibraryCurriculum.version == version)
+    stmt = select(CatalogCurriculum).where(CatalogCurriculum.id == id, CatalogCurriculum.version == version)
     curriculum = (await db.execute(stmt)).scalar_one_or_none()
     if not curriculum:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Curriculum '{id}' v{version} not found")
@@ -142,19 +142,19 @@ async def delete_curriculum(
 # Curriculum -> Program Junction Endpoints
 # ============================================================================
 
-@router.get("/{id}/programs", response_model=List[LibraryCurriculumProgramResponse], summary="List Programs in Curriculum")
+@router.get("/{id}/programs", response_model=List[CatalogCurriculumProgramResponse], summary="List Programs in Curriculum")
 async def list_curriculum_programs(
     id: str,
     version: int = Query(1, description="Curriculum version"),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = (
-        select(LibraryCurriculumProgram)
+        select(CatalogCurriculumProgram)
         .where(
-            LibraryCurriculumProgram.curriculum_id == id,
-            LibraryCurriculumProgram.curriculum_version == version,
+            CatalogCurriculumProgram.curriculum_id == id,
+            CatalogCurriculumProgram.curriculum_version == version,
         )
-        .order_by(LibraryCurriculumProgram.order_rank.asc())
+        .order_by(CatalogCurriculumProgram.position.asc())
     )
     result = await db.execute(stmt)
     return result.scalars().all()
@@ -162,22 +162,22 @@ async def list_curriculum_programs(
 
 @router.post(
     "/{id}/programs",
-    response_model=LibraryCurriculumProgramResponse,
+    response_model=CatalogCurriculumProgramResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Link Program into Curriculum",
 )
 async def link_program_to_curriculum(
     id: str,
-    payload: LibraryCurriculumProgramCreate,
+    payload: CatalogCurriculumProgramCreate,
     version: int = Query(1, description="Curriculum version"),
     db: AsyncSession = Depends(get_db),
 ):
-    link = LibraryCurriculumProgram(
+    link = CatalogCurriculumProgram(
         curriculum_id=id,
         curriculum_version=version,
         program_id=payload.program_id,
         program_version=payload.program_version,
-        order_rank=payload.position * 1_000_000,
+        position=payload.position * 1_000_000,
         display_label=payload.display_label,
     )
     db.add(link)
@@ -196,8 +196,8 @@ async def link_program_to_curriculum(
     summary="Unlink Program from Curriculum",
 )
 async def unlink_program_from_curriculum(id: str, junction_id: int, db: AsyncSession = Depends(get_db)):
-    stmt = select(LibraryCurriculumProgram).where(
-        LibraryCurriculumProgram.id == junction_id, LibraryCurriculumProgram.curriculum_id == id
+    stmt = select(CatalogCurriculumProgram).where(
+        CatalogCurriculumProgram.id == junction_id, CatalogCurriculumProgram.curriculum_id == id
     )
     link = (await db.execute(stmt)).scalar_one_or_none()
     if not link:

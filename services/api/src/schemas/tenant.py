@@ -10,7 +10,7 @@ class TenantBase(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     slug: str = Field(..., description="Unique URL slug identifier for tenant", examples=["stanford"])
-    name: str = Field(..., description="Full official institutional name", examples=["Stanford University"])
+    name: str = Field(..., description="Full official institutional name", examples=["Stanford Institution"])
     domain: Optional[str] = Field(None, description="Custom institutional domain name", examples=["stanford.edu"])
     is_active: bool = Field(True, description="Tenant active status flag")
     branding: Optional[str] = Field(None, description="JSON string containing institutional branding configuration")

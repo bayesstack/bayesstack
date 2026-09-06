@@ -1,4 +1,4 @@
-"""Institutional Governance: Student Matriculation Router (student_curriculum_enrollments, student_program_enrollments)."""
+"""Institutional Governance: Student Matriculation Router (curriculum_enrollments, program_enrollments)."""
 
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -8,17 +8,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.database import get_db
 from core.dependencies import get_current_tenant_id
 from db.models.enrollment import (
-    StudentCurriculumEnrollment,
-    StudentProgramEnrollment,
+    CurriculumEnrollment,
+    ProgramEnrollment,
 )
 from db.models.operations import StudentAcademicProfile
 from schemas.governance import (
-    StudentCurriculumEnrollmentCreate,
-    StudentCurriculumEnrollmentResponse,
-    StudentCurriculumEnrollmentUpdate,
-    StudentProgramEnrollmentCreate,
-    StudentProgramEnrollmentResponse,
-    StudentProgramEnrollmentUpdate,
+    CurriculumEnrollmentCreate,
+    CurriculumEnrollmentResponse,
+    CurriculumEnrollmentUpdate,
+    ProgramEnrollmentCreate,
+    ProgramEnrollmentResponse,
+    ProgramEnrollmentUpdate,
 )
 from schemas.operations import (
     StudentAcademicProfileCreate,
@@ -33,31 +33,31 @@ router = APIRouter(prefix="/students", tags=["Governance - Student Matriculation
 # Degree / Curriculum Matriculation
 # ============================================================================
 
-@router.get("/curriculums", response_model=List[StudentCurriculumEnrollmentResponse], summary="List Student Degree Enrollments")
-async def list_student_curriculums(
+@router.get("/curricula", response_model=List[CurriculumEnrollmentResponse], summary="List Student Degree Enrollments")
+async def list_student_curricula(
     student_id: Optional[str] = Query(None),
     curriculum_id: Optional[str] = Query(None),
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(StudentCurriculumEnrollment).where(StudentCurriculumEnrollment.tenant_id == tenant_id)
+    stmt = select(CurriculumEnrollment).where(CurriculumEnrollment.tenant_id == tenant_id)
     if student_id:
-        stmt = stmt.where(StudentCurriculumEnrollment.student_id == student_id)
+        stmt = stmt.where(CurriculumEnrollment.student_id == student_id)
     if curriculum_id:
-        stmt = stmt.where(StudentCurriculumEnrollment.university_curriculum_id == curriculum_id)
+        stmt = stmt.where(CurriculumEnrollment.institution_curriculum_id == curriculum_id)
     result = await db.execute(stmt)
     return result.scalars().all()
 
 
-@router.post("/curriculums", response_model=StudentCurriculumEnrollmentResponse, status_code=status.HTTP_201_CREATED, summary="Matriculate Student into Degree Curriculum")
+@router.post("/curricula", response_model=CurriculumEnrollmentResponse, status_code=status.HTTP_201_CREATED, summary="Matriculate Student into Degree Curriculum")
 async def matriculate_student_curriculum(
-    payload: StudentCurriculumEnrollmentCreate,
+    payload: CurriculumEnrollmentCreate,
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
     data = payload.model_dump()
     data["tenant_id"] = tenant_id
-    enrollment = StudentCurriculumEnrollment(**data)
+    enrollment = CurriculumEnrollment(**data)
     db.add(enrollment)
     try:
         await db.commit()
@@ -68,15 +68,15 @@ async def matriculate_student_curriculum(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to matriculate student: {str(exc)}")
 
 
-@router.put("/curriculums/{enrollment_id}", response_model=StudentCurriculumEnrollmentResponse, summary="Update Student Degree Enrollment")
+@router.put("/curricula/{enrollment_id}", response_model=CurriculumEnrollmentResponse, summary="Update Student Degree Enrollment")
 async def update_student_curriculum(
     enrollment_id: int,
-    payload: StudentCurriculumEnrollmentUpdate,
+    payload: CurriculumEnrollmentUpdate,
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(StudentCurriculumEnrollment).where(
-        StudentCurriculumEnrollment.id == enrollment_id, StudentCurriculumEnrollment.tenant_id == tenant_id
+    stmt = select(CurriculumEnrollment).where(
+        CurriculumEnrollment.id == enrollment_id, CurriculumEnrollment.tenant_id == tenant_id
     )
     enrollment = (await db.execute(stmt)).scalar_one_or_none()
     if not enrollment:
@@ -95,14 +95,14 @@ async def update_student_curriculum(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to update enrollment: {str(exc)}")
 
 
-@router.delete("/curriculums/{enrollment_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete Student Degree Enrollment")
+@router.delete("/curricula/{enrollment_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete Student Degree Enrollment")
 async def delete_student_curriculum(
     enrollment_id: int,
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(StudentCurriculumEnrollment).where(
-        StudentCurriculumEnrollment.id == enrollment_id, StudentCurriculumEnrollment.tenant_id == tenant_id
+    stmt = select(CurriculumEnrollment).where(
+        CurriculumEnrollment.id == enrollment_id, CurriculumEnrollment.tenant_id == tenant_id
     )
     enrollment = (await db.execute(stmt)).scalar_one_or_none()
     if not enrollment:
@@ -116,31 +116,31 @@ async def delete_student_curriculum(
 # Semester / Program Stage Matriculation
 # ============================================================================
 
-@router.get("/programs", response_model=List[StudentProgramEnrollmentResponse], summary="List Student Program Enrollments")
+@router.get("/programs", response_model=List[ProgramEnrollmentResponse], summary="List Student Program Enrollments")
 async def list_student_programs(
     student_id: Optional[str] = Query(None),
     program_id: Optional[str] = Query(None),
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(StudentProgramEnrollment).where(StudentProgramEnrollment.tenant_id == tenant_id)
+    stmt = select(ProgramEnrollment).where(ProgramEnrollment.tenant_id == tenant_id)
     if student_id:
-        stmt = stmt.where(StudentProgramEnrollment.student_id == student_id)
+        stmt = stmt.where(ProgramEnrollment.student_id == student_id)
     if program_id:
-        stmt = stmt.where(StudentProgramEnrollment.university_program_id == program_id)
+        stmt = stmt.where(ProgramEnrollment.institution_program_id == program_id)
     result = await db.execute(stmt)
     return result.scalars().all()
 
 
-@router.post("/programs", response_model=StudentProgramEnrollmentResponse, status_code=status.HTTP_201_CREATED, summary="Enroll Student in Program Stage")
+@router.post("/programs", response_model=ProgramEnrollmentResponse, status_code=status.HTTP_201_CREATED, summary="Enroll Student in Program Stage")
 async def enroll_student_program(
-    payload: StudentProgramEnrollmentCreate,
+    payload: ProgramEnrollmentCreate,
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
     data = payload.model_dump()
     data["tenant_id"] = tenant_id
-    enrollment = StudentProgramEnrollment(**data)
+    enrollment = ProgramEnrollment(**data)
     db.add(enrollment)
     try:
         await db.commit()
@@ -151,15 +151,15 @@ async def enroll_student_program(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to enroll student: {str(exc)}")
 
 
-@router.put("/programs/{enrollment_id}", response_model=StudentProgramEnrollmentResponse, summary="Update Student Program Enrollment")
+@router.put("/programs/{enrollment_id}", response_model=ProgramEnrollmentResponse, summary="Update Student Program Enrollment")
 async def update_student_program(
     enrollment_id: int,
-    payload: StudentProgramEnrollmentUpdate,
+    payload: ProgramEnrollmentUpdate,
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(StudentProgramEnrollment).where(
-        StudentProgramEnrollment.id == enrollment_id, StudentProgramEnrollment.tenant_id == tenant_id
+    stmt = select(ProgramEnrollment).where(
+        ProgramEnrollment.id == enrollment_id, ProgramEnrollment.tenant_id == tenant_id
     )
     enrollment = (await db.execute(stmt)).scalar_one_or_none()
     if not enrollment:
@@ -184,8 +184,8 @@ async def delete_student_program(
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(StudentProgramEnrollment).where(
-        StudentProgramEnrollment.id == enrollment_id, StudentProgramEnrollment.tenant_id == tenant_id
+    stmt = select(ProgramEnrollment).where(
+        ProgramEnrollment.id == enrollment_id, ProgramEnrollment.tenant_id == tenant_id
     )
     enrollment = (await db.execute(stmt)).scalar_one_or_none()
     if not enrollment:

@@ -1,7 +1,7 @@
 """Delivery Layer: Course Publications Router (course_publications).
 
 CQRS Read Model & Deterministic Compilation Pipeline:
-- Writes happen in normalized authoring tables (university_courses, chapters, concepts).
+- Writes happen in normalized authoring tables (institution_courses, chapters, concepts).
 - POST /compile/{course_id} resolves floating links, compiles the full DAG snapshot, computes SHA-256 hash, and saves immutable release.
 - GET /active/{course_id} executes an O(1) single-key index seek returning the compiled JSON tree in < 0.5ms.
 """
@@ -18,23 +18,23 @@ from sqlalchemy.orm import selectinload
 from core.database import get_db
 from core.dependencies import get_current_tenant_id
 from db.models.dedicated_edges import (
-    UniversityChapterCustomConcept,
-    UniversityChapterLibraryConcept,
-    UniversityCourseCustomChapter,
-    UniversityCourseLibraryChapter,
+    InstitutionChapterCustomConcept,
+    InstitutionChapterCatalogConcept,
+    InstitutionCourseCustomChapter,
+    InstitutionCourseCatalogChapter,
 )
 from db.models.delivery import CoursePublication
-from db.models.library import (
-    LibraryChapter,
-    LibraryChapterConcept,
-    LibraryConcept,
-    LibraryStudioInstance,
+from db.models.catalog import (
+    CatalogChapter,
+    CatalogChapterConcept,
+    CatalogConcept,
+    CatalogActivity,
 )
-from db.models.university import (
-    UniversityChapter,
-    UniversityConcept,
-    UniversityCourse,
-    UniversityStudioInstance,
+from db.models.institution import (
+    InstitutionChapter,
+    InstitutionConcept,
+    InstitutionCourse,
+    InstitutionActivity,
 )
 from schemas.delivery import (
     CoursePublicationCompileRequest,
@@ -46,8 +46,8 @@ router = APIRouter(prefix="/publications", tags=["Delivery - Course Publications
 
 @router.get("", response_model=List[CoursePublicationResponse], summary="List Course Publications")
 async def list_publications(
-    course_id: Optional[str] = Query(None, description="Filter by university_course_id"),
-    status_filter: Optional[str] = Query(None, alias="status"),
+    course_id: Optional[str] = Query(None, description="Filter by institution_course_id"),
+    publication_status_filter: Optional[str] = Query(None, alias="publication_status"),
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
     tenant_id: str = Depends(get_current_tenant_id),
@@ -55,9 +55,9 @@ async def list_publications(
 ):
     stmt = select(CoursePublication).where(CoursePublication.tenant_id == tenant_id)
     if course_id:
-        stmt = stmt.where(CoursePublication.university_course_id == course_id)
-    if status_filter:
-        stmt = stmt.where(CoursePublication.status == status_filter)
+        stmt = stmt.where(CoursePublication.institution_course_id == course_id)
+    if publication_status_filter:
+        stmt = stmt.where(CoursePublication.publication_status == publication_status_filter)
     stmt = stmt.order_by(CoursePublication.publication_number.desc()).limit(limit).offset(offset)
     result = await db.execute(stmt)
     return result.scalars().all()
@@ -69,11 +69,11 @@ async def get_active_publication(
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    """Sub-millisecond single-key point lookup using the partial index on (tenant_id, university_course_id, status='active')."""
+    """Sub-millisecond single-key lookup using the active-publication partial index."""
     stmt = select(CoursePublication).where(
         CoursePublication.tenant_id == tenant_id,
-        CoursePublication.university_course_id == course_id,
-        CoursePublication.status == "active",
+        CoursePublication.institution_course_id == course_id,
+        CoursePublication.publication_status == "active",
     )
     pub = (await db.execute(stmt)).scalar_one_or_none()
     if not pub:
@@ -107,9 +107,9 @@ async def compile_and_publish_course(
     db: AsyncSession = Depends(get_db),
 ):
     """Compiles the authoring DAG into an immutable CoursePublication manifest."""
-    # 1. Verify university course exists
-    course_stmt = select(UniversityCourse).where(
-        UniversityCourse.id == course_id, UniversityCourse.tenant_id == tenant_id
+    # 1. Verify institution course exists
+    course_stmt = select(InstitutionCourse).where(
+        InstitutionCourse.id == course_id, InstitutionCourse.tenant_id == tenant_id
     )
     course = (await db.execute(course_stmt)).scalar_one_or_none()
     if not course:
@@ -118,47 +118,47 @@ async def compile_and_publish_course(
     # 2. Gather chapter edges
     lib_ch_edges = (
         await db.execute(
-            select(UniversityCourseLibraryChapter).where(
-                UniversityCourseLibraryChapter.university_course_id == course_id,
-                UniversityCourseLibraryChapter.tenant_id == tenant_id,
+            select(InstitutionCourseCatalogChapter).where(
+                InstitutionCourseCatalogChapter.institution_course_id == course_id,
+                InstitutionCourseCatalogChapter.tenant_id == tenant_id,
             )
         )
     ).scalars().all()
 
     cust_ch_edges = (
         await db.execute(
-            select(UniversityCourseCustomChapter).where(
-                UniversityCourseCustomChapter.university_course_id == course_id,
-                UniversityCourseCustomChapter.tenant_id == tenant_id,
+            select(InstitutionCourseCustomChapter).where(
+                InstitutionCourseCustomChapter.institution_course_id == course_id,
+                InstitutionCourseCustomChapter.tenant_id == tenant_id,
             )
         )
     ).scalars().all()
 
     all_ch_edges = []
     for e in lib_ch_edges:
-        all_ch_edges.append({"type": "library", "edge": e, "rank": e.order_rank})
+        all_ch_edges.append({"type": "catalog", "edge": e, "rank": e.position})
     for e in cust_ch_edges:
-        all_ch_edges.append({"type": "custom", "edge": e, "rank": e.order_rank})
+        all_ch_edges.append({"type": "custom", "edge": e, "rank": e.position})
     all_ch_edges.sort(key=lambda x: x["rank"])
 
     compiled_chapters: List[Dict[str, Any]] = []
 
     for item in all_ch_edges:
         edge = item["edge"]
-        if item["type"] == "library":
+        if item["type"] == "catalog":
             # Resolve version (pinned or floating MAX)
-            ver = edge.library_version
-            if getattr(edge, "adoption_mode", "pinned") == "floating":
+            ver = edge.catalog_version
+            if getattr(edge, "reference_policy", "pinned") == "floating":
                 max_ver = (
                     await db.execute(
-                        select(func.max(LibraryChapter.version)).where(LibraryChapter.id == edge.library_chapter_id)
+                        select(func.max(CatalogChapter.version)).where(CatalogChapter.id == edge.catalog_chapter_id)
                     )
                 ).scalar()
                 if max_ver:
                     ver = max_ver
 
-            ch_stmt = select(LibraryChapter).where(
-                LibraryChapter.id == edge.library_chapter_id, LibraryChapter.version == ver
+            ch_stmt = select(CatalogChapter).where(
+                CatalogChapter.id == edge.catalog_chapter_id, CatalogChapter.version == ver
             )
             ch = (await db.execute(ch_stmt)).scalar_one_or_none()
             if not ch:
@@ -167,42 +167,42 @@ async def compile_and_publish_course(
             # Fetch concepts
             c_links = (
                 await db.execute(
-                    select(LibraryChapterConcept)
-                    .where(LibraryChapterConcept.chapter_id == ch.id, LibraryChapterConcept.chapter_version == ch.version)
-                    .order_by(LibraryChapterConcept.position.asc())
+                    select(CatalogChapterConcept)
+                    .where(CatalogChapterConcept.chapter_id == ch.id, CatalogChapterConcept.chapter_version == ch.version)
+                    .order_by(CatalogChapterConcept.position.asc())
                 )
             ).scalars().all()
 
             compiled_concepts = []
             for cl in c_links:
-                c_stmt = select(LibraryConcept).where(
-                    LibraryConcept.id == cl.concept_id, LibraryConcept.version == cl.concept_version
+                c_stmt = select(CatalogConcept).where(
+                    CatalogConcept.id == cl.concept_id, CatalogConcept.version == cl.concept_version
                 )
                 c = (await db.execute(c_stmt)).scalar_one_or_none()
                 if not c:
                     continue
 
-                studios_stmt = select(LibraryStudioInstance).where(
-                    LibraryStudioInstance.concept_id == c.id,
-                    LibraryStudioInstance.concept_version == c.version,
-                ).order_by(LibraryStudioInstance.order_rank.asc())
-                c_studios = (await db.execute(studios_stmt)).scalars().all()
+                activities_stmt = select(CatalogActivity).where(
+                    CatalogActivity.concept_id == c.id,
+                    CatalogActivity.concept_version == c.version,
+                ).order_by(CatalogActivity.position.asc())
+                c_activities = (await db.execute(activities_stmt)).scalars().all()
 
                 compiled_concepts.append({
                     "id": c.id,
                     "version": c.version,
                     "code": c.code,
                     "title": c.title,
-                    "studios": [
+                    "activities": [
                         {
                             "id": s.id,
-                            "studio_type": s.studio_type,
-                            "studio_version": s.studio_version,
+                            "activity_type": s.activity_type,
+                            "activity_version": s.activity_version,
                             "position": s.position,
                             "is_required": s.is_required,
                             "config": s.config,
                         }
-                        for s in c_studios
+                        for s in c_activities
                     ],
                 })
 
@@ -211,14 +211,14 @@ async def compile_and_publish_course(
                 "version": ch.version,
                 "code": ch.code,
                 "title": ch.title,
-                "order_rank": edge.order_rank,
+                "position": edge.position,
                 "concepts": compiled_concepts,
             })
 
         else:
-            # Custom university chapter
-            ch_stmt = select(UniversityChapter).where(
-                UniversityChapter.id == edge.university_chapter_id, UniversityChapter.tenant_id == tenant_id
+            # Custom institution chapter
+            ch_stmt = select(InstitutionChapter).where(
+                InstitutionChapter.id == edge.institution_chapter_id, InstitutionChapter.tenant_id == tenant_id
             )
             ch = (await db.execute(ch_stmt)).scalar_one_or_none()
             if not ch:
@@ -227,95 +227,95 @@ async def compile_and_publish_course(
             # Fetch concept edges
             lib_c_edges = (
                 await db.execute(
-                    select(UniversityChapterLibraryConcept).where(
-                        UniversityChapterLibraryConcept.university_chapter_id == ch.id,
-                        UniversityChapterLibraryConcept.tenant_id == tenant_id,
+                    select(InstitutionChapterCatalogConcept).where(
+                        InstitutionChapterCatalogConcept.institution_chapter_id == ch.id,
+                        InstitutionChapterCatalogConcept.tenant_id == tenant_id,
                     )
                 )
             ).scalars().all()
 
             cust_c_edges = (
                 await db.execute(
-                    select(UniversityChapterCustomConcept).where(
-                        UniversityChapterCustomConcept.university_chapter_id == ch.id,
-                        UniversityChapterCustomConcept.tenant_id == tenant_id,
+                    select(InstitutionChapterCustomConcept).where(
+                        InstitutionChapterCustomConcept.institution_chapter_id == ch.id,
+                        InstitutionChapterCustomConcept.tenant_id == tenant_id,
                     )
                 )
             ).scalars().all()
 
             all_c_edges = []
             for ce in lib_c_edges:
-                all_c_edges.append({"type": "library", "edge": ce, "rank": ce.order_rank})
+                all_c_edges.append({"type": "catalog", "edge": ce, "rank": ce.position})
             for ce in cust_c_edges:
-                all_c_edges.append({"type": "custom", "edge": ce, "rank": ce.order_rank})
+                all_c_edges.append({"type": "custom", "edge": ce, "rank": ce.position})
             all_c_edges.sort(key=lambda x: x["rank"])
 
             compiled_concepts = []
             for c_item in all_c_edges:
                 c_edge = c_item["edge"]
-                if c_item["type"] == "library":
-                    c_stmt = select(LibraryConcept).where(
-                        LibraryConcept.id == c_edge.library_concept_id,
-                        LibraryConcept.version == c_edge.library_concept_version,
+                if c_item["type"] == "catalog":
+                    c_stmt = select(CatalogConcept).where(
+                        CatalogConcept.id == c_edge.catalog_concept_id,
+                        CatalogConcept.version == c_edge.catalog_concept_version,
                     )
                     c = (await db.execute(c_stmt)).scalar_one_or_none()
                     if not c:
                         continue
 
-                    studios_stmt = select(LibraryStudioInstance).where(
-                        LibraryStudioInstance.concept_id == c.id,
-                        LibraryStudioInstance.concept_version == c.version,
-                    ).order_by(LibraryStudioInstance.order_rank.asc())
-                    c_studios = (await db.execute(studios_stmt)).scalars().all()
+                    activities_stmt = select(CatalogActivity).where(
+                        CatalogActivity.concept_id == c.id,
+                        CatalogActivity.concept_version == c.version,
+                    ).order_by(CatalogActivity.position.asc())
+                    c_activities = (await db.execute(activities_stmt)).scalars().all()
 
                     compiled_concepts.append({
                         "id": c.id,
                         "version": c.version,
                         "code": c.code,
                         "title": c.title,
-                        "order_rank": c_edge.order_rank,
-                        "studios": [
+                        "position": c_edge.position,
+                        "activities": [
                             {
                                 "id": s.id,
-                                "studio_type": s.studio_type,
-                                "studio_version": s.studio_version,
+                                "activity_type": s.activity_type,
+                                "activity_version": s.activity_version,
                                 "position": s.position,
                                 "is_required": s.is_required,
                                 "config": s.config,
                             }
-                            for s in c_studios
+                            for s in c_activities
                         ],
                     })
                 else:
-                    c_stmt = select(UniversityConcept).where(
-                        UniversityConcept.id == c_edge.university_concept_id,
-                        UniversityConcept.tenant_id == tenant_id,
+                    c_stmt = select(InstitutionConcept).where(
+                        InstitutionConcept.id == c_edge.institution_concept_id,
+                        InstitutionConcept.tenant_id == tenant_id,
                     )
                     c = (await db.execute(c_stmt)).scalar_one_or_none()
                     if not c:
                         continue
 
-                    studios_stmt = select(UniversityStudioInstance).where(
-                        UniversityStudioInstance.concept_id == c.id,
-                        UniversityStudioInstance.tenant_id == tenant_id,
-                    ).order_by(UniversityStudioInstance.order_rank.asc())
-                    c_studios = (await db.execute(studios_stmt)).scalars().all()
+                    activities_stmt = select(InstitutionActivity).where(
+                        InstitutionActivity.concept_id == c.id,
+                        InstitutionActivity.tenant_id == tenant_id,
+                    ).order_by(InstitutionActivity.position.asc())
+                    c_activities = (await db.execute(activities_stmt)).scalars().all()
 
                     compiled_concepts.append({
                         "id": c.id,
                         "code": c.local_code,
                         "title": c.title,
-                        "order_rank": c_edge.order_rank,
-                        "studios": [
+                        "position": c_edge.position,
+                        "activities": [
                             {
                                 "id": s.id,
-                                "studio_type": s.studio_type,
-                                "studio_version": s.studio_version,
+                                "activity_type": s.activity_type,
+                                "activity_version": s.activity_version,
                                 "position": s.position,
                                 "is_required": s.is_required,
                                 "config": s.config,
                             }
-                            for s in c_studios
+                            for s in c_activities
                         ],
                     })
 
@@ -323,7 +323,7 @@ async def compile_and_publish_course(
                 "chapter_id": ch.id,
                 "code": ch.local_code,
                 "title": ch.local_title,
-                "order_rank": edge.order_rank,
+                "position": edge.position,
                 "concepts": compiled_concepts,
             })
 
@@ -343,7 +343,7 @@ async def compile_and_publish_course(
         await db.execute(
             select(func.max(CoursePublication.publication_number)).where(
                 CoursePublication.tenant_id == tenant_id,
-                CoursePublication.university_course_id == course_id,
+                CoursePublication.institution_course_id == course_id,
             )
         )
     ).scalar() or 0
@@ -354,10 +354,10 @@ async def compile_and_publish_course(
         update(CoursePublication)
         .where(
             CoursePublication.tenant_id == tenant_id,
-            CoursePublication.university_course_id == course_id,
-            CoursePublication.status == "active",
+            CoursePublication.institution_course_id == course_id,
+            CoursePublication.publication_status == "active",
         )
-        .values(status="archived")
+        .values(publication_status="archived")
     )
 
     published_by = (
@@ -370,11 +370,11 @@ async def compile_and_publish_course(
     publication = CoursePublication(
         id=uuid.uuid4(),
         tenant_id=tenant_id,
-        university_course_id=course_id,
+        institution_course_id=course_id,
         publication_number=next_publication_number,
         source_revision=payload.source_revision if payload else None,
         published_by_user_id=published_by,
-        status="active",
+        publication_status="active",
         content_hash=content_hash,
         compiled_syllabus_tree=compiled_tree,
     )

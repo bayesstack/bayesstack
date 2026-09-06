@@ -1,4 +1,4 @@
-"""Institutional Governance: Faculty Assignments Router (faculty_course_assignments, faculty_program_assignments)."""
+"""Institutional Governance: Faculty relationships router (course_faculty, program_faculty)."""
 
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -8,48 +8,48 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.database import get_db
 from core.dependencies import get_current_tenant_id
 from db.models.enrollment import (
-    FacultyCourseAssignment,
-    FacultyProgramAssignment,
+    CourseFaculty,
+    ProgramFaculty,
 )
 from schemas.governance import (
-    FacultyCourseAssignmentCreate,
-    FacultyCourseAssignmentResponse,
-    FacultyProgramAssignmentCreate,
-    FacultyProgramAssignmentResponse,
+    CourseFacultyCreate,
+    CourseFacultyResponse,
+    ProgramFacultyCreate,
+    ProgramFacultyResponse,
 )
 
-router = APIRouter(prefix="/faculty", tags=["Governance - Faculty Assignments"])
+router = APIRouter(prefix="/faculty", tags=["Governance - Faculty"])
 
 
 # ============================================================================
 # Faculty Course Assignments
 # ============================================================================
 
-@router.get("/courses", response_model=List[FacultyCourseAssignmentResponse], summary="List Faculty Course Assignments")
+@router.get("/courses", response_model=List[CourseFacultyResponse], summary="List Faculty Course Assignments")
 async def list_faculty_courses(
     faculty_id: Optional[str] = Query(None),
     course_id: Optional[str] = Query(None),
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(FacultyCourseAssignment).where(FacultyCourseAssignment.tenant_id == tenant_id)
+    stmt = select(CourseFaculty).where(CourseFaculty.tenant_id == tenant_id)
     if faculty_id:
-        stmt = stmt.where(FacultyCourseAssignment.faculty_id == faculty_id)
+        stmt = stmt.where(CourseFaculty.faculty_id == faculty_id)
     if course_id:
-        stmt = stmt.where(FacultyCourseAssignment.university_course_id == course_id)
+        stmt = stmt.where(CourseFaculty.institution_course_id == course_id)
     result = await db.execute(stmt)
     return result.scalars().all()
 
 
-@router.post("/courses", response_model=FacultyCourseAssignmentResponse, status_code=status.HTTP_201_CREATED, summary="Assign Faculty to Course")
+@router.post("/courses", response_model=CourseFacultyResponse, status_code=status.HTTP_201_CREATED, summary="Assign Faculty to Course")
 async def assign_faculty_course(
-    payload: FacultyCourseAssignmentCreate,
+    payload: CourseFacultyCreate,
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
     data = payload.model_dump()
     data["tenant_id"] = tenant_id
-    assignment = FacultyCourseAssignment(**data)
+    assignment = CourseFaculty(**data)
     db.add(assignment)
     try:
         await db.commit()
@@ -66,8 +66,8 @@ async def remove_faculty_course(
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(FacultyCourseAssignment).where(
-        FacultyCourseAssignment.id == assignment_id, FacultyCourseAssignment.tenant_id == tenant_id
+    stmt = select(CourseFaculty).where(
+        CourseFaculty.id == assignment_id, CourseFaculty.tenant_id == tenant_id
     )
     assignment = (await db.execute(stmt)).scalar_one_or_none()
     if not assignment:
@@ -81,31 +81,31 @@ async def remove_faculty_course(
 # Faculty Program Assignments
 # ============================================================================
 
-@router.get("/programs", response_model=List[FacultyProgramAssignmentResponse], summary="List Faculty Program Assignments")
+@router.get("/programs", response_model=List[ProgramFacultyResponse], summary="List Faculty Program Assignments")
 async def list_faculty_programs(
     faculty_id: Optional[str] = Query(None),
     program_id: Optional[str] = Query(None),
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(FacultyProgramAssignment).where(FacultyProgramAssignment.tenant_id == tenant_id)
+    stmt = select(ProgramFaculty).where(ProgramFaculty.tenant_id == tenant_id)
     if faculty_id:
-        stmt = stmt.where(FacultyProgramAssignment.faculty_id == faculty_id)
+        stmt = stmt.where(ProgramFaculty.faculty_id == faculty_id)
     if program_id:
-        stmt = stmt.where(FacultyProgramAssignment.university_program_id == program_id)
+        stmt = stmt.where(ProgramFaculty.institution_program_id == program_id)
     result = await db.execute(stmt)
     return result.scalars().all()
 
 
-@router.post("/programs", response_model=FacultyProgramAssignmentResponse, status_code=status.HTTP_201_CREATED, summary="Assign Faculty to Program")
+@router.post("/programs", response_model=ProgramFacultyResponse, status_code=status.HTTP_201_CREATED, summary="Assign Faculty to Program")
 async def assign_faculty_program(
-    payload: FacultyProgramAssignmentCreate,
+    payload: ProgramFacultyCreate,
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
     data = payload.model_dump()
     data["tenant_id"] = tenant_id
-    assignment = FacultyProgramAssignment(**data)
+    assignment = ProgramFaculty(**data)
     db.add(assignment)
     try:
         await db.commit()
@@ -122,8 +122,8 @@ async def remove_faculty_program(
     tenant_id: str = Depends(get_current_tenant_id),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(FacultyProgramAssignment).where(
-        FacultyProgramAssignment.id == assignment_id, FacultyProgramAssignment.tenant_id == tenant_id
+    stmt = select(ProgramFaculty).where(
+        ProgramFaculty.id == assignment_id, ProgramFaculty.tenant_id == tenant_id
     )
     assignment = (await db.execute(stmt)).scalar_one_or_none()
     if not assignment:

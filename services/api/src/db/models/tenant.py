@@ -3,12 +3,12 @@
 Why this file exists:
 ---------------------
 Every request in BayesStack resolves to an institutional boundary (Tenant).
-The Tenant model acts as the root container for all university-specific content,
+The Tenant model acts as the root container for all institution-specific content,
 white-label branding, custom domains, and user memberships.
 
 Roles & Governance Nuance:
 --------------------------
-1. 'superadmin': Platform operator (maintains the Master Learning Library).
+1. 'superadmin': Platform operator (maintains the Master Learning Catalog).
 2. 'admin': Institutional Admin (governs degree curricula and semester programs).
 3. 'faculty': Instructor / Professor (authors & customizes courses, chapters, concepts).
 4. 'learner': Student (consumes published course snapshots with zero write privileges).
@@ -44,7 +44,7 @@ class Tenant(Base):
     """Institutional Tenant root container.
     
     Architecture Note:
-    Universities borrow from the platform library with zero duplication.
+    Universities borrow from the platform catalog with zero duplication.
     The tenant record holds custom subdomains (e.g. 'ashoka.bayesstack.com')
     or dedicated CNAMEs (e.g. 'learn.ashoka.edu.in'), alongside brand colors.
     """
@@ -55,7 +55,7 @@ class Tenant(Base):
     slug: Mapped[str] = mapped_column(String(64), unique=True, index=True, nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     short_name: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
-    institution_type: Mapped[str] = mapped_column(String(32), default="university", nullable=False)
+    institution_type: Mapped[str] = mapped_column(String(32), default="institution", nullable=False)
     domain: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     custom_domain: Mapped[Optional[str]] = mapped_column(String(255), unique=True, nullable=True)
     branding: Mapped[Optional[dict]] = mapped_column(JSON, default=dict, nullable=True)

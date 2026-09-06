@@ -1,104 +1,75 @@
-"""Backward-compatibility facade for content models.
+"""Compatibility facade for the content-domain models.
 
 Why this file exists:
 ---------------------
 The architecture has transitioned to clean, modular domain boundaries:
-- Platform Master Learning Library -> `from db.models import LibraryCourse, LibraryConcept, ...`
-- University Composition Layer -> `from db.models import UniversityCourse, UniversityConcept, ...`
+- Platform Master Learning Catalog -> `from db.models import CatalogCourse, CatalogConcept, ...`
+- Institution Composition Layer -> `from db.models import InstitutionCourse, InstitutionConcept, ...`
 - Production Delivery -> `from db.models import CoursePublication, StudioAsset`
-- Assignments & Enrollments -> `from db.models import FacultyCourseAssignment, StudentProgramEnrollment`
+- Assignments & Enrollments -> `from db.models import CourseFaculty, ProgramEnrollment`
 
-This file re-exports all models under their legacy aliases (`Canonical*`, `Tenant*`)
-so that existing services, tests, and seed scripts continue to operate seamlessly.
+The canonical imports live in :mod:`db.models`; this module keeps the historical
+import path working while exposing the new catalog/institution terminology.
 """
 
 from db.models import (
+    CATALOG_TABLE_NAMES,
     CoursePublication,
-    FacultyCourseAssignment,
-    FacultyProgramAssignment,
-    LIBRARY_TABLE_NAMES,
-    LibraryChapter,
-    LibraryChapterConcept,
-    LibraryConcept,
-    LibraryCourse,
-    LibraryCourseChapter,
-    LibraryCurriculum,
-    LibraryCurriculumProgram,
-    LibraryProgram,
-    LibraryProgramCourse,
-    LibraryStudioInstance,
-    StudentCurriculumEnrollment,
-    StudentProgramEnrollment,
+    CourseFaculty,
+    ProgramFaculty,
+    CatalogChapter,
+    CatalogChapterConcept,
+    CatalogConcept,
+    CatalogCourse,
+    CatalogCourseChapter,
+    CatalogCurriculum,
+    CatalogCurriculumProgram,
+    CatalogProgram,
+    CatalogProgramCourse,
+    CatalogActivity,
+    CurriculumEnrollment,
+    ProgramEnrollment,
     StudioAsset,
-    UniversityChapter,
-    UniversityChapterConcept,
-    UniversityConcept,
-    UniversityCourse,
-    UniversityCourseChapter,
-    UniversityCurriculum,
-    UniversityCurriculumProgram,
-    UniversityProgram,
-    UniversityProgramCourse,
-    UniversityStudioInstance,
-    ensure_library_immutability_guards,
+    InstitutionChapter,
+    InstitutionChapterConcept,
+    InstitutionConcept,
+    InstitutionCourse,
+    InstitutionCourseChapter,
+    InstitutionCurriculum,
+    InstitutionCurriculumProgram,
+    InstitutionProgram,
+    InstitutionProgramCourse,
+    InstitutionActivity,
+    ensure_catalog_immutability_guards,
 )
 
-# Aliases for Platform Master Learning Library
-CanonicalCurriculum = LibraryCurriculum
-CanonicalCurriculumProgram = LibraryCurriculumProgram
-CanonicalProgram = LibraryProgram
-CanonicalProgramCourse = LibraryProgramCourse
-CanonicalCourse = LibraryCourse
-CanonicalCourseChapter = LibraryCourseChapter
-CanonicalChapter = LibraryChapter
-CanonicalChapterConcept = LibraryChapterConcept
-CanonicalConcept = LibraryConcept
-CanonicalStudioInstance = LibraryStudioInstance
-
-# Aliases for University Composition Layer
-TenantCurriculum = UniversityCurriculum
-TenantCurriculumProgram = UniversityCurriculumProgram
-TenantProgram = UniversityProgram
-TenantProgramCourse = UniversityProgramCourse
-TenantCourse = UniversityCourse
-TenantCourseChapter = UniversityCourseChapter
-TenantChapter = UniversityChapter
-TenantChapterConcept = UniversityChapterConcept
-TenantConcept = UniversityConcept
-TenantStudioInstance = UniversityStudioInstance
-
-# Helpers & Table Name Collections
-CANONICAL_TABLE_NAMES = LIBRARY_TABLE_NAMES
-ensure_canonical_immutability_guards = ensure_library_immutability_guards
-
-
 __all__ = [
-    "CanonicalCurriculum",
-    "CanonicalCurriculumProgram",
-    "CanonicalProgram",
-    "CanonicalProgramCourse",
-    "CanonicalCourse",
-    "CanonicalCourseChapter",
-    "CanonicalChapter",
-    "CanonicalChapterConcept",
-    "CanonicalConcept",
-    "CanonicalStudioInstance",
-    "TenantCurriculum",
-    "TenantCurriculumProgram",
-    "TenantProgram",
-    "TenantProgramCourse",
-    "TenantCourse",
-    "TenantCourseChapter",
-    "TenantChapter",
-    "TenantChapterConcept",
-    "TenantConcept",
-    "TenantStudioInstance",
+    "CatalogCurriculum",
+    "CatalogCurriculumProgram",
+    "CatalogProgram",
+    "CatalogProgramCourse",
+    "CatalogCourse",
+    "CatalogCourseChapter",
+    "CatalogChapter",
+    "CatalogChapterConcept",
+    "CatalogConcept",
+    "CatalogActivity",
+    "InstitutionCurriculum",
+    "InstitutionCurriculumProgram",
+    "InstitutionProgram",
+    "InstitutionProgramCourse",
+    "InstitutionCourse",
+    "InstitutionCourseChapter",
+    "InstitutionChapter",
+    "InstitutionChapterConcept",
+    "InstitutionConcept",
+    "InstitutionActivity",
     "CoursePublication",
     "StudioAsset",
-    "FacultyCourseAssignment",
-    "FacultyProgramAssignment",
-    "StudentCurriculumEnrollment",
-    "StudentProgramEnrollment",
-    "CANONICAL_TABLE_NAMES",
-    "ensure_canonical_immutability_guards",
+    "CourseFaculty",
+    "ProgramFaculty",
+    "CurriculumEnrollment",
+    "ProgramEnrollment",
+    "CATALOG_TABLE_NAMES",
+    "ensure_catalog_immutability_guards",
 ]

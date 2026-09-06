@@ -1,4 +1,4 @@
-"""Platform Master Learning Library ORM models (`library_*`).
+"""Platform Master Learning Catalog ORM models (`catalog_*`).
 
 Why this file exists:
 ---------------------
@@ -11,9 +11,9 @@ Architectural Invariants:
    Universities pin to specific releases. Updating content requires authoring a new version.
 2. Atomic Concepts: Concepts have zero hardcoded parent dependencies; they can be sequenced
    into multiple chapters and courses simultaneously with zero duplication.
-3. Decoupled Studios: Studios mount dynamically via `studio_type` and receive runtime configs,
+3. Decoupled Studios: Studios mount dynamically via `activity_type` and receive runtime configs,
    completely isolated from degree or curriculum context.
-4. Spaced Integer Indexing: Sequences use `order_rank BIGINT` (spacing=1_000_000) so drag-and-drop
+4. Spaced Integer Indexing: Sequences use `position BIGINT` (spacing=1_000_000) so drag-and-drop
    reordering requires updating exactly 1 row via integer bisection, eliminating precision decay.
 """
 
@@ -43,14 +43,14 @@ def utc_now() -> datetime:
 
 
 # ============================================================================
-# 1. Master Curriculums & Programs
+# 1. Master Curricula & Programs
 # ============================================================================
 
-class LibraryCurriculum(Base):
+class CatalogCurriculum(Base):
     """The overarching degree or credential roadmap (e.g. 4-Year B.Tech Computer Science)."""
 
-    __tablename__ = "library_curriculums"
-    __table_args__ = (CheckConstraint("version > 0", name="ck_library_curriculum_version"),)
+    __tablename__ = "catalog_curricula"
+    __table_args__ = (CheckConstraint("version > 0", name="ck_catalog_curriculum_version"),)
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     version: Mapped[int] = mapped_column(Integer, primary_key=True, default=1)
@@ -60,7 +60,7 @@ class LibraryCurriculum(Base):
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     credential_type: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)  # 'bachelors' | 'masters' | etc.
     estimated_duration: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
-    status: Mapped[str] = mapped_column(String(16), default="draft", nullable=False)
+    content_status: Mapped[str] = mapped_column(String(16), default="draft", nullable=False)
     release_channel: Mapped[str] = mapped_column(String(32), default="stable", server_default="stable", nullable=False)
     metadata_: Mapped[dict[str, Any]] = mapped_column("metadata", JSON, default=dict, nullable=False)
     released_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
@@ -68,22 +68,22 @@ class LibraryCurriculum(Base):
     content = synonym("metadata_")
 
 
-class LibraryCurriculumProgram(Base):
+class CatalogCurriculumProgram(Base):
     """Sequences academic phases / terms into a master curriculum."""
 
-    __tablename__ = "library_curriculum_programs"
+    __tablename__ = "catalog_curriculum_programs"
     __table_args__ = (
         ForeignKeyConstraint(
             ["curriculum_id", "curriculum_version"],
-            ["library_curriculums.id", "library_curriculums.version"],
+            ["catalog_curricula.id", "catalog_curricula.version"],
             ondelete="CASCADE",
         ),
         ForeignKeyConstraint(
             ["program_id", "program_version"],
-            ["library_programs.id", "library_programs.version"],
+            ["catalog_programs.id", "catalog_programs.version"],
             ondelete="RESTRICT",
         ),
-        UniqueConstraint("curriculum_id", "curriculum_version", "order_rank", name="uq_lib_curr_prog_rank"),
+        UniqueConstraint("curriculum_id", "curriculum_version", "position", name="uq_lib_curr_prog_rank"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -91,17 +91,16 @@ class LibraryCurriculumProgram(Base):
     curriculum_version: Mapped[int] = mapped_column(Integer, nullable=False)
     program_id: Mapped[str] = mapped_column(String(64), nullable=False)
     program_version: Mapped[int] = mapped_column(Integer, nullable=False)
-    order_rank: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
+    position: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
     display_label: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
 
-    position = synonym("order_rank")
 
 
-class LibraryProgram(Base):
+class CatalogProgram(Base):
     """A major academic term or specialization track (e.g. Semester 1, Year 1 Core)."""
 
-    __tablename__ = "library_programs"
-    __table_args__ = (CheckConstraint("version > 0", name="ck_library_program_version"),)
+    __tablename__ = "catalog_programs"
+    __table_args__ = (CheckConstraint("version > 0", name="ck_catalog_version"),)
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     version: Mapped[int] = mapped_column(Integer, primary_key=True, default=1)
@@ -110,7 +109,7 @@ class LibraryProgram(Base):
     slug: Mapped[str] = mapped_column(String(128), default="program", nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     program_type: Mapped[str] = mapped_column(String(32), default="semester", nullable=False)
-    status: Mapped[str] = mapped_column(String(16), default="draft", nullable=False)
+    content_status: Mapped[str] = mapped_column(String(16), default="draft", nullable=False)
     release_channel: Mapped[str] = mapped_column(String(32), default="stable", server_default="stable", nullable=False)
     metadata_: Mapped[dict[str, Any]] = mapped_column("metadata", JSON, default=dict, nullable=False)
     released_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
@@ -118,22 +117,22 @@ class LibraryProgram(Base):
     content = synonym("metadata_")
 
 
-class LibraryProgramCourse(Base):
+class CatalogProgramCourse(Base):
     """Sequences individual courses into a master academic program."""
 
-    __tablename__ = "library_program_courses"
+    __tablename__ = "catalog_program_courses"
     __table_args__ = (
         ForeignKeyConstraint(
             ["program_id", "program_version"],
-            ["library_programs.id", "library_programs.version"],
+            ["catalog_programs.id", "catalog_programs.version"],
             ondelete="CASCADE",
         ),
         ForeignKeyConstraint(
             ["course_id", "course_version"],
-            ["library_courses.id", "library_courses.version"],
+            ["catalog_courses.id", "catalog_courses.version"],
             ondelete="RESTRICT",
         ),
-        UniqueConstraint("program_id", "program_version", "order_rank", name="uq_lib_prog_course_rank"),
+        UniqueConstraint("program_id", "program_version", "position", name="uq_lib_prog_course_rank"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -141,22 +140,21 @@ class LibraryProgramCourse(Base):
     program_version: Mapped[int] = mapped_column(Integer, nullable=False)
     course_id: Mapped[str] = mapped_column(String(64), nullable=False)
     course_version: Mapped[int] = mapped_column(Integer, nullable=False)
-    order_rank: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
+    position: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
     is_elective: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     credits: Mapped[int] = mapped_column(Integer, default=4, nullable=False)
 
-    position = synonym("order_rank")
 
 
 # ============================================================================
 # 2. Master Courses & Chapters
 # ============================================================================
 
-class LibraryCourse(Base):
+class CatalogCourse(Base):
     """Authoritative master course syllabus (e.g. CS-203 Machine Learning Foundations)."""
 
-    __tablename__ = "library_courses"
-    __table_args__ = (CheckConstraint("version > 0", name="ck_library_course_version"),)
+    __tablename__ = "catalog_courses"
+    __table_args__ = (CheckConstraint("version > 0", name="ck_catalog_version"),)
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     version: Mapped[int] = mapped_column(Integer, primary_key=True, default=1)
@@ -166,7 +164,7 @@ class LibraryCourse(Base):
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     difficulty: Mapped[str] = mapped_column(String(32), default="intermediate", nullable=False)
     credits: Mapped[int] = mapped_column(Integer, default=4, nullable=False)
-    status: Mapped[str] = mapped_column(String(16), default="draft", nullable=False)
+    content_status: Mapped[str] = mapped_column(String(16), default="draft", nullable=False)
     release_channel: Mapped[str] = mapped_column(String(32), default="stable", server_default="stable", nullable=False)
     metadata_: Mapped[dict[str, Any]] = mapped_column("metadata", JSON, default=dict, nullable=False)
     released_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
@@ -174,22 +172,22 @@ class LibraryCourse(Base):
     content = synonym("metadata_")
 
 
-class LibraryCourseChapter(Base):
+class CatalogCourseChapter(Base):
     """Sequences chapters inside a master course."""
 
-    __tablename__ = "library_course_chapters"
+    __tablename__ = "catalog_course_chapters"
     __table_args__ = (
         ForeignKeyConstraint(
             ["course_id", "course_version"],
-            ["library_courses.id", "library_courses.version"],
+            ["catalog_courses.id", "catalog_courses.version"],
             ondelete="CASCADE",
         ),
         ForeignKeyConstraint(
             ["chapter_id", "chapter_version"],
-            ["library_chapters.id", "library_chapters.version"],
+            ["catalog_chapters.id", "catalog_chapters.version"],
             ondelete="RESTRICT",
         ),
-        UniqueConstraint("course_id", "course_version", "order_rank", name="uq_lib_course_chap_rank"),
+        UniqueConstraint("course_id", "course_version", "position", name="uq_lib_course_chap_rank"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -197,16 +195,15 @@ class LibraryCourseChapter(Base):
     course_version: Mapped[int] = mapped_column(Integer, nullable=False)
     chapter_id: Mapped[str] = mapped_column(String(64), nullable=False)
     chapter_version: Mapped[int] = mapped_column(Integer, nullable=False)
-    order_rank: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
-
-    position = synonym("order_rank")
+    position: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
 
 
-class LibraryChapter(Base):
+
+class CatalogChapter(Base):
     """Thematic pedagogical container grouping related concepts (e.g. Optimization Techniques)."""
 
-    __tablename__ = "library_chapters"
-    __table_args__ = (CheckConstraint("version > 0", name="ck_library_chapter_version"),)
+    __tablename__ = "catalog_chapters"
+    __table_args__ = (CheckConstraint("version > 0", name="ck_catalog_version"),)
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     version: Mapped[int] = mapped_column(Integer, primary_key=True, default=1)
@@ -215,7 +212,7 @@ class LibraryChapter(Base):
     slug: Mapped[str] = mapped_column(String(128), default="chapter", nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     estimated_minutes: Mapped[int] = mapped_column(Integer, default=120, nullable=False)
-    status: Mapped[str] = mapped_column(String(16), default="draft", nullable=False)
+    content_status: Mapped[str] = mapped_column(String(16), default="draft", nullable=False)
     release_channel: Mapped[str] = mapped_column(String(32), default="stable", server_default="stable", nullable=False)
     metadata_: Mapped[dict[str, Any]] = mapped_column("metadata", JSON, default=dict, nullable=False)
     released_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
@@ -223,22 +220,22 @@ class LibraryChapter(Base):
     content = synonym("metadata_")
 
 
-class LibraryChapterConcept(Base):
+class CatalogChapterConcept(Base):
     """Sequences atomic concepts inside a master chapter."""
 
-    __tablename__ = "library_chapter_concepts"
+    __tablename__ = "catalog_chapter_concepts"
     __table_args__ = (
         ForeignKeyConstraint(
             ["chapter_id", "chapter_version"],
-            ["library_chapters.id", "library_chapters.version"],
+            ["catalog_chapters.id", "catalog_chapters.version"],
             ondelete="CASCADE",
         ),
         ForeignKeyConstraint(
             ["concept_id", "concept_version"],
-            ["library_concepts.id", "library_concepts.version"],
+            ["catalog_concepts.id", "catalog_concepts.version"],
             ondelete="RESTRICT",
         ),
-        UniqueConstraint("chapter_id", "chapter_version", "order_rank", name="uq_lib_chap_cpt_rank"),
+        UniqueConstraint("chapter_id", "chapter_version", "position", name="uq_lib_chap_cpt_rank"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -246,16 +243,15 @@ class LibraryChapterConcept(Base):
     chapter_version: Mapped[int] = mapped_column(Integer, nullable=False)
     concept_id: Mapped[str] = mapped_column(String(64), nullable=False)
     concept_version: Mapped[int] = mapped_column(Integer, nullable=False)
-    order_rank: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
+    position: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
 
-    position = synonym("order_rank")
 
 
 # ============================================================================
-# 3. Master Atomic Concepts & Studio Instances
+# 3. Master Atomic Concepts & Activities
 # ============================================================================
 
-class LibraryConcept(Base):
+class CatalogConcept(Base):
     """The atomic pedagogical truth (e.g. Stochastic Gradient Descent).
     
     Pedagogical Invariant:
@@ -263,8 +259,8 @@ class LibraryConcept(Base):
     chapters and courses simultaneously without duplication.
     """
 
-    __tablename__ = "library_concepts"
-    __table_args__ = (CheckConstraint("version > 0", name="ck_library_concept_version"),)
+    __tablename__ = "catalog_concepts"
+    __table_args__ = (CheckConstraint("version > 0", name="ck_catalog_concept_version"),)
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     version: Mapped[int] = mapped_column(Integer, primary_key=True, default=1)
@@ -275,7 +271,7 @@ class LibraryConcept(Base):
     topic_category: Mapped[str] = mapped_column(String(64), default="general", nullable=False)
     tags: Mapped[Optional[List[str]]] = mapped_column(JSON, default=list, nullable=True)
     estimated_minutes: Mapped[int] = mapped_column(Integer, default=30, nullable=False)
-    status: Mapped[str] = mapped_column(String(16), default="draft", nullable=False)
+    content_status: Mapped[str] = mapped_column(String(16), default="draft", nullable=False)
     release_channel: Mapped[str] = mapped_column(String(32), default="stable", server_default="stable", nullable=False)
     metadata_: Mapped[dict[str, Any]] = mapped_column("metadata", JSON, default=dict, nullable=False)
     released_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
@@ -283,7 +279,7 @@ class LibraryConcept(Base):
     content = synonym("metadata_")
 
 
-class LibraryStudioInstance(Base):
+class CatalogActivity(Base):
     """Runtime interactive mini-app mounted inside a concept (Video, Code Judge, Finance).
     
     Optimization Note:
@@ -291,29 +287,28 @@ class LibraryStudioInstance(Base):
     Heavy assets (starter files, test cases) are offloaded to S3/R2 via 'asset_hash'.
     """
 
-    __tablename__ = "library_studio_instances"
+    __tablename__ = "catalog_activities"
     __table_args__ = (
         ForeignKeyConstraint(
             ["concept_id", "concept_version"],
-            ["library_concepts.id", "library_concepts.version"],
+            ["catalog_concepts.id", "catalog_concepts.version"],
             ondelete="CASCADE",
         ),
-        UniqueConstraint("concept_id", "concept_version", "order_rank", name="uq_lib_studio_rank"),
+        UniqueConstraint("concept_id", "concept_version", "position", name="uq_lib_studio_rank"),
     )
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     concept_id: Mapped[str] = mapped_column(String(64), nullable=False)
     concept_version: Mapped[int] = mapped_column(Integer, nullable=False)
-    studio_type: Mapped[str] = mapped_column(String(32), nullable=False)  # 'video' | 'coding' | 'finance' | etc.
-    studio_version: Mapped[str] = mapped_column(String(16), default="1.0.0", nullable=False)
-    order_rank: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
+    activity_type: Mapped[str] = mapped_column(String(32), nullable=False)  # 'video' | 'coding' | 'finance' | etc.
+    activity_version: Mapped[str] = mapped_column(String(16), default="1.0.0", nullable=False)
+    position: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
     is_required: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    title: Mapped[str] = mapped_column(String(255), default="Interactive Studio", nullable=False)
+    title: Mapped[str] = mapped_column(String(255), default="Interactive Activity", nullable=False)
     config_summary: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
     asset_hash: Mapped[Optional[str]] = mapped_column(
         String(64), ForeignKey("studio_assets.content_hash", ondelete="SET NULL"), nullable=True
     )
 
-    position = synonym("order_rank")
     config = synonym("config_summary")
     required = synonym("is_required")

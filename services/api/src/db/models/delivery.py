@@ -68,44 +68,44 @@ class CoursePublication(Base):
     
     CQRS Pattern in Action:
     -----------------------
-    - WRITES happen in normalized tables (university_courses, chapters, concepts).
+    - WRITES happen in normalized tables (institution_courses, chapters, concepts).
     - On 'Publish', an asynchronous worker compiles the entire DAG into
       'compiled_syllabus_tree' and records an active publication snapshot.
     - READS by 50,000 students hit this single indexed row:
-      `SELECT compiled_syllabus_tree FROM course_publications WHERE tenant_id = :t AND university_course_id = :c AND status = 'active'`
+      `SELECT compiled_syllabus_tree FROM course_publications WHERE tenant_id = :t AND institution_course_id = :c AND publication_status = 'active'`
     
     Result: 0 joins, 0.3ms latency, 99.9% Redis cache hit ratio.
     
     Deterministic Publication Contract:
     -----------------------------------
     When compiling 'compiled_syllabus_tree':
-    - All floating subscriptions (adoption_mode = 'floating', release_channel = 'stable')
+    - All floating subscriptions (reference_policy = 'floating', release_channel = 'stable')
       are resolved by querying MAX(version) on that channel at publish time.
-    - Every chapter, concept, and studio instance in the output manifest is locked to an
+    - Every chapter, concept, and activity in the output manifest is locked to an
       EXACT integer version and CAS SHA-256 asset hash.
     - An active student cohort is guaranteed 100% determinism with ZERO mid-term drift.
     """
 
     __tablename__ = "course_publications"
     __table_args__ = (
-        UniqueConstraint("tenant_id", "university_course_id", "publication_number", name="uq_course_publication_number"),
-        UniqueConstraint("tenant_id", "university_course_id", "id", name="uq_course_pub_consistent_tuple"),
+        UniqueConstraint("tenant_id", "institution_course_id", "publication_number", name="uq_course_publication_number"),
+        UniqueConstraint("tenant_id", "institution_course_id", "id", name="uq_course_pub_consistent_tuple"),
         ForeignKeyConstraint(
-            ["tenant_id", "university_course_id"],
-            ["university_courses.tenant_id", "university_courses.id"],
+            ["tenant_id", "institution_course_id"],
+            ["institution_courses.tenant_id", "institution_courses.id"],
             ondelete="CASCADE",
         ),
         # Unique partial index: exactly one active publication per institutional course
-        Index("uq_active_course_publication", "tenant_id", "university_course_id", unique=True, postgresql_where=text("status = 'active'"), sqlite_where=text("status = 'active'")),
+        Index("uq_active_course_publication", "tenant_id", "institution_course_id", unique=True, postgresql_where=text("publication_status = 'active'"), sqlite_where=text("publication_status = 'active'")),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
-    university_course_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    institution_course_id: Mapped[str] = mapped_column(String(64), nullable=False)
     publication_number: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     source_revision: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     published_by_user_id: Mapped[str] = mapped_column(String(64), nullable=False)
-    status: Mapped[str] = mapped_column(String(32), default="active", server_default="active", nullable=False)
+    publication_status: Mapped[str] = mapped_column(String(32), default="active", server_default="active", nullable=False)
     compiled_tree: Mapped[dict[str, Any]] = mapped_column("compiled_syllabus_tree", JSON, nullable=False)
     content_hash: Mapped[str] = mapped_column(String(64), nullable=False)  # SHA-256 of tree for ETag/CDN validation
     created_at: Mapped[datetime] = mapped_column("published_at", DateTime(timezone=True), default=utc_now, nullable=False)
@@ -115,7 +115,6 @@ class CoursePublication(Base):
     compiled_syllabus_tree = synonym("compiled_tree")
     published_at = synonym("created_at")
     published_by = synonym("published_by_user_id")
-    tenant_course_id = synonym("university_course_id")
     revision = synonym("publication_number")
     snapshot = synonym("compiled_tree")
 

@@ -28,8 +28,8 @@ router = APIRouter(prefix="/offerings", tags=["Academic Operations - Course Offe
 @router.get("", response_model=List[CourseOfferingResponse], summary="List Course Offerings")
 async def list_offerings(
     term_id: Optional[uuid.UUID] = Query(None, description="Filter by academic_term_id"),
-    course_id: Optional[str] = Query(None, description="Filter by university_course_id"),
-    status_filter: Optional[str] = Query(None, alias="status"),
+    course_id: Optional[str] = Query(None, description="Filter by institution_course_id"),
+    offering_status_filter: Optional[str] = Query(None, alias="offering_status"),
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
     tenant_id: str = Depends(get_current_tenant_id),
@@ -39,9 +39,9 @@ async def list_offerings(
     if term_id:
         stmt = stmt.where(CourseOffering.academic_term_id == term_id)
     if course_id:
-        stmt = stmt.where(CourseOffering.university_course_id == course_id)
-    if status_filter:
-        stmt = stmt.where(CourseOffering.status == status_filter)
+        stmt = stmt.where(CourseOffering.institution_course_id == course_id)
+    if offering_status_filter:
+        stmt = stmt.where(CourseOffering.offering_status == offering_status_filter)
     stmt = stmt.order_by(CourseOffering.created_at.desc()).limit(limit).offset(offset)
     result = await db.execute(stmt)
     return result.scalars().all()
@@ -72,13 +72,13 @@ async def create_offering(
     pub_stmt = select(CoursePublication).where(
         CoursePublication.id == payload.course_publication_id,
         CoursePublication.tenant_id == tenant_id,
-        CoursePublication.university_course_id == payload.university_course_id,
+        CoursePublication.institution_course_id == payload.institution_course_id,
     )
     pub = (await db.execute(pub_stmt)).scalar_one_or_none()
     if not pub:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Publication '{payload.course_publication_id}' not found or does not belong to course '{payload.university_course_id}'",
+            detail=f"Publication '{payload.course_publication_id}' not found or does not belong to course '{payload.institution_course_id}'",
         )
 
     data = payload.model_dump()

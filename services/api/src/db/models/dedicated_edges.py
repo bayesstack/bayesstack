@@ -4,11 +4,11 @@ Why this file exists:
 ---------------------
 To resolve the 'polymorphic junction smell' (exclusive arcs with 50% NULL foreign keys),
 BayesStack provides dedicated, non-null edge tables for each entity type:
-- Library References: Strictly constrained to `library_*` tables with versioned compound FKs.
-- University Custom References: Strictly constrained to `university_*` proprietary tables.
+- Catalog References: Strictly constrained to `catalog_*` tables with versioned compound FKs.
+- Institution Custom References: Strictly constrained to `institution_*` proprietary tables.
 
 Both dedicated tables are unified at the database level via unified sequencing VIEWs
-(`university_course_chapters`, etc.) equipped with INSTEAD OF triggers for full read/write transparency.
+(`institution_course_chapters`, etc.) equipped with INSTEAD OF triggers for full read/write transparency.
 """
 
 from typing import Optional
@@ -22,289 +22,280 @@ from core.database import Base
 # 1. Curriculum -> Programs (Academic Degree Tracks)
 # ============================================================================
 
-class UniversityCurriculumLibraryProgram(Base):
-    """Dedicated edge: Curriculum references an immutable platform library program."""
+class InstitutionCurriculumCatalogProgram(Base):
+    """Dedicated edge: Curriculum references an immutable platform catalog program."""
 
-    __tablename__ = "university_curriculum_library_programs"
+    __tablename__ = "institution_curriculum_catalog_programs"
     __table_args__ = (
-        UniqueConstraint("university_curriculum_id", "order_rank", name="uq_uclp_rank"),
+        UniqueConstraint("institution_curriculum_id", "position", name="uq_uclp_rank"),
         ForeignKeyConstraint(
-            ["tenant_id", "university_curriculum_id"],
-            ["university_curriculums.tenant_id", "university_curriculums.id"],
+            ["tenant_id", "institution_curriculum_id"],
+            ["institution_curricula.tenant_id", "institution_curricula.id"],
             ondelete="CASCADE",
         ),
         ForeignKeyConstraint(
-            ["library_program_id", "library_version"],
-            ["library_programs.id", "library_programs.version"],
+            ["catalog_program_id", "catalog_version"],
+            ["catalog_programs.id", "catalog_programs.version"],
             ondelete="RESTRICT",
         ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
-    university_curriculum_id: Mapped[str] = mapped_column(String(64), nullable=False)
-    library_program_id: Mapped[str] = mapped_column(String(64), nullable=False)
-    library_version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
-    order_rank: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
-    adoption_mode: Mapped[str] = mapped_column(String(16), default="pinned", server_default="pinned", nullable=False)
+    institution_curriculum_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    catalog_program_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    catalog_version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    position: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
+    reference_policy: Mapped[str] = mapped_column(String(16), default="pinned", server_default="pinned", nullable=False)
     release_channel: Mapped[str] = mapped_column(String(32), default="stable", server_default="stable", nullable=False)
     lineage_type: Mapped[str] = mapped_column(String(20), default="inherited", server_default="inherited", nullable=False)
     origin_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     origin_version: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    origin_order_rank: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
+    origin_position: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
     display_label: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
 
-    position = synonym("order_rank")
 
 
-class UniversityCurriculumCustomProgram(Base):
+class InstitutionCurriculumCustomProgram(Base):
     """Dedicated edge: Curriculum references an institutional proprietary program."""
 
-    __tablename__ = "university_curriculum_custom_programs"
+    __tablename__ = "institution_curriculum_custom_programs"
     __table_args__ = (
-        UniqueConstraint("university_curriculum_id", "order_rank", name="uq_uccp_rank"),
+        UniqueConstraint("institution_curriculum_id", "position", name="uq_uccp_rank"),
         ForeignKeyConstraint(
-            ["tenant_id", "university_curriculum_id"],
-            ["university_curriculums.tenant_id", "university_curriculums.id"],
+            ["tenant_id", "institution_curriculum_id"],
+            ["institution_curricula.tenant_id", "institution_curricula.id"],
             ondelete="CASCADE",
         ),
         ForeignKeyConstraint(
-            ["tenant_id", "university_program_id"],
-            ["university_programs.tenant_id", "university_programs.id"],
+            ["tenant_id", "institution_program_id"],
+            ["institution_programs.tenant_id", "institution_programs.id"],
             ondelete="CASCADE",
         ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
-    university_curriculum_id: Mapped[str] = mapped_column(String(64), nullable=False)
-    university_program_id: Mapped[str] = mapped_column(String(64), nullable=False)
-    order_rank: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
-    adoption_mode: Mapped[str] = mapped_column(String(16), default="pinned", server_default="pinned", nullable=False)
+    institution_curriculum_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    institution_program_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    position: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
+    reference_policy: Mapped[str] = mapped_column(String(16), default="pinned", server_default="pinned", nullable=False)
     release_channel: Mapped[str] = mapped_column(String(32), default="stable", server_default="stable", nullable=False)
     lineage_type: Mapped[str] = mapped_column(String(20), default="custom", server_default="custom", nullable=False)
     origin_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     origin_version: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    origin_order_rank: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
+    origin_position: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
     display_label: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
 
-    position = synonym("order_rank")
 
 
 # ============================================================================
 # 2. Program -> Courses (Module & Semester Composition)
 # ============================================================================
 
-class UniversityProgramLibraryCourse(Base):
-    """Dedicated edge: Program references an immutable platform library course."""
+class InstitutionProgramCatalogCourse(Base):
+    """Dedicated edge: Program references an immutable platform catalog course."""
 
-    __tablename__ = "university_program_library_courses"
+    __tablename__ = "institution_program_catalog_courses"
     __table_args__ = (
-        UniqueConstraint("university_program_id", "order_rank", name="uq_uplc_rank"),
+        UniqueConstraint("institution_program_id", "position", name="uq_uplc_rank"),
         ForeignKeyConstraint(
-            ["tenant_id", "university_program_id"],
-            ["university_programs.tenant_id", "university_programs.id"],
+            ["tenant_id", "institution_program_id"],
+            ["institution_programs.tenant_id", "institution_programs.id"],
             ondelete="CASCADE",
         ),
         ForeignKeyConstraint(
-            ["library_course_id", "library_version"],
-            ["library_courses.id", "library_courses.version"],
+            ["catalog_course_id", "catalog_version"],
+            ["catalog_courses.id", "catalog_courses.version"],
             ondelete="RESTRICT",
         ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
-    university_program_id: Mapped[str] = mapped_column(String(64), nullable=False)
-    library_course_id: Mapped[str] = mapped_column(String(64), nullable=False)
-    library_version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
-    order_rank: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
-    adoption_mode: Mapped[str] = mapped_column(String(16), default="pinned", server_default="pinned", nullable=False)
+    institution_program_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    catalog_course_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    catalog_version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    position: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
+    reference_policy: Mapped[str] = mapped_column(String(16), default="pinned", server_default="pinned", nullable=False)
     release_channel: Mapped[str] = mapped_column(String(32), default="stable", server_default="stable", nullable=False)
     lineage_type: Mapped[str] = mapped_column(String(20), default="inherited", server_default="inherited", nullable=False)
     origin_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     origin_version: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    origin_order_rank: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
+    origin_position: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
     is_elective: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     credits: Mapped[int] = mapped_column(Integer, default=4, nullable=False)
     display_label: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
 
-    position = synonym("order_rank")
 
 
-class UniversityProgramCustomCourse(Base):
+class InstitutionProgramCustomCourse(Base):
     """Dedicated edge: Program references an institutional proprietary course."""
 
-    __tablename__ = "university_program_custom_courses"
+    __tablename__ = "institution_program_custom_courses"
     __table_args__ = (
-        UniqueConstraint("university_program_id", "order_rank", name="uq_upcc_rank"),
+        UniqueConstraint("institution_program_id", "position", name="uq_upcc_rank"),
         ForeignKeyConstraint(
-            ["tenant_id", "university_program_id"],
-            ["university_programs.tenant_id", "university_programs.id"],
+            ["tenant_id", "institution_program_id"],
+            ["institution_programs.tenant_id", "institution_programs.id"],
             ondelete="CASCADE",
         ),
         ForeignKeyConstraint(
-            ["tenant_id", "university_course_id"],
-            ["university_courses.tenant_id", "university_courses.id"],
+            ["tenant_id", "institution_course_id"],
+            ["institution_courses.tenant_id", "institution_courses.id"],
             ondelete="CASCADE",
         ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
-    university_program_id: Mapped[str] = mapped_column(String(64), nullable=False)
-    university_course_id: Mapped[str] = mapped_column(String(64), nullable=False)
-    order_rank: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
-    adoption_mode: Mapped[str] = mapped_column(String(16), default="pinned", server_default="pinned", nullable=False)
+    institution_program_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    institution_course_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    position: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
+    reference_policy: Mapped[str] = mapped_column(String(16), default="pinned", server_default="pinned", nullable=False)
     release_channel: Mapped[str] = mapped_column(String(32), default="stable", server_default="stable", nullable=False)
     lineage_type: Mapped[str] = mapped_column(String(20), default="custom", server_default="custom", nullable=False)
     origin_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     origin_version: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    origin_order_rank: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
+    origin_position: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
     is_elective: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     credits: Mapped[int] = mapped_column(Integer, default=4, nullable=False)
     display_label: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
 
-    position = synonym("order_rank")
 
 
 # ============================================================================
 # 3. Course -> Chapters (Course Syllabus Sequencing)
 # ============================================================================
 
-class UniversityCourseLibraryChapter(Base):
-    """Dedicated edge: Course references an immutable platform library chapter."""
+class InstitutionCourseCatalogChapter(Base):
+    """Dedicated edge: Course references an immutable platform catalog chapter."""
 
-    __tablename__ = "university_course_library_chapters"
+    __tablename__ = "institution_course_catalog_chapters"
     __table_args__ = (
-        UniqueConstraint("university_course_id", "order_rank", name="uq_uclch_rank"),
+        UniqueConstraint("institution_course_id", "position", name="uq_uclch_rank"),
         ForeignKeyConstraint(
-            ["tenant_id", "university_course_id"],
-            ["university_courses.tenant_id", "university_courses.id"],
+            ["tenant_id", "institution_course_id"],
+            ["institution_courses.tenant_id", "institution_courses.id"],
             ondelete="CASCADE",
         ),
         ForeignKeyConstraint(
-            ["library_chapter_id", "library_version"],
-            ["library_chapters.id", "library_chapters.version"],
+            ["catalog_chapter_id", "catalog_version"],
+            ["catalog_chapters.id", "catalog_chapters.version"],
             ondelete="RESTRICT",
         ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
-    university_course_id: Mapped[str] = mapped_column(String(64), nullable=False)
-    library_chapter_id: Mapped[str] = mapped_column(String(64), nullable=False)
-    library_version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
-    order_rank: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
-    adoption_mode: Mapped[str] = mapped_column(String(16), default="pinned", server_default="pinned", nullable=False)
+    institution_course_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    catalog_chapter_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    catalog_version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    position: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
+    reference_policy: Mapped[str] = mapped_column(String(16), default="pinned", server_default="pinned", nullable=False)
     release_channel: Mapped[str] = mapped_column(String(32), default="stable", server_default="stable", nullable=False)
     lineage_type: Mapped[str] = mapped_column(String(20), default="inherited", server_default="inherited", nullable=False)
     origin_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     origin_version: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    origin_order_rank: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
-
-    position = synonym("order_rank")
+    origin_position: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
 
 
-class UniversityCourseCustomChapter(Base):
+
+class InstitutionCourseCustomChapter(Base):
     """Dedicated edge: Course references an institutional proprietary chapter."""
 
-    __tablename__ = "university_course_custom_chapters"
+    __tablename__ = "institution_course_custom_chapters"
     __table_args__ = (
-        UniqueConstraint("university_course_id", "order_rank", name="uq_uccch_rank"),
+        UniqueConstraint("institution_course_id", "position", name="uq_uccch_rank"),
         ForeignKeyConstraint(
-            ["tenant_id", "university_course_id"],
-            ["university_courses.tenant_id", "university_courses.id"],
+            ["tenant_id", "institution_course_id"],
+            ["institution_courses.tenant_id", "institution_courses.id"],
             ondelete="CASCADE",
         ),
         ForeignKeyConstraint(
-            ["tenant_id", "university_chapter_id"],
-            ["university_chapters.tenant_id", "university_chapters.id"],
+            ["tenant_id", "institution_chapter_id"],
+            ["institution_chapters.tenant_id", "institution_chapters.id"],
             ondelete="CASCADE",
         ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
-    university_course_id: Mapped[str] = mapped_column(String(64), nullable=False)
-    university_chapter_id: Mapped[str] = mapped_column(String(64), nullable=False)
-    order_rank: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
-    adoption_mode: Mapped[str] = mapped_column(String(16), default="pinned", server_default="pinned", nullable=False)
+    institution_course_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    institution_chapter_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    position: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
+    reference_policy: Mapped[str] = mapped_column(String(16), default="pinned", server_default="pinned", nullable=False)
     release_channel: Mapped[str] = mapped_column(String(32), default="stable", server_default="stable", nullable=False)
     lineage_type: Mapped[str] = mapped_column(String(20), default="custom", server_default="custom", nullable=False)
     origin_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     origin_version: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    origin_order_rank: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
+    origin_position: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
 
-    position = synonym("order_rank")
 
 
 # ============================================================================
 # 4. Chapter -> Concepts (Pedagogical Concept Sequencing)
 # ============================================================================
 
-class UniversityChapterLibraryConcept(Base):
-    """Dedicated edge: Chapter references an immutable platform library concept."""
+class InstitutionChapterCatalogConcept(Base):
+    """Dedicated edge: Chapter references an immutable platform catalog concept."""
 
-    __tablename__ = "university_chapter_library_concepts"
+    __tablename__ = "institution_chapter_catalog_concepts"
     __table_args__ = (
-        UniqueConstraint("university_chapter_id", "order_rank", name="uq_uclc_rank"),
+        UniqueConstraint("institution_chapter_id", "position", name="uq_uclc_rank"),
         ForeignKeyConstraint(
-            ["tenant_id", "university_chapter_id"],
-            ["university_chapters.tenant_id", "university_chapters.id"],
+            ["tenant_id", "institution_chapter_id"],
+            ["institution_chapters.tenant_id", "institution_chapters.id"],
             ondelete="CASCADE",
         ),
         ForeignKeyConstraint(
-            ["library_concept_id", "library_concept_version"],
-            ["library_concepts.id", "library_concepts.version"],
+            ["catalog_concept_id", "catalog_concept_version"],
+            ["catalog_concepts.id", "catalog_concepts.version"],
             ondelete="RESTRICT",
         ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
-    university_chapter_id: Mapped[str] = mapped_column(String(64), nullable=False)
-    library_concept_id: Mapped[str] = mapped_column(String(64), nullable=False)
-    library_concept_version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
-    order_rank: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
-    adoption_mode: Mapped[str] = mapped_column(String(16), default="pinned", server_default="pinned", nullable=False)
+    institution_chapter_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    catalog_concept_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    catalog_concept_version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    position: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
+    reference_policy: Mapped[str] = mapped_column(String(16), default="pinned", server_default="pinned", nullable=False)
     release_channel: Mapped[str] = mapped_column(String(32), default="stable", server_default="stable", nullable=False)
     lineage_type: Mapped[str] = mapped_column(String(20), default="inherited", server_default="inherited", nullable=False)
     origin_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     origin_version: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    origin_order_rank: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
-
-    position = synonym("order_rank")
+    origin_position: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
 
 
-class UniversityChapterCustomConcept(Base):
+
+class InstitutionChapterCustomConcept(Base):
     """Dedicated edge: Chapter references an institutional proprietary concept."""
 
-    __tablename__ = "university_chapter_custom_concepts"
+    __tablename__ = "institution_chapter_custom_concepts"
     __table_args__ = (
-        UniqueConstraint("university_chapter_id", "order_rank", name="uq_uccc_rank"),
+        UniqueConstraint("institution_chapter_id", "position", name="uq_uccc_rank"),
         ForeignKeyConstraint(
-            ["tenant_id", "university_chapter_id"],
-            ["university_chapters.tenant_id", "university_chapters.id"],
+            ["tenant_id", "institution_chapter_id"],
+            ["institution_chapters.tenant_id", "institution_chapters.id"],
             ondelete="CASCADE",
         ),
         ForeignKeyConstraint(
-            ["tenant_id", "university_concept_id"],
-            ["university_concepts.tenant_id", "university_concepts.id"],
+            ["tenant_id", "institution_concept_id"],
+            ["institution_concepts.tenant_id", "institution_concepts.id"],
             ondelete="CASCADE",
         ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
-    university_chapter_id: Mapped[str] = mapped_column(String(64), nullable=False)
-    university_concept_id: Mapped[str] = mapped_column(String(64), nullable=False)
-    order_rank: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
-    adoption_mode: Mapped[str] = mapped_column(String(16), default="pinned", server_default="pinned", nullable=False)
+    institution_chapter_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    institution_concept_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    position: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
+    reference_policy: Mapped[str] = mapped_column(String(16), default="pinned", server_default="pinned", nullable=False)
     release_channel: Mapped[str] = mapped_column(String(32), default="stable", server_default="stable", nullable=False)
     lineage_type: Mapped[str] = mapped_column(String(20), default="custom", server_default="custom", nullable=False)
     origin_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     origin_version: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    origin_order_rank: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
-
-    position = synonym("order_rank")
+    origin_position: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)

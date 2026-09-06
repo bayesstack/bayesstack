@@ -21,7 +21,7 @@ router = APIRouter(prefix="/grades", tags=["Academic Operations - Course Grades"
 
 @router.get("", response_model=List[CourseGradeResponse], summary="List Course Grades")
 async def list_grades(
-    enrollment_id: Optional[uuid.UUID] = Query(None, description="Filter by section_enrollment_id"),
+    enrollment_id: Optional[uuid.UUID] = Query(None, description="Filter by enrollment_id"),
     is_final: Optional[bool] = Query(None, description="Filter by finalized status"),
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
@@ -30,7 +30,7 @@ async def list_grades(
 ):
     stmt = select(CourseGrade).where(CourseGrade.tenant_id == tenant_id)
     if enrollment_id:
-        stmt = stmt.where(CourseGrade.section_enrollment_id == enrollment_id)
+        stmt = stmt.where(CourseGrade.enrollment_id == enrollment_id)
     if is_final is not None:
         stmt = stmt.where(CourseGrade.is_final == is_final)
     stmt = stmt.order_by(CourseGrade.created_at.desc()).limit(limit).offset(offset)
