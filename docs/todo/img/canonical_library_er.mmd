@@ -1,0 +1,284 @@
+erDiagram
+    direction TB
+
+    TENANTS {
+        string id PK
+        string slug UK
+        string name
+        string short_name
+        string institution_type
+        string custom_domain
+        jsonb branding
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    LIBRARY_CURRICULUMS {
+        string id PK
+        int version PK
+        string code
+        string title
+        string slug
+        text description
+        string credential_type
+        string estimated_duration
+        string status
+        jsonb metadata
+        timestamp released_at
+    }
+
+    LIBRARY_CURRICULUM_PROGRAMS {
+        int id PK
+        string curriculum_id FK
+        int curriculum_version FK
+        string program_id FK
+        int program_version FK
+        int position
+        string display_label
+    }
+
+    LIBRARY_PROGRAMS {
+        string id PK
+        int version PK
+        string code
+        string title
+        string slug
+        text description
+        string program_type
+        string status
+        jsonb metadata
+        timestamp released_at
+    }
+
+    LIBRARY_PROGRAM_COURSES {
+        int id PK
+        string program_id FK
+        int program_version FK
+        string course_id FK
+        int course_version FK
+        int position
+        boolean is_elective
+        int credits
+    }
+
+    LIBRARY_COURSES {
+        string id PK
+        int version PK
+        string code
+        string title
+        string slug
+        text description
+        string difficulty
+        int credits
+        string status
+        jsonb metadata
+        timestamp released_at
+    }
+
+    LIBRARY_COURSE_CHAPTERS {
+        int id PK
+        string course_id FK
+        int course_version FK
+        string chapter_id FK
+        int chapter_version FK
+        int position
+    }
+
+    LIBRARY_CHAPTERS {
+        string id PK
+        int version PK
+        string code
+        string title
+        string slug
+        text description
+        int estimated_minutes
+        string status
+        jsonb metadata
+        timestamp released_at
+    }
+
+    LIBRARY_CHAPTER_CONCEPTS {
+        int id PK
+        string chapter_id FK
+        int chapter_version FK
+        string concept_id FK
+        int concept_version FK
+        int position
+    }
+
+    LIBRARY_CONCEPTS {
+        string id PK
+        int version PK
+        string code
+        string title
+        string slug
+        text description
+        string topic_category
+        string_array tags
+        int estimated_minutes
+        string status
+        jsonb metadata
+        timestamp released_at
+    }
+
+    LIBRARY_STUDIO_INSTANCES {
+        string id PK
+        string concept_id FK
+        int concept_version FK
+        string studio_type
+        string studio_version
+        int position
+        boolean is_required
+        string title
+        jsonb config
+    }
+
+    UNIVERSITY_CURRICULUMS {
+        string id PK
+        string tenant_id FK
+        string source_library_curriculum_id FK
+        int source_library_version FK
+        string local_code
+        string local_title
+        string composition_type
+        string status
+        string managed_by_user_id FK
+    }
+
+    UNIVERSITY_CURRICULUM_PROGRAMS {
+        int id PK
+        string tenant_id FK
+        string university_curriculum_id FK
+        string library_program_id FK
+        int library_version FK
+        string university_program_id FK
+        int position
+        string display_label
+    }
+
+    UNIVERSITY_PROGRAMS {
+        string id PK
+        string tenant_id FK
+        string source_library_program_id FK
+        int source_library_version FK
+        string local_code
+        string local_title
+        string program_type
+        string composition_type
+        string status
+        string managed_by_user_id FK
+    }
+
+    UNIVERSITY_PROGRAM_COURSES {
+        int id PK
+        string tenant_id FK
+        string university_program_id FK
+        string library_course_id FK
+        int library_version FK
+        string university_course_id FK
+        int position
+        boolean is_elective
+        int credits
+    }
+
+    UNIVERSITY_COURSES {
+        string id PK
+        string tenant_id FK
+        string source_library_course_id FK
+        int source_library_version FK
+        string local_code
+        string local_title
+        string composition_type
+        string status
+        string created_by_user_id FK
+    }
+
+    UNIVERSITY_COURSE_CHAPTERS {
+        int id PK
+        string tenant_id FK
+        string university_course_id FK
+        string library_chapter_id FK
+        int library_version FK
+        string university_chapter_id FK
+        int position
+    }
+
+    UNIVERSITY_CHAPTERS {
+        string id PK
+        string tenant_id FK
+        string source_library_chapter_id FK
+        int source_library_version FK
+        string local_code
+        string local_title
+        string composition_type
+        string status
+        string created_by_user_id FK
+    }
+
+    UNIVERSITY_CHAPTER_CONCEPTS {
+        int id PK
+        string tenant_id FK
+        string university_chapter_id FK
+        string library_concept_id FK
+        int library_concept_version FK
+        string university_concept_id FK
+        int position
+    }
+
+    UNIVERSITY_CONCEPTS {
+        string id PK
+        string tenant_id FK
+        string local_code
+        string title
+        string status
+        string created_by_user_id FK
+    }
+
+    UNIVERSITY_STUDIO_INSTANCES {
+        string id PK
+        string tenant_id FK
+        string concept_id FK
+        string studio_type
+        string studio_version
+        int position
+        jsonb config
+    }
+
+    LIBRARY_CURRICULUMS ||--|{ LIBRARY_CURRICULUM_PROGRAMS : "contains"
+    LIBRARY_PROGRAMS ||--|{ LIBRARY_CURRICULUM_PROGRAMS : "referenced in"
+
+    LIBRARY_PROGRAMS ||--|{ LIBRARY_PROGRAM_COURSES : "contains"
+    LIBRARY_COURSES ||--|{ LIBRARY_PROGRAM_COURSES : "referenced in"
+
+    LIBRARY_COURSES ||--|{ LIBRARY_COURSE_CHAPTERS : "contains"
+    LIBRARY_CHAPTERS ||--|{ LIBRARY_COURSE_CHAPTERS : "referenced in"
+
+    LIBRARY_CHAPTERS ||--|{ LIBRARY_CHAPTER_CONCEPTS : "contains"
+    LIBRARY_CONCEPTS ||--|{ LIBRARY_CHAPTER_CONCEPTS : "referenced in"
+
+    LIBRARY_CONCEPTS ||--|{ LIBRARY_STUDIO_INSTANCES : "launches"
+
+    TENANTS ||--o{ UNIVERSITY_CURRICULUMS : "owns"
+    TENANTS ||--o{ UNIVERSITY_PROGRAMS : "owns"
+    TENANTS ||--o{ UNIVERSITY_COURSES : "owns"
+    TENANTS ||--o{ UNIVERSITY_CHAPTERS : "owns"
+    TENANTS ||--o{ UNIVERSITY_CONCEPTS : "owns"
+
+    UNIVERSITY_CURRICULUMS ||--o{ UNIVERSITY_CURRICULUM_PROGRAMS : "sequences"
+    UNIVERSITY_PROGRAMS ||--o{ UNIVERSITY_CURRICULUM_PROGRAMS : "composed in"
+    LIBRARY_PROGRAMS ||--o{ UNIVERSITY_CURRICULUM_PROGRAMS : "borrowed in"
+
+    UNIVERSITY_PROGRAMS ||--o{ UNIVERSITY_PROGRAM_COURSES : "sequences"
+    UNIVERSITY_COURSES ||--o{ UNIVERSITY_PROGRAM_COURSES : "composed in"
+    LIBRARY_COURSES ||--o{ UNIVERSITY_PROGRAM_COURSES : "borrowed in"
+
+    UNIVERSITY_COURSES ||--o{ UNIVERSITY_COURSE_CHAPTERS : "sequences"
+    UNIVERSITY_CHAPTERS ||--o{ UNIVERSITY_COURSE_CHAPTERS : "composed in"
+    LIBRARY_CHAPTERS ||--o{ UNIVERSITY_COURSE_CHAPTERS : "borrowed in"
+
+    UNIVERSITY_CHAPTERS ||--o{ UNIVERSITY_CHAPTER_CONCEPTS : "sequences"
+    UNIVERSITY_CONCEPTS ||--o{ UNIVERSITY_CHAPTER_CONCEPTS : "custom concept"
+    LIBRARY_CONCEPTS ||--o{ UNIVERSITY_CHAPTER_CONCEPTS : "borrowed concept"
+
+    UNIVERSITY_CONCEPTS ||--|{ UNIVERSITY_STUDIO_INSTANCES : "launches"

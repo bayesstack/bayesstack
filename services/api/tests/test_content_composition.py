@@ -4,9 +4,27 @@ import pytest
 from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 
-from content.service import resolve_course_manifest
+from content.service import (
+    recompute_container_composition_type,
+    resolve_course_manifest,
+)
 from core.database import AsyncSessionLocal
-from db.content_models import CanonicalCourse, TenantCourse, TenantCourseChapter
+from db.content_models import (
+    CanonicalChapter,
+    CanonicalChapterConcept,
+    CanonicalCourse,
+    TenantCourse,
+    TenantCourseChapter,
+)
+from db.models import (
+    CoursePublication,
+    UniversityChapter,
+    UniversityChapterConcept,
+    UniversityConcept,
+    UniversityCourse,
+    UniversityCourseCustomChapter,
+    UniversityCourseLibraryChapter,
+)
 from db.seed import seed_database
 
 
@@ -43,3 +61,524 @@ async def test_canonical_release_database_guard_rejects_mutation():
                 .values(title="This update must fail")
             )
         await session.rollback()
+
+
+@pytest.mark.asyncio
+async def test_dual_semantics_pinned_vs_floating_resolution():
+    """Verify that pinned consumption locks version while floating resolves latest channel release."""
+    await seed_database()
+    async with AsyncSessionLocal() as session:
+        # 1. Publish v3 of CH-OPTIMIZATION to the platform library on the 'stable' channel
+        new_chapter = CanonicalChapter(
+            id="CH-OPTIMIZATION",
+            version=3,
+            code="CH-OPT-V3",
+            title="Optimization Fundamentals V3 (Improved Starter Code)",
+            slug="optimization-fundamentals-v3",
+            description="Next-generation release with improved numerical stability.",
+            status="published",
+            release_channel="stable",
+            metadata_={},
+        )
+        session.add(new_chapter)
+        chapter_cpt_edge = CanonicalChapterConcept(
+            chapter_id="CH-OPTIMIZATION",
+            chapter_version=3,
+            concept_id="C-GRADIENT-DESCENT",
+            concept_version=4,
+            order_rank=1_000_000,
+        )
+        session.add(chapter_cpt_edge)
+
+        # 2. Author a custom university course for Ashoka
+        ashoka_course = TenantCourse(
+            id="course-ashoka-dual-test",
+            tenant_id="tenant-ashoka",
+            local_code="ASHOKA-CS101",
+            local_title="Ashoka Machine Learning",
+            composition_type="custom",
+            status="draft",
+        )
+        session.add(ashoka_course)
+
+        # 3. Add Chapter 1 as PINNED to v2 (historical baseline)
+        pinned_edge = TenantCourseChapter(
+            tenant_id="tenant-ashoka",
+            university_course_id="course-ashoka-dual-test",
+            library_chapter_id="CH-OPTIMIZATION",
+            library_version=2,
+            adoption_mode="pinned",
+            release_channel="stable",
+            order_rank=1_000_000,
+        )
+        session.add(pinned_edge)
+
+        # 4. Add Chapter 2 as FLOATING on 'stable' (tracks latest approved release)
+        floating_edge = TenantCourseChapter(
+            tenant_id="tenant-ashoka",
+            university_course_id="course-ashoka-dual-test",
+            library_chapter_id="CH-OPTIMIZATION",
+            library_version=None,
+            adoption_mode="floating",
+            release_channel="stable",
+            order_rank=2_000_000,
+        )
+        session.add(floating_edge)
+        await session.commit()
+
+        # 5. Compile / Resolve the course manifest
+        manifest = await resolve_course_manifest(session, ashoka_course)
+        assert len(manifest["chapters"]) == 2
+
+        # Pinned node: strictly locked to v2
+        assert manifest["chapters"][0]["id"] == "CH-OPTIMIZATION"
+        assert manifest["chapters"][0]["version"] == 2
+        assert manifest["chapters"][0]["title"] == "Optimisation Fundamentals"
+
+        # Floating node: resolved to v3 with improved starter code
+        assert manifest["chapters"][1]["id"] == "CH-OPTIMIZATION"
+        assert manifest["chapters"][1]["version"] == 3
+        assert manifest["chapters"][1]["title"] == "Optimization Fundamentals V3 (Improved Starter Code)"
+
+
+@pytest.mark.asyncio
+async def test_fork_composition_lineage_and_diff_explainability():
+    """Verify that composition-level lineage accurately tracks inherited, custom, forked, and removed elements."""
+    await seed_database()
+    async with AsyncSessionLocal() as session:
+        # 1. Author a university-specific proprietary concept
+        ashoka_custom_cpt = UniversityConcept(
+            id="cpt-ashoka-lab-intro",
+            tenant_id="tenant-ashoka",
+            local_code="ASHOKA-LAB-01",
+            title="Ashoka Optimization Lab Setup",
+            status="published",
+        )
+        session.add(ashoka_custom_cpt)
+        await session.flush()
+
+        # 2. Fork Chapter CH-OPTIMIZATION v2 into Ashoka
+        ashoka_forked_chap = UniversityChapter(
+            id="chap-ashoka-opt-fork",
+            tenant_id="tenant-ashoka",
+            source_library_chapter_id="CH-OPTIMIZATION",
+            source_library_version=2,
+            local_code="ASHOKA-CH-OPT",
+            local_title="Ashoka Optimization & Loss Labs",
+            composition_type="custom",
+            status="published",
+        )
+        session.add(ashoka_forked_chap)
+        await session.flush()
+
+        # 3. Populate composition edges with explicit provenance:
+        # Node A: INHERITED & REORDERED (Gradient Descent moved to rank 2_000_000, originally 1_000_000)
+        edge_inherited = UniversityChapterConcept(
+            tenant_id="tenant-ashoka",
+            university_chapter_id="chap-ashoka-opt-fork",
+            library_concept_id="C-GRADIENT-DESCENT",
+            library_concept_version=4,
+            order_rank=2_000_000,
+            lineage_type="inherited",
+            origin_id="C-GRADIENT-DESCENT",
+            origin_version=4,
+            origin_order_rank=1_000_000,
+        )
+        # Node B: CUSTOM addition by faculty (at rank 1_000_000)
+        edge_custom = UniversityChapterConcept(
+            tenant_id="tenant-ashoka",
+            university_chapter_id="chap-ashoka-opt-fork",
+            university_concept_id="cpt-ashoka-lab-intro",
+            order_rank=1_000_000,
+            lineage_type="custom",
+            origin_id=None,
+            origin_version=None,
+            origin_order_rank=None,
+        )
+        # Node C: REMOVED / Tombstone (deliberately excluded from library baseline)
+        edge_removed = UniversityChapterConcept(
+            tenant_id="tenant-ashoka",
+            university_chapter_id="chap-ashoka-opt-fork",
+            library_concept_id="C-OLD-LEGACY-METHOD",
+            library_concept_version=1,
+            order_rank=99_000_000,
+            lineage_type="removed",
+            origin_id="C-OLD-LEGACY-METHOD",
+            origin_version=1,
+            origin_order_rank=3_000_000,
+        )
+        session.add_all([edge_inherited, edge_custom, edge_removed])
+
+        # 4. Attach forked chapter to a course
+        course = TenantCourse(
+            id="course-ashoka-lineage-test",
+            tenant_id="tenant-ashoka",
+            local_code="ASHOKA-CS102",
+            local_title="Ashoka Deep Learning Foundations",
+            composition_type="custom",
+            status="draft",
+        )
+        session.add(course)
+        course_edge = TenantCourseChapter(
+            tenant_id="tenant-ashoka",
+            university_course_id="course-ashoka-lineage-test",
+            university_chapter_id="chap-ashoka-opt-fork",
+            order_rank=1_000_000,
+            lineage_type="custom",
+        )
+        session.add(course_edge)
+        await session.commit()
+
+        # 5. Execute Lineage Audit Query
+        lineage_rows = (await session.scalars(
+            select(UniversityChapterConcept)
+            .where(UniversityChapterConcept.university_chapter_id == "chap-ashoka-opt-fork")
+            .order_by(UniversityChapterConcept.order_rank)
+        )).all()
+
+        assert len(lineage_rows) == 3
+
+        # Classify mutations
+        custom_node = next(r for r in lineage_rows if r.lineage_type == "custom")
+        inherited_node = next(r for r in lineage_rows if r.lineage_type == "inherited")
+        removed_node = next(r for r in lineage_rows if r.lineage_type == "removed")
+
+        assert custom_node.university_concept_id == "cpt-ashoka-lab-intro"
+        assert custom_node.origin_id is None
+
+        assert inherited_node.library_concept_id == "C-GRADIENT-DESCENT"
+        assert inherited_node.origin_order_rank == 1_000_000
+        assert inherited_node.order_rank == 2_000_000  # Proves reordering is detectable!
+
+        assert removed_node.origin_id == "C-OLD-LEGACY-METHOD"
+
+        # 6. Verify Learner Course Manifest filters out the 'removed' tombstone
+        manifest = await resolve_course_manifest(session, course)
+        chapter_manifest = manifest["chapters"][0]
+        concept_ids = [c["id"] for c in chapter_manifest["concepts"]]
+
+        # C-OLD-LEGACY-METHOD is excluded!
+        assert "C-OLD-LEGACY-METHOD" not in concept_ids
+        # Active concepts are in correct local sequence: Custom Lab first, then Gradient Descent
+        assert concept_ids == ["cpt-ashoka-lab-intro", "C-GRADIENT-DESCENT"]
+
+
+@pytest.mark.asyncio
+async def test_materialized_composition_type_transitions():
+    """Verify that composition_type dynamically derives/materializes without drift.
+
+    1. Start with a course borrowing pure library chapter -> 'library'.
+    2. Add a custom proprietary chapter edge -> transitions to 'hybrid'.
+    3. Remove the custom chapter edge -> transitions back to 'library'.
+    """
+    await seed_database()
+    async with AsyncSessionLocal() as session:
+        # 1. Author a course initialized from library ML-001
+        test_course = TenantCourse(
+            id="course-ashoka-drift-test",
+            tenant_id="tenant-ashoka",
+            source_library_course_id="ML-001",
+            source_library_version=7,
+            local_code="ASHOKA-CS200",
+            local_title="Ashoka Adaptive Machine Learning",
+            composition_type="library",
+            status="draft",
+        )
+        session.add(test_course)
+        await session.flush()
+
+        # Pure zero-copy: no local edges materialized yet
+        status = await recompute_container_composition_type(session, "course", test_course.id)
+        assert status == "library"
+        assert test_course.composition_type == "library"
+
+        # 2. Add an edge borrowing pure library chapter CH-OPTIMIZATION v2
+        edge_lib = TenantCourseChapter(
+            tenant_id="tenant-ashoka",
+            university_course_id="course-ashoka-drift-test",
+            library_chapter_id="CH-OPTIMIZATION",
+            library_version=2,
+            order_rank=1_000_000,
+            lineage_type="inherited",
+        )
+        session.add(edge_lib)
+        await session.flush()
+
+        status = await recompute_container_composition_type(session, "course", test_course.id)
+        assert status == "library"
+        assert test_course.composition_type == "library"
+
+        # 3. Add a custom university chapter authored by faculty
+        custom_chap = UniversityChapter(
+            id="chap-ashoka-local-ethics",
+            tenant_id="tenant-ashoka",
+            local_code="ASHOKA-ETHICS",
+            local_title="AI Ethics in India",
+            composition_type="custom",
+            status="published",
+        )
+        session.add(custom_chap)
+        await session.flush()
+
+        edge_custom = TenantCourseChapter(
+            tenant_id="tenant-ashoka",
+            university_course_id="course-ashoka-drift-test",
+            university_chapter_id="chap-ashoka-local-ethics",
+            order_rank=2_000_000,
+            lineage_type="custom",
+        )
+        session.add(edge_custom)
+        await session.flush()
+
+        # Authoritative edge truth: Course now has 1 library + 1 custom chapter -> MUST BE HYBRID!
+        status = await recompute_container_composition_type(session, "course", test_course.id)
+        assert status == "hybrid"
+        assert test_course.composition_type == "hybrid"
+
+        # 4. Remove the custom chapter edge
+        await session.delete(edge_custom)
+        await session.flush()
+
+        # Course now has only library chapter again -> MUST REVERT TO LIBRARY!
+        status = await recompute_container_composition_type(session, "course", test_course.id)
+        assert status == "library"
+        assert test_course.composition_type == "library"
+
+
+@pytest.mark.asyncio
+async def test_dedicated_edge_tables_isolated_foreign_keys():
+    """Verify dedicated edge tables enforce clean, non-null foreign keys and isolate references."""
+    await seed_database()
+    async with AsyncSessionLocal() as session:
+        test_course = UniversityCourse(
+            id="course-ashoka-dedicated-edge-test",
+            tenant_id="tenant-ashoka",
+            local_code="ASHOKA-EDGE-101",
+            local_title="Relational Edge Isolation Course",
+            composition_type="custom",
+            status="draft",
+        )
+        session.add(test_course)
+        await session.flush()
+
+        # 1. Insert into dedicated library edge table:
+        # UniversityCourseLibraryChapter requires library_chapter_id, no nullable foreign keys
+        lib_edge = UniversityCourseLibraryChapter(
+            tenant_id="tenant-ashoka",
+            university_course_id=test_course.id,
+            library_chapter_id="chap_optimization",
+            library_version=1,
+            order_rank=1_000_000,
+            lineage_type="inherited",
+        )
+        session.add(lib_edge)
+        await session.flush()
+
+        # 2. Insert into dedicated custom edge table:
+        custom_chap = UniversityChapter(
+            id="chap-ashoka-dedicated-custom",
+            tenant_id="tenant-ashoka",
+            local_code="ASHOKA-DED-01",
+            local_title="Dedicated Custom Chapter",
+            composition_type="custom",
+            status="published",
+        )
+        session.add(custom_chap)
+        await session.flush()
+
+        custom_edge = UniversityCourseCustomChapter(
+            tenant_id="tenant-ashoka",
+            university_course_id=test_course.id,
+            university_chapter_id=custom_chap.id,
+            order_rank=2_000_000,
+            lineage_type="custom",
+        )
+        session.add(custom_edge)
+        await session.flush()
+
+        # 3. Verify querying dedicated tables directly
+        lib_edges = (
+            await session.scalars(
+                select(UniversityCourseLibraryChapter).where(
+                    UniversityCourseLibraryChapter.university_course_id == test_course.id
+                )
+            )
+        ).all()
+        assert len(lib_edges) == 1
+        assert lib_edges[0].library_chapter_id == "chap_optimization"
+        assert lib_edges[0].library_version == 1
+
+        custom_edges = (
+            await session.scalars(
+                select(UniversityCourseCustomChapter).where(
+                    UniversityCourseCustomChapter.university_course_id == test_course.id
+                )
+            )
+        ).all()
+        assert len(custom_edges) == 1
+        assert custom_edges[0].university_chapter_id == "chap-ashoka-dedicated-custom"
+
+        # 4. Recomputing composition type reflects both dedicated edge tables
+        status = await recompute_container_composition_type(session, "course", test_course.id)
+        assert status == "hybrid"
+        assert test_course.composition_type == "hybrid"
+
+
+@pytest.mark.asyncio
+async def test_spaced_integer_order_rank_bisection_and_rebalancing():
+    """Verify spaced integer BIGINT bisection on drag-and-drop and instant rebalancing."""
+    from content.service import calculate_bisected_rank, rebalance_container_ranks
+
+    # 1. Test pure integer bisection
+    # Inserting between 1_000_000 and 2_000_000 gives 1_500_000
+    mid_rank, needs_rebalance = calculate_bisected_rank(1_000_000, 2_000_000)
+    assert mid_rank == 1_500_000
+    assert not needs_rebalance
+
+    # Repeated bisection
+    mid_rank2, needs_rebalance2 = calculate_bisected_rank(1_000_000, 1_500_000)
+    assert mid_rank2 == 1_250_000
+    assert not needs_rebalance2
+
+    # Exhaustion bisection: gap <= 1 triggers rebalance flag
+    _, needs_rebalance_flag = calculate_bisected_rank(1_000, 1_001)
+    assert needs_rebalance_flag
+
+    # Appending after 2_000_000
+    append_rank, _ = calculate_bisected_rank(2_000_000, None)
+    assert append_rank == 3_000_000
+
+    # Prepending before 1_000_000
+    prepend_rank, _ = calculate_bisected_rank(None, 1_000_000)
+    assert prepend_rank == 500_000
+
+    # 2. Database container rebalancing test
+    await seed_database()
+    async with AsyncSessionLocal() as session:
+        test_chap = UniversityChapter(
+            id="chap-ashoka-rebalance-test",
+            tenant_id="tenant-ashoka",
+            local_code="ASHOKA-REBAL-01",
+            local_title="Spaced Integer Rebalance Chapter",
+            composition_type="custom",
+            status="draft",
+        )
+        session.add(test_chap)
+        await session.flush()
+
+        # Add 3 concepts with exhausted adjacent ranks: 100, 101, 102
+        for r in [100, 101, 102]:
+            c = UniversityChapterConcept(
+                tenant_id="tenant-ashoka",
+                university_chapter_id=test_chap.id,
+                library_concept_id="C-GRADIENT-DESCENT",
+                library_concept_version=4,
+                order_rank=r,
+                lineage_type="inherited",
+            )
+            session.add(c)
+        await session.flush()
+
+        # Rebalance container ranks back to 1_000_000 spacing
+        count = await rebalance_container_ranks(session, "chapter", test_chap.id)
+        assert count == 3
+
+        rebalanced = (
+            await session.scalars(
+                select(UniversityChapterConcept)
+                .where(UniversityChapterConcept.university_chapter_id == test_chap.id)
+                .order_by(UniversityChapterConcept.order_rank)
+            )
+        ).all()
+        assert [r.order_rank for r in rebalanced] == [1_000_000, 2_000_000, 3_000_000]
+
+
+@pytest.mark.asyncio
+async def test_publication_release_artifact_immutability_and_rollback():
+    """Verify course_publications is an append-only release artifact with atomic pointer rollback."""
+    from content.service import (
+        latest_publication,
+        publish_course_snapshot,
+        rollback_course_publication,
+    )
+
+    await seed_database()
+    async with AsyncSessionLocal() as session:
+        # 1. Fetch an existing course seeded with content
+        course = await session.get(UniversityCourse, "course-bayes-ml-001")
+        assert course is not None
+
+        # 2. Create Release Publication #1
+        pub1 = await publish_course_snapshot(
+            session,
+            tenant_id="tenant-bayes",
+            course_id="course-bayes-ml-001",
+            user_id="user-bayes-faculty",
+            source_revision=1,
+        )
+        assert pub1.publication_number >= 1
+        assert pub1.content_hash is not None
+        assert pub1.compiled_tree is not None
+        pub1_num = pub1.publication_number
+        pub1_id = pub1.id
+
+        # Course's current_publication_id must now point to pub1
+        assert course.current_publication_id == pub1_id
+
+        # latest_publication must return pub1 via the active pointer
+        latest = await latest_publication(session, "tenant-bayes", "course-bayes-ml-001")
+        assert latest.id == pub1_id
+        assert latest.publication_number == pub1_num
+
+        # 3. Create Release Publication #2 (append-only, does NOT mutate publication #1)
+        pub2 = await publish_course_snapshot(
+            session,
+            tenant_id="tenant-bayes",
+            course_id="course-bayes-ml-001",
+            user_id="user-bayes-faculty",
+            source_revision=2,
+        )
+        assert pub2.publication_number == pub1_num + 1
+        assert pub2.id != pub1_id
+        pub2_id = pub2.id
+        pub2_num = pub2.publication_number
+
+        # Pointer moves to pub2
+        assert course.current_publication_id == pub2_id
+        latest2 = await latest_publication(session, "tenant-bayes", "course-bayes-ml-001")
+        assert latest2.id == pub2_id
+        assert latest2.publication_number == pub2_num
+
+        # Publication #1 remains 100% intact and unchanged in the database
+        pub1_check = await session.get(CoursePublication, pub1_id)
+        assert pub1_check.publication_number == pub1_num
+        assert pub1_check.content_hash == pub1.content_hash
+
+        # 4. Rollback to Publication #1 (zero reconstruction, single pointer swap)
+        rolled_back_pub = await rollback_course_publication(
+            session,
+            tenant_id="tenant-bayes",
+            course_id="course-bayes-ml-001",
+            target_publication_number=pub1_num,
+        )
+        assert rolled_back_pub.id == pub1_id
+        assert course.current_publication_id == pub1_id
+
+        # Active learner traffic now immediately receives Publication #1 again
+        latest_after_rollback = await latest_publication(session, "tenant-bayes", "course-bayes-ml-001")
+        assert latest_after_rollback.id == pub1_id
+        assert latest_after_rollback.publication_number == pub1_num
+
+        # Zero rows were deleted or mutated in course_publications during rollback
+        total_pubs = (
+            await session.scalars(
+                select(CoursePublication).where(
+                    CoursePublication.university_course_id == "course-bayes-ml-001"
+                )
+            )
+        ).all()
+        assert len(total_pubs) >= 2
+
+
+
+
