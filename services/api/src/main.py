@@ -20,6 +20,7 @@ from routers.institution import institution_router
 from routers.delivery import delivery_router
 from routers.operations import operations_router
 from routers.governance import governance_router
+from routers.coding import coding_router
 
 tags_metadata = [
     {
@@ -130,6 +131,10 @@ tags_metadata = [
         "name": "Database Explorer",
         "description": "SuperAdmin studio database schema inspection and metadata discovery.",
     },
+    {
+        "name": "Coding Studio",
+        "description": "Platform-owned coding problems, durable submissions, and private judge orchestration.",
+    },
 ]
 
 
@@ -188,3 +193,4 @@ app.include_router(institution_router)
 app.include_router(delivery_router)
 app.include_router(operations_router)
 app.include_router(governance_router)
+app.include_router(coding_router)

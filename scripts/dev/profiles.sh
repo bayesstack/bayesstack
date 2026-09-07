@@ -4,12 +4,12 @@
 expand_profile() {
   local target="$1"
   case "$target" in
-    core|minimal) echo "postgres api auth super learner faculty admin landing nginx" ;;
+    core|minimal) echo "postgres api coding-judge auth super learner faculty admin landing nginx" ;;
     learner-flow) echo "postgres api auth learner nginx" ;;
     faculty-flow) echo "postgres api auth faculty nginx" ;;
     admin-flow)   echo "postgres api auth admin nginx" ;;
-    super-flow)   echo "postgres api super nginx" ;;
-    all)          echo "postgres api landing learner faculty admin auth super ui pgadmin nginx" ;;
+    super-flow)   echo "postgres api coding-judge super nginx" ;;
+    all)          echo "postgres api coding-judge landing learner faculty admin auth super ui pgadmin nginx" ;;
     *)            echo "$target" ;;
   esac
 }

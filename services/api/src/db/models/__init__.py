@@ -56,6 +56,7 @@ from db.models.operations import (
     CourseGrade,
     StudentAcademicProfile,
 )
+from db.models.coding import CodingProblem, CodingTestCase, CodingSubmission, CodingSubmissionCaseResult
 from db.models.enrollment import (
     CourseFaculty,
     ProgramFaculty,
@@ -117,6 +118,11 @@ __all__ = [
     "AssessmentSubmission",
     "CourseGrade",
     "StudentAcademicProfile",
+    # Coding Studio durable judging records
+    "CodingProblem",
+    "CodingTestCase",
+    "CodingSubmission",
+    "CodingSubmissionCaseResult",
     # Assignments & Enrollments
     "CourseFaculty",
     "ProgramFaculty",
@@ -126,4 +132,3 @@ __all__ = [
     "CATALOG_TABLE_NAMES",
     "ensure_catalog_immutability_guards",
 ]
-

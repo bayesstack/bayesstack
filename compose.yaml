@@ -50,6 +50,8 @@ services:
       POSTGRES_PASSWORD: bayesstack_dev
       POSTGRES_DB: bayesstack
       DATABASE_URL: postgresql+asyncpg://bayesstack:bayesstack_dev@postgres:5432/bayesstack
+      JUDGE_SERVICE_URL: http://coding-judge:2358
+      JUDGE_SERVICE_TOKEN: ${JUDGE_SERVICE_TOKEN:-}
     volumes:
       - ./services/api/src:/app/src
     command: uvicorn main:app --app-dir src --host 0.0.0.0 --port 8000 --reload
@@ -188,6 +190,45 @@ services:
       api:
         condition: service_healthy
 
+  coding-judge:
+    build:
+      context: ./studios/coding/backend
+      dockerfile: Dockerfile
+    container_name: bayesstack_coding_judge
+    restart: unless-stopped
+    environment:
+      PORT: 2358
+      ENVIRONMENT: development
+      EXECUTION_PROVIDER: ${EXECUTION_PROVIDER:-mock}
+      PISTON_BASE_URL: http://piston:2000
+      JUDGE_SERVICE_TOKEN: ${JUDGE_SERVICE_TOKEN:-}
+    volumes:
+      - ./studios/coding/backend/src:/app/src
+    command: uvicorn main:app --app-dir src --host 0.0.0.0 --port 2358 --reload
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:2358/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - default
+      - judge_internal
+
+  # Optional execution runtime. It has no host port and is reachable only from
+  # coding-judge on an internal Docker network. Start with --profile execution.
+  piston:
+    # Immutable digest for the upstream image; review/update deliberately.
+    image: ghcr.io/engineer-man/piston@sha256:2f66b7456189c4d713aa986d98eccd0b6ee16d26c7ec5f21b30e942756fd127a
+    profiles: ["execution"]
+    restart: unless-stopped
+    privileged: true
+    # Development convenience only: loopback keeps the API off the LAN/WAN.
+    # Production should omit this mapping entirely.
+    ports:
+      - "127.0.0.1:2000:2000"
+    networks:
+      - judge_internal
+
   nginx:
     image: nginx:alpine
     container_name: bayesstack_nginx
@@ -204,3 +245,7 @@ services:
 volumes:
   postgres_data:
   pgadmin_data:
+
+networks:
+  judge_internal:
+    internal: true

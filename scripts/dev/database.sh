@@ -26,6 +26,29 @@ setup_python_api() {
   "$venv_dir/bin/python" -m pip install -e "$root_dir/services/api" >/dev/null
 }
 
+setup_python_coding_judge() {
+  local root_dir="$1"
+  local python_cmd=""
+
+  if command -v python3 >/dev/null 2>&1; then
+    python_cmd="python3"
+  elif command -v python >/dev/null 2>&1; then
+    python_cmd="python"
+  fi
+  if [[ -z "$python_cmd" ]]; then
+    log_error "Python 3 is required for the Coding Studio judge."
+    exit 1
+  fi
+
+  local judge_dir="$root_dir/studios/coding/backend"
+  local venv_dir="$judge_dir/.venv"
+  if [[ ! -x "$venv_dir/bin/python" ]]; then
+    log_info "Setting up Coding Studio judge virtual environment at $venv_dir..."
+    "$python_cmd" -m venv "$venv_dir"
+  fi
+  "$venv_dir/bin/python" -m pip install -e "$judge_dir" >/dev/null
+}
+
 run_db_backup() {
   local root_dir="$1"
   local backup_dir="$root_dir/scripts/backups"

@@ -32,6 +32,8 @@ from db.models import (
     TenantRole,
     InstitutionCourse,
     User,
+    CodingProblem,
+    CodingTestCase,
 )
 from db.content_models import (
     CatalogChapter,
@@ -846,7 +848,45 @@ async def seed_academic_operations(session):
             StudentAcademicProfile.tenant_id == "tenant-ashoka",
             StudentAcademicProfile.student_id == "user-ashoka-learner",
         )
-
+async def seed_coding_problems(session):
+    """Seed the demo problem in the same durable store used by the Studio API."""
+    problem = await _add_if_missing(
+        session,
+        CodingProblem,
+        {
+            "id": "knapsack-01",
+            "activity_id": "ACT-KNAPSACK-CODE-V1",
+            "title": "0/1 Knapsack",
+            "allowed_languages": ["python", "cpp", "javascript"],
+            "time_limit_ms": 2_000,
+            "memory_limit_mb": 256,
+            "output_limit_bytes": 1_048_576,
+            "comparison_mode": "whitespace_insensitive",
+            "is_active": True,
+        },
+        CodingProblem.id == "knapsack-01",
+    )
+    cases = [
+        (0, "Sample 1", "3 50\n10 20 30\n60 100 120\n", "220\n", True, "Choose weights 20 and 30."),
+        (1, "Sample 2", "4 10\n5 4 6 3\n10 40 30 50\n", "90\n", True, "Choose values 40 and 50."),
+        (2, None, "3 10\n15 25 35\n100 200 300\n", "0\n", False, None),
+    ]
+    for position, title, stdin, expected, is_sample, explanation in cases:
+        await _add_if_missing(
+            session,
+            CodingTestCase,
+            {
+                "problem_id": problem.id,
+                "position": position,
+                "title": title,
+                "stdin": stdin,
+                "expected_output": expected,
+                "is_sample": is_sample,
+                "explanation": explanation,
+            },
+            CodingTestCase.problem_id == problem.id,
+            CodingTestCase.position == position,
+        )
 
 
 async def seed_database():
@@ -944,6 +984,7 @@ async def seed_database():
         logger.info("Users and memberships seeding completed: %d created, %d updated.", u_created, u_updated)
 
         await seed_content_catalog(session)
+        await seed_coding_problems(session)
         await session.commit()
         logger.info("Catalog content and Bayes institution composition seed completed.")
 

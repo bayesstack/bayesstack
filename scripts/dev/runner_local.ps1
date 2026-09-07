@@ -187,9 +187,11 @@ function Run-LocalMode([string]$root, [string[]]$services) {
 
   $runsNode = $false
   $runsApi = $false
+  $runsCodingJudge = $false
 
   foreach ($svc in $services) {
     if ($svc -eq "api") { $runsApi = $true }
+    elseif ($svc -eq "coding-judge") { $runsCodingJudge = $true }
     elseif ($svc -ne "nginx" -and $svc -ne "postgres" -and $svc -ne "pgadmin") { $runsNode = $true }
   }
 
@@ -205,6 +207,9 @@ function Run-LocalMode([string]$root, [string[]]$services) {
   if ($runsApi) {
     $VenvPython = Setup-PythonApi $root
   }
+  if ($runsCodingJudge) {
+    $JudgeVenvPython = Setup-PythonCodingJudge $root
+  }
 
   $Processes = @()
   Push-Location $root
@@ -214,6 +219,10 @@ function Run-LocalMode([string]$root, [string[]]$services) {
       "api" {
         Write-LogInfo "Starting API backend at http://localhost:8000..."
         $Processes += Start-Process $VenvPython -ArgumentList @("-m", "uvicorn", "main:app", "--app-dir", "src", "--host", "0.0.0.0", "--port", "8000") -WorkingDirectory (Join-Path $root "services/api") -NoNewWindow -PassThru
+      }
+      "coding-judge" {
+        Write-LogInfo "Starting Coding Studio judge at http://localhost:2358 (mock provider by default)..."
+        $Processes += Start-Process $JudgeVenvPython -ArgumentList @("-m", "uvicorn", "main:app", "--app-dir", "src", "--host", "0.0.0.0", "--port", "2358") -WorkingDirectory (Join-Path $root "studios/coding/backend") -NoNewWindow -PassThru
       }
       "nginx" {
         $Processes += Start-NativeNginx $root

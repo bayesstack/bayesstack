@@ -56,6 +56,7 @@ free_service_ports() {
       super)   free_port 3005 ;;
       ui)      free_port 6001 ;;
       api)     free_port 8000 ;;
+      coding-judge) free_port 2358 ;;
       nginx)   free_port 80 ;;
       pgadmin) free_port 5050 ;;
       # PostgreSQL can be a separately managed local service (or a persistent

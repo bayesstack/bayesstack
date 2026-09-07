@@ -2,13 +2,13 @@
 
 function Expand-Profile([string]$target) {
   switch ($target.ToLower()) {
-    "core"         { return "postgres", "api", "auth", "super", "learner", "faculty", "admin", "landing", "nginx" }
-    "minimal"      { return "postgres", "api", "auth", "super", "learner", "faculty", "admin", "landing", "nginx" }
+    "core"         { return "postgres", "api", "coding-judge", "auth", "super", "learner", "faculty", "admin", "landing", "nginx" }
+    "minimal"      { return "postgres", "api", "coding-judge", "auth", "super", "learner", "faculty", "admin", "landing", "nginx" }
     "learner-flow" { return "postgres", "api", "auth", "learner", "nginx" }
     "faculty-flow" { return "postgres", "api", "auth", "faculty", "nginx" }
     "admin-flow"   { return "postgres", "api", "auth", "admin", "nginx" }
-    "super-flow"   { return "postgres", "api", "super", "nginx" }
-    "all"          { return "postgres", "api", "landing", "learner", "faculty", "admin", "auth", "super", "ui", "pgadmin", "nginx" }
+    "super-flow"   { return "postgres", "api", "coding-judge", "super", "nginx" }
+    "all"          { return "postgres", "api", "coding-judge", "landing", "learner", "faculty", "admin", "auth", "super", "ui", "pgadmin", "nginx" }
     default        { return $target }
   }
 }

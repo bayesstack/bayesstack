@@ -37,6 +37,7 @@ function Free-ServicePorts([string[]]$targetList, [switch]$PreserveInfrastructur
       "super"    { Free-Port 3005 }
       "ui"       { Free-Port 6001 }
       "api"      { Free-Port 8000 }
+      "coding-judge" { Free-Port 2358 }
       "nginx"    { Free-Port 80 }
       "pgadmin"  { Free-Port 5050 }
       "postgres" {

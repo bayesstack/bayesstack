@@ -37,6 +37,12 @@ class Settings(BaseSettings):
 
     DATABASE_URL: str | None = Field(default=None, validation_alias="DATABASE_URL")
 
+    # Private Coding Studio judge boundary. The public UI only calls this API;
+    # it never receives a Piston endpoint or execution-provider credentials.
+    JUDGE_SERVICE_URL: str = Field(default="http://localhost:2358", validation_alias="JUDGE_SERVICE_URL")
+    JUDGE_SERVICE_TIMEOUT_SECONDS: float = Field(default=45.0, validation_alias="JUDGE_SERVICE_TIMEOUT_SECONDS")
+    JUDGE_SERVICE_TOKEN: str | None = Field(default=None, validation_alias="JUDGE_SERVICE_TOKEN")
+
     @property
     def parsed_base_domains(self) -> list[str]:
         """Return a clean list of allowed base domains for tenant resolution."""

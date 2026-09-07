@@ -32,10 +32,13 @@ run_local_mode() {
 
   local runs_node=0
   local runs_api=0
+  local runs_coding_judge=0
 
   for svc in "${selected_services[@]}"; do
     if [[ "$svc" == "api" ]]; then
       runs_api=1
+    elif [[ "$svc" == "coding-judge" ]]; then
+      runs_coding_judge=1
     elif [[ "$svc" != "nginx" && "$svc" != "postgres" && "$svc" != "pgadmin" ]]; then
       runs_node=1
     fi
@@ -80,6 +83,9 @@ run_local_mode() {
   if [[ $runs_api -eq 1 ]]; then
     setup_python_api "$root_dir"
   fi
+  if [[ $runs_coding_judge -eq 1 ]]; then
+    setup_python_coding_judge "$root_dir"
+  fi
 
   PIDS=()
   setup_signal_traps PIDS "${selected_services[*]}"
@@ -95,6 +101,13 @@ run_local_mode() {
           POSTGRES_HOST="${BAYESSTACK_LOCAL_POSTGRES_HOST:-localhost}" \
           DATABASE_URL="${BAYESSTACK_LOCAL_DATABASE_URL:-}" \
             exec "$root_dir/services/api/.venv/bin/python" -m uvicorn main:app --app-dir src --reload --host 0.0.0.0 --port 8000
+        ) & PIDS+=("$!")
+        ;;
+      coding-judge)
+        log_info "Starting Coding Studio judge at http://localhost:2358 (mock provider by default)..."
+        (
+          cd "$root_dir/studios/coding/backend"
+          exec "$root_dir/studios/coding/backend/.venv/bin/python" -m uvicorn main:app --app-dir src --reload --host 0.0.0.0 --port 2358
         ) & PIDS+=("$!")
         ;;
       landing)

@@ -29,6 +29,24 @@ function Setup-PythonApi([string]$root) {
   return $VenvPython
 }
 
+function Setup-PythonCodingJudge([string]$root) {
+  $pyCmd = (Get-Command python -ErrorAction SilentlyContinue).Source
+  if (-not $pyCmd) { $pyCmd = (Get-Command python3 -ErrorAction SilentlyContinue).Source }
+  if (-not $pyCmd) { $pyCmd = (Get-Command py -ErrorAction SilentlyContinue).Source }
+  if (-not $pyCmd) { throw "Python 3 is required for the Coding Studio judge." }
+
+  $judgePath = Join-Path $root "studios/coding/backend"
+  $venv = Join-Path $judgePath ".venv"
+  $venvPython = Join-Path $venv "Scripts/python.exe"
+  if (-not (Test-Path $venvPython)) {
+    Write-LogInfo "Setting up Coding Studio judge environment at $venv..."
+    & $pyCmd -m venv $venv
+  }
+  & $venvPython -m pip install -e $judgePath --disable-pip-version-check *> $null
+  if ($LASTEXITCODE -ne 0) { throw "Coding Studio judge dependency installation failed." }
+  return $venvPython
+}
+
 function Run-DbBackup([string]$root) {
   $backupDir = Join-Path $root "scripts/backups"
   if (-not (Test-Path $backupDir)) { New-Item -ItemType Directory -Path $backupDir | Out-Null }
