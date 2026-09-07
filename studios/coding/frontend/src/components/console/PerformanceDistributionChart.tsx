@@ -80,7 +80,7 @@ export function PerformanceDistributionChart({
     <div
       className="bs-cs-perf-chart"
       style={{
-        background: "#ffffff",
+        background: "var(--bs-ui-surface, #ffffff)",
         border: "1px solid var(--bs-ui-line, #d7e8e4)",
         borderRadius: "10px",
         padding: "12px 16px",
@@ -110,7 +110,7 @@ export function PerformanceDistributionChart({
               fontWeight: 700,
               cursor: "pointer",
               border: `1px solid ${isRuntime ? "var(--bs-ui-brand, #0b6763)" : "var(--bs-ui-line, #d7e8e4)"}`,
-              background: isRuntime ? "var(--bs-ui-brand-soft, #e4f2ef)" : "#ffffff",
+              background: isRuntime ? "var(--bs-ui-brand-soft, #e4f2ef)" : "var(--bs-ui-surface, #ffffff)",
               color: isRuntime ? "var(--bs-ui-brand, #0b6763)" : "var(--bs-ui-muted, #4a6360)",
               transition: "all 0.15s ease",
             }}
@@ -127,7 +127,7 @@ export function PerformanceDistributionChart({
               fontWeight: 700,
               cursor: "pointer",
               border: `1px solid ${!isRuntime ? "var(--bs-ui-brand, #0b6763)" : "var(--bs-ui-line, #d7e8e4)"}`,
-              background: !isRuntime ? "var(--bs-ui-brand-soft, #e4f2ef)" : "#ffffff",
+              background: !isRuntime ? "var(--bs-ui-brand-soft, #e4f2ef)" : "var(--bs-ui-surface, #ffffff)",
               color: !isRuntime ? "var(--bs-ui-brand, #0b6763)" : "var(--bs-ui-muted, #4a6360)",
               transition: "all 0.15s ease",
             }}

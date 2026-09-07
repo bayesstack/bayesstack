@@ -134,7 +134,7 @@ export function ConsolePanel({
           alignItems: "center",
           justifyContent: "space-between",
           padding: "0.35rem 1rem 0",
-          background: "#ffffff",
+          background: "var(--bs-ui-surface, #ffffff)",
           borderBottom: "1px solid var(--bs-ui-line, #d7e8e4)",
           flexShrink: 0,
         }}

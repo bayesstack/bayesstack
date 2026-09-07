@@ -348,7 +348,7 @@ export function ExecutionResultsView({
                         ? "#bbf7d0"
                         : "#fecaca"
                     }`,
-                    background: isSelected ? "var(--bs-ui-brand, #0b6763)" : "#ffffff",
+                    background: isSelected ? "var(--bs-ui-brand, #0b6763)" : "var(--bs-ui-surface, #ffffff)",
                     color: isSelected ? "#ffffff" : res.passed ? "#166534" : "#991b1b",
                     transition: "all 0.15s ease",
                   }}

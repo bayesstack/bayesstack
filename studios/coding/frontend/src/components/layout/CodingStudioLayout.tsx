@@ -32,7 +32,7 @@ export function CodingStudioLayout({
   consolePanel,
   isFullscreen,
   isZenMode = false,
-  theme = "dark",
+  theme = "light",
   className = "",
   style = {},
   onLayoutReady,

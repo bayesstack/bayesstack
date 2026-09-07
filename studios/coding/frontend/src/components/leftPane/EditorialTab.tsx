@@ -327,7 +327,7 @@ export function EditorialTab({ config }: EditorialTabProps) {
                 key={hint.id || idx}
                 className="bs-cs-card"
                 style={{
-                  background: isRevealed ? "#ffffff" : "var(--bs-ui-canvas, #f1f8f6)",
+                  background: isRevealed ? "var(--bs-ui-surface, #ffffff)" : "var(--bs-ui-canvas, #f1f8f6)",
                   border: `1px solid ${isRevealed ? "var(--bs-ui-line, #d7e8e4)" : "rgba(11, 103, 99, 0.15)"}`,
                   borderRadius: "8px",
                   padding: "10px 14px",
@@ -351,21 +351,21 @@ export function EditorialTab({ config }: EditorialTabProps) {
                         width: "22px",
                         height: "22px",
                         borderRadius: "50%",
-                        background: isRevealed ? "rgba(11, 103, 99, 0.1)" : "rgba(0, 0, 0, 0.05)",
-                        color: isRevealed ? "var(--bs-ui-brand, #0b6763)" : "var(--bs-ui-muted, #4a6360)",
+                        background: isRevealed ? "var(--bs-ui-brand-soft, #e4f2ef)" : "rgba(11, 103, 99, 0.08)",
+                        color: "var(--bs-ui-brand, #0b6763)",
                         fontSize: "0.72rem",
-                        fontWeight: 800,
+                        fontWeight: 700,
                       }}
                     >
                       {idx + 1}
                     </span>
-                    <strong style={{ fontSize: "0.84rem", color: "var(--bs-ui-ink, #123333)" }}>
+                    <span style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--bs-ui-ink, #123333)" }}>
                       {hint.title}
-                    </strong>
+                    </span>
                   </div>
 
                   <Button
-                    variant={isRevealed ? "secondary" : "primary"}
+                    variant={isRevealed ? "outline" : "secondary"}
                     size="xs"
                     onClick={() => toggleHint(idx)}
                   >
@@ -380,7 +380,7 @@ export function EditorialTab({ config }: EditorialTabProps) {
                       paddingTop: "8px",
                       borderTop: "1px dashed var(--bs-ui-line, #d7e8e4)",
                       fontSize: "0.85rem",
-                      color: "#334e55",
+                      color: "var(--bs-ui-ink, #123333)",
                       lineHeight: 1.6,
                     }}
                   >
@@ -437,13 +437,13 @@ export function EditorialTab({ config }: EditorialTabProps) {
 
         {isApproachRevealed && (
           <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "8px" }}>
-            <div style={{ fontSize: "0.86rem", color: "#334e55", lineHeight: 1.6 }}>
+            <div style={{ fontSize: "0.86rem", color: "var(--bs-ui-ink, #123333)", lineHeight: 1.6 }}>
               <MathText>
                 {config.editorial?.intuition ||
                   "For each item, we have two choices: either include it in the knapsack or exclude it. If we include it, we gain its value but reduce our remaining capacity. If we exclude it, our capacity remains unchanged."}
               </MathText>
             </div>
-            <div style={{ fontSize: "0.86rem", color: "#334e55", lineHeight: 1.6 }}>
+            <div style={{ fontSize: "0.86rem", color: "var(--bs-ui-ink, #123333)", lineHeight: 1.6 }}>
               <MathText>
                 {config.editorial?.approach ||
                   "To optimize space from $O(N \\cdot W)$ to $O(W)$, notice that computing $dp[i][w]$ only depends on the previous row $dp[i - 1]$. By iterating the capacity backwards from $W$ down to $\\text{weight}[i]$, we can maintain a single 1D array without overwriting states needed for smaller capacities."}
@@ -466,7 +466,7 @@ export function EditorialTab({ config }: EditorialTabProps) {
                 <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--bs-ui-brand, #0b6763)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "4px" }}>
                   1D Optimized Space Recurrence
                 </div>
-                <div style={{ background: "#ffffff", padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--bs-ui-line, #d7e8e4)" }}>
+                <div style={{ background: "var(--bs-ui-surface, #ffffff)", padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--bs-ui-line, #d7e8e4)" }}>
                   <MathText block>
                     {"$$dp[w] = \\max\\bigl(dp[w],\\; dp[w - \\text{weight}[i]] + \\text{value}[i]\\bigr)$$"}
                   </MathText>
@@ -477,7 +477,7 @@ export function EditorialTab({ config }: EditorialTabProps) {
                 <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--bs-ui-muted, #4a6360)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "4px" }}>
                   2D Standard State Recurrence
                 </div>
-                <div style={{ background: "#ffffff", padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--bs-ui-line, #d7e8e4)" }}>
+                <div style={{ background: "var(--bs-ui-surface, #ffffff)", padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--bs-ui-line, #d7e8e4)" }}>
                   <MathText block>
                     {"$$dp[i][w] = \\max\\bigl(dp[i-1][w],\\; dp[i-1][w - \\text{weight}[i]] + \\text{value}[i]\\bigr)$$"}
                   </MathText>
@@ -630,7 +630,7 @@ export function EditorialTab({ config }: EditorialTabProps) {
                         fontWeight: 700,
                         cursor: "pointer",
                         border: `1px solid ${isSelected ? "var(--bs-ui-brand, #0b6763)" : "var(--bs-ui-line, #d7e8e4)"}`,
-                        background: isSelected ? "var(--bs-ui-brand, #0b6763)" : "#ffffff",
+                        background: isSelected ? "var(--bs-ui-brand, #0b6763)" : "var(--bs-ui-surface, #ffffff)",
                         color: isSelected ? "#ffffff" : "var(--bs-ui-muted, #4a6360)",
                         transition: "all 0.15s ease",
                       }}

@@ -474,7 +474,7 @@ export function OutputDiffViewer({
               fontWeight: mode === "side-by-side" ? 700 : 500,
               border: "none",
               cursor: "pointer",
-              background: mode === "side-by-side" ? "#ffffff" : "transparent",
+              background: mode === "side-by-side" ? "var(--bs-ui-surface, #ffffff)" : "transparent",
               color: mode === "side-by-side" ? "var(--bs-ui-brand, #0b6763)" : "#64748b",
               boxShadow: mode === "side-by-side" ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
             }}
@@ -492,7 +492,7 @@ export function OutputDiffViewer({
               fontWeight: mode === "inline" ? 700 : 500,
               border: "none",
               cursor: "pointer",
-              background: mode === "inline" ? "#ffffff" : "transparent",
+              background: mode === "inline" ? "var(--bs-ui-surface, #ffffff)" : "transparent",
               color: mode === "inline" ? "var(--bs-ui-brand, #0b6763)" : "#64748b",
               boxShadow: mode === "inline" ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
             }}
@@ -510,7 +510,7 @@ export function OutputDiffViewer({
               fontWeight: mode === "raw" ? 700 : 500,
               border: "none",
               cursor: "pointer",
-              background: mode === "raw" ? "#ffffff" : "transparent",
+              background: mode === "raw" ? "var(--bs-ui-surface, #ffffff)" : "transparent",
               color: mode === "raw" ? "var(--bs-ui-brand, #0b6763)" : "#64748b",
               boxShadow: mode === "raw" ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
             }}
@@ -529,7 +529,7 @@ export function OutputDiffViewer({
             border: "1px solid var(--bs-ui-line, #d7e8e4)",
             borderRadius: "8px",
             overflow: "hidden",
-            background: "#ffffff",
+            background: "var(--bs-ui-surface, #ffffff)",
           }}
         >
           {/* Expected Output Column */}
@@ -711,7 +711,7 @@ export function OutputDiffViewer({
             border: "1px solid var(--bs-ui-line, #d7e8e4)",
             borderRadius: "8px",
             overflow: "hidden",
-            background: "#ffffff",
+            background: "var(--bs-ui-surface, #ffffff)",
           }}
         >
           <div

@@ -198,7 +198,7 @@ export function SubmissionsTab({
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "10px 12px",
-                background: "#ffffff",
+                background: "var(--bs-ui-surface, #ffffff)",
                 border: "1px solid var(--bs-ui-line, #d7e8e4)",
                 borderRadius: "8px",
                 cursor: "pointer",

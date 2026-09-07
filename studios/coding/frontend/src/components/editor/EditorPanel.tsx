@@ -32,14 +32,14 @@ const SETTINGS_KEY = "bs_cs_editor_settings";
 
 function getInitialSettings(): EditorSettings {
   if (typeof window === "undefined") {
-    return { theme: "dark", fontSize: "14px", tabSize: 2, keymap: "standard" };
+    return { theme: "light", fontSize: "14px", tabSize: 2, keymap: "standard" };
   }
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
       return {
-        theme: parsed.theme || "dark",
+        theme: parsed.theme || "light",
         fontSize: parsed.fontSize || "14px",
         tabSize: parsed.tabSize || 2,
         keymap: parsed.keymap || "standard",
@@ -48,7 +48,7 @@ function getInitialSettings(): EditorSettings {
   } catch {
     // fallback
   }
-  return { theme: "dark", fontSize: "14px", tabSize: 2, keymap: "standard" };
+  return { theme: "light", fontSize: "14px", tabSize: 2, keymap: "standard" };
 }
 
 /**

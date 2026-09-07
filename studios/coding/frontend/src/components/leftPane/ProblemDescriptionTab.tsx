@@ -63,7 +63,7 @@ export function ProblemDescriptionTab({
       <div
         style={{
           fontSize: "0.9rem",
-          color: "#334e55",
+          color: "var(--bs-ui-ink, #123333)",
           lineHeight: 1.65,
         }}
       >
@@ -95,7 +95,7 @@ export function ProblemDescriptionTab({
               key={example.id || idx}
               className="bs-cs-card"
               style={{
-                background: "#ffffff",
+                background: "var(--bs-ui-surface, #ffffff)",
                 border: "1px solid var(--bs-ui-line, #d7e8e4)",
                 borderRadius: "8px",
                 padding: "12px 14px",
@@ -228,7 +228,7 @@ export function ProblemDescriptionTab({
             margin: 0,
             paddingLeft: "1.25rem",
             fontSize: "0.85rem",
-            color: "#334e55",
+            color: "var(--bs-ui-ink, #123333)",
             lineHeight: 1.8,
           }}
         >

@@ -28,20 +28,32 @@ export function CodingStudio({
   const [isShortcutsOpen, setIsShortcutsOpen] = useState<boolean>(false);
   const layoutActionsRef = useRef<CodingStudioLayoutActions | null>(null);
 
-  // Synchronized theme state across studio shell, editor, and surrounding panels
+  // Synchronized theme state across studio shell, editor, and surrounding panels (Defaults to 'light')
   const [studioTheme, setStudioTheme] = useState<"dark" | "light">(() => {
-    if (typeof window === "undefined") return "dark";
+    if (typeof window === "undefined") return "light";
     try {
-      const raw = localStorage.getItem("bs_cs_editor_settings");
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed.theme === "light" || parsed.theme === "dark") return parsed.theme;
-      }
+      const explicit = localStorage.getItem("bs_cs_theme_user_choice");
+      if (explicit === "light" || explicit === "dark") return explicit;
     } catch {
       // fallback
     }
-    return "dark";
+    return "light";
   });
+
+  const handleThemeChange = (nextTheme?: "dark" | "light") => {
+    setStudioTheme((prev) => {
+      const target = nextTheme || (prev === "dark" ? "light" : "dark");
+      try {
+        localStorage.setItem("bs_cs_theme_user_choice", target);
+        const raw = localStorage.getItem("bs_cs_editor_settings");
+        const current = raw ? JSON.parse(raw) : {};
+        localStorage.setItem("bs_cs_editor_settings", JSON.stringify({ ...current, theme: target }));
+      } catch {
+        // ignore
+      }
+      return target;
+    });
+  };
 
   // Daily Streak retention tracker
   const [streakCount, setStreakCount] = useState<number>(() => {
@@ -226,7 +238,7 @@ export function CodingStudio({
             isAudioEnabled={isAudioEnabled}
             onToggleAudio={toggleAudio}
             theme={studioTheme}
-            onToggleTheme={() => setStudioTheme((t) => (t === "dark" ? "light" : "dark"))}
+            onToggleTheme={() => handleThemeChange()}
           />
         }
         leftPane={
@@ -252,7 +264,7 @@ export function CodingStudio({
             draftStatus={draftStatus}
             lastSavedAt={lastSavedAt}
             theme={studioTheme}
-            onThemeChange={setStudioTheme}
+            onThemeChange={handleThemeChange}
           />
         }
         consolePanel={

@@ -40,7 +40,7 @@ export function CodingStudioHeader({
   streakCount = 1,
   isAudioEnabled = true,
   onToggleAudio,
-  theme = "dark",
+  theme = "light",
   onToggleTheme,
 }: CodingStudioHeaderProps) {
   const isApple = useMemo(() => isMac(), []);
@@ -61,7 +61,7 @@ export function CodingStudioHeader({
         alignItems: "center",
         justifyContent: "space-between",
         padding: "0 1rem",
-        background: "#ffffff",
+        background: "var(--bs-ui-surface, #ffffff)",
         borderBottom: "1px solid var(--bs-ui-line, #d7e8e4)",
         flexShrink: 0,
         gap: "1rem",
@@ -79,6 +79,7 @@ export function CodingStudioHeader({
         }}
       >
         <span
+          className="bs-cs-header-title"
           style={{
             fontSize: "0.92rem",
             fontWeight: 800,

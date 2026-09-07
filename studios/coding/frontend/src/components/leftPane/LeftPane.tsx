@@ -63,7 +63,7 @@ export function LeftPane({
         minHeight: 0,
         overflow: "hidden",
         borderRight: "1px solid var(--bs-ui-line, #d7e8e4)",
-        background: "#ffffff",
+        background: "var(--bs-ui-surface, #ffffff)",
       }}
     >
       {/* Tab Navigation */}
@@ -72,7 +72,7 @@ export function LeftPane({
         style={{
           padding: "0.4rem 1rem 0",
           borderBottom: "1px solid var(--bs-ui-line, #d7e8e4)",
-          background: "#ffffff",
+          background: "var(--bs-ui-surface, #ffffff)",
           flexShrink: 0,
         }}
       >
@@ -92,7 +92,7 @@ export function LeftPane({
           flex: 1,
           overflowY: "auto",
           padding: "1.25rem 1.5rem",
-          background: "#ffffff",
+          background: "var(--bs-ui-surface, #ffffff)",
           minHeight: 0,
         }}
       >
