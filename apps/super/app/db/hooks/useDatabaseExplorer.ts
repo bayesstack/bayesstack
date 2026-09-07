@@ -6,6 +6,7 @@ export function useDatabaseExplorer() {
   const [openedTableIds, setOpenedTableIds] = useState<string[]>([]);
   const [selectedTableId, setSelectedTableId] = useState<string>("");
   const [dbEngine, setDbEngine] = useState<string>("postgresql");
+  const [loading, setLoading] = useState<boolean>(true);
   const [queryCounter, setQueryCounter] = useState<number>(1);
 
   useEffect(() => {
@@ -30,6 +31,8 @@ export function useDatabaseExplorer() {
         }
       } catch (error) {
         console.warn("Backend API not reachable", error);
+      } finally {
+        if (isMounted) setLoading(false);
       }
     }
 
@@ -109,6 +112,7 @@ export function useDatabaseExplorer() {
     openedTableIds,
     selectedTableId,
     dbEngine,
+    loading,
     handleCreateNewQuery,
     handleCreateErDiagram,
     handleTabRename,

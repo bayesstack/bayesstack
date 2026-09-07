@@ -29,6 +29,13 @@ const testTables: DbTable[] = [
 ];
 
 describe("DatabaseWorkspace Component", () => {
+  it("shows a loading skeleton instead of mock tables while data is loading", () => {
+    render(<DatabaseWorkspace tables={[]} loading />);
+
+    expect(screen.queryByRole("button", { name: /^users/i })).not.toBeInTheDocument();
+    expect(screen.queryByText("public")).not.toBeInTheDocument();
+  });
+
   it("renders table explorer and initial opened table tab with custom children render prop", () => {
     render(
       <DatabaseWorkspace tables={testTables} defaultSelectedTableId="public.users">

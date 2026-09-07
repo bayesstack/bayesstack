@@ -20,6 +20,7 @@ export default function BayesStackDbPage() {
     openedTableIds,
     selectedTableId,
     dbEngine,
+    loading,
     handleCreateNewQuery,
     handleCreateErDiagram,
     handleTabRename,
@@ -64,9 +65,10 @@ export default function BayesStackDbPage() {
     <SuperAdminLayout ribbon={ribbonHeader}>
       <div style={{ width: "100%", height: "100%", flex: 1, display: "flex", flexDirection: "column" }}>
         <DatabaseWorkspace
-          tables={tables.length > 0 ? tables : undefined}
+          tables={tables}
           defaultOpenedTableIds={openedTableIds.length > 0 ? openedTableIds : undefined}
           defaultSelectedTableId={selectedTableId || undefined}
+          loading={loading}
           onNewQuery={handleCreateNewQuery}
           onTabRename={handleTabRename}
           style={{ borderRadius: 0, border: "none", borderTop: "1px solid var(--bs-ui-line, #d7e8e4)" }}

@@ -42,7 +42,12 @@ function Setup-PythonCodingJudge([string]$root) {
     Write-LogInfo "Setting up Coding Studio judge environment at $venv..."
     & $pyCmd -m venv $venv
   }
-  & $venvPython -m pip install -e $judgePath --disable-pip-version-check *> $null
+  $packageIndex = $env:BAYESSTACK_PYPI_INDEX_URL
+  if ([string]::IsNullOrWhiteSpace($packageIndex)) {
+    $packageIndex = "https://pypi.org/simple"
+  }
+  Write-LogInfo "Using Python package index: $packageIndex"
+  & $venvPython -m pip install -e $judgePath --index-url $packageIndex --disable-pip-version-check *> $null
   if ($LASTEXITCODE -ne 0) { throw "Coding Studio judge dependency installation failed." }
   return $venvPython
 }

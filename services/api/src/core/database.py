@@ -3,6 +3,7 @@
 import logging
 from typing import AsyncGenerator
 import asyncpg
+from sqlalchemy import text
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
@@ -49,9 +50,37 @@ class Base(DeclarativeBase):
 
 
 async def init_db_tables_and_seeds():
-    """Create database tables and seed initial default tenants if missing."""
+    """Create/repair database tables and seed initial default tenants if missing."""
     from db.seed import seed_tenants
+
     await seed_tenants()
+
+
+async def ensure_legacy_postgres_schema():
+    """Repair additive columns in native databases created by older models."""
+    # Native local databases may have been created by an older version of the
+    # models with no Alembic revision marker. `create_all()` does not alter
+    # existing tables, so repair the small set of additive columns required by
+    # the current models before the seed queries them.
+    if not is_sqlite:
+        async with engine.begin() as conn:
+            await conn.execute(text("ALTER TABLE tenants ADD COLUMN IF NOT EXISTS short_name VARCHAR(64)"))
+            await conn.execute(
+                text(
+                    "ALTER TABLE tenants ADD COLUMN IF NOT EXISTS "
+                    "institution_type VARCHAR(32) NOT NULL DEFAULT 'institution'"
+                )
+            )
+            await conn.execute(text("ALTER TABLE tenants ADD COLUMN IF NOT EXISTS custom_domain VARCHAR(255)"))
+            await conn.execute(
+                text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_superadmin BOOLEAN NOT NULL DEFAULT FALSE")
+            )
+            await conn.execute(
+                text(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS uq_tenants_custom_domain "
+                    "ON tenants (custom_domain) WHERE custom_domain IS NOT NULL"
+                )
+            )
 
 
 async def ensure_database_exists() -> bool:

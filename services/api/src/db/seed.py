@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from datetime import date, datetime, timezone
 from sqlalchemy import select
-from core.database import AsyncSessionLocal, engine, Base
+from core.database import AsyncSessionLocal, engine, Base, ensure_legacy_postgres_schema
 from db.models import (
     AcademicTerm,
     AssessmentSubmission,
@@ -1057,6 +1057,8 @@ async def seed_database():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
         await ensure_catalog_immutability_guards(conn)
+
+    await ensure_legacy_postgres_schema()
 
     async with AsyncSessionLocal() as session:
         # 1. Seed Tenants
