@@ -40,9 +40,8 @@ export function useSplitResize({
   const lastLeftWidthRef = useRef<number>(defaultLeftPct);
   const [isHDragging, setIsHDragging] = useState<boolean>(false);
 
-  // Console layout mode & floating state
+  // Console layout mode
   const [consolePosition, setConsolePosition] = useState<ConsolePosition>(defaultPosition);
-  const [isFloating, setIsFloating] = useState<boolean>(false);
 
   // Vertical split state (Console bottom split height in px)
   const [consoleHeight, setConsoleHeight] = useState<number>(defaultConsoleHeight);
@@ -243,10 +242,6 @@ export function useSplitResize({
     setIsConsoleCollapsed(false);
   }, []);
 
-  const toggleFloating = useCallback(() => {
-    setIsFloating((prev) => !prev);
-  }, []);
-
   // Keyboard accessibility helper for ARIA separators
   const handleKeyDownH = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -281,7 +276,7 @@ export function useSplitResize({
     [minConsoleHeight, toggleConsoleCollapse]
   );
 
-  // Global keyboard shortcuts (Ctrl/Cmd + ' to toggle console, Ctrl/Cmd + Shift + L to toggle split layout, Esc to close floating modal)
+  // Global keyboard shortcuts for console visibility and docking.
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       const isModifier = e.ctrlKey || e.metaKey;
@@ -300,16 +295,11 @@ export function useSplitResize({
         return;
       }
 
-      // Escape closes floating modal if open
-      if (e.key === "Escape" && isFloating) {
-        e.preventDefault();
-        setIsFloating(false);
-      }
     };
 
     window.addEventListener("keydown", handleGlobalKeyDown);
     return () => window.removeEventListener("keydown", handleGlobalKeyDown);
-  }, [toggleConsoleCollapse, toggleConsolePosition, isFloating]);
+  }, [toggleConsoleCollapse, toggleConsolePosition]);
 
   // Global user-select prevention during active dragging
   useEffect(() => {
@@ -340,13 +330,10 @@ export function useSplitResize({
     resetLeftWidth,
     toggleLeftCollapse,
     handleKeyDownH,
-    // Console position & floating
+    // Console position
     consolePosition,
     setConsolePosition,
     toggleConsolePosition,
-    isFloating,
-    setIsFloating,
-    toggleFloating,
     // Vertical console split (bottom)
     consoleHeight,
     setConsoleHeight,

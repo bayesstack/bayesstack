@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Button, Icon } from "@bayesstack/ui";
+import React, { useEffect, useState } from "react";
+import { Button, Dropdown, Icon } from "@bayesstack/ui";
 import type { TestCase } from "../../types";
 
 export interface TestCaseViewProps {
@@ -33,9 +33,7 @@ export function TestCaseView({
 
   const updateCases = (next: TestCase[]) => {
     setLocalCases(next);
-    if (onTestCasesChange) {
-      onTestCasesChange(next);
-    }
+    onTestCasesChange?.(next);
   };
 
   const handleAddCase = () => {
@@ -64,292 +62,126 @@ export function TestCaseView({
     const next = [...localCases, cloned];
     updateCases(next);
     setActiveCaseIdx(next.length - 1);
-    setShowCustom(false);
   };
 
-  const handleDeleteCase = (idxToDelete: number) => {
+  const handleDeleteCase = () => {
     if (localCases.length <= 1) return;
-    const next = localCases.filter((_, idx) => idx !== idxToDelete);
+    const next = localCases.filter((_, index) => index !== activeCaseIdx);
     updateCases(next);
     setActiveCaseIdx(Math.max(0, Math.min(activeCaseIdx, next.length - 1)));
   };
 
   const handleCaseChange = (field: "input" | "expected", value: string) => {
-    const next = localCases.map((tc, idx) => {
-      if (idx !== activeCaseIdx) return tc;
-      return { ...tc, [field]: value };
-    });
-    updateCases(next);
+    updateCases(localCases.map((testCase, index) => (index === activeCaseIdx ? { ...testCase, [field]: value } : testCase)));
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-      {/* Test Case Selector Tabs + Add / Clone / Custom Controls */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          gap: "8px",
-        }}
-      >
-        <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
-          {localCases.map((tc, idx) => {
-            const isSelected = !showCustom && activeCaseIdx === idx;
+    <div className="bs-cs-test-case-view">
+      <div className="bs-cs-testcase-topline">
+        <div className="bs-cs-testcase-switcher" role="tablist" aria-label="Test input modes">
+          {localCases.map((testCase, index) => {
+            const selected = !showCustom && activeCaseIdx === index;
             return (
-              <div key={tc.id || idx} style={{ display: "inline-flex", alignItems: "center" }}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowCustom(false);
-                    setActiveCaseIdx(idx);
-                  }}
-                  style={{
-                    padding: "4px 10px",
-                    borderRadius: localCases.length > 1 ? "6px 0 0 6px" : "6px",
-                    fontSize: "0.76rem",
-                    fontWeight: 700,
-                    cursor: "pointer",
-                    borderStyle: "solid",
-                    borderColor: isSelected ? "var(--bs-ui-brand, #0b6763)" : "var(--bs-ui-line, #d7e8e4)",
-                    borderWidth: localCases.length > 1 ? "1px 0 1px 1px" : "1px",
-                    background: isSelected ? "var(--bs-ui-brand, #0b6763)" : "var(--bs-ui-surface, #ffffff)",
-                    color: isSelected ? "#ffffff" : "var(--bs-ui-muted, #4a6360)",
-                    transition: "all 0.15s ease",
-                  }}
-                >
-                  Case {idx + 1}
-                </button>
-                {localCases.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteCase(idx);
-                    }}
-                    title={`Delete Case ${idx + 1}`}
-                    style={{
-                      padding: "4px 5px",
-                      borderRadius: "0 6px 6px 0",
-                      fontSize: "0.7rem",
-                      cursor: "pointer",
-                      borderStyle: "solid",
-                      borderColor: isSelected ? "var(--bs-ui-brand, #0b6763)" : "var(--bs-ui-line, #d7e8e4)",
-                      borderWidth: "1px",
-                      background: isSelected ? "var(--bs-ui-brand, #0b6763)" : "var(--bs-ui-surface, #ffffff)",
-                      color: isSelected ? "#ffffff" : "var(--bs-ui-muted, #94a3b8)",
-                      display: "inline-flex",
-                      alignItems: "center",
-                    }}
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
+              <button
+                key={testCase.id || index}
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                className={["bs-cs-testcase-tab", selected ? "bs-cs-testcase-tab--active" : ""].filter(Boolean).join(" ")}
+                onClick={() => {
+                  setShowCustom(false);
+                  setActiveCaseIdx(index);
+                }}
+              >
+                Case {index + 1}
+              </button>
             );
           })}
-
-          {/* + Add Testcase Button */}
+          <button type="button" className="bs-cs-testcase-add" onClick={handleAddCase} title="Add test case" aria-label="Add test case">
+            <Icon name="Add" size={13} />
+          </button>
           <button
             type="button"
-            onClick={handleAddCase}
-            title="Add a new testcase"
-            aria-label="Add Testcase"
-            style={{
-              padding: "4px 8px",
-              borderRadius: "6px",
-              fontSize: "0.74rem",
-              fontWeight: 700,
-              cursor: "pointer",
-              border: "1px dashed var(--bs-ui-line, #d7e8e4)",
-              background: "var(--bs-ui-surface, #ffffff)",
-              color: "var(--bs-ui-brand, #0b6763)",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "3px",
-            }}
+            role="tab"
+            aria-selected={showCustom}
+            className={["bs-cs-testcase-tab", showCustom ? "bs-cs-testcase-tab--active" : ""].filter(Boolean).join(" ")}
+            onClick={() => setShowCustom(true)}
           >
-            <Icon name="Plus" size={11} />
-            <span>Add</span>
+            Custom input
           </button>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          {!showCustom && (
-            <button
-              type="button"
-              onClick={handleCloneCase}
-              title="Duplicate and clone current test case"
-              style={{
-                padding: "4px 8px",
-                borderRadius: "6px",
-                fontSize: "0.74rem",
-                fontWeight: 600,
-                cursor: "pointer",
-                border: "1px solid var(--bs-ui-line, #d7e8e4)",
-                background: "var(--bs-ui-surface, #ffffff)",
-                color: "var(--bs-ui-muted, #4a6360)",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "4px",
-              }}
-            >
-              <Icon name="Copy" size={12} />
-              <span>Clone</span>
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={() => setShowCustom((prev) => !prev)}
-            style={{
-              padding: "4px 10px",
-              borderRadius: "6px",
-              fontSize: "0.75rem",
-              fontWeight: 700,
-              cursor: "pointer",
-              border: `1px dashed ${showCustom ? "var(--bs-ui-brand, #0b6763)" : "var(--bs-ui-line, #d7e8e4)"}`,
-              background: showCustom ? "var(--bs-ui-brand-soft, #e4f2ef)" : "transparent",
-              color: showCustom ? "var(--bs-ui-brand, #0b6763)" : "var(--bs-ui-muted, #4a6360)",
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-            }}
+        {!showCustom && activeCase && (
+          <Dropdown
+            placement="bottomRight"
+            items={[
+              { key: "clone-case", label: "Duplicate case", icon: "Copy", onClick: handleCloneCase },
+              {
+                key: "delete-case",
+                label: "Delete case",
+                icon: "Delete",
+                divider: true,
+                danger: true,
+                disabled: localCases.length <= 1,
+                onClick: handleDeleteCase,
+              },
+            ]}
           >
-            <Icon name="Terminal" size={12} />
-            <span>Custom Stdin</span>
-          </button>
-        </div>
+            <Button variant="secondary" size="xs" aria-label="Case actions" title="Case actions">
+              More
+            </Button>
+          </Dropdown>
+        )}
       </div>
 
-      {/* Inline Editable Test Case View */}
       {!showCustom && activeCase && (
-        <div className="bs-cs-card">
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--bs-ui-muted, #4a6360)" }}>
-                Input (stdin):
-              </span>
-              <span style={{ fontSize: "0.7rem", color: "#94a3b8" }}>
-                Directly editable
-              </span>
-            </div>
-
+        <div className="bs-cs-testcase-card">
+          <label className="bs-cs-testcase-field">
+            <span>Input <em>(stdin)</em></span>
             <textarea
               value={activeCase.input}
-              onChange={(e) => handleCaseChange("input", e.target.value)}
+              onChange={(event) => handleCaseChange("input", event.target.value)}
               placeholder="Enter testcase stdin..."
               rows={2}
               aria-label="Testcase Input"
-              style={{
-                width: "100%",
-                padding: "6px 10px",
-                borderRadius: "6px",
-                border: "1px solid var(--bs-ui-line, #d7e8e4)",
-                fontFamily: "var(--bs-ui-font-mono, monospace)",
-                fontSize: "0.8rem",
-                background: "var(--bs-ui-canvas, #f1f8f6)",
-                color: "var(--bs-ui-ink, #123333)",
-                outline: "none",
-                resize: "vertical",
-                boxSizing: "border-box",
-              }}
             />
+          </label>
 
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "4px" }}>
-              <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--bs-ui-muted, #4a6360)" }}>
-                Expected Output:
-              </span>
-              <span style={{ fontSize: "0.7rem", color: "#94a3b8" }}>
-                Directly editable
-              </span>
-            </div>
-
+          <label className="bs-cs-testcase-field">
+            <span>Expected output</span>
             <textarea
               value={activeCase.expected}
-              onChange={(e) => handleCaseChange("expected", e.target.value)}
+              onChange={(event) => handleCaseChange("expected", event.target.value)}
               placeholder="Enter expected stdout..."
               rows={2}
               aria-label="Testcase Expected Output"
-              style={{
-                width: "100%",
-                padding: "6px 10px",
-                borderRadius: "6px",
-                border: "1px solid var(--bs-ui-line, #d7e8e4)",
-                fontFamily: "var(--bs-ui-font-mono, monospace)",
-                fontSize: "0.8rem",
-                background: "var(--bs-ui-canvas, #f1f8f6)",
-                color: "var(--bs-ui-ink, #123333)",
-                outline: "none",
-                resize: "vertical",
-                boxSizing: "border-box",
-              }}
             />
-          </div>
+          </label>
         </div>
       )}
 
-      {/* Raw Custom Stdin Runner View */}
       {showCustom && (
-        <div className="bs-cs-card">
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <label
-                htmlFor="bs-cs-custom-stdin"
-                style={{ fontSize: "0.76rem", fontWeight: 700, color: "var(--bs-ui-ink, #123333)" }}
-              >
-                Custom Standard Input (stdin):
-              </label>
-              <Button
-                variant="outline"
-                size="xs"
-                leftIcon={<Icon name="Play" size={12} />}
-                onClick={onRunCustomInput}
-                loading={isCustomRunning}
-              >
-                Run Custom Input
-              </Button>
-            </div>
-
-            <textarea
-              id="bs-cs-custom-stdin"
-              value={customInput}
-              onChange={(e) => onCustomInputChange(e.target.value)}
-              placeholder="Paste raw stdin here to test edge cases..."
-              rows={3}
-              style={{
-                width: "100%",
-                padding: "8px 10px",
-                borderRadius: "6px",
-                border: "1px solid var(--bs-ui-line, #d7e8e4)",
-                fontFamily: "var(--bs-ui-font-mono, monospace)",
-                fontSize: "0.78rem",
-                outline: "none",
-                resize: "vertical",
-                boxSizing: "border-box",
-              }}
-            />
-
-            {customOutput && (
-              <div style={{ marginTop: "4px" }}>
-                <span style={{ fontSize: "0.74rem", fontWeight: 700, color: "var(--bs-ui-muted, #4a6360)" }}>
-                  Program Output:
-                </span>
-                <div
-                  className="bs-cs-code-block"
-                  style={{
-                    marginTop: "2px",
-                    background: "#1e293b",
-                    color: "#f8fafc",
-                    border: "1px solid #334155",
-                  }}
-                >
-                  {customOutput}
-                </div>
-              </div>
-            )}
+        <div className="bs-cs-testcase-card">
+          <div className="bs-cs-custom-input-heading">
+            <label htmlFor="bs-cs-custom-stdin">Custom input <em>(stdin)</em></label>
+            <Button variant="outline" size="xs" leftIcon={<Icon name="Play" size={12} />} onClick={onRunCustomInput} loading={isCustomRunning}>
+              Run
+            </Button>
           </div>
+          <textarea
+            id="bs-cs-custom-stdin"
+            value={customInput}
+            onChange={(event) => onCustomInputChange(event.target.value)}
+            placeholder="Paste raw stdin to test an edge case..."
+            rows={4}
+            className="bs-cs-custom-input"
+          />
+          {customOutput && (
+            <div className="bs-cs-custom-output">
+              <span>Program output</span>
+              <pre>{customOutput}</pre>
+            </div>
+          )}
         </div>
       )}
     </div>

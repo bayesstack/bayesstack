@@ -461,7 +461,7 @@ export default function LearningLibraryPage() {
     const isCoding = activity.activity_type.toLowerCase() === "coding";
 
     const studioTabItems: TabItem[] = [
-      { value: "runtime", label: "Studio Runtime", icon: isVideo ? "Play" : "Code" },
+      { value: "runtime", label: isCoding ? "Workspace" : "Studio Runtime", icon: isVideo ? "Play" : "Code" },
       { value: "descriptor", label: "CQRS Descriptor", icon: "BookOpen" },
     ];
 
@@ -473,6 +473,7 @@ export default function LearningLibraryPage() {
 
     return (
       <div
+        className={isCoding ? "bs-super-studio-shell bs-super-studio-shell--coding" : "bs-super-studio-shell"}
         style={{
           position: "fixed",
           top: 0,
@@ -488,10 +489,11 @@ export default function LearningLibraryPage() {
           fontFamily: "var(--bs-font-main, sans-serif)",
         }}
       >
-        {/* Studio Top Control Navigation Bar */}
+        {/* Coding keeps only essential context. Video retains the richer studio navigation. */}
         <header
+          className="bs-super-studio-shell__header"
           style={{
-            height: "60px",
+            height: isCoding ? "48px" : "60px",
             background: "rgba(255, 255, 255, 0.95)",
             backdropFilter: "blur(12px)",
             WebkitBackdropFilter: "blur(12px)",
@@ -499,46 +501,78 @@ export default function LearningLibraryPage() {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "0 1.5rem",
-            boxShadow: "0 2px 12px rgba(11, 103, 99, 0.04)",
+            padding: isCoding ? "0 1rem" : "0 1.5rem",
+            boxShadow: isCoding ? "none" : "0 2px 12px rgba(11, 103, 99, 0.04)",
             flexShrink: 0,
           }}
         >
-          {/* Left: Exit Button & Breadcrumbs using @bayesstack/ui */}
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: isCoding ? "0.7rem" : "1rem", minWidth: 0, flex: "1 1 0" }}>
             <Button
               variant="outline"
-              size="sm"
+              size={isCoding ? "xs" : "sm"}
               leftIcon={<Icon name="ArrowLeft" size={15} />}
               onClick={handleExitStudio}
-              title="Return to Concept Table (Esc)"
+              title="Back to learning path (Esc)"
             >
-              Exit Studio
+              {isCoding ? "Back" : "Exit Studio"}
             </Button>
 
-            <Breadcrumbs
-              items={[
-                { label: "Concepts Catalog", onClick: handleExitStudio },
-                { label: concept.code },
-                { label: concept.title },
-              ]}
-              showHomeIcon={false}
-            />
+            {isCoding ? (
+              <div style={{ minWidth: 0, display: "flex", alignItems: "center", gap: "6px", fontSize: "0.78rem" }}>
+                <span style={{ color: "var(--bs-ui-muted, #4a6360)", whiteSpace: "nowrap" }}>{concept.code}</span>
+                <span style={{ color: "var(--bs-ui-line, #d7e8e4)" }}>•</span>
+                <strong style={{ color: "var(--bs-ui-ink, #123333)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {activity.title || "Coding activity"}
+                </strong>
+              </div>
+            ) : (
+              <Breadcrumbs
+                items={[
+                  { label: "Concepts Catalog", onClick: handleExitStudio },
+                  { label: concept.code },
+                  { label: concept.title },
+                ]}
+                showHomeIcon={false}
+              />
+            )}
           </div>
 
-          {/* Center: Activity Switcher using @bayesstack/ui Tabs */}
           {concept.activities && concept.activities.length > 1 && (
-            <Tabs
-              items={activitySwitcherTabs}
-              value={activity.id}
-              onValueChange={handleSwitchStudioActivity}
-              variant="pill"
-              size="sm"
-            />
+            isCoding ? (
+              <select
+                className="bs-super-studio-shell__activity-select"
+                value={activity.id}
+                onChange={(event) => handleSwitchStudioActivity(event.target.value)}
+                aria-label="Switch activity"
+                style={{
+                  maxWidth: "230px",
+                  padding: "5px 28px 5px 9px",
+                  border: "1px solid var(--bs-ui-line, #d7e8e4)",
+                  borderRadius: "6px",
+                  background: "var(--bs-ui-surface, #ffffff)",
+                  color: "var(--bs-ui-ink, #123333)",
+                  fontSize: "0.75rem",
+                  fontWeight: 650,
+                }}
+              >
+                {(concept.activities || []).map((candidate, index) => (
+                  <option key={candidate.id} value={candidate.id}>
+                    Activity {index + 1} of {concept.activities.length}: {candidate.title || candidate.activity_type}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <Tabs
+                items={activitySwitcherTabs}
+                value={activity.id}
+                onValueChange={handleSwitchStudioActivity}
+                variant="pill"
+                size="sm"
+              />
+            )
           )}
 
-          {/* Right: Studio Mode Toggle & Modality Badge */}
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: "1 1 0", justifyContent: "flex-end" }}>
             <Tabs
               items={studioTabItems}
               value={studioViewMode}
@@ -547,19 +581,22 @@ export default function LearningLibraryPage() {
               size="sm"
             />
 
-            <Badge color={isVideo ? "success" : "primary"} variant="subtle" size="sm">
-              {activity.activity_type.toUpperCase()} STUDIO
-            </Badge>
+            {!isCoding && (
+              <Badge color={isVideo ? "success" : "primary"} variant="subtle" size="sm">
+                {activity.activity_type.toUpperCase()} STUDIO
+              </Badge>
+            )}
           </div>
         </header>
 
         {/* Studio Standalone Body */}
         <main
+          className="bs-super-studio-shell__main"
           style={{
             flex: 1,
             overflowY: isCoding ? "hidden" : "auto",
             background: "var(--bs-ui-canvas, #f1f8f6)",
-            padding: isCoding ? "0.75rem 1rem" : "1.5rem",
+            padding: isCoding ? "0.5rem 0.75rem" : "1.5rem",
             display: "flex",
             flexDirection: "column",
           }}

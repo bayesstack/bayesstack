@@ -7,10 +7,10 @@ describe("CodingStudioHeader Component", () => {
   afterEach(() => {
     cleanup();
   });
-  it("renders problem title, badges, and action buttons with shortcut indicators", () => {
+  it("renders problem context, primary actions, and a settings utility", () => {
     const onRun = vi.fn();
     const onSubmit = vi.fn();
-    const onOpenShortcuts = vi.fn();
+    const onOpenSettings = vi.fn();
 
     render(
       <CodingStudioHeader
@@ -22,9 +22,7 @@ describe("CodingStudioHeader Component", () => {
         isSubmitting={false}
         onRun={onRun}
         onSubmit={onSubmit}
-        isFullscreen={false}
-        onToggleFullscreen={vi.fn()}
-        onOpenShortcuts={onOpenShortcuts}
+        onOpenSettings={onOpenSettings}
       />
     );
 
@@ -33,11 +31,9 @@ describe("CodingStudioHeader Component", () => {
     expect(screen.getByText("Run")).toBeDefined();
     expect(screen.getByText("Submit")).toBeDefined();
 
-    // Verify Shortcuts trigger button
-    const shortcutsBtn = screen.getByLabelText("Keyboard Shortcuts");
-    expect(shortcutsBtn).toBeDefined();
-    fireEvent.click(shortcutsBtn);
-    expect(onOpenShortcuts).toHaveBeenCalledTimes(1);
+    const settingsBtn = screen.getByLabelText("Open Studio Settings");
+    fireEvent.click(settingsBtn);
+    expect(onOpenSettings).toHaveBeenCalledTimes(1);
 
     // Click Run
     const runBtn = screen.getByRole("button", { name: /Run/i });
@@ -61,8 +57,6 @@ describe("CodingStudioHeader Component", () => {
         isSubmitting={false}
         onRun={vi.fn()}
         onSubmit={vi.fn()}
-        isFullscreen={false}
-        onToggleFullscreen={vi.fn()}
         isZenMode={false}
         onToggleZenMode={onToggleZenMode}
       />
@@ -81,8 +75,6 @@ describe("CodingStudioHeader Component", () => {
         isSubmitting={false}
         onRun={vi.fn()}
         onSubmit={vi.fn()}
-        isFullscreen={false}
-        onToggleFullscreen={vi.fn()}
         isZenMode={true}
         onToggleZenMode={onToggleZenMode}
       />
@@ -94,8 +86,8 @@ describe("CodingStudioHeader Component", () => {
     expect(onToggleZenMode).toHaveBeenCalledTimes(2);
   });
 
-  it("renders daily streak badge and handles audio toggle", () => {
-    const onToggleAudio = vi.fn();
+  it("renders daily streak badge and keeps studio settings available as a quiet utility", () => {
+    const onOpenSettings = vi.fn();
 
     render(
       <CodingStudioHeader
@@ -105,21 +97,16 @@ describe("CodingStudioHeader Component", () => {
         isSubmitting={false}
         onRun={vi.fn()}
         onSubmit={vi.fn()}
-        isFullscreen={false}
-        onToggleFullscreen={vi.fn()}
         streakCount={5}
-        isAudioEnabled={true}
-        onToggleAudio={onToggleAudio}
+        onOpenSettings={onOpenSettings}
       />
     );
 
     // Verify streak flame and count
     expect(screen.getByText(/5 days/)).toBeDefined();
 
-    // Verify audio button toggle
-    const audioBtn = screen.getByLabelText("Mute Audio Cues");
-    expect(audioBtn).toBeDefined();
-    fireEvent.click(audioBtn);
-    expect(onToggleAudio).toHaveBeenCalledTimes(1);
+    const settingsButton = screen.getByLabelText("Open Studio Settings");
+    fireEvent.click(settingsButton);
+    expect(onOpenSettings).toHaveBeenCalledTimes(1);
   });
 });

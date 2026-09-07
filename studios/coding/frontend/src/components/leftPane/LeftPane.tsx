@@ -38,7 +38,7 @@ export function LeftPane({
     },
     {
       value: "notes",
-      label: "My Notes",
+      label: "Notes",
       icon: "Edit",
     },
     {

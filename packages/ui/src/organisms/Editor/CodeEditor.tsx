@@ -89,6 +89,13 @@ export interface CodeEditorProps
   footerStatus?: React.ReactNode;
 
   /**
+   * Show secondary footer telemetry such as indentation, encoding, and character count.
+   * Cursor position and any custom footer status remain visible.
+   * @default true
+   */
+  showStatusDetails?: boolean;
+
+  /**
    * Indentation spaces count
    * @default 2
    */
@@ -220,6 +227,7 @@ export function CodeEditor({
   showCopy = true,
   showStatusFooter = true,
   footerStatus,
+  showStatusDetails = true,
   tabSize = 2,
   fontSize = "13.5px",
   engine = "codemirror",
@@ -659,8 +667,9 @@ export function CodeEditor({
               </div>
             )}
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
-            {keymap !== "standard" && (
+          {showStatusDetails && (
+            <div className="bs-code-editor-footer-details" style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
+              {keymap !== "standard" && (
               <span
                 style={{
                   textTransform: "uppercase",
@@ -674,11 +683,12 @@ export function CodeEditor({
               >
                 {keymap.toUpperCase()}
               </span>
-            )}
-            <span>Spaces: {tabSize}</span>
-            <span>UTF-8</span>
-            <span>{code.length} chars</span>
-          </div>
+              )}
+              <span>Spaces: {tabSize}</span>
+              <span>UTF-8</span>
+              <span>{code.length} chars</span>
+            </div>
+          )}
         </div>
       )}
     </div>

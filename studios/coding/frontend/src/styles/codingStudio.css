@@ -199,31 +199,6 @@
   color: var(--bs-ui-brand, #0b6763);
 }
 
-/* Floating Popout Modal Overlay */
-.bs-cs-floating-backdrop {
-  animation: bs-cs-fade-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.bs-cs-floating-window {
-  animation: bs-cs-scale-up 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes bs-cs-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes bs-cs-scale-up {
-  from {
-    opacity: 0;
-    transform: scale(0.96) translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
 /* Split Dividers */
 .bs-cs-split-divider {
   user-select: none;
@@ -758,6 +733,1000 @@
   display: inline-block;
   animation: bs-cs-flame-flicker 2s ease-in-out infinite;
   transform-origin: center bottom;
+}
+
+/* --------------------------------------------------------------------------
+   Laptop-first workspace structure
+   The studio is intentionally optimized for 1366px- and 1536px-wide Chrome
+   viewports. Fixed splitter tracks and minmax columns keep every zone usable
+   instead of letting percentage widths or negative splitter margins overlap.
+   -------------------------------------------------------------------------- */
+.bs-coding-studio {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.bs-cs-workspace {
+  display: grid !important;
+  grid-template-columns: minmax(300px, var(--bs-cs-left-width, 38%)) 8px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  flex: 1 1 auto;
+  height: auto !important;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.bs-cs-left-pane-wrapper {
+  grid-column: 1;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: auto !important;
+}
+
+.bs-cs-left-collapsed-rail {
+  grid-column: 1;
+  width: auto;
+}
+
+.bs-cs-split-divider--horizontal {
+  grid-column: 2;
+  width: 8px !important;
+  height: auto !important;
+  margin: 0 !important;
+}
+
+.bs-cs-right-pane {
+  grid-column: 3;
+  min-width: 0;
+  min-height: 0;
+  height: auto !important;
+  overflow: hidden;
+}
+
+.bs-cs-editor-container,
+.bs-cs-editor-panel,
+.bs-cs-editor-stage,
+.bs-cs-console-container,
+.bs-cs-console-side-container {
+  min-width: 0;
+  min-height: 0;
+}
+
+.bs-cs-editor-container {
+  min-height: 220px;
+}
+
+.bs-cs-console-container {
+  flex: 0 0 auto;
+  min-height: 48px;
+  overflow: hidden;
+}
+
+.bs-cs-console-side-container {
+  min-width: 320px !important;
+  max-width: 54% !important;
+  height: auto !important;
+  overflow: hidden;
+  border-left: 1px solid var(--bs-ui-line, #d7e8e4);
+}
+
+.bs-cs-header {
+  height: auto !important;
+  min-height: 56px;
+}
+
+.bs-cs-header-left,
+.bs-cs-header-right,
+.bs-cs-editor-toolbar-primary,
+.bs-cs-editor-actions,
+.bs-cs-console-toolbar {
+  min-width: 0;
+}
+
+.bs-cs-editor-toolbar {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  height: auto !important;
+  padding: 6px 12px !important;
+  gap: 6px;
+  overflow: visible !important;
+}
+
+.bs-cs-editor-toolbar-primary,
+.bs-cs-editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.bs-cs-editor-toolbar-primary {
+  flex: 1 1 280px;
+}
+
+.bs-cs-editor-actions {
+  flex: 0 0 auto;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.bs-cs-editor-actions .bs-button {
+  border-radius: 6px;
+}
+
+.bs-cs-editor-actions .bs-dropdown-wrapper,
+.bs-cs-testcase-topline > .bs-dropdown-wrapper {
+  display: inline-flex;
+  width: auto;
+  flex: 0 0 auto;
+}
+
+.bs-cs-language-select {
+  display: flex;
+  align-items: center;
+}
+
+.bs-cs-header-utilities,
+.bs-cs-header-primary-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bs-cs-header-utilities {
+  padding-right: 8px;
+  border-right: 1px solid var(--bs-ui-line, #d7e8e4);
+}
+
+.bs-cs-header-icon-button {
+  min-width: 30px;
+  padding-inline: 7px !important;
+  color: var(--bs-ui-muted, #4a6360);
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+.bs-cs-header-icon-button:hover,
+.bs-cs-header-icon-button--active {
+  color: var(--bs-ui-brand, #0b6763);
+  background: var(--bs-ui-canvas, #f1f8f6) !important;
+  border-color: var(--bs-ui-line, #d7e8e4) !important;
+}
+
+.bs-cs-console-toolbar {
+  min-height: 42px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Quiet chrome: splitters are discoverable on hover, never an extra control bar. */
+.bs-cs-split-divider:not(.bs-cs-split-divider--dragging) .bs-cs-split-line {
+  opacity: 0.34;
+}
+
+.bs-cs-split-divider:not(.bs-cs-split-divider--dragging) .bs-cs-split-grip {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.82);
+}
+
+.bs-cs-split-divider:hover .bs-cs-split-line,
+.bs-cs-split-divider:focus-visible .bs-cs-split-line,
+.bs-cs-split-divider--dragging .bs-cs-split-line {
+  opacity: 1;
+}
+
+.bs-cs-split-divider:hover .bs-cs-split-grip,
+.bs-cs-split-divider:focus-visible .bs-cs-split-grip,
+.bs-cs-split-divider--dragging .bs-cs-split-grip {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* A shared tab vocabulary keeps problem, tests, and results part of one workspace. */
+.bs-cs-left-nav .bs-tab-item,
+.bs-cs-console-toolbar .bs-tab-item {
+  min-height: 38px;
+  padding-inline: 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.bs-cs-left-nav .bs-tab-item[aria-selected="true"],
+.bs-cs-console-toolbar .bs-tab-item[aria-selected="true"] {
+  font-weight: 700;
+}
+
+.bs-cs-editor-panel .bs-code-editor-footer {
+  min-height: 28px;
+  padding-inline: 12px;
+  font-size: 0.72rem;
+}
+
+.bs-cs-editor-panel .bs-code-editor-footer-status {
+  font-size: 0.72rem;
+}
+
+.bs-cs-problem-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.05rem;
+}
+
+.bs-cs-problem-title {
+  letter-spacing: -0.018em;
+}
+
+.bs-cs-problem-prompt {
+  max-width: 66ch;
+}
+
+.bs-cs-problem-section-title {
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+
+.bs-cs-example-copy {
+  width: 28px;
+  min-width: 28px;
+  padding-inline: 0 !important;
+}
+
+.bs-cs-test-case-view {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bs-cs-testcase-topline,
+.bs-cs-testcase-switcher,
+.bs-cs-custom-input-heading {
+  display: flex;
+  align-items: center;
+}
+
+.bs-cs-testcase-topline {
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.bs-cs-testcase-switcher {
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.bs-cs-testcase-tab,
+.bs-cs-testcase-add {
+  height: 28px;
+  padding: 0 9px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--bs-ui-muted, #4a6360);
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.bs-cs-testcase-tab:hover,
+.bs-cs-testcase-add:hover {
+  background: var(--bs-ui-surface, #ffffff);
+  border-color: var(--bs-ui-line, #d7e8e4);
+  color: var(--bs-ui-ink, #123333);
+}
+
+.bs-cs-testcase-tab--active {
+  background: var(--bs-ui-brand-soft, #e4f2ef);
+  border-color: rgba(11, 103, 99, 0.2);
+  color: var(--bs-ui-brand, #0b6763);
+}
+
+.bs-cs-testcase-add {
+  width: 28px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bs-ui-brand, #0b6763);
+  border-style: dashed;
+  border-color: var(--bs-ui-line, #d7e8e4);
+}
+
+.bs-cs-testcase-card {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding: 12px;
+  border: 1px solid var(--bs-ui-line, #d7e8e4);
+  border-radius: 8px;
+  background: var(--bs-ui-surface, #ffffff);
+}
+
+.bs-cs-testcase-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: var(--bs-ui-muted, #4a6360);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.bs-cs-testcase-field em,
+.bs-cs-custom-input-heading em {
+  font-style: normal;
+  font-weight: 500;
+  color: #8da0a4;
+}
+
+.bs-cs-testcase-field textarea,
+.bs-cs-custom-input {
+  width: 100%;
+  padding: 7px 9px;
+  box-sizing: border-box;
+  resize: vertical;
+  border: 1px solid var(--bs-ui-line, #d7e8e4);
+  border-radius: 6px;
+  outline: none;
+  background: var(--bs-ui-canvas, #f1f8f6);
+  color: var(--bs-ui-ink, #123333);
+  font-family: var(--bs-ui-font-mono, monospace);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.bs-cs-testcase-field textarea:focus,
+.bs-cs-custom-input:focus {
+  border-color: var(--bs-ui-brand, #0b6763);
+  box-shadow: 0 0 0 2px rgba(11, 103, 99, 0.12);
+}
+
+.bs-cs-custom-input-heading {
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--bs-ui-muted, #4a6360);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.bs-cs-custom-output > span {
+  color: var(--bs-ui-muted, #4a6360);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.bs-cs-custom-output pre {
+  margin: 5px 0 0;
+  padding: 9px;
+  overflow: auto;
+  border-radius: 6px;
+  background: #14212a;
+  color: #d9f7ed;
+  font: 0.78rem/1.45 var(--bs-ui-font-mono, monospace);
+}
+
+@media (max-width: 1439px) {
+  .bs-cs-header-streak {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1180px) {
+  .bs-cs-header-meta {
+    display: none !important;
+  }
+
+  .bs-cs-header {
+    align-items: flex-start !important;
+    flex-wrap: wrap;
+    gap: 6px !important;
+    padding: 8px 12px !important;
+  }
+
+  .bs-cs-header-left,
+  .bs-cs-header-right {
+    flex: 1 1 100% !important;
+    width: 100%;
+  }
+
+  .bs-cs-header-right {
+    justify-content: flex-end !important;
+  }
+
+  .bs-cs-workspace {
+    grid-template-columns: minmax(280px, 42%) 8px minmax(0, 1fr);
+  }
+
+  .bs-cs-left-nav {
+    padding-inline: 10px;
+    overflow-x: auto;
+  }
+
+  .bs-cs-left-body,
+  .bs-cs-console-body {
+    padding: 16px !important;
+  }
+}
+
+.bs-cs-settings-drawer .bs-drawer-header,
+.bs-cs-settings-drawer .bs-drawer-footer {
+  background: var(--bs-ui-surface, #ffffff);
+  border-color: var(--bs-ui-line, #d7e8e4);
+}
+
+.bs-cs-settings-drawer .bs-drawer-body {
+  gap: 24px;
+  padding: 22px;
+  background: var(--bs-ui-surface, #ffffff);
+}
+
+.bs-cs-settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--bs-ui-line, #d7e8e4);
+}
+
+.bs-cs-settings-section:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.bs-cs-settings-section h4 {
+  margin: 0;
+  color: var(--bs-ui-ink, #123333);
+  font-size: 0.9rem;
+}
+
+.bs-cs-settings-section p,
+.bs-cs-settings-inline-action span {
+  display: block;
+  margin: 4px 0 0;
+  color: var(--bs-ui-muted, #4a6360);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.bs-cs-settings-choice-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.bs-cs-settings-field,
+.bs-cs-settings-inline-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 36px;
+  color: var(--bs-ui-ink, #123333);
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.bs-cs-settings-field select {
+  min-width: 148px;
+  padding: 7px 28px 7px 10px;
+  border: 1px solid var(--bs-ui-line, #d7e8e4);
+  border-radius: 6px;
+  background: var(--bs-ui-canvas, #f1f8f6);
+  color: var(--bs-ui-ink, #123333);
+  font: inherit;
+}
+
+.bs-cs-settings-workspace-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.bs-cs-settings-workspace-actions .bs-button {
+  justify-content: flex-start;
+}
+
+.bs-cs-settings-drawer--dark,
+.bs-cs-settings-drawer--dark .bs-drawer-header,
+.bs-cs-settings-drawer--dark .bs-drawer-body {
+  background: #0f172a;
+  color: #e2e8f0;
+  border-color: #334155;
+}
+
+.bs-cs-settings-drawer--dark .bs-drawer-title,
+.bs-cs-settings-drawer--dark .bs-cs-settings-section h4,
+.bs-cs-settings-drawer--dark .bs-cs-settings-field {
+  color: #e2e8f0;
+}
+
+.bs-cs-settings-drawer--dark .bs-drawer-subtitle,
+.bs-cs-settings-drawer--dark .bs-cs-settings-section p,
+.bs-cs-settings-drawer--dark .bs-cs-settings-inline-action span {
+  color: #94a3b8;
+}
+
+.bs-cs-settings-drawer--dark .bs-cs-settings-section,
+.bs-cs-settings-drawer--dark .bs-drawer-header {
+  border-color: #334155;
+}
+
+.bs-cs-settings-drawer--dark .bs-cs-settings-field select {
+  background: #1e293b;
+  color: #e2e8f0;
+  border-color: #475569;
+}
+
+.bs-coding-studio--dark .bs-cs-example,
+.bs-coding-studio--dark .bs-cs-testcase-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.bs-coding-studio--dark .bs-cs-testcase-tab:hover,
+.bs-coding-studio--dark .bs-cs-testcase-add:hover {
+  background: #1e293b;
+  border-color: #475569;
+}
+
+@media (max-width: 1023px) {
+  .bs-coding-studio:not(.bs-coding-studio--fullscreen):not(.bs-coding-studio--zen) {
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  .bs-cs-workspace {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: minmax(300px, 46dvh) minmax(600px, auto);
+    overflow: visible !important;
+  }
+
+  .bs-cs-left-pane-wrapper,
+  .bs-cs-left-collapsed-rail,
+  .bs-cs-right-pane {
+    grid-column: 1;
+  }
+
+  .bs-cs-left-pane-wrapper,
+  .bs-cs-left-collapsed-rail {
+    grid-row: 1;
+  }
+
+  .bs-cs-right-pane {
+    grid-row: 2;
+  }
+
+  .bs-cs-split-divider--horizontal {
+    display: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Production dark workspace
+   A dark studio is an ink workspace with quiet elevation—not the light UI
+   painted slate. These tokens also reach drawers and menus mounted at body.
+   -------------------------------------------------------------------------- */
+html.bs-cs-dark-mode {
+  color-scheme: dark;
+  --bs-cs-night-0: #1e1e1e;
+  --bs-cs-night-1: #1e1e1e;
+  --bs-cs-night-2: #252526;
+  --bs-cs-night-3: #333333;
+  --bs-cs-night-line: #3c3c3c;
+  --bs-cs-night-line-strong: #4d4d4d;
+  --bs-cs-night-ink: #d4d4d4;
+  --bs-cs-night-muted: #a6a6a6;
+  --bs-cs-night-dim: #858585;
+  --bs-cs-night-accent: #3794ff;
+  --bs-cs-night-accent-strong: #0e639c;
+
+  --bs-ui-surface: var(--bs-cs-night-2);
+  --bs-ui-canvas: var(--bs-cs-night-0);
+  --bs-ui-card: var(--bs-cs-night-2);
+  --bs-ui-ink: var(--bs-cs-night-ink);
+  --bs-ui-muted: var(--bs-cs-night-muted);
+  --bs-ui-line: var(--bs-cs-night-line);
+  --bs-ui-brand: var(--bs-cs-night-accent);
+  --bs-ui-brand-soft: rgba(55, 148, 255, 0.16);
+
+  --bs-color-bg-surface: var(--bs-cs-night-2);
+  --bs-color-bg-subtle: var(--bs-cs-night-3);
+  --bs-color-bg-hover: #2a2d2e;
+  --bs-color-bg-disabled: #3a3d41;
+  --bs-color-border-subtle: var(--bs-cs-night-line);
+  --bs-color-text-primary: var(--bs-cs-night-ink);
+  --bs-color-text-secondary: var(--bs-cs-night-muted);
+  --bs-color-text-tertiary: var(--bs-cs-night-dim);
+  --bs-color-text-muted: var(--bs-cs-night-muted);
+  --bs-color-interactive: var(--bs-cs-night-accent-strong);
+  --bs-color-teal-primary: var(--bs-cs-night-accent);
+  --bs-color-teal-border: rgba(55, 148, 255, 0.68);
+  --bs-color-teal-subtle: rgba(55, 148, 255, 0.16);
+  --bs-color-success: #89d185;
+  --bs-color-warning: #d7ba7d;
+  --bs-color-danger: #f48771;
+}
+
+html.bs-cs-dark-mode,
+html.bs-cs-dark-mode body {
+  background: var(--bs-cs-night-0);
+  color: var(--bs-cs-night-ink);
+}
+
+html.bs-cs-dark-mode .bs-super-studio-shell {
+  background: var(--bs-cs-night-0) !important;
+  color: var(--bs-cs-night-ink) !important;
+}
+
+html.bs-cs-dark-mode .bs-super-studio-shell__header {
+  background: rgba(37, 37, 38, 0.96) !important;
+  border-color: var(--bs-cs-night-line) !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.025) !important;
+}
+
+html.bs-cs-dark-mode .bs-super-studio-shell__main {
+  background: var(--bs-cs-night-0) !important;
+}
+
+html.bs-cs-dark-mode .bs-super-studio-shell__activity-select,
+html.bs-cs-dark-mode .bs-cs-language-select select,
+html.bs-cs-dark-mode .bs-cs-settings-field select {
+  background: var(--bs-cs-night-2) !important;
+  border-color: var(--bs-cs-night-line) !important;
+  color: var(--bs-cs-night-ink) !important;
+}
+
+html.bs-cs-dark-mode .bs-super-studio-shell__activity-select option,
+html.bs-cs-dark-mode .bs-cs-language-select option,
+html.bs-cs-dark-mode .bs-cs-settings-field option {
+  background: var(--bs-cs-night-2);
+  color: var(--bs-cs-night-ink);
+}
+
+.bs-coding-studio--dark {
+  /* Override the legacy local token values declared above this block. */
+  --bs-cs-night-0: #1e1e1e;
+  --bs-cs-night-1: #1e1e1e;
+  --bs-cs-night-2: #252526;
+  --bs-cs-night-3: #333333;
+  --bs-cs-night-line: #3c3c3c;
+  --bs-cs-night-line-strong: #4d4d4d;
+  --bs-cs-night-ink: #d4d4d4;
+  --bs-cs-night-muted: #a6a6a6;
+  --bs-cs-night-dim: #858585;
+  --bs-cs-night-accent: #3794ff;
+  --bs-cs-night-accent-strong: #0e639c;
+  --bs-ui-surface: var(--bs-cs-night-2);
+  --bs-ui-canvas: var(--bs-cs-night-0);
+  --bs-ui-card: var(--bs-cs-night-2);
+  --bs-ui-ink: var(--bs-cs-night-ink);
+  --bs-ui-muted: var(--bs-cs-night-muted);
+  --bs-ui-line: var(--bs-cs-night-line);
+  --bs-ui-brand: var(--bs-cs-night-accent);
+  --bs-ui-brand-soft: rgba(55, 148, 255, 0.16);
+  --bs-color-bg-surface: var(--bs-cs-night-2);
+  --bs-color-bg-subtle: var(--bs-cs-night-3);
+  --bs-color-bg-hover: #2a2d2e;
+  --bs-color-bg-disabled: #3a3d41;
+  --bs-color-border-subtle: var(--bs-cs-night-line);
+  --bs-color-text-primary: var(--bs-cs-night-ink);
+  --bs-color-text-secondary: var(--bs-cs-night-muted);
+  --bs-color-text-tertiary: var(--bs-cs-night-dim);
+  --bs-color-text-muted: var(--bs-cs-night-muted);
+  --bs-color-interactive: var(--bs-cs-night-accent-strong);
+  --bs-color-teal-primary: var(--bs-cs-night-accent);
+  --bs-color-teal-border: rgba(55, 148, 255, 0.68);
+  --bs-color-teal-subtle: rgba(55, 148, 255, 0.16);
+  background: var(--bs-cs-night-0) !important;
+  border-color: var(--bs-cs-night-line) !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2) !important;
+}
+
+.bs-coding-studio--dark .bs-cs-header,
+.bs-coding-studio--dark .bs-cs-left-pane,
+.bs-coding-studio--dark .bs-cs-left-nav,
+.bs-coding-studio--dark .bs-cs-left-body,
+.bs-coding-studio--dark .bs-cs-editor-panel,
+.bs-coding-studio--dark .bs-cs-editor-toolbar,
+.bs-coding-studio--dark .bs-cs-console-panel,
+.bs-coding-studio--dark .bs-cs-console-toolbar,
+.bs-coding-studio--dark .bs-cs-left-collapsed-rail,
+.bs-coding-studio--dark .bs-cs-right-collapsed-rail {
+  background: var(--bs-cs-night-2) !important;
+  border-color: var(--bs-cs-night-line) !important;
+  color: var(--bs-cs-night-ink) !important;
+}
+
+.bs-coding-studio--dark .bs-cs-right-pane,
+.bs-coding-studio--dark .bs-cs-console-body,
+.bs-coding-studio--dark .bs-cs-editor-stage {
+  background: var(--bs-cs-night-0) !important;
+}
+
+.bs-coding-studio--dark .bs-code-editor--dark,
+.bs-coding-studio--dark .bs-code-editor--dark .bs-code-editor-codemirror,
+.bs-coding-studio--dark .bs-code-editor--dark .cm-editor,
+.bs-coding-studio--dark .bs-code-editor--dark .cm-scroller,
+.bs-coding-studio--dark .bs-code-editor--dark .cm-content,
+.bs-coding-studio--dark .bs-code-editor--dark .cm-gutters {
+  background: var(--bs-cs-night-1) !important;
+}
+
+.bs-coding-studio--dark .bs-code-editor--dark,
+.bs-coding-studio--dark .bs-code-editor--dark .bs-code-editor-footer,
+.bs-coding-studio--dark .bs-code-editor--dark .cm-gutters {
+  border-color: var(--bs-cs-night-line) !important;
+}
+
+.bs-coding-studio--dark .bs-code-editor--dark .bs-code-editor-footer {
+  background: var(--bs-cs-night-2) !important;
+  color: var(--bs-cs-night-muted) !important;
+}
+
+.bs-coding-studio--dark .bs-code-editor--dark .cm-content,
+.bs-coding-studio--dark .bs-code-editor--dark .cm-line {
+  color: var(--bs-cs-night-ink) !important;
+}
+
+.bs-coding-studio--dark .bs-code-editor--dark .cm-activeLine,
+.bs-coding-studio--dark .bs-code-editor--dark .cm-activeLineGutter {
+  background: rgba(38, 79, 120, 0.75) !important;
+}
+
+.bs-coding-studio--dark .bs-code-editor--dark .cm-activeLineGutter {
+  color: var(--bs-cs-night-accent) !important;
+}
+
+.bs-coding-studio--dark .bs-code-editor--dark .cm-cursor {
+  border-left-color: #aeafad !important;
+}
+
+.bs-coding-studio--dark .bs-code-editor--dark .cm-selectionBackground,
+.bs-coding-studio--dark .bs-code-editor--dark .cm-content ::selection {
+  background: #264f78 !important;
+}
+
+.bs-coding-studio--dark .bs-cs-card,
+.bs-coding-studio--dark .bs-cs-example,
+.bs-coding-studio--dark .bs-cs-testcase-card {
+  background: var(--bs-cs-night-2) !important;
+  border-color: var(--bs-cs-night-line) !important;
+  color: var(--bs-cs-night-ink) !important;
+}
+
+.bs-coding-studio--dark .bs-cs-code-block,
+.bs-coding-studio--dark .bs-cs-testcase-field textarea,
+.bs-coding-studio--dark .bs-cs-custom-input {
+  background: var(--bs-cs-night-1) !important;
+  border-color: var(--bs-cs-night-line) !important;
+  color: var(--bs-cs-night-ink) !important;
+}
+
+.bs-coding-studio--dark textarea::placeholder,
+.bs-coding-studio--dark input::placeholder {
+  color: var(--bs-cs-night-dim);
+}
+
+.bs-coding-studio--dark .bs-cs-testcase-tab:hover,
+.bs-coding-studio--dark .bs-cs-testcase-add:hover {
+  background: var(--bs-cs-night-3) !important;
+  border-color: var(--bs-cs-night-line-strong) !important;
+}
+
+.bs-coding-studio--dark .bs-cs-testcase-tab--active {
+  background: rgba(55, 148, 255, 0.16) !important;
+  border-color: rgba(55, 148, 255, 0.44) !important;
+  color: var(--bs-cs-night-accent) !important;
+}
+
+.bs-coding-studio--dark .bs-cs-custom-output pre {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  border: 1px solid var(--bs-cs-night-line);
+}
+
+.bs-coding-studio--dark .bs-cs-left-body .katex,
+.bs-coding-studio--dark .bs-cs-left-body .katex * {
+  color: var(--bs-cs-night-ink) !important;
+}
+
+.bs-coding-studio--dark .bs-cs-left-body p,
+.bs-coding-studio--dark .bs-cs-left-body li,
+.bs-coding-studio--dark .bs-cs-left-body label,
+.bs-coding-studio--dark .bs-cs-left-body strong {
+  color: inherit;
+}
+
+/* UI primitives use these exact class names; the previous dark selectors used
+   an obsolete bs-btn prefix, leaving light controls inside the dark studio. */
+html.bs-cs-dark-mode .bs-button--variant-secondary {
+  background: var(--bs-cs-night-3) !important;
+  border-color: var(--bs-cs-night-line) !important;
+  color: var(--bs-cs-night-ink) !important;
+}
+
+html.bs-cs-dark-mode .bs-button--variant-secondary:hover:not(:disabled):not(.bs-button--loading) {
+  background: #2a2d2e !important;
+  border-color: var(--bs-cs-night-line-strong) !important;
+  color: #ffffff !important;
+}
+
+html.bs-cs-dark-mode .bs-button--variant-outline {
+  background: transparent !important;
+  border-color: var(--bs-cs-night-line) !important;
+  color: var(--bs-cs-night-ink) !important;
+}
+
+html.bs-cs-dark-mode .bs-button--variant-outline:hover:not(:disabled):not(.bs-button--loading) {
+  background: rgba(55, 148, 255, 0.16) !important;
+  border-color: rgba(55, 148, 255, 0.72) !important;
+  color: #9cdcfe !important;
+}
+
+html.bs-cs-dark-mode .bs-button--variant-primary {
+  background: var(--bs-cs-night-accent-strong) !important;
+  border-color: var(--bs-cs-night-accent-strong) !important;
+  color: #ffffff !important;
+}
+
+html.bs-cs-dark-mode .bs-button--variant-primary:hover:not(:disabled):not(.bs-button--loading) {
+  background: #1177bb !important;
+  border-color: #1177bb !important;
+}
+
+html.bs-cs-dark-mode .bs-tabs--line.bs-tabs--row {
+  border-color: var(--bs-cs-night-line) !important;
+}
+
+html.bs-cs-dark-mode .bs-tab-item {
+  color: var(--bs-cs-night-muted) !important;
+}
+
+html.bs-cs-dark-mode .bs-tab-item:hover:not(.bs-tab-item--disabled) {
+  color: var(--bs-cs-night-ink) !important;
+}
+
+html.bs-cs-dark-mode .bs-tab-item--active,
+html.bs-cs-dark-mode .bs-tab-item[aria-selected="true"] {
+  color: var(--bs-cs-night-accent) !important;
+}
+
+html.bs-cs-dark-mode .bs-badge--subtle-primary {
+  background: rgba(55, 148, 255, 0.16) !important;
+  color: #9cdcfe !important;
+}
+
+html.bs-cs-dark-mode .bs-badge--subtle-success {
+  background: rgba(137, 209, 133, 0.14) !important;
+  color: #b5cea8 !important;
+}
+
+html.bs-cs-dark-mode .bs-badge--subtle-warning {
+  background: rgba(215, 186, 125, 0.14) !important;
+  color: #d7ba7d !important;
+}
+
+html.bs-cs-dark-mode .bs-badge--subtle-danger {
+  background: rgba(244, 135, 113, 0.14) !important;
+  color: #f48771 !important;
+}
+
+html.bs-cs-dark-mode .bs-badge--subtle-neutral {
+  background: rgba(148, 163, 184, 0.13) !important;
+  color: #cbd5e1 !important;
+}
+
+html.bs-cs-dark-mode .bs-dropdown-overlay,
+html.bs-cs-dark-mode .bs-dropdown-menu {
+  background: var(--bs-cs-night-2) !important;
+  border-color: var(--bs-cs-night-line) !important;
+  color: var(--bs-cs-night-ink) !important;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.34) !important;
+}
+
+html.bs-cs-dark-mode .bs-dropdown-item {
+  color: var(--bs-cs-night-ink) !important;
+}
+
+html.bs-cs-dark-mode .bs-dropdown-item:hover:not(.bs-dropdown-item--disabled),
+html.bs-cs-dark-mode .bs-dropdown-item--active:not(.bs-dropdown-item--disabled),
+html.bs-cs-dark-mode .bs-dropdown-item--selected:not(.bs-dropdown-item--disabled) {
+  background: #094771 !important;
+  color: #ffffff !important;
+}
+
+html.bs-cs-dark-mode .bs-dropdown-divider,
+html.bs-cs-dark-mode .bs-dropdown-header-slot,
+html.bs-cs-dark-mode .bs-dropdown-footer-slot {
+  border-color: var(--bs-cs-night-line) !important;
+  background-color: var(--bs-cs-night-2) !important;
+}
+
+.bs-cs-settings-drawer--dark,
+.bs-cs-settings-drawer--dark .bs-drawer-header,
+.bs-cs-settings-drawer--dark .bs-drawer-body,
+.bs-cs-settings-drawer--dark .bs-drawer-footer {
+  background: var(--bs-cs-night-1) !important;
+  border-color: var(--bs-cs-night-line) !important;
+  color: var(--bs-cs-night-ink) !important;
+}
+
+.bs-cs-settings-drawer--dark .bs-cs-settings-section {
+  border-color: var(--bs-cs-night-line) !important;
+}
+
+.bs-cs-settings-drawer--dark .bs-drawer-title,
+.bs-cs-settings-drawer--dark .bs-cs-settings-section h4,
+.bs-cs-settings-drawer--dark .bs-cs-settings-field,
+.bs-cs-settings-drawer--dark .bs-cs-settings-inline-action strong {
+  color: var(--bs-cs-night-ink) !important;
+}
+
+html.bs-cs-dark-mode .bs-cs-command-palette,
+html.bs-cs-dark-mode .bs-cs-modal-card {
+  background: var(--bs-cs-night-2) !important;
+  border-color: var(--bs-cs-night-line) !important;
+  color: var(--bs-cs-night-ink) !important;
+}
+
+html.bs-cs-dark-mode .bs-cs-command-palette > div:first-child,
+html.bs-cs-dark-mode .bs-cs-modal-card > div:first-child,
+html.bs-cs-dark-mode .bs-cs-modal-card > div:last-child {
+  background: var(--bs-cs-night-2) !important;
+  border-color: var(--bs-cs-night-line) !important;
+}
+
+html.bs-cs-dark-mode .bs-cs-command-palette .bs-cs-kbd,
+html.bs-cs-dark-mode .bs-cs-modal-card kbd {
+  background: var(--bs-cs-night-3) !important;
+  border-color: var(--bs-cs-night-line) !important;
+  color: var(--bs-cs-night-ink) !important;
+  box-shadow: none !important;
+}
+
+html.bs-cs-dark-mode .bs-cs-modal-card > div:nth-child(2) {
+  background: rgba(251, 191, 36, 0.12) !important;
+  border-color: rgba(251, 191, 36, 0.28) !important;
+  color: #fcd34d !important;
+}
+
+.bs-cs-diff-viewer {
+  --bs-cs-diff-toolbar: #f8fafc;
+  --bs-cs-diff-switcher: #e2e8f0;
+  --bs-cs-diff-ink: #1e293b;
+  --bs-cs-diff-muted: #64748b;
+  --bs-cs-diff-empty: #cbd5e1;
+  --bs-cs-diff-success-surface: #f0fdf4;
+  --bs-cs-diff-success-line: #bbf7d0;
+  --bs-cs-diff-success-ink: #166534;
+  --bs-cs-diff-danger-surface: #fef2f2;
+  --bs-cs-diff-danger-line: #fecaca;
+  --bs-cs-diff-danger-ink: #991b1b;
+  --bs-cs-diff-warning-surface: #fef3c7;
+  --bs-cs-diff-warning-line: #fde68a;
+  --bs-cs-diff-warning-ink: #b45309;
+}
+
+.bs-coding-studio--dark .bs-cs-diff-viewer {
+  --bs-cs-diff-toolbar: #252526;
+  --bs-cs-diff-switcher: #333333;
+  --bs-cs-diff-ink: #d4d4d4;
+  --bs-cs-diff-muted: #a6a6a6;
+  --bs-cs-diff-empty: #858585;
+  --bs-cs-diff-success-surface: rgba(137, 209, 133, 0.1);
+  --bs-cs-diff-success-line: rgba(137, 209, 133, 0.32);
+  --bs-cs-diff-success-ink: #b5cea8;
+  --bs-cs-diff-danger-surface: rgba(244, 135, 113, 0.1);
+  --bs-cs-diff-danger-line: rgba(244, 135, 113, 0.32);
+  --bs-cs-diff-danger-ink: #f48771;
+  --bs-cs-diff-warning-surface: rgba(215, 186, 125, 0.1);
+  --bs-cs-diff-warning-line: rgba(215, 186, 125, 0.32);
+  --bs-cs-diff-warning-ink: #d7ba7d;
 }
 
 

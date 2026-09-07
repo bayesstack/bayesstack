@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Badge, Button, Icon } from "@bayesstack/ui";
+import { Button, Icon } from "@bayesstack/ui";
 import type { TestCase, CodingActivityConfig } from "../../types";
 import { MathText } from "../common/MathText";
 
@@ -33,10 +33,11 @@ export function ProblemDescriptionTab({
   ];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-      {/* Problem Title & Meta */}
+    <div className="bs-cs-problem-content">
+      {/* Problem title stays singular; difficulty and limits live in the studio header. */}
       <div>
         <h2
+          className="bs-cs-problem-title"
           style={{
             margin: "0 0 8px",
             fontSize: "1.25rem",
@@ -46,23 +47,13 @@ export function ProblemDescriptionTab({
         >
           {title}
         </h2>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-          <Badge color="primary" variant="subtle" size="sm">
-            {String(config.difficulty || "Medium")}
-          </Badge>
-          <Badge color="neutral" variant="subtle" size="sm">
-            Time: {config.time_limit_ms || 2000}ms
-          </Badge>
-          <Badge color="neutral" variant="subtle" size="sm">
-            Memory: {config.memory_limit_mb || 256}MB
-          </Badge>
-        </div>
       </div>
 
       {/* Description Prompt with KaTeX */}
       <div
+        className="bs-cs-problem-prompt"
         style={{
-          fontSize: "0.9rem",
+          fontSize: "0.875rem",
           color: "var(--bs-ui-ink, #123333)",
           lineHeight: 1.65,
         }}
@@ -77,10 +68,11 @@ export function ProblemDescriptionTab({
       {/* Examples */}
       <div>
         <h3
+          className="bs-cs-problem-section-title"
           style={{
             margin: "0 0 10px",
             fontSize: "0.85rem",
-            color: "var(--bs-ui-brand, #0b6763)",
+            color: "var(--bs-ui-ink, #123333)",
             fontWeight: 700,
             textTransform: "uppercase",
             letterSpacing: "0.5px",
@@ -93,14 +85,14 @@ export function ProblemDescriptionTab({
           {sampleList.map((example, idx) => (
             <div
               key={example.id || idx}
-              className="bs-cs-card"
-              style={{
-                background: "var(--bs-ui-surface, #ffffff)",
-                border: "1px solid var(--bs-ui-line, #d7e8e4)",
-                borderRadius: "8px",
-                padding: "12px 14px",
-                fontSize: "0.85rem",
-                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.02)",
+            className="bs-cs-example"
+            style={{
+              background: "var(--bs-ui-surface, #ffffff)",
+              border: "1px solid var(--bs-ui-line, #d7e8e4)",
+              borderRadius: "8px",
+              padding: "10px 12px",
+              fontSize: "0.85rem",
+              boxShadow: "none",
               }}
             >
               <div
@@ -117,10 +109,12 @@ export function ProblemDescriptionTab({
                 <Button
                   variant="secondary"
                   size="xs"
-                  leftIcon={<Icon name={copiedIndex === idx ? "Check" : "Copy"} size={12} />}
+                  className="bs-cs-example-copy"
+                  aria-label={copiedIndex === idx ? "Example copied" : `Copy example ${idx + 1}`}
+                  title={copiedIndex === idx ? "Example copied" : "Copy example"}
                   onClick={() => handleCopy(`Input:\n${example.input}\nOutput:\n${example.expected}`, idx)}
                 >
-                  {copiedIndex === idx ? "Copied" : "Copy"}
+                  <Icon name={copiedIndex === idx ? "Check" : "Copy"} size={12} />
                 </Button>
               </div>
 
@@ -138,7 +132,7 @@ export function ProblemDescriptionTab({
                       background: "var(--bs-ui-canvas, #f1f8f6)",
                       border: "1px solid var(--bs-ui-line, #d7e8e4)",
                       borderRadius: "6px",
-                      padding: "8px 12px",
+                      padding: "7px 10px",
                       lineHeight: 1.5,
                       whiteSpace: "pre-wrap",
                       wordBreak: "break-all",
@@ -161,7 +155,7 @@ export function ProblemDescriptionTab({
                       background: "var(--bs-ui-canvas, #f1f8f6)",
                       border: "1px solid var(--bs-ui-line, #d7e8e4)",
                       borderRadius: "6px",
-                      padding: "8px 12px",
+                      padding: "7px 10px",
                       lineHeight: 1.5,
                       whiteSpace: "pre-wrap",
                       wordBreak: "break-all",

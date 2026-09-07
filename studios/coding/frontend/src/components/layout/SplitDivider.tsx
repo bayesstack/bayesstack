@@ -1,5 +1,4 @@
 import React from "react";
-import { Icon } from "@bayesstack/ui";
 
 export interface SplitDividerProps {
   direction: "horizontal" | "vertical";
@@ -7,9 +6,6 @@ export interface SplitDividerProps {
   onPointerDown: (e: React.PointerEvent<HTMLDivElement>) => void;
   onDoubleClick?: () => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLDivElement>) => void;
-  isCollapsed?: boolean;
-  onToggleCollapse?: () => void;
-  collapseTitle?: string;
   title?: string;
   ariaValueNow?: number;
   className?: string;
@@ -22,9 +18,6 @@ export function SplitDivider({
   onPointerDown,
   onDoubleClick,
   onKeyDown,
-  isCollapsed = false,
-  onToggleCollapse,
-  collapseTitle,
   title,
   ariaValueNow,
   className = "",
@@ -131,70 +124,32 @@ export function SplitDivider({
               }),
         }}
       >
-        {onToggleCollapse ? (
-          <button
-            type="button"
-            tabIndex={-1}
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleCollapse();
-            }}
-            title={collapseTitle || (isCollapsed ? "Expand panel" : "Collapse panel")}
-            aria-label={collapseTitle || (isCollapsed ? "Expand panel" : "Collapse panel")}
+        <>
+          <span
             style={{
-              background: "transparent",
-              border: "none",
-              padding: 0,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: isDragging ? "#ffffff" : "var(--bs-ui-muted, #4a6360)",
-              width: "100%",
-              height: "100%",
+              width: "3px",
+              height: "3px",
+              borderRadius: "50%",
+              background: isDragging ? "#ffffff" : "var(--bs-ui-muted, #4a6360)",
             }}
-          >
-            <Icon
-              name={
-                isHorizontal
-                  ? isCollapsed
-                    ? "ChevronRight"
-                    : "ChevronLeft"
-                  : isCollapsed
-                  ? "ChevronUp"
-                  : "ChevronDown"
-              }
-              size={11}
-            />
-          </button>
-        ) : (
-          <>
-            <span
-              style={{
-                width: "3px",
-                height: "3px",
-                borderRadius: "50%",
-                background: isDragging ? "#ffffff" : "var(--bs-ui-muted, #4a6360)",
-              }}
-            />
-            <span
-              style={{
-                width: "3px",
-                height: "3px",
-                borderRadius: "50%",
-                background: isDragging ? "#ffffff" : "var(--bs-ui-muted, #4a6360)",
-              }}
-            />
-            <span
-              style={{
-                width: "3px",
-                height: "3px",
-                borderRadius: "50%",
-                background: isDragging ? "#ffffff" : "var(--bs-ui-muted, #4a6360)",
-              }}
-            />
-          </>
-        )}
+          />
+          <span
+            style={{
+              width: "3px",
+              height: "3px",
+              borderRadius: "50%",
+              background: isDragging ? "#ffffff" : "var(--bs-ui-muted, #4a6360)",
+            }}
+          />
+          <span
+            style={{
+              width: "3px",
+              height: "3px",
+              borderRadius: "50%",
+              background: isDragging ? "#ffffff" : "var(--bs-ui-muted, #4a6360)",
+            }}
+          />
+        </>
       </div>
     </div>
   );

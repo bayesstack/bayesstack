@@ -52,7 +52,7 @@ describe("TestCaseView Inline Editable Component", () => {
       />
     );
 
-    const addBtn = screen.getByRole("button", { name: /Add/i });
+    const addBtn = screen.getByRole("button", { name: "Add test case" });
     fireEvent.click(addBtn);
 
     expect(onTestCasesChange).toHaveBeenCalled();
@@ -74,8 +74,8 @@ describe("TestCaseView Inline Editable Component", () => {
       />
     );
 
-    const cloneBtn = screen.getByRole("button", { name: /Clone/i });
-    fireEvent.click(cloneBtn);
+    fireEvent.click(screen.getByRole("button", { name: "Case actions" }));
+    fireEvent.click(screen.getByText("Duplicate case"));
 
     expect(onTestCasesChange).toHaveBeenCalled();
     const updatedCases = onTestCasesChange.mock.calls[0][0];

@@ -349,7 +349,7 @@ export function OutputDiffViewer({
           key={index}
           style={{
             backgroundColor: "rgba(34, 197, 94, 0.28)",
-            color: "#166534",
+            color: "var(--bs-cs-diff-success-ink)",
             fontWeight: 700,
             borderRadius: "3px",
             padding: "0 2px",
@@ -367,7 +367,7 @@ export function OutputDiffViewer({
         key={index}
         style={{
           backgroundColor: "rgba(239, 68, 68, 0.28)",
-          color: "#991b1b",
+          color: "var(--bs-cs-diff-danger-ink)",
           fontWeight: 700,
           borderRadius: "3px",
           padding: "0 2px",
@@ -399,7 +399,7 @@ export function OutputDiffViewer({
           alignItems: "center",
           justifyContent: "space-between",
           padding: "6px 10px",
-          background: "#f8fafc",
+          background: "var(--bs-cs-diff-toolbar)",
           border: "1px solid var(--bs-ui-line, #d7e8e4)",
           borderRadius: "8px",
           gap: "8px",
@@ -420,11 +420,11 @@ export function OutputDiffViewer({
                 gap: "4px",
                 fontSize: "0.74rem",
                 fontWeight: 600,
-                color: "#b45309",
-                background: "#fef3c7",
+                color: "var(--bs-cs-diff-warning-ink)",
+                background: "var(--bs-cs-diff-warning-surface)",
                 padding: "2px 8px",
                 borderRadius: "6px",
-                border: "1px solid #fde68a",
+                border: "1px solid var(--bs-cs-diff-warning-line)",
               }}
             >
               ⚠️ Trailing whitespace or newline mismatch
@@ -437,18 +437,18 @@ export function OutputDiffViewer({
                 gap: "4px",
                 fontSize: "0.74rem",
                 fontWeight: 600,
-                color: "#b91c1c",
-                background: "#fee2e2",
+                color: "var(--bs-cs-diff-danger-ink)",
+                background: "var(--bs-cs-diff-danger-surface)",
                 padding: "2px 8px",
                 borderRadius: "6px",
-                border: "1px solid #fecaca",
+                border: "1px solid var(--bs-cs-diff-danger-line)",
               }}
             >
               First mismatch: Line {firstDiff.line}, Col {firstDiff.col} (Expected {firstDiff.expectedChar}, Got {firstDiff.actualChar})
             </span>
           ) : null}
 
-          <span style={{ fontSize: "0.7rem", color: "#64748b" }}>
+          <span style={{ fontSize: "0.7rem", color: "var(--bs-cs-diff-muted)" }}>
             Length: Exp {expected.length} chars / Act {actual.length} chars
           </span>
         </div>
@@ -458,7 +458,7 @@ export function OutputDiffViewer({
           style={{
             display: "inline-flex",
             alignItems: "center",
-            background: "#e2e8f0",
+            background: "var(--bs-cs-diff-switcher)",
             padding: "2px",
             borderRadius: "6px",
             gap: "2px",
@@ -475,7 +475,7 @@ export function OutputDiffViewer({
               border: "none",
               cursor: "pointer",
               background: mode === "side-by-side" ? "var(--bs-ui-surface, #ffffff)" : "transparent",
-              color: mode === "side-by-side" ? "var(--bs-ui-brand, #0b6763)" : "#64748b",
+              color: mode === "side-by-side" ? "var(--bs-ui-brand, #0b6763)" : "var(--bs-cs-diff-muted)",
               boxShadow: mode === "side-by-side" ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
             }}
           >
@@ -493,7 +493,7 @@ export function OutputDiffViewer({
               border: "none",
               cursor: "pointer",
               background: mode === "inline" ? "var(--bs-ui-surface, #ffffff)" : "transparent",
-              color: mode === "inline" ? "var(--bs-ui-brand, #0b6763)" : "#64748b",
+              color: mode === "inline" ? "var(--bs-ui-brand, #0b6763)" : "var(--bs-cs-diff-muted)",
               boxShadow: mode === "inline" ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
             }}
           >
@@ -511,7 +511,7 @@ export function OutputDiffViewer({
               border: "none",
               cursor: "pointer",
               background: mode === "raw" ? "var(--bs-ui-surface, #ffffff)" : "transparent",
-              color: mode === "raw" ? "var(--bs-ui-brand, #0b6763)" : "#64748b",
+              color: mode === "raw" ? "var(--bs-ui-brand, #0b6763)" : "var(--bs-cs-diff-muted)",
               boxShadow: mode === "raw" ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
             }}
           >
@@ -540,11 +540,11 @@ export function OutputDiffViewer({
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "4px 10px",
-                background: "#f0fdf4",
-                borderBottom: "1px solid #bbf7d0",
+                background: "var(--bs-cs-diff-success-surface)",
+                borderBottom: "1px solid var(--bs-cs-diff-success-line)",
                 fontSize: "0.72rem",
                 fontWeight: 700,
-                color: "#166534",
+                color: "var(--bs-cs-diff-success-ink)",
               }}
             >
               <span>Expected Output</span>
@@ -556,7 +556,7 @@ export function OutputDiffViewer({
                   border: "none",
                   cursor: "pointer",
                   fontSize: "0.7rem",
-                  color: "#166534",
+                  color: "var(--bs-cs-diff-success-ink)",
                   display: "flex",
                   alignItems: "center",
                   gap: "3px",
@@ -587,7 +587,7 @@ export function OutputDiffViewer({
                         width: "32px",
                         textAlign: "right",
                         paddingRight: "8px",
-                        color: "#94a3b8",
+                        color: "var(--bs-cs-diff-muted)",
                         userSelect: "none",
                         fontSize: "0.7rem",
                         lineHeight: "1.4em",
@@ -602,13 +602,13 @@ export function OutputDiffViewer({
                         paddingRight: "8px",
                         whiteSpace: "pre",
                         lineHeight: "1.4em",
-                        color: isMismatch ? "#166534" : "#1e293b",
+                        color: isMismatch ? "var(--bs-cs-diff-success-ink)" : "var(--bs-cs-diff-ink)",
                       }}
                     >
                       {row.expectedTokens && row.expectedTokens.length > 0
                         ? row.expectedTokens.map((t, tidx) => renderToken(t, tidx, true))
                         : row.expectedText === undefined
-                        ? <span style={{ color: "#cbd5e1", fontStyle: "italic" }}>(empty)</span>
+                        ? <span style={{ color: "var(--bs-cs-diff-empty)", fontStyle: "italic" }}>(empty)</span>
                         : "\n"}
                     </div>
                   </div>
@@ -625,11 +625,11 @@ export function OutputDiffViewer({
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "4px 10px",
-                background: passed ? "#f0fdf4" : "#fef2f2",
-                borderBottom: `1px solid ${passed ? "#bbf7d0" : "#fecaca"}`,
+                background: passed ? "var(--bs-cs-diff-success-surface)" : "var(--bs-cs-diff-danger-surface)",
+                borderBottom: `1px solid ${passed ? "var(--bs-cs-diff-success-line)" : "var(--bs-cs-diff-danger-line)"}`,
                 fontSize: "0.72rem",
                 fontWeight: 700,
-                color: passed ? "#166534" : "#991b1b",
+                color: passed ? "var(--bs-cs-diff-success-ink)" : "var(--bs-cs-diff-danger-ink)",
               }}
             >
               <span>Actual Output</span>
@@ -641,7 +641,7 @@ export function OutputDiffViewer({
                   border: "none",
                   cursor: "pointer",
                   fontSize: "0.7rem",
-                  color: passed ? "#166534" : "#991b1b",
+                  color: passed ? "var(--bs-cs-diff-success-ink)" : "var(--bs-cs-diff-danger-ink)",
                   display: "flex",
                   alignItems: "center",
                   gap: "3px",
@@ -672,7 +672,7 @@ export function OutputDiffViewer({
                         width: "32px",
                         textAlign: "right",
                         paddingRight: "8px",
-                        color: "#94a3b8",
+                        color: "var(--bs-cs-diff-muted)",
                         userSelect: "none",
                         fontSize: "0.7rem",
                         lineHeight: "1.4em",
@@ -687,13 +687,13 @@ export function OutputDiffViewer({
                         paddingRight: "8px",
                         whiteSpace: "pre",
                         lineHeight: "1.4em",
-                        color: isMismatch ? "#991b1b" : "#1e293b",
+                        color: isMismatch ? "var(--bs-cs-diff-danger-ink)" : "var(--bs-cs-diff-ink)",
                       }}
                     >
                       {row.actualTokens && row.actualTokens.length > 0
                         ? row.actualTokens.map((t, tidx) => renderToken(t, tidx, false))
                         : row.actualText === undefined
-                        ? <span style={{ color: "#cbd5e1", fontStyle: "italic" }}>(empty)</span>
+                        ? <span style={{ color: "var(--bs-cs-diff-empty)", fontStyle: "italic" }}>(empty)</span>
                         : "\n"}
                     </div>
                   </div>
@@ -717,19 +717,19 @@ export function OutputDiffViewer({
           <div
             style={{
               padding: "4px 10px",
-              background: "#f8fafc",
-              borderBottom: "1px solid #e2e8f0",
+              background: "var(--bs-cs-diff-toolbar)",
+              borderBottom: "1px solid var(--bs-cs-diff-switcher)",
               fontSize: "0.72rem",
               fontWeight: 700,
-              color: "#475569",
+              color: "var(--bs-cs-diff-muted)",
               display: "flex",
               alignItems: "center",
               gap: "12px",
             }}
           >
             <span>Unified Output Diff:</span>
-            <span style={{ color: "#166534" }}>+ Expected (Missing in actual)</span>
-            <span style={{ color: "#991b1b" }}>- Actual (Unexpected output)</span>
+            <span style={{ color: "var(--bs-cs-diff-success-ink)" }}>+ Expected (Missing in actual)</span>
+            <span style={{ color: "var(--bs-cs-diff-danger-ink)" }}>- Actual (Unexpected output)</span>
           </div>
 
           <div style={{ overflowX: "auto", padding: "6px 0" }}>
@@ -749,7 +749,7 @@ export function OutputDiffViewer({
                         width: "44px",
                         textAlign: "right",
                         paddingRight: "10px",
-                        color: "#94a3b8",
+                        color: "var(--bs-cs-diff-muted)",
                         userSelect: "none",
                         fontSize: "0.7rem",
                         lineHeight: "1.4em",
@@ -757,8 +757,8 @@ export function OutputDiffViewer({
                     >
                       {row.expectedLineNum}
                     </span>
-                    <span style={{ width: "16px", color: "#94a3b8", userSelect: "none" }}> </span>
-                    <div style={{ flex: 1, whiteSpace: "pre", color: "#1e293b", lineHeight: "1.4em" }}>
+                    <span style={{ width: "16px", color: "var(--bs-cs-diff-muted)", userSelect: "none" }}> </span>
+                    <div style={{ flex: 1, whiteSpace: "pre", color: "var(--bs-cs-diff-ink)", lineHeight: "1.4em" }}>
                       {row.expectedText || "\n"}
                     </div>
                   </div>
@@ -781,7 +781,7 @@ export function OutputDiffViewer({
                           width: "44px",
                           textAlign: "right",
                           paddingRight: "10px",
-                          color: "#ef4444",
+                          color: "var(--bs-cs-diff-danger-ink)",
                           userSelect: "none",
                           fontSize: "0.7rem",
                           lineHeight: "1.4em",
@@ -789,8 +789,8 @@ export function OutputDiffViewer({
                       >
                         {row.actualLineNum ?? "-"}
                       </span>
-                      <span style={{ width: "16px", color: "#dc2626", fontWeight: 700, userSelect: "none" }}>-</span>
-                      <div style={{ flex: 1, whiteSpace: "pre", color: "#991b1b", lineHeight: "1.4em" }}>
+                      <span style={{ width: "16px", color: "var(--bs-cs-diff-danger-ink)", fontWeight: 700, userSelect: "none" }}>-</span>
+                      <div style={{ flex: 1, whiteSpace: "pre", color: "var(--bs-cs-diff-danger-ink)", lineHeight: "1.4em" }}>
                         {row.actualTokens && row.actualTokens.length > 0
                           ? row.actualTokens.map((t, tidx) => renderToken(t, tidx, false))
                           : row.actualText}
@@ -812,7 +812,7 @@ export function OutputDiffViewer({
                           width: "44px",
                           textAlign: "right",
                           paddingRight: "10px",
-                          color: "#16a34a",
+                          color: "var(--bs-cs-diff-success-ink)",
                           userSelect: "none",
                           fontSize: "0.7rem",
                           lineHeight: "1.4em",
@@ -820,8 +820,8 @@ export function OutputDiffViewer({
                       >
                         {row.expectedLineNum ?? "+"}
                       </span>
-                      <span style={{ width: "16px", color: "#16a34a", fontWeight: 700, userSelect: "none" }}>+</span>
-                      <div style={{ flex: 1, whiteSpace: "pre", color: "#166534", lineHeight: "1.4em" }}>
+                      <span style={{ width: "16px", color: "var(--bs-cs-diff-success-ink)", fontWeight: 700, userSelect: "none" }}>+</span>
+                      <div style={{ flex: 1, whiteSpace: "pre", color: "var(--bs-cs-diff-success-ink)", lineHeight: "1.4em" }}>
                         {row.expectedTokens && row.expectedTokens.length > 0
                           ? row.expectedTokens.map((t, tidx) => renderToken(t, tidx, true))
                           : row.expectedText}
@@ -851,7 +851,7 @@ export function OutputDiffViewer({
                   border: "none",
                   cursor: "pointer",
                   fontSize: "0.7rem",
-                  color: "#0b6763",
+                  color: "var(--bs-ui-brand, #0b6763)",
                   display: "flex",
                   alignItems: "center",
                   gap: "3px",
@@ -877,7 +877,7 @@ export function OutputDiffViewer({
                   border: "none",
                   cursor: "pointer",
                   fontSize: "0.7rem",
-                  color: "#0b6763",
+                  color: "var(--bs-ui-brand, #0b6763)",
                   display: "flex",
                   alignItems: "center",
                   gap: "3px",
@@ -890,8 +890,8 @@ export function OutputDiffViewer({
             <div
               className="bs-cs-code-block"
               style={{
-                background: passed ? "var(--bs-ui-canvas, #f1f8f6)" : "#fef2f2",
-                color: passed ? "var(--bs-ui-ink, #123333)" : "#991b1b",
+                background: passed ? "var(--bs-ui-canvas, #f1f8f6)" : "var(--bs-cs-diff-danger-surface)",
+                color: passed ? "var(--bs-ui-ink, #123333)" : "var(--bs-cs-diff-danger-ink)",
               }}
             >
               {actual || "(no output)"}

@@ -182,12 +182,14 @@
 
 /* LatexText Component Styles */
 .bs-latex-text {
-  color: #0f2929;
+  /* Let the consuming surface own the foreground colour.  A hard-coded
+     light-theme ink here made normal problem prose disappear in dark mode. */
+  color: inherit;
   line-height: 1.6;
 }
 
 .bs-latex-text .katex {
-  color: #0f2929;
+  color: inherit;
 }
 
 .bs-latex-text--block {
@@ -216,7 +218,7 @@
 }
 
 .bs-latex-block .katex {
-  color: #0f2929;
+  color: inherit;
 }
 
 .bs-latex-inline {

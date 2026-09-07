@@ -8,9 +8,10 @@ import { useAudioEffects } from "./hooks/useAudioEffects";
 import { CodingStudioLayout, type CodingStudioLayoutActions } from "./components/layout/CodingStudioLayout";
 import { CodingStudioHeader } from "./components/layout/CodingStudioHeader";
 import { LeftPane } from "./components/leftPane/LeftPane";
-import { EditorPanel } from "./components/editor/EditorPanel";
+import { EditorPanel, getInitialEditorSettings, type EditorSettings } from "./components/editor/EditorPanel";
 import { ConsolePanel } from "./components/console/ConsolePanel";
 import { ShortcutsModal } from "./components/modals/ShortcutsModal";
+import { StudioSettingsDrawer } from "./components/modals/StudioSettingsDrawer";
 import "./styles/codingStudio.css";
 
 const STREAK_KEY = "bs_cs_user_streak";
@@ -26,34 +27,52 @@ export function CodingStudio({
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [isZenMode, setIsZenMode] = useState<boolean>(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState<boolean>(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const layoutActionsRef = useRef<CodingStudioLayoutActions | null>(null);
 
-  // Synchronized theme state across studio shell, editor, and surrounding panels (Defaults to 'light')
-  const [studioTheme, setStudioTheme] = useState<"dark" | "light">(() => {
-    if (typeof window === "undefined") return "light";
+  // One persisted preference model keeps the shell and editor in the same theme.
+  const [editorSettings, setEditorSettings] = useState<EditorSettings>(() => {
+    const settings = getInitialEditorSettings();
+    if (typeof window === "undefined") return settings;
     try {
-      const explicit = localStorage.getItem("bs_cs_theme_user_choice");
-      if (explicit === "light" || explicit === "dark") return explicit;
+      const legacyTheme = localStorage.getItem("bs_cs_theme_user_choice");
+      return legacyTheme === "light" || legacyTheme === "dark" ? { ...settings, theme: legacyTheme } : settings;
     } catch {
-      // fallback
+      return settings;
     }
-    return "light";
   });
+  const studioTheme = editorSettings.theme;
 
-  const handleThemeChange = (nextTheme?: "dark" | "light") => {
-    setStudioTheme((prev) => {
-      const target = nextTheme || (prev === "dark" ? "light" : "dark");
-      try {
-        localStorage.setItem("bs_cs_theme_user_choice", target);
-        const raw = localStorage.getItem("bs_cs_editor_settings");
-        const current = raw ? JSON.parse(raw) : {};
-        localStorage.setItem("bs_cs_editor_settings", JSON.stringify({ ...current, theme: target }));
-      } catch {
-        // ignore
-      }
-      return target;
-    });
-  };
+  useEffect(() => {
+    try {
+      localStorage.setItem("bs_cs_editor_settings", JSON.stringify(editorSettings));
+      localStorage.setItem("bs_cs_theme_user_choice", editorSettings.theme);
+    } catch {
+      // Browser storage may be unavailable in an embedded runtime.
+    }
+  }, [editorSettings]);
+
+  // Coding Studio is a full-screen workspace. Keep its host chrome, menus, and
+  // portalled overlays in the same color system instead of only darkening the
+  // editor card.
+  useEffect(() => {
+    const className = "bs-cs-dark-mode";
+    const root = document.documentElement;
+    const body = document.body;
+
+    if (studioTheme === "dark") {
+      root.classList.add(className);
+      body.classList.add(className);
+    } else {
+      root.classList.remove(className);
+      body.classList.remove(className);
+    }
+
+    return () => {
+      root.classList.remove(className);
+      body.classList.remove(className);
+    };
+  }, [studioTheme]);
 
   // Daily Streak retention tracker
   const [streakCount, setStreakCount] = useState<number>(() => {
@@ -197,6 +216,8 @@ export function CodingStudio({
     onCloseModals: () => {
       if (isShortcutsOpen) {
         setIsShortcutsOpen(false);
+      } else if (isSettingsOpen) {
+        setIsSettingsOpen(false);
       } else if (isZenMode) {
         setIsZenMode(false);
       }
@@ -229,16 +250,10 @@ export function CodingStudio({
             isSubmitting={isSubmitting}
             onRun={handleRun}
             onSubmit={handleSubmit}
-            isFullscreen={isFullscreen}
-            onToggleFullscreen={() => setIsFullscreen((prev) => !prev)}
             isZenMode={isZenMode}
             onToggleZenMode={handleToggleZenMode}
-            onOpenShortcuts={() => setIsShortcutsOpen(true)}
+            onOpenSettings={() => setIsSettingsOpen(true)}
             streakCount={streakCount}
-            isAudioEnabled={isAudioEnabled}
-            onToggleAudio={toggleAudio}
-            theme={studioTheme}
-            onToggleTheme={() => handleThemeChange()}
           />
         }
         leftPane={
@@ -263,8 +278,7 @@ export function CodingStudio({
             isDirty={isDirty}
             draftStatus={draftStatus}
             lastSavedAt={lastSavedAt}
-            theme={studioTheme}
-            onThemeChange={handleThemeChange}
+            settings={editorSettings}
           />
         }
         consolePanel={
@@ -299,6 +313,26 @@ export function CodingStudio({
         onResetCode={handleResetCode}
         onSave={handleSaveDraft}
       />
+
+      <StudioSettingsDrawer
+        open={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        theme={studioTheme}
+        onThemeChange={(theme) => setEditorSettings((current) => ({ ...current, theme }))}
+        editorSettings={editorSettings}
+        onEditorSettingsChange={setEditorSettings}
+        isAudioEnabled={isAudioEnabled}
+        onToggleAudio={toggleAudio}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={() => setIsFullscreen((prev) => !prev)}
+        onToggleProblemPane={() => layoutActionsRef.current?.toggleLeftCollapse()}
+        onToggleConsole={() => layoutActionsRef.current?.toggleConsoleCollapse()}
+        onToggleConsoleDock={() => layoutActionsRef.current?.toggleConsolePosition()}
+        onOpenShortcuts={() => {
+          setIsSettingsOpen(false);
+          setIsShortcutsOpen(true);
+        }}
+      />
     </>
   );
 }
@@ -316,6 +350,7 @@ export { LeftPane } from "./components/leftPane/LeftPane";
 export { EditorPanel } from "./components/editor/EditorPanel";
 export { ConsolePanel } from "./components/console/ConsolePanel";
 export { ShortcutsModal } from "./components/modals/ShortcutsModal";
+export { StudioSettingsDrawer } from "./components/modals/StudioSettingsDrawer";
 export { MathText, enrichMathFormulas } from "./components/common/MathText";
 export { useAudioEffects } from "./hooks/useAudioEffects";
 export { ConfettiCelebration } from "./components/common/ConfettiCelebration";

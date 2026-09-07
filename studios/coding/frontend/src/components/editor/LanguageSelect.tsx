@@ -19,17 +19,7 @@ export function LanguageSelect({
   disabled = false,
 }: LanguageSelectProps) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-      <label
-        htmlFor="bs-cs-lang-select"
-        style={{
-          fontSize: "0.76rem",
-          fontWeight: 700,
-          color: "var(--bs-ui-muted, #4a6360)",
-        }}
-      >
-        Language:
-      </label>
+    <div className="bs-cs-language-select">
       <select
         id="bs-cs-lang-select"
         aria-label="Select programming language"
@@ -40,7 +30,7 @@ export function LanguageSelect({
           padding: "4px 10px",
           borderRadius: "6px",
           border: "1px solid var(--bs-ui-line, #d7e8e4)",
-          background: "#ffffff",
+          background: "var(--bs-ui-surface, #ffffff)",
           color: "var(--bs-ui-ink, #123333)",
           fontSize: "0.78rem",
           fontWeight: 700,
