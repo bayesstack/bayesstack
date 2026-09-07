@@ -63,8 +63,17 @@ async def test_tenant_user_login_and_auth_me_session():
         assert login_data["user"]["role"] == "learner"
         assert "set-cookie" in login_resp.headers
         assert "bayes_session" in login_resp.headers["set-cookie"]
+        assert "HttpOnly" in login_resp.headers["set-cookie"]
+        assert "Max-Age=604800" in login_resp.headers["set-cookie"]
+        assert "SameSite=lax" in login_resp.headers["set-cookie"]
 
         token = login_data["token"]
+
+        # The client cookie jar should carry the persistent session automatically;
+        # callers must not need to copy the token into a header or request body.
+        automatic_me_resp = await ac.get("/api/auth/me", headers={"Host": "bayes.localhost"})
+        assert automatic_me_resp.status_code == 200
+        assert automatic_me_resp.json()["authenticated"] is True
 
         # 2. Check /api/auth/me with session cookie
         me_resp = await ac.get(

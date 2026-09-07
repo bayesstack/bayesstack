@@ -1,15 +1,16 @@
 """JWT Session Token & Cookie Management for BayesStack Auth."""
 
-import os
 from datetime import datetime, timedelta, timezone
 import jwt
 from fastapi import Response, Request
 
+from core.config import settings
+
 # Configuration
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "bayesstack_dev_super_secret_jwt_key_2026")
+JWT_SECRET_KEY = settings.JWT_SECRET_KEY
 JWT_ALGORITHM = "HS256"
 SESSION_COOKIE_NAME = "bayes_session"
-DEFAULT_EXPIRE_DAYS = 7
+DEFAULT_EXPIRE_DAYS = settings.SESSION_TTL_DAYS
 
 
 def create_session_token(data: dict, expires_delta: timedelta | None = None) -> str:
@@ -45,10 +46,10 @@ def get_cookie_domain(request_host: str | None = None) -> str | None:
     # Strip port if present
     host = request_host.split(":")[0].lower()
     
-    if host.endswith(".localhost") or host == "localhost":
+    if host == "localhost" or host.endswith(".localhost"):
         return ".localhost"
     
-    if "bayesstack.com" in host:
+    if host == "bayesstack.com" or host.endswith(".bayesstack.com"):
         return ".bayesstack.com"
         
     return None
@@ -64,7 +65,7 @@ def set_session_cookie(response: Response, token: str, request_host: str | None 
         max_age=DEFAULT_EXPIRE_DAYS * 86400,
         httponly=True,
         samesite="lax",
-        secure=False,  # Set to True in production HTTPS
+        secure=settings.session_cookie_secure,
         domain=cookie_domain,
         path="/",
     )

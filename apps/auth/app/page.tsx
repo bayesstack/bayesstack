@@ -82,7 +82,8 @@ export default function AuthPage() {
 
       const user = data.user as AuthenticatedUser;
       const role = user.role || "learner";
-      localStorage.setItem("bayes_auth_token", "authenticated");
+      // Authentication is persisted by the API's HttpOnly bayes_session
+      // cookie. Never mirror an auth flag or bearer token in localStorage.
       localStorage.setItem("bayes_user", JSON.stringify(user));
       setStatusMessage(`Welcome back, ${user.full_name || user.email}. Redirecting to your portal...`);
       setTimeout(() => redirectToPortal(role, user.tenant_slug), 800);

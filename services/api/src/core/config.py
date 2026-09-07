@@ -21,6 +21,20 @@ class Settings(BaseSettings):
     VERSION: str = "0.1.0"
     BAYESSTACK_ENV: str = Field(default="development", validation_alias="BAYESSTACK_ENV")
 
+    # Authentication session settings. The JWT and cookie use the same TTL
+    # so returning users remain signed in until the session expires.
+    SESSION_TTL_DAYS: int = Field(default=7, ge=1, le=30, validation_alias="SESSION_TTL_DAYS")
+    SESSION_COOKIE_SECURE: bool | None = Field(default=None, validation_alias="SESSION_COOKIE_SECURE")
+    JWT_SECRET_KEY: str = Field(
+        default="bayesstack_dev_super_secret_jwt_key_2026",
+        validation_alias="JWT_SECRET_KEY",
+    )
+
+    @property
+    def session_cookie_secure(self) -> bool:
+        """Use secure cookies in production while keeping local HTTP usable."""
+        return self.SESSION_COOKIE_SECURE if self.SESSION_COOKIE_SECURE is not None else self.BAYESSTACK_ENV == "production"
+
     # Multi-tenant domain settings
     BASE_DOMAINS: str = Field(
         default="localhost,bayesstack.com",
