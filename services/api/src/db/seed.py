@@ -236,6 +236,37 @@ async def seed_content_catalog(session):
 
     await _add_if_missing(
         session,
+        CatalogConcept,
+        {
+            "id": "C-KNAPSACK",
+            "version": 1,
+            "code": "CPT-KNAPSACK-01",
+            "title": "0/1 Knapsack Problem",
+            "slug": "01-knapsack-problem",
+            "description": "Master dynamic programming optimization using the canonical 0/1 Knapsack formulation, state transitions, and space-optimized table construction.",
+            "topic_category": "algorithms",
+            "tags": ["algorithms", "dynamic-programming", "optimization", "data-structures"],
+            "estimated_minutes": 60,
+            "content_status": "published",
+            "release_channel": "stable",
+            "content": {
+                "difficulty": "intermediate",
+                "prerequisites": ["Recursion", "Basic Arrays"],
+                "learning_objectives": [
+                    "Formulate optimal substructure and overlapping subproblems for 0/1 Knapsack",
+                    "Construct 2D memoization / tabulation matrix with weights and values",
+                    "Optimize space complexity from O(N*W) to O(W) using 1D rolling array",
+                    "Implement edge-case validation and handle large capacity limits"
+                ],
+            },
+        },
+        CatalogConcept.id == "C-KNAPSACK",
+        CatalogConcept.version == 1,
+    )
+    await session.flush()
+
+    await _add_if_missing(
+        session,
         CatalogActivity,
         {
             "id": "SI-GRADIENT-DESCENT-VIDEO-V1",
@@ -248,6 +279,137 @@ async def seed_content_catalog(session):
             "position": 1,
         },
         CatalogActivity.id == "SI-GRADIENT-DESCENT-VIDEO-V1",
+    )
+    await _add_if_missing(
+        session,
+        CatalogActivity,
+        {
+            "id": "ACT-KNAPSACK-VIDEO-V1",
+            "concept_id": "C-KNAPSACK",
+            "concept_version": 1,
+            "activity_type": "video",
+            "activity_version": "1.0.0",
+            "title": "0/1 Knapsack: Dynamic Programming Formulation & State Space",
+            "position": 1_000_000,
+            "required": True,
+            "config": {
+                "video_url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                "poster_url": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80",
+                "duration_seconds": 745,
+                "aspect_ratio": "16:9",
+                "playback_policy": "allow_seek",
+                "transcript": [
+                    {"time": 0, "speaker": "Instructor", "text": "Welcome to the 0/1 Knapsack deep dive. Today we explore dynamic programming state representation."},
+                    {"time": 45, "speaker": "Instructor", "text": "Given items with weights and values, our goal is to maximize value without exceeding capacity W."},
+                    {"time": 120, "speaker": "Instructor", "text": "Notice the choice at each item i: either we include item i, or we exclude item i."},
+                    {"time": 240, "speaker": "Instructor", "text": "Let DP[i][w] be the maximum value achievable using a subset of the first i items with weight limit w."},
+                    {"time": 360, "speaker": "Instructor", "text": "If weights[i-1] > w, DP[i][w] = DP[i-1][w]. Otherwise, take the max of excluding and including it."},
+                    {"time": 480, "speaker": "Instructor", "text": "We can optimize space from O(N*W) to O(W) by filling the array backwards from W down to weights[i]."}
+                ],
+                "key_takeaways": [
+                    "0/1 Knapsack exhibits optimal substructure and overlapping subproblems.",
+                    "Time complexity of the tabular approach is O(N * W), which is pseudo-polynomial.",
+                    "Memory can be compressed into a single 1D array by traversing capacity backwards."
+                ],
+            },
+        },
+        CatalogActivity.id == "ACT-KNAPSACK-VIDEO-V1",
+    )
+    await _add_if_missing(
+        session,
+        CatalogActivity,
+        {
+            "id": "ACT-KNAPSACK-CODE-V1",
+            "concept_id": "C-KNAPSACK",
+            "concept_version": 1,
+            "activity_type": "coding",
+            "activity_version": "1.0.0",
+            "title": "Implement 0/1 Knapsack in Python",
+            "position": 2_000_000,
+            "required": True,
+            "config": {
+                "problem_id": "knapsack-01",
+                "problem_version": 1,
+                "default_language": "python",
+                "allowed_languages": ["python", "cpp", "javascript"],
+                "time_limit_ms": 2000,
+                "memory_limit_mb": 256,
+                "difficulty": "Medium",
+                "prompt": "Write a program that reads N and capacity W, then N weights and N values from standard input. Print the maximum total value of a 0/1 knapsack. Each item may be selected at most once.",
+                "input_format": "Line 1: N W. Line 2: N weights. Line 3: N values.",
+                "output_format": "One integer: the maximum possible total value.",
+                "constraints": [
+                    "1 <= N <= 1000 (number of items)",
+                    "1 <= capacity <= 1000",
+                    "1 <= weights[i] <= 1000",
+                    "1 <= values[i] <= 1000"
+                ],
+                "starter_code": {
+                    "python": (
+                        "def knapsack(weights: list[int], values: list[int], capacity: int) -> int:\n"
+                        "    \"\"\"\n"
+                        "    Solve 0/1 Knapsack using Dynamic Programming.\n"
+                        "    \n"
+                        "    :param weights: list of item weights\n"
+                        "    :param values: list of item values\n"
+                        "    :param capacity: maximum weight capacity\n"
+                        "    :return: maximum total value achievable\n"
+                        "    \"\"\"\n"
+                        "    n = len(weights)\n"
+                        "    dp = [0] * (capacity + 1)\n"
+                        "    \n"
+                        "    # TODO: Implement 0/1 Knapsack recurrence\n"
+                        "    for i in range(n):\n"
+                        "        w_i, v_i = weights[i], values[i]\n"
+                        "        for w in range(capacity, w_i - 1, -1):\n"
+                        "            dp[w] = max(dp[w], dp[w - w_i] + v_i)\n"
+                        "            \n"
+                        "    return dp[capacity]\n"
+                    ),
+                    "cpp": (
+                        "#include <vector>\n"
+                        "#include <algorithm>\n\n"
+                        "int knapsack(const std::vector<int>& weights, const std::vector<int>& values, int capacity) {\n"
+                        "    std::vector<int> dp(capacity + 1, 0);\n"
+                        "    for (size_t i = 0; i < weights.size(); ++i) {\n"
+                        "        for (int w = capacity; w >= weights[i]; --w) {\n"
+                        "            dp[w] = std::max(dp[w], dp[w - weights[i]] + values[i]);\n"
+                        "        }\n"
+                        "    }\n"
+                        "    return dp[capacity];\n"
+                        "}\n"
+                    ),
+                    "java": (
+                        "class Solution {\n"
+                        "    public int knapsack(int[] weights, int[] values, int capacity) {\n"
+                        "        int[] dp = new int[capacity + 1];\n"
+                        "        for (int i = 0; i < weights.length; i++) {\n"
+                        "            for (int w = capacity; w >= weights[i]; w--) {\n"
+                        "                dp[w] = Math.max(dp[w], dp[w - weights[i]] + values[i]);\n"
+                        "            }\n"
+                        "        }\n"
+                        "        return dp[capacity];\n"
+                        "    }\n"
+                        "}\n"
+                    )
+                },
+            },
+        },
+        CatalogActivity.id == "ACT-KNAPSACK-CODE-V1",
+    )
+    await _add_if_missing(
+        session,
+        CatalogChapterConcept,
+        {
+            "chapter_id": "CH-OPTIMIZATION",
+            "chapter_version": 2,
+            "concept_id": "C-KNAPSACK",
+            "concept_version": 1,
+            "position": 2_000_000,
+        },
+        CatalogChapterConcept.chapter_id == "CH-OPTIMIZATION",
+        CatalogChapterConcept.chapter_version == 2,
+        CatalogChapterConcept.concept_id == "C-KNAPSACK",
     )
     await _add_if_missing(
         session,

@@ -62,41 +62,6 @@ async def _assert_draft(course: InstitutionCourse) -> None:
         raise _conflict("Published or archived courses are immutable. Create a new draft to edit composition.")
 
 
-@router.get(
-    "/catalog/courses",
-    summary="Browse catalog course releases",
-    description="Returns immutable, version-pinned catalog releases available to Course Builder.",
-)
-async def list_catalog_courses(db: AsyncSession = Depends(get_db)):
-    courses = (await db.scalars(select(CatalogCourse).order_by(CatalogCourse.id, CatalogCourse.version.desc()))).all()
-    return [
-        {
-            "id": course.id,
-            "version": course.version,
-            "title": course.title,
-            "description": course.description,
-            "content": course.content or {},
-        }
-        for course in courses
-    ]
-
-
-@router.get("/catalog/chapters", summary="Browse catalog chapter releases")
-async def list_catalog_chapters(db: AsyncSession = Depends(get_db)):
-    chapters = (await db.scalars(select(CatalogChapter).order_by(CatalogChapter.id, CatalogChapter.version.desc()))).all()
-    return [
-        {"id": chapter.id, "version": chapter.version, "title": chapter.title, "description": chapter.description}
-        for chapter in chapters
-    ]
-
-
-@router.get("/catalog/concepts", summary="Browse catalog concept releases")
-async def list_catalog_concepts(db: AsyncSession = Depends(get_db)):
-    concepts = (await db.scalars(select(CatalogConcept).order_by(CatalogConcept.id, CatalogConcept.version.desc()))).all()
-    return [
-        {"id": concept.id, "version": concept.version, "title": concept.title, "description": concept.description}
-        for concept in concepts
-    ]
 
 
 @router.post(

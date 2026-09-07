@@ -22,18 +22,18 @@ To solve this without compromise, BayesStack divides its relational schema into 
                  │                                                 │
                  ▼                                                 ▼
 ┌──────────────────────────────────────────────┐  ┌────────────────────────────────────────────────┐
-│      2. Master Learning Library              │  │      3. University Composition Layer            │
+│      2. Master Learning Catalog              │  │      3. Institution Composition Layer          │
 │       (Platform-Wide Blueprints)             │  │       (Institutional Customizations & Forks)   │
-│  - library_curriculums                       │  │  - university_curriculums                      │
-│  - library_curriculum_programs               │  │  - university_curriculum_[library/custom]_progs │
-│  - library_programs                          │  │  - university_programs                         │
-│  - library_program_courses                   │  │  - university_program_[library/custom]_courses │
-│  - library_courses                           │  │  - university_courses                          │
-│  - library_course_chapters                   │  │  - university_course_[library/custom]_chapters │
-│  - library_chapters                          │  │  - university_chapters                         │
-│  - library_chapter_concepts                  │  │  - university_chapter_[library/custom]_concepts│
-│  - library_concepts                          │  │  - university_concepts                         │
-│  - library_studio_instances                  │  │  - university_studio_instances                 │
+│  - catalog_curricula                         │  │  - institution_curricula                       │
+│  - catalog_curriculum_programs               │  │  - institution_curriculum_[catalog/cust]_progs │
+│  - catalog_programs                          │  │  - institution_programs                        │
+│  - catalog_program_courses                   │  │  - institution_program_[catalog/cust]_courses  │
+│  - catalog_courses                           │  │  - institution_courses                         │
+│  - catalog_course_chapters                   │  │  - institution_course_[catalog/cust]_chapters  │
+│  - catalog_chapters                          │  │  - institution_chapters                        │
+│  - catalog_chapter_concepts                  │  │  - institution_chapter_[catalog/cust]_concepts │
+│  - catalog_concepts                          │  │  - institution_concepts                        │
+│  - catalog_activities                        │  │  - institution_activities                      │
 └──────────────────────┬───────────────────────┘  └───────────────────────┬────────────────────────┘
                        │                                                  │
                        │             ┌────────────────────────────────────┘
@@ -51,21 +51,21 @@ To solve this without compromise, BayesStack divides its relational schema into 
 │  - academic_terms (Fall 2026, Spring 2027)                                                       │
 │  - course_offerings (Term scheduled instance pinned to consistent (tenant, course, publication)) │
 │  - course_sections (Section A Morning, Section B Evening)                                        │
-│  - section_instructors (Faculty & TA cohort assignments)                                         │
-│  - section_enrollments (Student seat membership, attempt number, and audit/repeat tracking)     │
+│  - section_staff (Faculty & TA cohort assignments)                                               │
+│  - enrollments (Student seat membership, attempt number, and audit/repeat tracking)               │
 │  - student_academic_profiles (Institutional student roll number, standing, GPA, credits)        │
-│  - learner_concept_progress (Concept mastery with explicit content_type namespace)              │
-│  - assessment_submissions (Studio attempts, code execution logs, autograder scores)               │
+│  - learning_progress (Concept mastery with explicit source_type namespace)                       │
+│  - assessment_submissions (Activity attempts, code execution logs, autograder scores)            │
 │  - course_grades (Final letter grades, official GPA transcript points)                           │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
                                                │
                                                ▼
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
 │                             6. Institutional Governance & Matriculation                          │
-│  - faculty_course_assignments (Faculty rights to author & manage specific courses)               │
-│  - faculty_program_assignments (Department chairs managing semester tracks)                      │
-│  - student_curriculum_enrollments (Degree matriculation: e.g. Ashoka 4-Year B.Tech 2026-2030)    │
-│  - student_program_enrollments (Semester cohort registration: e.g. Sophomore Fall 2026)          │
+│  - course_faculty (Faculty rights to author & manage specific courses)                           │
+│  - program_faculty (Department chairs managing semester tracks)                                  │
+│  - curriculum_enrollments (Degree matriculation: e.g. Ashoka 4-Year B.Tech 2026-2030)            │
+│  - program_enrollments (Semester cohort registration: e.g. Sophomore Fall 2026)                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -83,16 +83,16 @@ CREATE TABLE course_offerings (
     id UUID PRIMARY KEY,
     tenant_id VARCHAR(64) REFERENCES tenants(id),
     academic_term_id UUID REFERENCES academic_terms(id),
-    university_course_id VARCHAR(64) REFERENCES university_courses(id)
+    institution_course_id VARCHAR(64) REFERENCES institution_courses(id)
 );
 ```
-Under this anti-pattern, a bug in application code can silently insert an offering with Tenant A's `tenant_id` referencing Tenant B's `university_course_id`. The database happily accepts it, resulting in catastrophic cross-tenant data leaks.
+Under this anti-pattern, a bug in application code can silently insert an offering with Tenant A's `tenant_id` referencing Tenant B's `institution_course_id`. The database happily accepts it, resulting in catastrophic cross-tenant data leaks.
 
 **The BayesStack Solution: Compound Foreign Keys**:
 Every institutional table enforces a compound unique constraint `UNIQUE (tenant_id, id)`. Child tables enforce compound foreign keys:
 ```sql
 -- PRODUCTION HARDENED: Cross-Tenant References Physically Impossible
-ALTER TABLE university_courses
+ALTER TABLE institution_courses
     ADD CONSTRAINT uq_uni_course_tenant_id UNIQUE (tenant_id, id);
 
 ALTER TABLE academic_terms
@@ -100,8 +100,8 @@ ALTER TABLE academic_terms
 
 ALTER TABLE course_offerings
     ADD CONSTRAINT fk_offering_course_tenant
-    FOREIGN KEY (tenant_id, university_course_id)
-    REFERENCES university_courses (tenant_id, id) ON DELETE CASCADE;
+    FOREIGN KEY (tenant_id, institution_course_id)
+    REFERENCES institution_courses (tenant_id, id) ON DELETE CASCADE;
 
 ALTER TABLE course_offerings
     ADD CONSTRAINT fk_offering_term_tenant
@@ -122,24 +122,24 @@ This fails in higher education SaaS:
 
 **The BayesStack Solution**:
 1. `users`: Global authenticated identity (email, password hash, global flags like `is_superadmin`).
-2. `tenant_memberships`: University affiliation (`user_id`, `tenant_id`, `joined_at`, `is_active`).
+2. `tenant_memberships`: Institutional affiliation (`user_id`, `tenant_id`, `joined_at`, `is_active`).
 3. `tenant_roles`: Role authorization per membership (`'admin'`, `'faculty'`, `'learner'`, `'dept_chair'`).
 
 ---
 
 ### C. Consistent Publication Tuple Enforcement
-In BayesStack, a scheduled `course_offering` must bind to an immutable release snapshot in `course_publications`. However, a standard foreign key `FOREIGN KEY (course_publication_id) REFERENCES course_publications(id)` does not guarantee that the publication belongs to the same course or the same university!
+In BayesStack, a scheduled `course_offering` must bind to an immutable release snapshot in `course_publications`. However, a standard foreign key `FOREIGN KEY (course_publication_id) REFERENCES course_publications(id)` does not guarantee that the publication belongs to the same course or the same institution!
 
 **The BayesStack Solution**:
 `course_publications` maintains:
 ```sql
-CONSTRAINT uq_course_pub_consistent_tuple UNIQUE (tenant_id, university_course_id, id)
+CONSTRAINT uq_course_pub_consistent_tuple UNIQUE (tenant_id, institution_course_id, id)
 ```
 And `course_offerings` enforces:
 ```sql
 CONSTRAINT fk_offering_publication_consistent_tuple
-FOREIGN KEY (tenant_id, university_course_id, course_publication_id)
-REFERENCES course_publications (tenant_id, university_course_id, id)
+FOREIGN KEY (tenant_id, institution_course_id, course_publication_id)
+REFERENCES course_publications (tenant_id, institution_course_id, id)
 ON DELETE RESTRICT;
 ```
 This ensures that Ashoka CS-301 can **only** bind to an Ashoka CS-301 publication snapshot. It is impossible to bind an offering to another institution's publication or another course's publication.
@@ -147,53 +147,53 @@ This ensures that Ashoka CS-301 can **only** bind to an Ashoka CS-301 publicatio
 Furthermore, `course_publications` enforces a **unique partial index**:
 ```sql
 CREATE UNIQUE INDEX uq_active_course_publication
-ON course_publications (tenant_id, university_course_id)
-WHERE status = 'active';
+ON course_publications (tenant_id, institution_course_id)
+WHERE publication_status = 'active';
 ```
-This guarantees at the database level that exactly one publication can be active per university course at a time.
+This guarantees at the database level that exactly one publication can be active per institution course at a time.
 
 ---
 
 ### D. Explicit Detached Snapshot Semantics for Copy-on-Write (CoW)
-When Dr. Arjun at Ashoka University forks a platform library chapter to inject a custom homework problem, BayesStack establishes **Explicit Detached Snapshot Semantics**:
-- Once a tenant forks a chapter, the resulting `university_chapters` record and its child edges are an **independent, permanently detached snapshot**.
-- Lineage columns (`source_library_chapter_id`, `source_library_version`, `forked_at`) are preserved solely for provenance and UI diff explainability.
-- When BayesStack later publishes Chapter v2 with a new concept, Ashoka's custom chapter **never auto-mutates or silently updates**. The university syllabus remains deterministic and immune to upstream changes.
+When Dr. Arjun at Ashoka University forks a platform catalog chapter to inject a custom homework problem, BayesStack establishes **Explicit Detached Snapshot Semantics**:
+- Once a tenant forks a chapter, the resulting `institution_chapters` record and its child edges are an **independent, permanently detached snapshot**.
+- Lineage columns (`source_catalog_chapter_id`, `catalog_version`, `forked_at`) are preserved solely for provenance and UI diff explainability.
+- When BayesStack later publishes Chapter v2 with a new concept, Ashoka's custom chapter **never auto-mutates or silently updates**. The institution syllabus remains deterministic and immune to upstream changes.
 - The faculty authoring UI provides a visual "Diff with Upstream" comparison tool, allowing faculty to manually pull upstream changes if desired.
 
 ---
 
 ### E. Explicit Content Namespace in Learner Tracking
 Learner mastery events cannot merely store `concept_id` and `concept_version` because concepts exist in two distinct universes:
-1. Master platform `library_concepts`.
-2. Institutional proprietary `university_concepts`.
+1. Master platform `catalog_concepts`.
+2. Institutional proprietary `institution_concepts`.
 
-`learner_concept_progress` explicitly includes:
-- `content_type VARCHAR(16) NOT NULL` (`'library'` | `'university'`)
+`learning_progress` explicitly includes:
+- `source_type VARCHAR(32) NOT NULL` (`'catalog'` | `'institution'`)
 - `concept_id VARCHAR(64) NOT NULL`
 - `concept_version INT NOT NULL`
 
 Similarly, `assessment_submissions` includes:
-- `studio_type VARCHAR(16) NOT NULL` (`'library'` | `'university'`)
-- `studio_instance_id VARCHAR(64) NOT NULL`
-- `studio_version VARCHAR(16) NOT NULL`
+- `activity_type VARCHAR(32) NOT NULL`
+- `activity_id VARCHAR(64) NOT NULL`
+- `activity_version VARCHAR(16) NOT NULL`
 
 This guarantees that learner events unambiguously identify the exact content entity authored and delivered.
 
 ---
 
 ### F. Eliminating the "Polymorphic Junction Smell" via Dedicated Edge Tables
-Instead of a single table with exclusive-arc nullable columns (`CHECK (lib_id IS NOT NULL AND uni_id IS NULL OR ...)`), BayesStack uses **dedicated relational edge tables**:
-- `university_course_library_chapters` (Strict compound FK to `library_chapters(id, version)`).
-- `university_course_custom_chapters` (Strict compound FK to `university_chapters(tenant_id, id)`).
+Instead of a single table with exclusive-arc nullable columns (`CHECK (cat_id IS NOT NULL AND inst_id IS NULL OR ...)`), BayesStack uses **dedicated relational edge tables**:
+- `institution_course_catalog_chapters` (Strict compound FK to `catalog_chapters(id, version)`).
+- `institution_course_custom_chapters` (Strict compound FK to `institution_chapters(tenant_id, id)`).
 
-Both are unified at the database level using a PostgreSQL unified `VIEW` (`university_course_chapters`) equipped with `INSTEAD OF` triggers for seamless read/write compatibility.
+Both are unified at the database level using a PostgreSQL unified `VIEW` (`institution_course_chapters`) equipped with `INSTEAD OF` triggers for seamless read/write compatibility.
 
 ---
 
 ### G. Spaced-Integer Ordering (Bisected Indexing)
-When faculty drag and drop a chapter or concept in the syllabus editor, items are indexed with spaced integers (`1_000_000`, `2_000_000`, `3_000_000`). Inserting an element between item A and item B computes:
-$$\text{new\_rank} = \frac{\text{before\_rank} + \text{after\_rank}}{2}$$
+When faculty drag and drop a chapter or concept in the syllabus editor, items are indexed with spaced integers (`1_000_000`, `2_000_000`, `3_000_000`) in the `position` column. Inserting an element between item A and item B computes:
+$$\text{new\_position} = \frac{\text{before\_position} + \text{after\_position}}{2}$$
 This executes as a **single-row $O(1)$ update** with zero deadlocks and zero cascading table rewrites.
 
 ---
@@ -203,7 +203,7 @@ When 50,000 learners navigate courses, the system avoids 11-way recursive relati
 ```sql
 SELECT compiled_syllabus_tree, content_hash
 FROM course_publications
-WHERE tenant_id = :tenant_id AND university_course_id = :course_id AND status = 'active';
+WHERE tenant_id = :tenant_id AND institution_course_id = :course_id AND publication_status = 'active';
 ```
 This architectural pattern guarantees $O(1)$ point lookup complexity and single-row retrieval.
 
@@ -241,43 +241,50 @@ This architectural pattern guarantees $O(1)$ point lookup complexity and single-
 
 ---
 
-### Domain 2: Platform Master Learning Library (10 Tables)
+### Domain 2: Platform Master Learning Catalog (10 Tables)
 
 Protected by kernel-level database triggers (`BEFORE UPDATE OR DELETE RAISE EXCEPTION`).
 
-#### 5. `library_curriculums`: Master degree blueprint `(id, version)`.
-#### 6. `library_curriculum_programs`: Sequences semester programs into a degree `UNIQUE(curriculum_id, curriculum_version, order_rank)`.
-#### 7. `library_programs`: Master semester / track module `(id, version)`.
-#### 8. `library_program_courses`: Maps master courses into a semester program.
-#### 9. `library_courses`: Master catalog course definition `(id, version)`.
-#### 10. `library_course_chapters`: Sequences chapters into a course syllabus.
-#### 11. `library_chapters`: Master pedagogical topic unit `(id, version)`.
-#### 12. `library_chapter_concepts`: Sequences atomic concepts into a chapter.
-#### 13. `library_concepts`: Atomic 15-30 minute learning step `(id, version)`.
-#### 14. `library_studio_instances`: Interactive coding/quiz workspace attached to a concept, pointing to `studio_assets(content_hash)`.
+#### 5. `catalog_curricula`: Master degree blueprint `(id, version)`. Key columns: `content_status`, `release_channel`, `metadata`.
+#### 6. `catalog_curriculum_programs`: Sequences semester programs into a degree `UNIQUE(curriculum_id, curriculum_version, position)`.
+#### 7. `catalog_programs`: Master semester / track module `(id, version)`. Key columns: `program_type`, `content_status`, `release_channel`.
+#### 8. `catalog_program_courses`: Maps master courses into a semester program `UNIQUE(program_id, program_version, position)`.
+#### 9. `catalog_courses`: Master catalog course definition `(id, version)`. Key columns: `difficulty`, `credits`, `content_status`, `release_channel`.
+#### 10. `catalog_course_chapters`: Sequences chapters into a course syllabus `UNIQUE(course_id, course_version, position)`.
+#### 11. `catalog_chapters`: Master pedagogical topic unit `(id, version)`. Key columns: `estimated_minutes`, `content_status`, `release_channel`.
+#### 12. `catalog_chapter_concepts`: Sequences atomic concepts into a chapter `UNIQUE(chapter_id, chapter_version, position)`.
+#### 13. `catalog_concepts`: Atomic 15-30 minute learning step `(id, version)`. Key columns: `topic_category`, `content_status`, `release_channel`.
+#### 14. `catalog_activities`: Interactive runtime activity (coding, video, quiz) attached to a concept, pointing to `studio_assets(content_hash)`. Key columns: `concept_id`, `concept_version`, `activity_type`, `activity_version`, `position`, `config_summary`, `asset_hash`. `UNIQUE(concept_id, concept_version, position)`.
 
 ---
 
-### Domain 3: University Composition Layer & Dedicated Edges (14 Tables)
+### Domain 3: Institution Composition Layer & Dedicated Edges (14 Tables)
 
 All institutional tables carry `UNIQUE(tenant_id, id)` and enforce compound tenant foreign keys.
 
-#### 15. `university_curriculums`: Institutional degree roadmap `(tenant_id, id)`.
-#### 16. `university_curriculum_library_programs`: Dedicated edge borrowing platform programs.
-#### 17. `university_curriculum_custom_programs`: Dedicated edge linking proprietary programs. Enforces compound FKs:
-  - `FOREIGN KEY (tenant_id, university_curriculum_id) REFERENCES university_curriculums(tenant_id, id)`
-  - `FOREIGN KEY (tenant_id, university_program_id) REFERENCES university_programs(tenant_id, id)`
-#### 18. `university_programs`: Institutional semester track `(tenant_id, id)`.
-#### 19. `university_program_library_courses`: Dedicated edge borrowing platform courses into a semester.
-#### 20. `university_program_custom_courses`: Dedicated edge linking proprietary courses into a semester.
-#### 21. `university_courses`: Institutional catalog course definition `(tenant_id, id)`.
-#### 22. `university_course_library_chapters`: **Zero-Copy Adoption**. Binds platform chapters directly to institutional courses.
-#### 23. `university_course_custom_chapters`: Binds custom/forked chapters to institutional courses.
-#### 24. `university_chapters`: Institutional custom chapter or **Copy-on-Write Fork** container `(tenant_id, id)`.
-#### 25. `university_chapter_library_concepts`: Sequences borrowed platform concepts inside custom chapters.
-#### 26. `university_chapter_custom_concepts`: Sequences proprietary concepts inside custom chapters.
-#### 27. `university_concepts`: Faculty-authored proprietary concepts `(tenant_id, id)`.
-#### 28. `university_studio_instances`: Interactive labs authored for proprietary concepts `(tenant_id, id)`.
+#### 15. `institution_curricula`: Institutional degree roadmap `(tenant_id, id)`. Key columns: `source_type` (`'catalog'`, `'custom'`, `'hybrid'`), `content_status`, `reference_policy` (`'pinned'`, `'floating'`), `release_channel`.
+#### 16. `institution_curriculum_catalog_programs`: Dedicated edge referencing platform catalog programs. Compound FKs to `institution_curricula(tenant_id, id)` and `catalog_programs(id, version)`.
+#### 17. `institution_curriculum_custom_programs`: Dedicated edge linking proprietary programs. Enforces compound FKs:
+  - `FOREIGN KEY (tenant_id, institution_curriculum_id) REFERENCES institution_curricula(tenant_id, id)`
+  - `FOREIGN KEY (tenant_id, institution_program_id) REFERENCES institution_programs(tenant_id, id)`
+#### 18. `institution_programs`: Institutional semester track `(tenant_id, id)`. Key columns: `source_type`, `content_status`, `reference_policy`, `release_channel`.
+#### 19. `institution_program_catalog_courses`: Dedicated edge referencing platform catalog courses into a semester. Compound FKs to `institution_programs(tenant_id, id)` and `catalog_courses(id, version)`.
+#### 20. `institution_program_custom_courses`: Dedicated edge linking proprietary courses into a semester. Enforces compound FKs:
+  - `FOREIGN KEY (tenant_id, institution_program_id) REFERENCES institution_programs(tenant_id, id)`
+  - `FOREIGN KEY (tenant_id, institution_course_id) REFERENCES institution_courses(tenant_id, id)`
+#### 21. `institution_courses`: Institutional catalog course definition `(tenant_id, id)`. Key columns: `source_type`, `content_status`, `reference_policy`, `release_channel`, `current_publication_id`.
+#### 22. `institution_course_catalog_chapters`: **Zero-Copy Adoption**. Binds platform catalog chapters directly to institutional courses. Compound FKs to `institution_courses(tenant_id, id)` and `catalog_chapters(id, version)`.
+#### 23. `institution_course_custom_chapters`: Binds custom/forked chapters to institutional courses. Enforces compound FKs:
+  - `FOREIGN KEY (tenant_id, institution_course_id) REFERENCES institution_courses(tenant_id, id)`
+  - `FOREIGN KEY (tenant_id, institution_chapter_id) REFERENCES institution_chapters(tenant_id, id)`
+#### 24. `institution_chapters`: Institutional custom chapter or **Copy-on-Write Fork** container `(tenant_id, id)`. Key columns: `source_catalog_chapter_id`, `catalog_version`, `source_type`, `content_status`, `reference_policy`.
+#### 25. `institution_chapter_catalog_concepts`: Sequences borrowed platform catalog concepts inside custom chapters. Compound FKs to `institution_chapters(tenant_id, id)` and `catalog_concepts(id, version)`.
+#### 26. `institution_chapter_custom_concepts`: Sequences proprietary concepts inside custom chapters. Enforces compound FKs:
+  - `FOREIGN KEY (tenant_id, institution_chapter_id) REFERENCES institution_chapters(tenant_id, id)`
+  - `FOREIGN KEY (tenant_id, institution_concept_id) REFERENCES institution_concepts(tenant_id, id)`
+#### 27. `institution_concepts`: Faculty-authored proprietary concepts `(tenant_id, id)`. Key columns: `local_code`, `title`, `content_status`.
+#### 28. `institution_activities`: Interactive activities authored for proprietary concepts `(tenant_id, id)`. Enforces compound FK to `institution_concepts(tenant_id, id)`.
+> *Note on Composition Views*: In addition to the 8 dedicated edge tables above, PostgreSQL unified `VIEW`s (`institution_curriculum_programs`, `institution_program_courses`, `institution_course_chapters`, `institution_chapter_concepts`) equipped with `INSTEAD OF` triggers provide unified read/write sequencing across both catalog and custom children.
 
 ---
 
@@ -292,9 +299,9 @@ All institutional tables carry `UNIQUE(tenant_id, id)` and enforce compound tena
 - **Why it exists**: Pre-compiled release artifacts serving active students.
 - **Primary Key**: `id UUID`.
 - **Key Constraints**:
-  - `CONSTRAINT uq_course_pub_consistent_tuple UNIQUE (tenant_id, university_course_id, id)`
-  - `CREATE UNIQUE INDEX uq_active_course_publication ON course_publications (tenant_id, university_course_id) WHERE status = 'active'`
-  - `FOREIGN KEY (tenant_id, university_course_id) REFERENCES university_courses (tenant_id, id) ON DELETE CASCADE`
+  - `CONSTRAINT uq_course_pub_consistent_tuple UNIQUE (tenant_id, institution_course_id, id)`
+  - `CREATE UNIQUE INDEX uq_active_course_publication ON course_publications (tenant_id, institution_course_id) WHERE publication_status = 'active'`
+  - `FOREIGN KEY (tenant_id, institution_course_id) REFERENCES institution_courses (tenant_id, id) ON DELETE CASCADE`
 
 ---
 
@@ -308,77 +315,90 @@ All institutional tables carry `UNIQUE(tenant_id, id)` and enforce compound tena
 - **Why it exists**: Scheduled course offering in a term.
 - **Consistent Publication Binding**:
   - `FOREIGN KEY (tenant_id, academic_term_id) REFERENCES academic_terms(tenant_id, id)`
-  - `FOREIGN KEY (tenant_id, university_course_id) REFERENCES university_courses(tenant_id, id)`
-  - `FOREIGN KEY (tenant_id, university_course_id, course_publication_id) REFERENCES course_publications(tenant_id, university_course_id, id) ON DELETE RESTRICT`
+  - `FOREIGN KEY (tenant_id, institution_course_id) REFERENCES institution_courses(tenant_id, id)`
+  - `FOREIGN KEY (tenant_id, institution_course_id, course_publication_id) REFERENCES course_publications(tenant_id, institution_course_id, id) ON DELETE RESTRICT`
+- **Key Columns**: `offering_status VARCHAR(32)` (`'scheduled'`, `'enrollment_open'`, `'active'`, `'grading'`, `'concluded'`), `syllabus_override JSON`.
 
 #### 33. `course_sections`
 - **Why it exists**: Instructional cohort group (Section A Morning, Section B Afternoon).
 - **Foreign Keys**: `FOREIGN KEY (tenant_id, course_offering_id) REFERENCES course_offerings(tenant_id, id) ON DELETE CASCADE`.
 
-#### 34. `section_instructors`
+#### 34. `section_staff`
 - **Why it exists**: Assigns faculty and TAs to cohort sections.
 - **Foreign Keys**: `FOREIGN KEY (tenant_id, course_section_id) REFERENCES course_sections(tenant_id, id) ON DELETE CASCADE`.
+- **Key Columns**: `role VARCHAR(32)` (`'primary_instructor'`, `'co_instructor'`, `'teaching_assistant'`, `'grader'`).
 
-#### 35. `section_enrollments`
+#### 35. `enrollments`
 - **Why it exists**: Student roster seat in a section.
+- **Foreign Keys**: `FOREIGN KEY (tenant_id, course_section_id) REFERENCES course_sections(tenant_id, id) ON DELETE CASCADE`.
 - **Extended Registration Tracking**:
-  - `registration_type VARCHAR(32) DEFAULT 'standard'` (`'standard'`, `'repeat_for_grade'`, `'audit'`, `'credit_by_exam'`)
+  - `registration_type VARCHAR(32) DEFAULT 'credit'` (`'credit'`, `'audit'`, `'pass_fail'`)
   - `attempt_number INT DEFAULT 1`
-  - `enrollment_status VARCHAR(32)` (`'enrolled'`, `'waitlisted'`, `'dropped'`, `'withdrawn'`)
+  - `enrollment_status VARCHAR(32)` (`'enrolled'`, `'waitlisted'`, `'dropped'`, `'withdrawn'`, `'completed'`)
 
-#### 36. `student_academic_profiles` (NEW)
+#### 36. `student_academic_profiles`
 - **Why it exists**: Models overall student academic status, standing, and institutional identity.
 - **Primary Key**: `id UUID`.
 - **Key Columns**:
   - `tenant_id VARCHAR(64)`, `student_id VARCHAR(64)`
-  - `student_number VARCHAR(64)` (University roll number / student ID: e.g. `'ASH-2026-CS-042'`)
-  - `academic_standing VARCHAR(32)` (`'good_standing'`, `'academic_probation'`, `'dean_list'`, `'suspended'`, `'graduated'`)
+  - `matriculation_number VARCHAR(64)` (University roll number / student ID: e.g. `'ASH-2026-CS-042'`)
+  - `academic_standing VARCHAR(32)` (`'good_standing'`, `'probation'`, `'honors'`, `'suspended'`)
   - `cumulative_gpa FLOAT DEFAULT 0.0`
-  - `credits_earned INT DEFAULT 0`
-  - `cohort_year VARCHAR(16)` (e.g. `'2026-2030'`)
-- **Constraints**: `UNIQUE (tenant_id, student_id)`, `UNIQUE (tenant_id, student_number)`.
+  - `total_credits_earned INT DEFAULT 0`
+  - `cohort_year INT` (e.g. `2026`)
+  - `degree_curriculum_id VARCHAR(64)`
+- **Constraints**: `UNIQUE (tenant_id, student_id)`, `UNIQUE (tenant_id, id)`.
 
-#### 37. `learner_concept_progress`
-- **Why it exists**: Concept-level learning mastery with explicit content namespace.
+#### 37. `learning_progress`
+- **Why it exists**: Concept-level learning mastery with explicit source namespace.
 - **Key Columns**:
-  - `content_type VARCHAR(16) DEFAULT 'library'` (`'library'` | `'university'`)
+  - `source_type VARCHAR(32) DEFAULT 'catalog'` (`'catalog'` | `'institution'`)
   - `concept_id VARCHAR(64)`
   - `concept_version INT`
-  - `status VARCHAR(32)`, `progress_percent FLOAT`
-- **Foreign Keys**: `FOREIGN KEY (tenant_id, section_enrollment_id) REFERENCES section_enrollments(tenant_id, id) ON DELETE CASCADE`.
+  - `progress_status VARCHAR(32)`, `progress_percent FLOAT`
+- **Foreign Keys**: `FOREIGN KEY (tenant_id, enrollment_id) REFERENCES enrollments(tenant_id, id) ON DELETE CASCADE`.
+- **Constraints**: `UNIQUE (enrollment_id, source_type, concept_id, concept_version)`.
 
 #### 38. `assessment_submissions`
 - **Why it exists**: Student homework attempts and automated coding lab evaluations.
 - **Key Columns**:
-  - `studio_type VARCHAR(16) DEFAULT 'library'` (`'library'` | `'university'`)
-  - `studio_instance_id VARCHAR(64)`
-  - `studio_version VARCHAR(16) DEFAULT '1.0.0'`
+  - `enrollment_id UUID`
+  - `activity_type VARCHAR(32) DEFAULT 'coding'`
+  - `activity_id VARCHAR(64)`
+  - `activity_version VARCHAR(16) DEFAULT '1.0.0'`
   - `attempt_number INT`
-  - `submission_payload JSON`, `grading_status`, `score FLOAT`
+  - `submission_payload JSON`, `grading_status`, `score FLOAT`, `max_score FLOAT`
+- **Foreign Keys**: `FOREIGN KEY (tenant_id, enrollment_id) REFERENCES enrollments(tenant_id, id) ON DELETE CASCADE`.
+- **Constraints**: `UNIQUE (enrollment_id, activity_id, attempt_number)`.
 
 #### 39. `course_grades`
 - **Why it exists**: Official finalized letter grades and transcript GPA points.
-- **Foreign Keys**: `FOREIGN KEY (tenant_id, section_enrollment_id) REFERENCES section_enrollments(tenant_id, id) ON DELETE CASCADE`.
+- **Foreign Keys**: `FOREIGN KEY (tenant_id, enrollment_id) REFERENCES enrollments(tenant_id, id) ON DELETE CASCADE`.
+- **Constraints**: `UNIQUE (enrollment_id)`.
 
 ---
 
 ### Domain 6: Institutional Governance & Matriculation (4 Tables)
 
-#### 40. `faculty_course_assignments`
+#### 40. `course_faculty`
 - **Why it exists**: Authorizes faculty to edit and oversee an institutional catalog course.
-- **Foreign Keys**: `FOREIGN KEY (tenant_id, university_course_id) REFERENCES university_courses(tenant_id, id) ON DELETE CASCADE`.
+- **Foreign Keys**: `FOREIGN KEY (tenant_id, institution_course_id) REFERENCES institution_courses(tenant_id, id) ON DELETE CASCADE`.
+- **Constraints**: `UNIQUE (faculty_id, institution_course_id)`.
 
-#### 41. `faculty_program_assignments`
+#### 41. `program_faculty`
 - **Why it exists**: Authorizes department chairs to manage semester tracks.
-- **Foreign Keys**: `FOREIGN KEY (tenant_id, university_program_id) REFERENCES university_programs(tenant_id, id) ON DELETE CASCADE`.
+- **Foreign Keys**: `FOREIGN KEY (tenant_id, institution_program_id) REFERENCES institution_programs(tenant_id, id) ON DELETE CASCADE`.
+- **Constraints**: `UNIQUE (faculty_id, institution_program_id)`.
 
-#### 42. `student_curriculum_enrollments`
+#### 42. `curriculum_enrollments`
 - **Why it exists**: Matriculates a student into an entire 4-year degree roadmap.
-- **Foreign Keys**: `FOREIGN KEY (tenant_id, university_curriculum_id) REFERENCES university_curriculums(tenant_id, id) ON DELETE CASCADE`.
+- **Foreign Keys**: `FOREIGN KEY (tenant_id, institution_curriculum_id) REFERENCES institution_curricula(tenant_id, id) ON DELETE CASCADE`.
+- **Constraints**: `UNIQUE (student_id, institution_curriculum_id)`.
 
-#### 43. `student_program_enrollments`
+#### 43. `program_enrollments`
 - **Why it exists**: Matriculates a student into a semester track.
-- **Foreign Keys**: `FOREIGN KEY (tenant_id, university_program_id) REFERENCES university_programs(tenant_id, id) ON DELETE CASCADE`.
+- **Foreign Keys**: `FOREIGN KEY (tenant_id, institution_program_id) REFERENCES institution_programs(tenant_id, id) ON DELETE CASCADE`.
+- **Constraints**: `UNIQUE (student_id, institution_program_id)`.
 
 ---
 
@@ -409,8 +429,8 @@ VALUES ('tenant-bayes', 'user-sagar', 'learner');
 
 ---
 
-### Scenario 2: SuperAdmin Authors a Concept with Studios & Multi-Chapter Reuse
-**Goal**: SuperAdmin creates an atomic concept "Gradient Descent", attaches a coding challenge, and links it into two separate master library chapters.
+### Scenario 2: SuperAdmin Authors a Concept with Activities & Multi-Chapter Reuse
+**Goal**: SuperAdmin creates an atomic concept "Gradient Descent", attaches a coding challenge, and links it into two separate master catalog chapters.
 
 ```sql
 -- Ingest CAS Asset
@@ -418,32 +438,32 @@ INSERT INTO studio_assets (content_hash, storage_provider, storage_uri, byte_siz
 VALUES ('a1b2c3d4...', 'r2', 'r2://bayes-assets/grad_descent_tests.json', 45020, 'application/json');
 
 -- Master Concept
-INSERT INTO library_concepts (id, version, code, title, slug, topic_category, status)
+INSERT INTO catalog_concepts (id, version, code, title, slug, topic_category, content_status)
 VALUES ('cpt-gd', 1, 'CPT-MATH-GD', 'Gradient Descent Fundamentals', 'gradient-descent', 'algorithms', 'published');
 
--- Master Studio
-INSERT INTO library_studio_instances (id, version, concept_id, concept_version, studio_type, order_rank, config_summary, asset_hash)
-VALUES ('std-gd-code', 1, 'cpt-gd', 1, 'coding', 1000000, '{"timeout": 5}', 'a1b2c3d4...');
+-- Master Activity
+INSERT INTO catalog_activities (id, concept_id, concept_version, activity_type, activity_version, position, config_summary, asset_hash)
+VALUES ('act-gd-code', 'cpt-gd', 1, 'coding', '1.0.0', 1000000, '{"timeout": 5}', 'a1b2c3d4...');
 
 -- Multi-Chapter Reuse
-INSERT INTO library_chapter_concepts (chapter_id, chapter_version, concept_id, concept_version, order_rank)
+INSERT INTO catalog_chapter_concepts (chapter_id, chapter_version, concept_id, concept_version, position)
 VALUES ('chap-optimization', 1, 'cpt-gd', 1, 1000000),
        ('chap-neural-networks', 1, 'cpt-gd', 1, 2000000);
 ```
 
 ---
 
-### Scenario 3: University Borrows an Entire Chapter As-Is (Zero-Copy)
-**Goal**: Ashoka University adopts the platform chapter "Neural Networks" into their course "CS-301" with zero row duplication.
+### Scenario 3: Institution Borrows an Entire Chapter As-Is (Zero-Copy)
+**Goal**: Ashoka University adopts the platform catalog chapter "Neural Networks" into their course "CS-301" with zero row duplication.
 
 ```sql
-INSERT INTO university_courses (id, tenant_id, local_code, local_title, composition_type, status)
-VALUES ('ucourse-ashoka-cs301', 'tenant-ashoka', 'CS-301', 'Deep Learning at Ashoka', 'library', 'published');
+INSERT INTO institution_courses (id, tenant_id, local_code, local_title, source_type, content_status)
+VALUES ('icourse-ashoka-cs301', 'tenant-ashoka', 'CS-301', 'Deep Learning at Ashoka', 'catalog', 'published');
 
-INSERT INTO university_course_library_chapters
-(tenant_id, university_course_id, library_chapter_id, library_version, order_rank, adoption_mode, release_channel)
+INSERT INTO institution_course_catalog_chapters
+(tenant_id, institution_course_id, catalog_chapter_id, catalog_version, position, reference_policy, release_channel)
 VALUES
-('tenant-ashoka', 'ucourse-ashoka-cs301', 'chap-neural-networks', 1, 1000000, 'pinned', 'stable');
+('tenant-ashoka', 'icourse-ashoka-cs301', 'chap-neural-networks', 1, 1000000, 'pinned', 'stable');
 ```
 
 ---
@@ -453,34 +473,34 @@ VALUES
 
 ```sql
 -- 1. Create Proprietary Concept
-INSERT INTO university_concepts (id, tenant_id, local_code, title, status, created_by_user_id)
-VALUES ('uconcept-ashoka-lab1', 'tenant-ashoka', 'ASHOKA-LAB-01', 'Ashoka Custom PyTorch CNN Lab', 'published', 'user-sagar');
+INSERT INTO institution_concepts (id, tenant_id, local_code, title, content_status, created_by_user_id)
+VALUES ('iconcept-ashoka-lab1', 'tenant-ashoka', 'ASHOKA-LAB-01', 'Ashoka Custom PyTorch CNN Lab', 'published', 'user-sagar');
 
 -- 2. Detached Snapshot Fork Container
-INSERT INTO university_chapters (id, tenant_id, source_library_chapter_id, source_library_version, local_code, local_title, composition_type, status)
-VALUES ('uchap-ashoka-nn-fork', 'tenant-ashoka', 'chap-neural-networks', 1, 'CS301-CHAP-02', 'Deep Learning (Ashoka Edition)', 'hybrid', 'draft');
+INSERT INTO institution_chapters (id, tenant_id, source_catalog_chapter_id, catalog_version, local_code, local_title, source_type, content_status)
+VALUES ('ichap-ashoka-nn-fork', 'tenant-ashoka', 'chap-neural-networks', 1, 'CS301-CHAP-02', 'Deep Learning (Ashoka Edition)', 'hybrid', 'draft');
 
 -- 3. Cloned Concept Pointers
-INSERT INTO university_chapter_library_concepts
-(tenant_id, university_chapter_id, library_concept_id, library_concept_version, order_rank)
+INSERT INTO institution_chapter_catalog_concepts
+(tenant_id, institution_chapter_id, catalog_concept_id, catalog_concept_version, position)
 VALUES
-('tenant-ashoka', 'uchap-ashoka-nn-fork', 'cpt-perceptron', 1, 1000000),
-('tenant-ashoka', 'uchap-ashoka-nn-fork', 'cpt-backpropagation', 1, 2000000);
+('tenant-ashoka', 'ichap-ashoka-nn-fork', 'cpt-perceptron', 1, 1000000),
+('tenant-ashoka', 'ichap-ashoka-nn-fork', 'cpt-backpropagation', 1, 2000000);
 
 -- 4. Custom Concept Injected
-INSERT INTO university_chapter_custom_concepts
-(tenant_id, university_chapter_id, university_concept_id, order_rank)
+INSERT INTO institution_chapter_custom_concepts
+(tenant_id, institution_chapter_id, institution_concept_id, position)
 VALUES
-('tenant-ashoka', 'uchap-ashoka-nn-fork', 'uconcept-ashoka-lab1', 3000000);
+('tenant-ashoka', 'ichap-ashoka-nn-fork', 'iconcept-ashoka-lab1', 3000000);
 
 -- 5. Pointer Switch
-DELETE FROM university_course_library_chapters
-WHERE university_course_id = 'ucourse-ashoka-cs301' AND library_chapter_id = 'chap-neural-networks';
+DELETE FROM institution_course_catalog_chapters
+WHERE institution_course_id = 'icourse-ashoka-cs301' AND catalog_chapter_id = 'chap-neural-networks';
 
-INSERT INTO university_course_custom_chapters
-(tenant_id, university_course_id, university_chapter_id, order_rank)
+INSERT INTO institution_course_custom_chapters
+(tenant_id, institution_course_id, institution_chapter_id, position)
 VALUES
-('tenant-ashoka', 'ucourse-ashoka-cs301', 'uchap-ashoka-nn-fork', 1000000);
+('tenant-ashoka', 'icourse-ashoka-cs301', 'ichap-ashoka-nn-fork', 1000000);
 ```
 
 ---
@@ -491,10 +511,10 @@ VALUES
 ```sql
 -- 1. Insert Pre-Compiled Publication Release #1
 INSERT INTO course_publications (
-    id, tenant_id, university_course_id, publication_number,
-    published_by_user_id, status, compiled_syllabus_tree, content_hash
+    id, tenant_id, institution_course_id, publication_number,
+    published_by_user_id, publication_status, compiled_syllabus_tree, content_hash
 ) VALUES (
-    'd8e6a1b2-...', 'tenant-ashoka', 'ucourse-ashoka-cs301', 1,
+    'd8e6a1b2-...', 'tenant-ashoka', 'icourse-ashoka-cs301', 1,
     'user-sagar', 'active',
     '{"course_code": "CS-301", "chapters": [...]}', '9f83c1b...'
 );
@@ -504,16 +524,16 @@ INSERT INTO academic_terms (id, tenant_id, code, name, start_date, end_date, is_
 VALUES ('term-2026-fall', 'tenant-ashoka', '2026-FALL', 'Fall 2026 Semester', '2026-08-15', '2026-12-20', TRUE);
 
 -- 3. Schedule Offering with Consistent Tuple Enforcement
--- (The database verifies that 'tenant-ashoka', 'ucourse-ashoka-cs301', and 'd8e6a1b2-...' match in course_publications)
-INSERT INTO course_offerings (id, tenant_id, academic_term_id, university_course_id, course_publication_id, status)
-VALUES ('offering-fall-cs301', 'tenant-ashoka', 'term-2026-fall', 'ucourse-ashoka-cs301', 'd8e6a1b2-...', 'enrollment_open');
+-- (The database verifies that 'tenant-ashoka', 'icourse-ashoka-cs301', and 'd8e6a1b2-...' match in course_publications)
+INSERT INTO course_offerings (id, tenant_id, academic_term_id, institution_course_id, course_publication_id, offering_status)
+VALUES ('offering-fall-cs301', 'tenant-ashoka', 'term-2026-fall', 'icourse-ashoka-cs301', 'd8e6a1b2-...', 'enrollment_open');
 
 -- 4. Create Cohort Section & Enroll Student
 INSERT INTO course_sections (id, tenant_id, course_offering_id, section_code, name, capacity)
 VALUES ('section-cs301-a', 'tenant-ashoka', 'offering-fall-cs301', 'SEC-A', 'Section A Morning', 50);
 
-INSERT INTO section_enrollments (id, tenant_id, course_section_id, student_id, registration_type, attempt_number, enrollment_status)
-VALUES ('enrollment-student-01', 'tenant-ashoka', 'section-cs301-a', 'user-student-01', 'standard', 1, 'enrolled');
+INSERT INTO enrollments (id, tenant_id, course_section_id, student_id, registration_type, attempt_number, enrollment_status)
+VALUES ('enrollment-student-01', 'tenant-ashoka', 'section-cs301-a', 'user-student-01', 'credit', 1, 'enrolled');
 ```
 
 ---
@@ -524,28 +544,28 @@ VALUES ('enrollment-student-01', 'tenant-ashoka', 'section-cs301-a', 'user-stude
 ```sql
 -- 1. Student Academic Profile
 INSERT INTO student_academic_profiles
-(id, tenant_id, student_id, student_number, academic_standing, cumulative_gpa, credits_earned, cohort_year)
+(id, tenant_id, student_id, matriculation_number, academic_standing, cumulative_gpa, total_credits_earned, cohort_year)
 VALUES
-(gen_random_uuid(), 'tenant-ashoka', 'user-student-01', 'ASH-2026-CS-042', 'good_standing', 3.85, 32, '2026-2030');
+(gen_random_uuid(), 'tenant-ashoka', 'user-student-01', 'ASH-2026-CS-042', 'good_standing', 3.85, 32, 2026);
 
 -- 2. Progress on Custom Concept
-INSERT INTO learner_concept_progress
-(tenant_id, section_enrollment_id, content_type, concept_id, concept_version, status, progress_percent, completed_at)
+INSERT INTO learning_progress
+(tenant_id, enrollment_id, source_type, concept_id, concept_version, progress_status, progress_percent, completed_at)
 VALUES
-('tenant-ashoka', 'enrollment-student-01', 'university', 'uconcept-ashoka-lab1', 1, 'completed', 100.0, NOW());
+('tenant-ashoka', 'enrollment-student-01', 'institution', 'iconcept-ashoka-lab1', 1, 'completed', 100.0, NOW());
 
--- 3. Submission on Custom Studio
+-- 3. Submission on Custom Activity
 INSERT INTO assessment_submissions (
-    tenant_id, section_enrollment_id, studio_type, studio_instance_id, studio_version,
+    tenant_id, enrollment_id, activity_type, activity_id, activity_version,
     attempt_number, submission_payload, grading_status, score, max_score
 ) VALUES (
-    'tenant-ashoka', 'enrollment-student-01', 'university', 'ustudio-ashoka-lab1', '1.0.0',
+    'tenant-ashoka', 'enrollment-student-01', 'coding', 'iact-ashoka-lab1', '1.0.0',
     1, '{"code": "import torch...", "tests_passed": 12}', 'auto_graded', 100.0, 100.0
 );
 
 -- 4. Final Course Grade & GPA
 INSERT INTO course_grades
-(tenant_id, section_enrollment_id, letter_grade, numeric_score, gpa_points, is_final, finalized_by_user_id, finalized_at)
+(tenant_id, enrollment_id, letter_grade, numeric_score, gpa_points, is_final, finalized_by_user_id, finalized_at)
 VALUES
 ('tenant-ashoka', 'enrollment-student-01', 'A', 97.0, 4.0, TRUE, 'user-sagar', NOW());
 ```
@@ -556,16 +576,16 @@ VALUES
 
 | User / Feature Action | Tables to Read & Mutate | Critical Invariant Rule |
 | :--- | :--- | :--- |
-| **Registering a user to a university** | `users`, `tenant_memberships`, `tenant_roles` | Identity is global; check `users` first. Memberships and roles are strictly scoped by `tenant_id`. |
-| **Authoring standardized platform content** | `library_concepts`, `library_studio_instances`, `studio_assets` | Once published, records are locked by database kernel triggers. Authors must increment version to revise. |
-| **University borrowing standard coursework** | `university_courses`, `university_course_library_chapters` | **Zero-Copy**. Insert a single edge row. Do not duplicate child chapters or concepts into tenant tables. |
-| **Customizing a borrowed chapter** | `university_chapters`, `university_chapter_library_concepts`, `university_chapter_custom_concepts`, `university_course_custom_chapters` | **Copy-on-Write Fork**. Creates an independent detached snapshot. Unmodified concepts stay referenced; custom concepts are tenant-owned. |
-| **Drag-and-drop reordering** | Dedicated edge table (e.g. `university_chapter_custom_concepts`) | Compute $\text{bisected\_rank} = \frac{\text{before} + \text{after}}{2}$. Single-row update. Never re-index neighboring rows. |
-| **Publishing a course** | `course_publications` | Run the CQRS compiler. The database enforces a `UNIQUE` partial index for active status per course. |
-| **Scheduling an offering** | `academic_terms`, `course_offerings` | Database enforces `FOREIGN KEY (tenant_id, university_course_id, course_publication_id)` consistent tuple. |
-| **Managing cohort sections & registration**| `course_sections`, `section_instructors`, `section_enrollments` | Enforces cohort isolation. Tracks `registration_type` (`'standard'`, `'audit'`, `'repeat'`) and `attempt_number`. |
-| **Tracking mastery, submissions, grades** | `learner_concept_progress`, `assessment_submissions`, `course_grades` | Tied strictly to `section_enrollment_id`. Concept progress and submissions include explicit `content_type` / `studio_type` namespace. |
-| **Managing student matriculation & standings**| `student_academic_profiles`, `student_curriculum_enrollments` | Independent of semester term offerings. Tracks roll number, standing (`'good_standing'`), and cumulative GPA. |
+| **Registering a user to an institution** | `users`, `tenant_memberships`, `tenant_roles` | Identity is global; check `users` first. Memberships and roles are strictly scoped by `tenant_id`. |
+| **Authoring standardized platform content** | `catalog_concepts`, `catalog_activities`, `studio_assets` | Once published, records are locked by database kernel triggers. Authors must increment version to revise. |
+| **Institution borrowing standard coursework** | `institution_courses`, `institution_course_catalog_chapters` | **Zero-Copy**. Insert a single edge row. Do not duplicate child chapters or concepts into tenant tables. |
+| **Customizing a borrowed chapter** | `institution_chapters`, `institution_chapter_catalog_concepts`, `institution_chapter_custom_concepts`, `institution_course_custom_chapters` | **Copy-on-Write Fork**. Creates an independent detached snapshot. Unmodified concepts stay referenced; custom concepts are tenant-owned. |
+| **Drag-and-drop reordering** | Dedicated edge table (e.g. `institution_chapter_custom_concepts`) | Compute $\text{bisected\_position} = \frac{\text{before} + \text{after}}{2}$ in `position`. Single-row update. Never re-index neighboring rows. |
+| **Publishing a course** | `course_publications` | Run the CQRS compiler. The database enforces a `UNIQUE` partial index for active `publication_status` per course. |
+| **Scheduling an offering** | `academic_terms`, `course_offerings` | Database enforces `FOREIGN KEY (tenant_id, institution_course_id, course_publication_id)` consistent tuple. |
+| **Managing cohort sections & registration**| `course_sections`, `section_staff`, `enrollments` | Enforces cohort isolation. Tracks `registration_type` (`'credit'`, `'audit'`, `'pass_fail'`) and `attempt_number`. |
+| **Tracking mastery, submissions, grades** | `learning_progress`, `assessment_submissions`, `course_grades` | Tied strictly to `enrollment_id`. Concept progress and submissions include explicit `source_type` / `activity_type` namespace. |
+| **Managing student matriculation & standings**| `student_academic_profiles`, `curriculum_enrollments`, `program_enrollments` | Independent of semester term offerings. Tracks matriculation number, standing (`'good_standing'`), and cumulative GPA. |
 
 ---
 

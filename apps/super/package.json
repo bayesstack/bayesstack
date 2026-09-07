@@ -12,6 +12,8 @@
     "@bayesstack/assets": "workspace:*",
     "@bayesstack/tenant": "workspace:*",
     "@bayesstack/ui": "workspace:*",
+    "@bayesstack/studio-video": "workspace:*",
+    "@bayesstack/studio-coding": "workspace:*",
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:"
