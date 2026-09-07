@@ -1,0 +1,47 @@
+flowchart TD
+    subgraph UI_Layer["1. Authoring & Runtime UI Layer"]
+        SA["Super Admin / Faculty<br/>Problem Setter Interface"]
+        LP["Learner App / Studio Launcher<br/>CodingStudio Frontend"]
+    end
+
+    subgraph API_Layer["2. Platform API Gateway (FastAPI Monolith)"]
+        AuthorAPI["/api/v1/coding/problems<br/>CRUD & Test Verification"]
+        ProblemAPI["/api/v1/coding/problems/{id}<br/>Single-Row Fast Read (&lt; 2ms)"]
+        RunAPI["/api/v1/coding/problems/{id}/runs<br/>Sample Test Runner"]
+        SubmitAPI["/api/v1/coding/submissions<br/>Durable Submission Intake"]
+        SSE["/api/v1/coding/submissions/{id}/stream<br/>Live SSE Progress Stream"]
+    end
+
+    subgraph Data_Layer["3. Unified Database Layer (PostgreSQL 16)"]
+        PTable[("coding_problems<br/>Denormalized Single Table<br/>(Markdown, Tests, Starters, Hints)")]
+        STable[("coding_submissions<br/>(User, Code, Verdict, Latency)")]
+        RTable[("coding_submission_case_results<br/>(Per-Case Output &amp; Verdict)")]
+    end
+
+    subgraph Queue_Layer["4. Lightweight Concurrency Queue"]
+        RedisQ[("Redis 7 Queue / Stream<br/>(In-Memory Buffer &lt; 30MB RAM)<br/>Priority: Run &gt; Submit")]
+        RedisPubSub["Redis Pub/Sub<br/>(Real-Time Verdict Broadcasting)"]
+    end
+
+    subgraph Execution_Layer["5. Distributed Execution Fleet"]
+        Workers["Judge Worker Pool<br/>(Python / Async Consumer Fleet)"]
+        Piston["Ephemeral Piston Sandbox<br/>(Docker / Cgroups / Network-Isolated)"]
+    end
+
+    SA -->|"1. Create / Seed Question"| AuthorAPI
+    AuthorAPI -->|"Write All-in-One Row"| PTable
+    LP -->|"2. Launch Studio (activity_id)"| ProblemAPI
+    ProblemAPI -->|"Zero-Join Read"| PTable
+    LP -->|"3. Run Code (Sample Cases)"| RunAPI
+    RunAPI -->|"High Priority Run"| RedisQ
+    LP -->|"4. Submit Solution"| SubmitAPI
+    SubmitAPI -->|"Enqueues Attempt"| RedisQ
+    SubmitAPI -->|"Insert queued state"| STable
+    RedisQ -->|"Pulls Job"| Workers
+    Workers -->|"Executes Hostile Code"| Piston
+    Piston -->|"Stdout / Stderr / Resource"| Workers
+    Workers -->|"5. Saves Verdicts &amp; Metrics"| STable
+    Workers -->|"Saves Case Details"| RTable
+    Workers -->|"6. Publish Event"| RedisPubSub
+    RedisPubSub -->|"Broadcast"| SSE
+    SSE -->|"7. Real-Time UI Update"| LP

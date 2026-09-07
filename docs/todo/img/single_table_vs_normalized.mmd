@@ -1,0 +1,31 @@
+flowchart LR
+    subgraph Anti_Pattern["Traditional 7-Table Normalized Anti-Pattern"]
+        direction TB
+        P["problems (id, title, difficulty)"]
+        D["problem_descriptions (text, markdown)"]
+        C["problem_constraints (1..N rows)"]
+        S["problem_starters (lang, template)"]
+        TC["problem_test_cases (sample + hidden)"]
+        H["problem_hints (ordered rows)"]
+        E["problem_editorials (approach, solution)"]
+        
+        P --> D
+        P --> C
+        P --> S
+        P --> TC
+        P --> H
+        P --> E
+        
+        Bottleneck["7-Way Relational JOIN<br/>Latency: 45ms - 120ms<br/>Connection Pool Exhaustion<br/>High Buffer Cache Misses"]
+    end
+
+    subgraph BayesStack_Pattern["BayesStack Single-Table Production Architecture"]
+        direction TB
+        Row[("coding_problems<br/>Single Primary Row<br/>id: 'knapsack-01'")]
+        
+        Payload["Embedded Document Attributes (JSONB):<br/>• Full Statement &amp; LaTeX Math<br/>• Input &amp; Output Specifications<br/>• Constraints Array<br/>• Starter Code Map (Python, C++, Java, JS)<br/>• Public Sample Cases (with Explanations)<br/>• Hidden Evaluation Test Suite<br/>• Progressive Hints (Tier 1, 2, 3)<br/>• Editorial &amp; Reference Solutions"]
+        
+        Row --- Payload
+        
+        Performance["Zero-Join Point Lookup (B-Tree PK)<br/>Latency: &lt; 1.5ms<br/>10,000+ Requests / Second<br/>Atomic Single-Row Updates"]
+    end

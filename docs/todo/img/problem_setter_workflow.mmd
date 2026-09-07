@@ -1,0 +1,30 @@
+sequenceDiagram
+    autonumber
+    actor Admin as Super Admin (Problem Setter)
+    participant UI as Super Admin Authoring Workspace
+    participant API as Platform API
+    participant Judge as Coding Judge Worker
+    participant Piston as Ephemeral Piston Sandbox
+    participant DB as PostgreSQL (coding_problems)
+
+    Admin->>UI: Fills Problem Statement (Markdown + KaTeX Math)
+    Admin->>UI: Configures Constraints & Language Starters
+    Admin->>UI: Defines Sample Cases & Hidden Boundary Cases
+    Admin->>UI: Inputs Reference Solution (e.g. Canonical DP)
+    Admin->>UI: Clicks "Verify Reference Solution"
+    
+    UI->>API: POST /api/v1/coding/problems/verify
+    API->>Judge: Dispatches code against 100% of test cases
+    Judge->>Piston: Executes isolated sandboxed runs
+    Piston-->>Judge: Raw stdout, stderr, timings, memory
+    Judge-->>API: 10/10 Cases Passed (All verdicts: ACCEPTED)
+    API-->>UI: Verification Success ("Solution 100% Validated")
+    
+    Admin->>UI: Clicks "Publish to Catalog"
+    UI->>API: POST /api/v1/coding/problems
+    API->>DB: INSERT INTO coding_problems (Single Row Atomic)
+    DB-->>API: Row Created (id: knapsack-01)
+    API-->>UI: Problem Published Successfully
+    
+    Admin->>UI: Clicks "Test Drive in Studio"
+    UI->>UI: Launches Studio Preview Screen with Live PostgreSQL Data

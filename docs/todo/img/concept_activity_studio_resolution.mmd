@@ -1,0 +1,27 @@
+graph TD
+    subgraph Catalog_Hierarchy["1. Master Learning Catalog Hierarchy"]
+        Curriculum["CatalogCurriculum<br/>(Computer Science B.Tech)"]
+        Program["CatalogProgram<br/>(Algorithms Track)"]
+        Course["CatalogCourse<br/>(Advanced Algorithms &amp; Optimization)"]
+        Chapter["CatalogChapter<br/>(Dynamic Programming)"]
+        Concept["CatalogConcept (C-KNAPSACK)<br/>'0/1 Knapsack Problem'"]
+    end
+
+    subgraph Activities["2. Configured Learner Tasks"]
+        ActVideo["CatalogActivity 1 (ACT-KNAPSACK-VIDEO-V1)<br/>type: video | 'Knapsack DP Formulation'"]
+        ActCode["CatalogActivity 2 (ACT-KNAPSACK-CODE-V1)<br/>type: coding | 'Implement 0/1 Knapsack in Python'"]
+    end
+
+    subgraph Studio_Resolution["3. Autonomous Studio Delivery"]
+        Descriptor["Published Activity Descriptor<br/>activity_id: ACT-KNAPSACK-CODE-V1<br/>activity_type: coding<br/>problem_id: knapsack-01"]
+        Studio["Coding Studio Runtime<br/>(Operates autonomously without syllabus tree joins)"]
+        DBRow[("PostgreSQL: coding_problems<br/>Single-Row Point Read (< 1.5ms)")]
+    end
+
+    Curriculum --> Program --> Course --> Chapter --> Concept
+    Concept --> ActVideo
+    Concept --> ActCode
+    ActCode --> Descriptor
+    Descriptor --> Studio
+    Studio -->|"GET /api/v1/coding/problems/knapsack-01"| DBRow
+    DBRow -->|"Delivers Full Markdown, Starters, Tests, Hints"| Studio

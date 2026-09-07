@@ -1,0 +1,31 @@
+flowchart TD
+    subgraph Client["Student Action in Studio"]
+        TriggerRun["Click 'Run' (⌘↵)"]
+        TriggerSubmit["Click 'Submit' (⇧⌘↵)"]
+    end
+
+    subgraph Run_Lane["Fast-Lane Ephemeral Path (Run)"]
+        RunAPI["POST /problems/{id}/runs"]
+        SampleOnly["Extract Public Sample Cases Only<br/>(2 Cases)"]
+        PistonRun["Direct Piston Sandbox Execution<br/>Priority: High"]
+        DiffGen["Compute Character-Level Diff<br/>(Actual vs Expected)"]
+        ConsoleOut["Update Console &amp; Visual Diff Viewer<br/>Latency: &lt; 350ms"]
+        NoDB["Zero DB Persistence"]
+    end
+
+    subgraph Submit_Lane["Durable Asynchronous Queue Path (Submit)"]
+        SubmitAPI["POST /submissions"]
+        DurableWrite["Insert Row: coding_submissions<br/>state: 'queued'"]
+        RedisPush["Push Job to Redis Queue<br/>bayesstack:coding:queue"]
+        HTTP202["Return HTTP 202 Accepted (8ms)"]
+        WorkerPool["Judge Worker Fleet Consumes Job"]
+        AllCases["Execute Full Test Suite<br/>(Samples + Hidden + Stress)"]
+        VerdictCalc["Compute Aggregate Verdict<br/>(AC / WA / TLE / MLE / CE)"]
+        DurableResult["Persist Result &amp; Case Details<br/>to PostgreSQL"]
+        SSEPush["Publish Event via Redis Pub/Sub"]
+        UI_Update["Render Accepted Confetti,<br/>Sound Chime &amp; Update History Tab"]
+    end
+
+    TriggerRun --> RunAPI --> SampleOnly --> PistonRun --> DiffGen --> ConsoleOut --> NoDB
+    TriggerSubmit --> SubmitAPI --> DurableWrite --> RedisPush --> HTTP202
+    RedisPush --> WorkerPool --> AllCases --> VerdictCalc --> DurableResult --> SSEPush --> UI_Update

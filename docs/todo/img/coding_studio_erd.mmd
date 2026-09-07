@@ -1,0 +1,94 @@
+erDiagram
+    TENANTS ||--o{ CODING_PROBLEMS : "scopes (optional)"
+    USERS ||--o{ CODING_USER_DRAFTS : "owns"
+    CODING_PROBLEMS ||--o{ CODING_USER_DRAFTS : "targets"
+    USERS ||--o{ CODING_SUBMISSIONS : "submits"
+    TENANTS ||--o{ CODING_SUBMISSIONS : "groups"
+    CODING_PROBLEMS ||--o{ CODING_SUBMISSIONS : "evaluates"
+    CODING_SUBMISSIONS ||--o{ CODING_SUBMISSION_CASE_RESULTS : "contains"
+
+    TENANTS {
+        string id PK
+        string name
+    }
+
+    USERS {
+        string id PK
+        string email
+        string role
+    }
+
+    CODING_PROBLEMS {
+        string id PK "knapsack-01"
+        string activity_id UK "ACT-KNAPSACK-CODE-V1"
+        string tenant_id FK "NULL for Global Library"
+        string title "0/1 Knapsack Problem"
+        string slug UK "01-knapsack-problem"
+        string difficulty "Easy | Medium | Hard"
+        jsonb topic_tags "['dp', 'knapsack']"
+        text description "Markdown + LaTeX"
+        text input_format "Specification"
+        text output_format "Specification"
+        jsonb constraints "['1 <= N <= 1000']"
+        jsonb starter_code "{python, cpp, java, js}"
+        jsonb sample_test_cases "[{stdin, expected, explanation}]"
+        jsonb hidden_test_cases "[{stdin, expected, weight}]"
+        jsonb hints "[{title, content}]"
+        jsonb editorial "{approach, solutions}"
+        jsonb allowed_languages "['python', 'cpp', ...]"
+        string default_language "python"
+        int time_limit_ms "2000"
+        int memory_limit_mb "256"
+        int output_limit_bytes "1048576"
+        string comparison_mode "whitespace_insensitive"
+        boolean is_active "true"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    CODING_USER_DRAFTS {
+        uuid id PK
+        string actor_id FK
+        string problem_id FK
+        string language
+        text code
+        timestamp updated_at
+    }
+
+    CODING_SUBMISSIONS {
+        uuid id PK
+        string problem_id FK
+        string tenant_id FK
+        string actor_id FK
+        text source_code
+        string language
+        string runtime_version
+        string state "queued | running | completed | failed"
+        string verdict "accepted | wrong_answer | time_limit_exceeded | ..."
+        int test_cases_passed
+        int total_test_cases
+        numeric score
+        int execution_time_ms
+        int memory_used_kb
+        text error_message
+        string execution_provider
+        timestamp created_at
+        timestamp started_at
+        timestamp completed_at
+    }
+
+    CODING_SUBMISSION_CASE_RESULTS {
+        uuid id PK
+        uuid submission_id FK
+        uuid case_id
+        string title
+        boolean is_visible
+        string verdict
+        boolean passed
+        text stdout
+        text stderr
+        text compile_output
+        int exit_code
+        int execution_time_ms
+        int memory_used_kb
+    }

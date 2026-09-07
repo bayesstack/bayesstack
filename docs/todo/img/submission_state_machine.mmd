@@ -1,0 +1,33 @@
+stateDiagram-v2
+    [*] --> Queued : POST /api/v1/coding/submissions
+    Queued --> Running : Worker claims job from Redis
+    
+    state Running {
+        [*] --> Compiling : If compiled language (C++, Java)
+        Compiling --> CompilationError : Non-zero exit code
+        Compiling --> ExecutingCases : Binary ready
+        
+        state ExecutingCases {
+            [*] --> CaseEvaluation
+            CaseEvaluation --> CaseEvaluation : Case 1..N passed
+            CaseEvaluation --> FirstFailure : Failed on Case K
+        }
+    }
+
+    ExecutingCases --> Accepted : All cases passed (100%)
+    FirstFailure --> WrongAnswer : Output mismatch
+    FirstFailure --> TimeLimitExceeded : Wall-clock / CPU limit reached
+    FirstFailure --> MemoryLimitExceeded : RAM ceiling exceeded
+    FirstFailure --> RuntimeError : Unhandled exception / SIGSEGV
+    Running --> SystemError : Worker crash or Piston network drop
+
+    Accepted --> Completed
+    WrongAnswer --> Completed
+    TimeLimitExceeded --> Completed
+    MemoryLimitExceeded --> Completed
+    RuntimeError --> Completed
+    CompilationError --> Completed
+    SystemError --> Failed
+
+    Completed --> [*] : Notify Browser via SSE &amp; Commit to DB
+    Failed --> [*] : Notify Browser &amp; Log Incident

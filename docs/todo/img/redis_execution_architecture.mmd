@@ -1,0 +1,50 @@
+flowchart TD
+    subgraph Browsers["1,000 Concurrent Students"]
+        S1["Student 1"]
+        S2["Student 2"]
+        SN["Student 1,000"]
+    end
+
+    subgraph Gateway["Platform API Monolith (Stateless FastAPI Fleet)"]
+        API1["API Worker 1"]
+        API2["API Worker 2"]
+        FastResponse["Validates Auth + Writes 'queued' row<br/>Enqueues Job to Redis<br/>Returns HTTP 202 in &lt; 10ms"]
+    end
+
+    subgraph Broker["Lightweight Redis 7 Broker (&lt; 30MB RAM)"]
+        StreamQ[("Job Queue (List / Stream)<br/>bayesstack:coding:queue<br/>[Job 1, Job 2, ..., Job 1000]")]
+        PubSubChannel[("Pub/Sub Event Bus<br/>bayesstack:submission:events")]
+    end
+
+    subgraph Judge_Fleet["Independent Judge Worker Pool"]
+        W1["Worker 1"]
+        W2["Worker 2"]
+        W3["Worker 3"]
+        W4["Worker 4"]
+    end
+
+    subgraph Sandboxes["Ephemeral Execution Sandboxes"]
+        P1["Piston Cgroup 1"]
+        P2["Piston Cgroup 2"]
+        P3["Piston Cgroup 3"]
+        P4["Piston Cgroup 4"]
+    end
+
+    subgraph Storage["Authoritative Database"]
+        PG[("PostgreSQL 16<br/>coding_submissions<br/>coding_submission_case_results")]
+    end
+
+    Browsers -->|"POST /submissions"| Gateway
+    Gateway --> FastResponse
+    FastResponse -->|"Enqueue"| StreamQ
+    FastResponse -->|"Init Row"| PG
+
+    StreamQ -->|"BRPOP / Consumer Group"| Judge_Fleet
+    W1 --> P1
+    W2 --> P2
+    W3 --> P3
+    W4 --> P4
+
+    Judge_Fleet -->|"Write Verdicts &amp; Metrics"| PG
+    Judge_Fleet -->|"Publish Result Event"| PubSubChannel
+    PubSubChannel -->|"Server-Sent Events (SSE)"| Browsers

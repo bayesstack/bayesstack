@@ -1,0 +1,22 @@
+gantt
+    title Coding Studio Functional Implementation Roadmap
+    dateFormat  YYYY-MM-DD
+    section Phase 1: DB &amp; Migration
+    Create Migration 0014 (Single-Table Schema) :p1_1, 2026-09-08, 1d
+    Enrich Seed Data with 0/1 Knapsack Suite    :p1_2, after p1_1, 1d
+    section Phase 2: Super Admin
+    Build Super Admin Problem Setter UI         :p2_1, after p1_2, 2d
+    Reference Solution Verifier Engine          :p2_2, after p2_1, 1d
+    section Phase 3: API &amp; Fast Lane
+    Single-Row Public Fetch Endpoint            :p3_1, after p1_2, 1d
+    Sample Run &amp; Custom Input Fast Lane         :p3_2, after p3_1, 1d
+    section Phase 4: Redis Execution
+    Add Redis 7 Service to Docker Compose       :p4_1, after p3_2, 1d
+    Build Async Judge Worker Daemon             :p4_2, after p4_1, 2d
+    Implement SSE Real-Time Stream              :p4_3, after p4_2, 1d
+    section Phase 5: Studio Frontend
+    Wire useCodingProblem to Real API           :p5_1, after p4_3, 1d
+    Wire Run &amp; Submit to Redis Pipeline         :p5_2, after p5_1, 1d
+    Wire Submissions Tab &amp; Perf Curves          :p5_3, after p5_2, 1d
+    section Phase 6: E2E Verification
+    Super Admin Studio Launch Test Drive        :p6_1, after p5_3, 1d
