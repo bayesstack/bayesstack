@@ -31,6 +31,24 @@ const KEYWORDS_BASH = new Set([
   "fi", "for", "do", "done", "while", "case", "esac", "function", "return"
 ]);
 
+const KEYWORDS_CPP = new Set([
+  "int", "char", "bool", "float", "double", "void", "long", "short", "unsigned", "signed",
+  "auto", "const", "constexpr", "static", "inline", "extern", "struct", "class", "enum", "union",
+  "public", "private", "protected", "virtual", "override", "final", "namespace", "using", "template",
+  "typename", "include", "if", "else", "for", "while", "do", "switch", "case", "default", "break",
+  "continue", "return", "sizeof", "new", "delete", "throw", "try", "catch", "std", "vector", "string",
+  "pair", "map", "set", "cout", "cin", "endl", "nullptr", "true", "false"
+]);
+
+const KEYWORDS_JAVA = new Set([
+  "abstract", "boolean", "byte", "char", "short", "int", "long", "float", "double", "void",
+  "class", "interface", "enum", "extends", "implements", "package", "import", "public", "private",
+  "protected", "static", "final", "synchronized", "volatile", "transient", "native", "strictfp",
+  "if", "else", "switch", "case", "default", "while", "do", "for", "break", "continue", "return",
+  "try", "catch", "finally", "throw", "throws", "new", "instanceof", "this", "super", "null",
+  "true", "false", "String", "System", "out", "println", "print", "Scanner", "Arrays", "List", "Map"
+]);
+
 /**
  * High-performance, zero-dependency tokenization engine for CodeDisplay syntax highlighting.
  */
@@ -66,6 +84,10 @@ export function highlightLine(lineText: string, language: string = "typescript")
       ? KEYWORDS_SQL
       : lang === "bash"
       ? KEYWORDS_BASH
+      : lang === "cpp" || lang === "c++" || lang === "c"
+      ? KEYWORDS_CPP
+      : lang === "java"
+      ? KEYWORDS_JAVA
       : KEYWORDS_JS_TS;
 
   while ((match = tokenRegex.exec(lineText)) !== null) {

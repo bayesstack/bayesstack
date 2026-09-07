@@ -1,0 +1,705 @@
+/* BayesStack Premium Competitive Coding Studio Layout */
+
+.bs-coding-studio {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: calc(100vh - 100px);
+  background: var(--bs-ui-canvas, #f1f8f6);
+  font-family: var(--bs-ui-font-sans, "Outfit", "Inter", sans-serif);
+  color: var(--bs-ui-ink, #123333);
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid var(--bs-ui-line, #d7e8e4);
+  box-shadow: 0 4px 24px rgba(11, 103, 99, 0.05);
+}
+
+.bs-coding-studio--fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  border-radius: 0;
+  border: none;
+  min-height: 100vh;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* Studio Header */
+.bs-cs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1.25rem;
+  background: var(--bs-ui-surface, #ffffff);
+  border-bottom: 1px solid var(--bs-ui-line, #d7e8e4);
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.bs-cs-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.bs-cs-header-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--bs-ui-ink, #123333);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bs-cs-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+/* Main Split Workspace */
+.bs-cs-workspace {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  overflow: hidden;
+  height: calc(100% - 48px);
+  min-height: 0;
+  position: relative;
+}
+
+.bs-cs-left-pane-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.bs-cs-left-collapsed-rail {
+  width: 36px;
+  height: 100%;
+  background: var(--bs-ui-surface, #ffffff);
+  border-right: 1px solid var(--bs-ui-line, #d7e8e4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0;
+  gap: 12px;
+  flex-shrink: 0;
+  user-select: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.bs-cs-left-collapsed-rail:hover {
+  background: var(--bs-ui-canvas, #f1f8f6);
+}
+
+.bs-cs-left-collapsed-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid var(--bs-ui-line, #d7e8e4);
+  background: #ffffff;
+  color: var(--bs-ui-brand, #0b6763);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bs-cs-left-collapsed-btn:hover {
+  background: var(--bs-ui-brand, #0b6763);
+  color: #ffffff;
+  border-color: var(--bs-ui-brand, #0b6763);
+}
+
+.bs-cs-left-collapsed-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--bs-ui-muted, #4a6360);
+  letter-spacing: 0.5px;
+  padding: 8px 0;
+  transition: color 0.15s ease;
+}
+
+.bs-cs-left-collapsed-label:hover {
+  color: var(--bs-ui-brand, #0b6763);
+}
+
+/* Right Collapsed Rail (Side-by-side mode) */
+.bs-cs-right-collapsed-rail {
+  width: 36px;
+  height: 100%;
+  background: var(--bs-ui-surface, #ffffff);
+  border-left: 1px solid var(--bs-ui-line, #d7e8e4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0;
+  gap: 12px;
+  flex-shrink: 0;
+  user-select: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.bs-cs-right-collapsed-rail:hover {
+  background: var(--bs-ui-canvas, #f1f8f6);
+}
+
+.bs-cs-right-collapsed-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid var(--bs-ui-line, #d7e8e4);
+  background: #ffffff;
+  color: var(--bs-ui-brand, #0b6763);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bs-cs-right-collapsed-btn:hover {
+  background: var(--bs-ui-brand, #0b6763);
+  color: #ffffff;
+  border-color: var(--bs-ui-brand, #0b6763);
+}
+
+.bs-cs-right-collapsed-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--bs-ui-muted, #4a6360);
+  letter-spacing: 0.5px;
+  padding: 8px 0;
+  transition: color 0.15s ease;
+}
+
+.bs-cs-right-collapsed-label:hover {
+  color: var(--bs-ui-brand, #0b6763);
+}
+
+/* Floating Popout Modal Overlay */
+.bs-cs-floating-backdrop {
+  animation: bs-cs-fade-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bs-cs-floating-window {
+  animation: bs-cs-scale-up 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes bs-cs-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes bs-cs-scale-up {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Split Dividers */
+.bs-cs-split-divider {
+  user-select: none;
+  touch-action: none;
+  outline: none;
+}
+
+.bs-cs-split-divider:hover .bs-cs-split-line,
+.bs-cs-split-divider:focus-visible .bs-cs-split-line {
+  background: var(--bs-ui-brand, #0b6763) !important;
+  box-shadow: 0 0 6px rgba(11, 103, 99, 0.4) !important;
+}
+
+.bs-cs-split-divider:hover .bs-cs-split-grip,
+.bs-cs-split-divider:focus-visible .bs-cs-split-grip {
+  border-color: var(--bs-ui-brand, #0b6763) !important;
+  background: var(--bs-ui-brand-soft, #e4f2ef) !important;
+  color: var(--bs-ui-brand, #0b6763) !important;
+}
+
+.bs-cs-split-divider--dragging .bs-cs-split-line {
+  background: var(--bs-ui-brand, #0b6763) !important;
+  box-shadow: 0 0 8px rgba(11, 103, 99, 0.5) !important;
+}
+
+.bs-cs-split-divider--dragging .bs-cs-split-grip {
+  border-color: var(--bs-ui-brand, #0b6763) !important;
+  background: var(--bs-ui-brand, #0b6763) !important;
+  color: #ffffff !important;
+}
+
+@media (max-width: 960px) {
+  .bs-cs-workspace {
+    flex-direction: column !important;
+    overflow-y: auto !important;
+  }
+  .bs-cs-left-pane-wrapper {
+    flex: none !important;
+    width: 100% !important;
+    height: 380px !important;
+  }
+  .bs-cs-split-divider--horizontal {
+    display: none !important;
+  }
+  .bs-cs-right-pane {
+    height: auto !important;
+    min-height: 500px !important;
+  }
+}
+
+/* Left Pane */
+.bs-cs-left-pane {
+  display: flex;
+  flex-direction: column;
+  background: var(--bs-ui-surface, #ffffff);
+  border-right: 1px solid var(--bs-ui-line, #d7e8e4);
+  overflow: hidden;
+  height: 100%;
+}
+
+.bs-cs-left-nav {
+  padding: 0.5rem 1rem 0;
+  border-bottom: 1px solid var(--bs-ui-line, #d7e8e4);
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
+.bs-cs-left-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem 1.5rem;
+  background: #ffffff;
+}
+
+/* Right Pane: Code Editor + Console */
+.bs-cs-right-pane {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bs-ui-surface, #ffffff);
+  height: 100%;
+}
+
+/* Editor Panel */
+.bs-cs-editor-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  min-height: 200px;
+}
+
+.bs-cs-editor-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  background: #ffffff;
+  border-bottom: 1px solid var(--bs-ui-line, #d7e8e4);
+  flex-shrink: 0;
+}
+
+.bs-cs-editor-stage {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Console Panel */
+.bs-cs-console-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--bs-ui-surface, #ffffff);
+  border-top: 2px solid var(--bs-ui-line, #d7e8e4);
+  transition: height 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.bs-cs-console-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 1rem 0;
+  background: #ffffff;
+  border-bottom: 1px solid var(--bs-ui-line, #d7e8e4);
+  flex-shrink: 0;
+}
+
+.bs-cs-console-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem 1.25rem;
+  background: var(--bs-ui-canvas, #f1f8f6);
+}
+
+/* Example & Test Case Cards */
+.bs-cs-card {
+  background: #ffffff;
+  border: 1px solid var(--bs-ui-line, #d7e8e4);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 0.85rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.bs-cs-code-block {
+  font-family: var(--bs-ui-font-mono, "JetBrains Mono", monospace);
+  font-size: 0.82rem;
+  background: var(--bs-ui-canvas, #f1f8f6);
+  border: 1px solid var(--bs-ui-line, #d7e8e4);
+  border-radius: 6px;
+  padding: 8px 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* Custom Scrollbars */
+.bs-cs-left-body::-webkit-scrollbar,
+.bs-cs-console-body::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.bs-cs-left-body::-webkit-scrollbar-thumb,
+.bs-cs-console-body::-webkit-scrollbar-thumb {
+  background: rgba(11, 103, 99, 0.2);
+  border-radius: 3px;
+}
+
+.bs-cs-left-body::-webkit-scrollbar-thumb:hover,
+.bs-cs-console-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(11, 103, 99, 0.4);
+}
+
+/* Keyboard Shortcut Badges */
+.bs-cs-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--bs-ui-font-mono, "JetBrains Mono", monospace);
+  font-size: 0.68rem;
+  line-height: 1;
+  user-select: none;
+}
+
+/* Command Palette Animation */
+@keyframes bsModalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Zen / Focus Coding Mode (Distraction-free ambient dark theme) */
+.bs-coding-studio--zen {
+  background: #090d16 !important;
+  color: #e2e8f0 !important;
+}
+
+.bs-coding-studio--zen .bs-cs-header {
+  background: #0d1322 !important;
+  border-bottom: 1px solid #1e293b !important;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+.bs-coding-studio--zen .bs-cs-header-title {
+  color: #f1f5f9 !important;
+}
+
+.bs-coding-studio--zen .bs-cs-left-pane,
+.bs-coding-studio--zen .bs-cs-left-nav,
+.bs-coding-studio--zen .bs-cs-left-body,
+.bs-coding-studio--zen .bs-cs-left-collapsed-rail {
+  background: #0d1322 !important;
+  border-color: #1e293b !important;
+  color: #cbd5e1 !important;
+}
+
+.bs-coding-studio--zen .bs-cs-left-collapsed-btn {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #38bdf8 !important;
+}
+
+.bs-coding-studio--zen .bs-cs-left-collapsed-btn:hover {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+}
+
+.bs-coding-studio--zen .bs-cs-right-pane {
+  background: #090d16 !important;
+}
+
+.bs-coding-studio--zen .bs-cs-editor-panel {
+  background: #0d1322 !important;
+}
+
+.bs-coding-studio--zen .bs-cs-editor-toolbar {
+  background: #0d1322 !important;
+  border-bottom: 1px solid #1e293b !important;
+  color: #cbd5e1 !important;
+}
+
+.bs-coding-studio--zen .bs-cs-console-panel {
+  background: #0d1322 !important;
+  border-top-color: #1e293b !important;
+}
+
+.bs-coding-studio--zen .bs-cs-console-toolbar {
+  background: #0d1322 !important;
+  border-bottom: 1px solid #1e293b !important;
+  color: #cbd5e1 !important;
+}
+
+.bs-coding-studio--zen .bs-cs-console-body {
+  background: #090d16 !important;
+  color: #cbd5e1 !important;
+}
+
+.bs-coding-studio--zen .bs-cs-card {
+  background: #0d1322 !important;
+  border-color: #1e293b !important;
+  color: #cbd5e1 !important;
+}
+
+.bs-coding-studio--zen .bs-cs-code-block {
+  background: #050811 !important;
+  border-color: #1e293b !important;
+  color: #38bdf8 !important;
+}
+
+.bs-coding-studio--zen .bs-cs-split-line {
+  background: #1e293b !important;
+}
+
+.bs-coding-studio--zen .bs-cs-split-grip {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #94a3b8 !important;
+}
+
+/* ==========================================================================
+   Cohesive Dark Studio Shell Theme (.bs-coding-studio--dark)
+   Harmonizes Slate-900 shell, crisp emerald/teal borders, and muted telemetry
+   ========================================================================== */
+.bs-coding-studio--dark {
+  background: #0f172a !important;
+  border-color: rgba(16, 185, 129, 0.25) !important;
+  color: #e2e8f0 !important;
+}
+
+.bs-coding-studio--dark .bs-cs-header {
+  background: #0f172a !important;
+  border-bottom: 1px solid #334155 !important;
+}
+
+.bs-coding-studio--dark .bs-cs-header-title {
+  color: #f8fafc !important;
+}
+
+.bs-coding-studio--dark .bs-cs-left-pane,
+.bs-coding-studio--dark .bs-cs-left-nav,
+.bs-coding-studio--dark .bs-cs-left-body,
+.bs-coding-studio--dark .bs-cs-left-collapsed-rail {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+.bs-coding-studio--dark .bs-cs-left-collapsed-btn {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: #10b981 !important;
+}
+
+.bs-coding-studio--dark .bs-cs-left-collapsed-btn:hover {
+  background: #0b6763 !important;
+  color: #ffffff !important;
+}
+
+.bs-coding-studio--dark .bs-cs-right-pane {
+  background: #0f172a !important;
+}
+
+.bs-coding-studio--dark .bs-cs-editor-panel {
+  background: #1e293b !important;
+}
+
+.bs-coding-studio--dark .bs-cs-editor-toolbar {
+  background: #1e293b !important;
+  border-bottom: 1px solid #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+.bs-coding-studio--dark .bs-cs-console-panel {
+  background: #1e293b !important;
+  border-top-color: #334155 !important;
+}
+
+.bs-coding-studio--dark .bs-cs-console-toolbar {
+  background: #1e293b !important;
+  border-bottom: 1px solid #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+.bs-coding-studio--dark .bs-cs-console-body {
+  background: #0f172a !important;
+  color: #cbd5e1 !important;
+}
+
+.bs-coding-studio--dark .bs-cs-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+.bs-coding-studio--dark .bs-cs-code-block {
+  background: #090d16 !important;
+  border-color: #334155 !important;
+  color: #38bdf8 !important;
+}
+
+.bs-coding-studio--dark .bs-cs-split-line {
+  background: #334155 !important;
+}
+
+.bs-coding-studio--dark .bs-cs-split-grip {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #94a3b8 !important;
+}
+
+.bs-coding-studio--dark textarea,
+.bs-coding-studio--dark input {
+  background: #0f172a !important;
+  color: #f1f5f9 !important;
+  border-color: #334155 !important;
+}
+
+.bs-coding-studio--dark textarea:focus,
+.bs-coding-studio--dark input:focus {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
+}
+
+.bs-coding-studio--dark .bs-cs-perf-chart {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+.bs-coding-studio--dark .bs-cs-perf-chart line {
+  stroke: #475569 !important;
+}
+
+.bs-coding-studio--dark .bs-cs-diff-viewer > div:first-child {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+.bs-coding-studio--dark .bs-cs-diff-viewer > div:nth-child(2) {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+}
+
+.bs-coding-studio--dark .bs-cs-left-body h2,
+.bs-coding-studio--dark .bs-cs-left-body h3 {
+  color: #f8fafc !important;
+}
+
+
+/* ==========================================================================
+   Micro-Interactions & Sensory Pulse Keyframes
+   ========================================================================== */
+@keyframes bs-cs-radar-pulse {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+@keyframes bs-cs-shimmer-slide {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(150%);
+  }
+}
+
+@keyframes bs-cs-dot-blink {
+  0% {
+    opacity: 0.3;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes bs-cs-flame-flicker {
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.12) rotate(-3deg);
+  }
+  50% {
+    transform: scale(1.05) rotate(2deg);
+  }
+  75% {
+    transform: scale(1.15) rotate(-2deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.bs-cs-flame-icon {
+  display: inline-block;
+  animation: bs-cs-flame-flicker 2s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+

@@ -557,15 +557,25 @@ export default function LearningLibraryPage() {
         <main
           style={{
             flex: 1,
-            overflowY: "auto",
+            overflowY: isCoding ? "hidden" : "auto",
             background: "var(--bs-ui-canvas, #f1f8f6)",
-            padding: "1.5rem",
+            padding: isCoding ? "0.75rem 1rem" : "1.5rem",
             display: "flex",
             flexDirection: "column",
           }}
         >
           {studioViewMode === "runtime" ? (
-            <div style={{ maxWidth: "1600px", width: "100%", margin: "0 auto", flex: 1 }}>
+            <div
+              style={{
+                maxWidth: isCoding ? "100%" : "1600px",
+                width: "100%",
+                margin: "0 auto",
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                height: isCoding ? "100%" : undefined,
+              }}
+            >
               {isVideo && (
                 <VideoStudio
                   activity={activity as VideoActivityDescriptor}
@@ -583,6 +593,7 @@ export default function LearningLibraryPage() {
                 <CodingStudio
                   activity={activity as CodingActivityDescriptor}
                   apiBaseUrl={apiUrl}
+                  style={{ height: "100%" }}
                   onComplete={() => {
                     setNotification({
                       message: `Coding solution for '${activity.title}' passed and submitted!`,

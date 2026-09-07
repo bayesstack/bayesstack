@@ -122,6 +122,17 @@ async def get_submission(submission_id: uuid.UUID, request: Request, db: AsyncSe
     return _submission_response(submission, results)
 
 
+@router.get("/problems/{problem_id}/submissions", response_model=list[CodingSubmissionResponse])
+async def list_problem_submissions(problem_id: str, request: Request, db: AsyncSession = Depends(get_db)) -> list[CodingSubmissionResponse]:
+    actor = await get_authenticated_user(request, db)
+    query = select(CodingSubmission).where(CodingSubmission.problem_id == problem_id)
+    if actor.role != "superadmin":
+        query = query.where(CodingSubmission.actor_id == actor.id)
+    query = query.order_by(CodingSubmission.created_at.desc()).limit(50)
+    submissions = (await db.execute(query)).scalars().all()
+    return [_submission_response(s, []) for s in submissions]
+
+
 async def _available_problem(db: AsyncSession, problem_id: str, language: str) -> CodingProblem:
     problem = await get_problem_or_none(db, problem_id)
     if not problem or not problem.is_active:
