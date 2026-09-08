@@ -3,15 +3,15 @@ import { parseTenantFromHost, isValidTenantSlug, extractHostname } from "../pars
 
 describe("Tenant Host Parsing", () => {
   it("extracts tenant slug from local subdomains", () => {
-    expect(parseTenantFromHost("ashoka.localhost")).toBe("ashoka");
-    expect(parseTenantFromHost("coep.localhost:3000")).toBe("coep");
-    expect(parseTenantFromHost("vjti.localhost:8000")).toBe("vjti");
+    expect(parseTenantFromHost("bayes.localhost")).toBe("bayes");
+    expect(parseTenantFromHost("bayes.localhost:3000")).toBe("bayes");
+    expect(parseTenantFromHost("sample-org.localhost:8000")).toBe("sample-org");
   });
 
   it("extracts tenant slug from production subdomains", () => {
-    expect(parseTenantFromHost("ashoka.bayesstack.com")).toBe("ashoka");
-    expect(parseTenantFromHost("coep.bayesstack.com")).toBe("coep");
-    expect(parseTenantFromHost("vjti.bayesstack.com:443")).toBe("vjti");
+    expect(parseTenantFromHost("bayes.bayesstack.com")).toBe("bayes");
+    expect(parseTenantFromHost("bayes.bayesstack.com:443")).toBe("bayes");
+    expect(parseTenantFromHost("sample-org.bayesstack.com")).toBe("sample-org");
   });
 
   it("returns null for root domains and IP addresses", () => {
@@ -31,15 +31,15 @@ describe("Tenant Host Parsing", () => {
 
 describe("Tenant Slug Syntax Validation", () => {
   it("validates valid slugs", () => {
-    expect(isValidTenantSlug("ashoka")).toBe(true);
-    expect(isValidTenantSlug("coep-tech")).toBe(true);
-    expect(isValidTenantSlug("vjti123")).toBe(true);
+    expect(isValidTenantSlug("bayes")).toBe(true);
+    expect(isValidTenantSlug("bayes-tech")).toBe(true);
+    expect(isValidTenantSlug("bayes123")).toBe(true);
   });
 
   it("rejects invalid or reserved slugs", () => {
-    expect(isValidTenantSlug("ashoka_univ")).toBe(false);
-    expect(isValidTenantSlug("-ashoka")).toBe(false);
-    expect(isValidTenantSlug("ashoka-")).toBe(false);
+    expect(isValidTenantSlug("bayes_univ")).toBe(false);
+    expect(isValidTenantSlug("-bayes")).toBe(false);
+    expect(isValidTenantSlug("bayes-")).toBe(false);
     expect(isValidTenantSlug("www")).toBe(false);
     expect(isValidTenantSlug("api")).toBe(false);
     expect(isValidTenantSlug("")).toBe(false);
@@ -48,7 +48,8 @@ describe("Tenant Slug Syntax Validation", () => {
 
 describe("Hostname Extractor", () => {
   it("strips ports correctly", () => {
-    expect(extractHostname("ashoka.localhost:3000")).toBe("ashoka.localhost");
-    expect(extractHostname("COEP.LOCALHOST:8000")).toBe("coep.localhost");
+    expect(extractHostname("bayes.localhost:3000")).toBe("bayes.localhost");
+    expect(extractHostname("BAYES.LOCALHOST:8000")).toBe("bayes.localhost");
   });
 });
+

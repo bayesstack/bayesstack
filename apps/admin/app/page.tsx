@@ -39,11 +39,11 @@ export default function AdminPage() {
   }, []);
 
   const sampleUsers = [
-    { id: "USR-101", name: "Prof. Alan Bayes", email: "faculty@bayes.edu", role: "Faculty Lead", status: "Active", courses: 4, telemetry: "99.8%" },
-    { id: "USR-102", name: "Bayes Institute Learner", email: "learner@bayes.edu", role: "Graduate Student", status: "Active", courses: 6, telemetry: "97.4%" },
-    { id: "USR-103", name: "Sophia Chen", email: "sophia.chen@bayesstack.edu", role: "System Admin", status: "Active", courses: 12, telemetry: "100%" },
-    { id: "USR-104", name: "Devon Miller", email: "devon.miller@bayesstack.edu", role: "Research Associate", status: "Offline", courses: 2, telemetry: "94.1%" },
-    { id: "USR-105", name: "Claire Dupont", email: "claire.dupont@bayesstack.edu", role: "Adjunct Faculty", status: "Active", courses: 3, telemetry: "98.9%" },
+    { id: "USR-101", name: "Prof. Alan Bayes", email: "faculty@bayes.com", role: "Faculty Lead", status: "Active", courses: 4, telemetry: "99.8%" },
+    { id: "USR-102", name: "Bayes Institute Learner", email: "learner@bayes.com", role: "Graduate Student", status: "Active", courses: 6, telemetry: "97.4%" },
+    { id: "USR-103", name: "Sophia Chen", email: "sophia.chen@bayesstack.com", role: "System Admin", status: "Active", courses: 12, telemetry: "100%" },
+    { id: "USR-104", name: "Devon Miller", email: "devon.miller@bayesstack.com", role: "Research Associate", status: "Offline", courses: 2, telemetry: "94.1%" },
+    { id: "USR-105", name: "Claire Dupont", email: "claire.dupont@bayesstack.com", role: "Adjunct Faculty", status: "Active", courses: 3, telemetry: "98.9%" },
   ];
 
   const tableColumns = [
@@ -92,10 +92,10 @@ export default function AdminPage() {
     if (typeof window !== "undefined") {
       const host = window.location.hostname;
       const isLocal = host.endsWith(".localhost") || host === "localhost";
-      const slug = tenantSlug || "bayes";
+      const currentSlug = tenantSlug || (isLocal && host.endsWith(".localhost") && host !== "localhost" ? host.replace(/\.localhost$/, "") : "bayes");
       window.location.href = isLocal
-        ? `http://${slug}.localhost:3004`
-        : `https://${slug}.bayesstack.com/login`;
+        ? `http://${currentSlug}.localhost:3004`
+        : `https://${currentSlug}.bayesstack.com/login`;
     }
   };
 

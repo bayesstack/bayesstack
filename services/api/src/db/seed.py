@@ -68,30 +68,6 @@ DEFAULT_TENANTS = [
         "is_active": True,
         "branding": '{"primary_color": "#0b6763", "logo_title": "Bayes Institute", "accent_color": "#084c49"}',
     },
-    {
-        "id": "tenant-ashoka",
-        "slug": "ashoka",
-        "name": "Ashoka Institution",
-        "domain": "ashoka.bayesstack.com",
-        "is_active": True,
-        "branding": '{"primary_color": "#0b6763", "logo_title": "Ashoka Institution"}',
-    },
-    {
-        "id": "tenant-coep",
-        "slug": "coep",
-        "name": "COEP Technological Institution",
-        "domain": "coep.bayesstack.com",
-        "is_active": True,
-        "branding": '{"primary_color": "#1b4d3e", "logo_title": "COEP Tech"}',
-    },
-    {
-        "id": "tenant-vjti",
-        "slug": "vjti",
-        "name": "Veermata Jijabai Technological Institute",
-        "domain": "vjti.bayesstack.com",
-        "is_active": True,
-        "branding": '{"primary_color": "#0d47a1", "logo_title": "VJTI Mumbai"}',
-    },
 ]
 
 DEFAULT_USERS = [
@@ -105,61 +81,30 @@ DEFAULT_USERS = [
     },
     {
         "id": "user-bayes-learner",
-        "email": "learner@bayes.edu",
-        "password": "password123",
+        "email": "learner@bayes.com",
+        "password": "learner123",
         "full_name": "Bayes Institute Learner",
         "role": "learner",
         "tenant_id": "tenant-bayes",
     },
     {
         "id": "user-bayes-faculty",
-        "email": "faculty@bayes.edu",
-        "password": "password123",
+        "email": "faculty@bayes.com",
+        "password": "faculty123",
         "full_name": "Prof. Alan Bayes",
         "role": "faculty",
         "tenant_id": "tenant-bayes",
     },
     {
         "id": "user-bayes-admin",
-        "email": "admin@bayes.edu",
-        "password": "password123",
+        "email": "admin@bayes.com",
+        "password": "admin123",
         "full_name": "Bayes Institute Administrator",
         "role": "admin",
         "tenant_id": "tenant-bayes",
     },
-    {
-        "id": "user-ashoka-faculty",
-        "email": "faculty@ashoka.edu",
-        "password": "password123",
-        "full_name": "Prof. Nandini Sundar",
-        "role": "faculty",
-        "tenant_id": "tenant-ashoka",
-    },
-    {
-        "id": "user-ashoka-learner",
-        "email": "alex@ashoka.edu",
-        "password": "password123",
-        "full_name": "Alex Rivers",
-        "role": "learner",
-        "tenant_id": "tenant-ashoka",
-    },
-    {
-        "id": "user-coep-faculty",
-        "email": "prof@coep.ac.in",
-        "password": "password123",
-        "full_name": "Prof. Rajesh Sharma",
-        "role": "faculty",
-        "tenant_id": "tenant-coep",
-    },
-    {
-        "id": "user-vjti-admin",
-        "email": "admin@vjti.ac.in",
-        "password": "password123",
-        "full_name": "VJTI Campus Administrator",
-        "role": "admin",
-        "tenant_id": "tenant-vjti",
-    },
 ]
+
 
 
 async def _add_if_missing(session, model, values: dict, *where):
@@ -685,7 +630,7 @@ async def seed_academic_operations(session):
                 "offering_status": "active",
                 "syllabus_override": {
                     "office_hours": "Tuesdays & Thursdays 14:00-16:00",
-                    "teaching_assistant": "ta@bayes.edu",
+                    "teaching_assistant": "ta@bayes.com",
                 },
             },
             CourseOffering.tenant_id == "tenant-bayes",
@@ -839,177 +784,7 @@ async def seed_academic_operations(session):
             StudentAcademicProfile.student_id == "user-bayes-learner",
         )
 
-    # 11. Ashoka Institution Academic Operations Seed
-    ashoka_term = await _add_if_missing(
-        session,
-        AcademicTerm,
-        {
-            "tenant_id": "tenant-ashoka",
-            "code": "2026-FALL",
-            "name": "Fall 2026 Semester",
-            "start_date": date(2026, 8, 20),
-            "end_date": date(2026, 12, 15),
-            "census_date": date(2026, 9, 5),
-            "grade_deadline": date(2026, 12, 22),
-            "is_active": True,
-        },
-        AcademicTerm.tenant_id == "tenant-ashoka",
-        AcademicTerm.code == "2026-FALL",
-    )
 
-    # Ashoka Course
-    ashoka_course = await _add_if_missing(
-        session,
-        InstitutionCourse,
-        {
-            "id": "course-ashoka-cs101",
-            "tenant_id": "tenant-ashoka",
-            "source_catalog_course_id": "ML-001",
-            "catalog_version": 7,
-            "source_type": "catalog",
-            "local_code": "CS-101",
-            "local_title": "Introduction to Machine Learning",
-            "content_status": "published",
-            "created_by_user_id": "user-ashoka-faculty",
-        },
-        InstitutionCourse.id == "course-ashoka-cs101",
-    )
-
-    # Ashoka Publication
-    ashoka_pub = await _add_if_missing(
-        session,
-        CoursePublication,
-        {
-            "tenant_id": "tenant-ashoka",
-            "institution_course_id": "course-ashoka-cs101",
-            "publication_number": 1,
-            "source_revision": 1,
-            "published_by_user_id": "user-ashoka-faculty",
-            "publication_status": "active",
-            "compiled_tree": {
-                "id": "course-ashoka-cs101",
-                "code": "CS-101",
-                "title": "Introduction to Machine Learning",
-                "chapters": [
-                    {
-                        "id": "CH-OPTIMIZATION",
-                        "version": 2,
-                        "title": "Optimisation Fundamentals",
-                        "position": 1000000,
-                    }
-                ],
-            },
-            "content_hash": "b2c3d4e5f6a7b8c90123456789abcdef0123456789abcdef0123456789abcdef",
-        },
-        CoursePublication.tenant_id == "tenant-ashoka",
-        CoursePublication.institution_course_id == "course-ashoka-cs101",
-        CoursePublication.publication_number == 1,
-    )
-
-
-    if ashoka_course and ashoka_pub and not ashoka_course.current_publication_id:
-        ashoka_course.current_publication_id = ashoka_pub.id
-        await session.flush()
-
-    if ashoka_term and ashoka_pub:
-        ashoka_offering = await _add_if_missing(
-            session,
-            CourseOffering,
-            {
-                "tenant_id": "tenant-ashoka",
-                "academic_term_id": ashoka_term.id,
-                "institution_course_id": "course-ashoka-cs101",
-                "course_publication_id": ashoka_pub.id,
-                "offering_status": "active",
-                "syllabus_override": {
-                    "office_hours": "Wednesdays 15:00-17:00",
-                    "room": "AC04-301",
-                },
-            },
-            CourseOffering.tenant_id == "tenant-ashoka",
-            CourseOffering.academic_term_id == ashoka_term.id,
-            CourseOffering.institution_course_id == "course-ashoka-cs101",
-        )
-
-        ashoka_sec = await _add_if_missing(
-            session,
-            CourseSection,
-            {
-                "tenant_id": "tenant-ashoka",
-                "course_offering_id": ashoka_offering.id,
-                "section_code": "SEC-01",
-                "name": "Section 1 - Main Cohort",
-                "delivery_mode": "in_person",
-                "capacity": 50,
-                "schedule_info": {
-                    "days": ["Mon", "Wed"],
-                    "time": "13:30-15:00",
-                    "room": "Lecture Hall AC04",
-                },
-            },
-            CourseSection.course_offering_id == ashoka_offering.id,
-            CourseSection.section_code == "SEC-01",
-        )
-
-        await _add_if_missing(
-            session,
-            SectionStaff,
-            {
-                "tenant_id": "tenant-ashoka",
-                "course_section_id": ashoka_sec.id,
-                "faculty_id": "user-ashoka-faculty",
-                "role": "primary_instructor",
-            },
-            SectionStaff.course_section_id == ashoka_sec.id,
-            SectionStaff.faculty_id == "user-ashoka-faculty",
-        )
-
-        ashoka_enrollment = await _add_if_missing(
-            session,
-            Enrollment,
-            {
-                "tenant_id": "tenant-ashoka",
-                "course_section_id": ashoka_sec.id,
-                "student_id": "user-ashoka-learner",
-                "enrollment_status": "enrolled",
-            },
-            Enrollment.course_section_id == ashoka_sec.id,
-            Enrollment.student_id == "user-ashoka-learner",
-        )
-
-        await _add_if_missing(
-            session,
-            LearningProgress,
-            {
-                "tenant_id": "tenant-ashoka",
-                "enrollment_id": ashoka_enrollment.id,
-                "concept_id": "C-GRADIENT-DESCENT",
-                "concept_version": 4,
-                "progress_status": "in_progress",
-                "progress_percent": 65.0,
-            },
-            LearningProgress.enrollment_id == ashoka_enrollment.id,
-            LearningProgress.concept_id == "C-GRADIENT-DESCENT",
-            LearningProgress.concept_version == 4,
-        )
-
-        # Student Academic Profile (Ashoka Institution)
-        await _add_if_missing(
-            session,
-            StudentAcademicProfile,
-            {
-                "tenant_id": "tenant-ashoka",
-                "student_id": "user-ashoka-learner",
-                "matriculation_number": "ASH-2024-CS-0042",
-                "cohort_year": 2024,
-                "degree_curriculum_id": None,
-                "academic_standing": "good_standing",
-                "cumulative_gpa": 3.85,
-                "total_credits_earned": 32,
-            },
-            StudentAcademicProfile.tenant_id == "tenant-ashoka",
-            StudentAcademicProfile.student_id == "user-ashoka-learner",
-        )
 async def seed_coding_problems(session):
     """Seed the demo problem in the same durable store used by the Studio API."""
     problem = await _add_if_missing(

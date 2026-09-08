@@ -13,6 +13,7 @@ This directory contains runtime infrastructure and Gateway reverse proxy configu
 
 | Domain Pattern | Path Pattern | Targeted Service | Port |
 | :--- | :--- | :--- | :--- |
+| `api.bayesstack.com` / `api.localhost` | `/*` | Tenant-Agnostic FastAPI Monolith (`services/api`) | `8000` |
 | `bayesstack.com` / `localhost` | `/` | Landing App (`apps/landing`) | `3000` |
 | `bayesstack.com` / `localhost` | `/api/*` | FastAPI Monolith (`services/api`) | `8000` |
 | `super.bayesstack.com` / `super.localhost` | `/` | SuperAdmin App (`apps/super`) | `3005` / `3000` |
@@ -23,7 +24,8 @@ This directory contains runtime infrastructure and Gateway reverse proxy configu
 | `*.bayesstack.com` / `*.localhost` | `/faculty/*` | Faculty App (`apps/faculty`) | `3002` / `3000` |
 | `*.bayesstack.com` / `*.localhost` | `/admin/*` | Admin App (`apps/admin`) | `3003` / `3000` |
 
-Subdomain tenant slugs (e.g. `bayes`, `ashoka`, `coep`, `vjti`) are automatically extracted and passed downstream via `X-Tenant-Slug` and `X-Forwarded-Host` headers. Reserved platform subdomains (`super`, `www`) are exempted from institutional tenant parsing.
+Subdomain tenant slugs (e.g. `bayes`) are automatically extracted and passed downstream via `X-Tenant-Slug` and `X-Forwarded-Host` headers. Reserved platform subdomains (`super`, `www`, `api`) are exempted from institutional tenant parsing.
+
 
 ---
 

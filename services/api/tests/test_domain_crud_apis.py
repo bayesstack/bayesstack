@@ -18,7 +18,7 @@ from core.database import ensure_database_exists
 from db.seed import seed_database
 from main import app
 
-TENANT_HEADERS = {"X-Tenant-Id": "ashoka"}
+TENANT_HEADERS = {"X-Tenant-Id": "tenant-bayes"}
 
 
 @pytest.fixture(autouse=True)
@@ -193,9 +193,9 @@ async def test_institution_composition_and_forks():
 
         # 1. Proprietary institution concept & studio
         uconcept_payload = {
-            "id": f"uconcept_ashoka_style_{u}",
+            "id": f"uconcept_bayes_style_{u}",
             "local_code": f"CPT-PEP8-{u.upper()}",
-            "title": "Ashoka PEP-8 Standards",
+            "title": "Bayes PEP-8 Standards",
             "description": "Departmental code submission rules",
             "estimated_minutes": 20,
         }
@@ -203,8 +203,8 @@ async def test_institution_composition_and_forks():
         assert resp.status_code == 201, resp.text
 
         ustudio_payload = {
-            "id": f"ustudio_ashoka_style_{u}",
-            "concept_id": f"uconcept_ashoka_style_{u}",
+            "id": f"ustudio_bayes_style_{u}",
+            "concept_id": f"uconcept_bayes_style_{u}",
             "activity_type": "coding",
             "position": 1,
             "config": {"linter": "flake8"},
@@ -214,26 +214,26 @@ async def test_institution_composition_and_forks():
 
         # 2. Scenario 4: Copy-on-Write Fork of a Chapter
         fork_chapter_payload = {
-            "new_chapter_id": f"uchap_ashoka_opt_{u}",
+            "new_chapter_id": f"uchap_bayes_opt_{u}",
             "new_local_code": f"OPT-FORK-{u.upper()}",
-            "new_local_title": "Ashoka Custom Optimization",
+            "new_local_title": "Bayes Custom Optimization",
             "source_catalog_chapter_id": f"lib_chap_opt_{u}",
             "catalog_version": 1,
         }
         resp = await client.post("/api/v1/institution/chapters/fork", json=fork_chapter_payload, headers=TENANT_HEADERS)
         assert resp.status_code == 201, resp.text
-        assert resp.json()["id"] == f"uchap_ashoka_opt_{u}"
+        assert resp.json()["id"] == f"uchap_bayes_opt_{u}"
 
         # Verify cloned catalog concept edges exist
-        resp = await client.get(f"/api/v1/institution/chapters/uchap_ashoka_opt_{u}/concepts", headers=TENANT_HEADERS)
+        resp = await client.get(f"/api/v1/institution/chapters/uchap_bayes_opt_{u}/concepts", headers=TENANT_HEADERS)
         assert resp.status_code == 200
         concept_edges = resp.json()
         assert len(concept_edges) >= 1
 
         # Inject proprietary concept into this forked chapter
         resp = await client.post(
-            f"/api/v1/institution/chapters/uchap_ashoka_opt_{u}/concepts/custom",
-            json={"institution_concept_id": f"uconcept_ashoka_style_{u}", "display_label": "Ashoka Submission Standard"},
+            f"/api/v1/institution/chapters/uchap_bayes_opt_{u}/concepts/custom",
+            json={"institution_concept_id": f"uconcept_bayes_style_{u}", "display_label": "Bayes Submission Standard"},
             headers=TENANT_HEADERS,
         )
         assert resp.status_code == 201
@@ -255,9 +255,9 @@ async def test_institution_composition_and_forks():
 
         # 4. Institution Course creation & Chapter composition
         course_payload = {
-            "id": f"ucourse_ashoka_ml_{u}",
+            "id": f"ucourse_bayes_ml_{u}",
             "local_code": f"CS-402-{u.upper()}",
-            "local_title": "Advanced Machine Learning at Ashoka",
+            "local_title": "Advanced Machine Learning at Bayes",
             "source_type": "hybrid",
             "content_status": "draft",
         }
@@ -266,22 +266,22 @@ async def test_institution_composition_and_forks():
 
         # Link forked chapter into custom course
         resp = await client.post(
-            f"/api/v1/institution/courses/ucourse_ashoka_ml_{u}/chapters/custom",
-            json={"institution_chapter_id": f"uchap_ashoka_opt_{u}", "display_label": "Core Chapter 1"},
+            f"/api/v1/institution/courses/ucourse_bayes_ml_{u}/chapters/custom",
+            json={"institution_chapter_id": f"uchap_bayes_opt_{u}", "display_label": "Core Chapter 1"},
             headers=TENANT_HEADERS,
         )
         assert resp.status_code == 201
 
         # Also link an as-is borrowed catalog chapter (Scenario 3: Zero-Copy)
         resp = await client.post(
-            f"/api/v1/institution/courses/ucourse_ashoka_ml_{u}/chapters/catalog",
+            f"/api/v1/institution/courses/ucourse_bayes_ml_{u}/chapters/catalog",
             json={"catalog_chapter_id": f"lib_chap_nn_{u}", "catalog_version": 1, "reference_policy": "pinned"},
             headers=TENANT_HEADERS,
         )
         assert resp.status_code == 201
 
         # Verify course chapter edges
-        resp = await client.get(f"/api/v1/institution/courses/ucourse_ashoka_ml_{u}/chapters", headers=TENANT_HEADERS)
+        resp = await client.get(f"/api/v1/institution/courses/ucourse_bayes_ml_{u}/chapters", headers=TENANT_HEADERS)
         assert resp.status_code == 200
         assert len(resp.json()) == 2
 
@@ -305,7 +305,7 @@ async def test_delivery_cas_and_publication_pipeline():
 
         # 2. Compile Course Publication (CQRS release snapshot)
         resp = await client.post(
-            "/api/v1/delivery/publications/compile/course-ashoka-cs101",
+            "/api/v1/delivery/publications/compile/course-bayes-ml-001",
             json={"publish_notes": f"Official release {u} for Fall 2026 term"},
             headers=TENANT_HEADERS,
         )
@@ -317,7 +317,7 @@ async def test_delivery_cas_and_publication_pipeline():
         pub_id = pub_data["id"]
 
         # 3. Sub-millisecond single-key point lookup for Learner SPA
-        resp = await client.get("/api/v1/delivery/publications/active/course-ashoka-cs101", headers=TENANT_HEADERS)
+        resp = await client.get("/api/v1/delivery/publications/active/course-bayes-ml-001", headers=TENANT_HEADERS)
         assert resp.status_code == 200
         assert resp.json()["id"] == pub_id
 
@@ -342,7 +342,7 @@ async def test_academic_operations_full_lifecycle():
 
         # 2. First compile course publication to bind offering
         pub_resp = await client.post(
-            "/api/v1/delivery/publications/compile/course-ashoka-cs101",
+            "/api/v1/delivery/publications/compile/course-bayes-ml-001",
             headers=TENANT_HEADERS,
         )
         assert pub_resp.status_code == 201
@@ -351,7 +351,7 @@ async def test_academic_operations_full_lifecycle():
         # 3. Schedule Course Offering bound to Publication
         offering_payload = {
             "academic_term_id": term_id,
-            "institution_course_id": "course-ashoka-cs101",
+            "institution_course_id": "course-bayes-ml-001",
             "course_publication_id": publication_id,
             "offering_status": "enrollment_open",
             "syllabus_override": {"office_hours": "MWF 2-4 PM"},
@@ -376,7 +376,7 @@ async def test_academic_operations_full_lifecycle():
         # 5. Assign Section Staff
         resp = await client.post(
             f"/api/v1/operations/sections/{section_id}/staff",
-            json={"faculty_id": "user-ashoka-faculty", "role": "primary_instructor"},
+            json={"faculty_id": "user-bayes-faculty", "role": "primary_instructor"},
             headers=TENANT_HEADERS,
         )
         assert resp.status_code == 201
@@ -384,7 +384,7 @@ async def test_academic_operations_full_lifecycle():
         # 6. Enroll Student
         resp = await client.post(
             "/api/v1/operations/enrollments",
-            json={"course_section_id": section_id, "student_id": "user-ashoka-learner", "enrollment_status": "enrolled"},
+            json={"course_section_id": section_id, "student_id": "user-bayes-learner", "enrollment_status": "enrolled"},
             headers=TENANT_HEADERS,
         )
         assert resp.status_code == 201, resp.text
@@ -393,8 +393,8 @@ async def test_academic_operations_full_lifecycle():
         # 7. Record Learner Concept Progress
         progress_payload = {
             "enrollment_id": enrollment_id,
-            "concept_id": "lib-cpt-gradient-descent",
-            "concept_version": 1,
+            "concept_id": "C-GRADIENT-DESCENT",
+            "concept_version": 4,
             "progress_status": "completed",
             "progress_percent": 100.00,
         }
@@ -405,7 +405,7 @@ async def test_academic_operations_full_lifecycle():
         # 8. Submit Assessment Lab Attempt
         submission_payload = {
             "enrollment_id": enrollment_id,
-            "activity_id": "lib-studio-gd-code",
+            "activity_id": "SI-GRADIENT-DESCENT-VIDEO-V1",
             "attempt_number": 1,
             "submission_payload": {"code": "def gradient_descent(): pass", "tests_passed": 5},
             "max_score": 100.00,
@@ -444,7 +444,7 @@ async def test_governance_apis():
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://localhost") as client:
         # 1. Faculty Course Assignment
         u_course = {
-            "id": f"course_ashoka_gov_{u}",
+            "id": f"course_bayes_gov_{u}",
             "local_code": f"GOV-{u.upper()}",
             "local_title": "Governance Systems",
             "source_type": "custom",
@@ -454,7 +454,7 @@ async def test_governance_apis():
 
         resp = await client.post(
             "/api/v1/governance/faculty/courses",
-            json={"faculty_id": "user-ashoka-faculty", "institution_course_id": f"course_ashoka_gov_{u}", "is_active": True},
+            json={"faculty_id": "user-bayes-faculty", "institution_course_id": f"course_bayes_gov_{u}", "is_active": True},
             headers=TENANT_HEADERS,
         )
         assert resp.status_code == 201, resp.text
@@ -467,7 +467,7 @@ async def test_governance_apis():
 
         # 2. Student Degree Matriculation
         u_curr = {
-            "id": f"ucurr_ashoka_btech_{u}",
+            "id": f"ucurr_bayes_btech_{u}",
             "local_code": f"BTECH-{u.upper()}",
             "local_title": "B.Tech Computer Science Governance",
         }
@@ -475,7 +475,7 @@ async def test_governance_apis():
 
         resp = await client.post(
             "/api/v1/governance/students/curricula",
-            json={"student_id": "user-ashoka-learner", "institution_curriculum_id": f"ucurr_ashoka_btech_{u}", "is_active": True},
+            json={"student_id": "user-bayes-learner", "institution_curriculum_id": f"ucurr_bayes_btech_{u}", "is_active": True},
             headers=TENANT_HEADERS,
         )
         assert resp.status_code == 201, resp.text
@@ -484,3 +484,4 @@ async def test_governance_apis():
         resp = await client.get("/api/v1/governance/students/curricula", headers=TENANT_HEADERS)
         assert resp.status_code == 200
         assert any(m["id"] == matriculation_id for m in resp.json())
+

@@ -39,9 +39,15 @@ def verify_session_token(token: str) -> dict | None:
 
 
 def get_cookie_domain(request_host: str | None = None) -> str | None:
-    """Determine domain scope for cross-subdomain HttpOnly cookies."""
+    """Determine domain scope for cross-subdomain HttpOnly cookies.
+    
+    Scopes cookies to:
+    - '.localhost' for local development across *.localhost subdomains (api.localhost, bayes.localhost, super.localhost)
+    - '.bayesstack.com' for production across *.bayesstack.com subdomains
+    - None for direct IP addresses.
+    """
     if not request_host:
-        return None
+        return ".localhost"
     
     # Strip port if present
     host = request_host.split(":")[0].lower()

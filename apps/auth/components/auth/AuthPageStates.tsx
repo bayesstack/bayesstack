@@ -28,17 +28,22 @@ interface TenantNotFoundStateProps {
 }
 
 export function TenantNotFoundState({ tenantSlug, error }: TenantNotFoundStateProps) {
+  const currentHost = typeof window !== "undefined" ? window.location.host : `${tenantSlug}.localhost`;
+
   return (
     <div className="auth-container">
       <div className="auth-card" style={{ textAlign: "center", borderTop: "4px solid #e53e3e" }}>
-        <div style={{ fontSize: "2.5rem", marginBottom: "0.5rem" }}>⚠️</div>
+        <div style={{ fontSize: "2.5rem", marginBottom: "0.5rem" }}>🏫 ⚠️</div>
         <h1 style={{ fontSize: "1.4rem", fontWeight: 800, color: "#111827", marginBottom: "0.5rem" }}>
-          Institutional Tenant Not Found
+          Institution &quot;{tenantSlug}&quot; Is Not With Us
         </h1>
-        <p style={{ fontSize: "0.9rem", color: "#4b5563", lineHeight: 1.5, marginBottom: "1.5rem" }}>
-          The institutional domain <strong>{tenantSlug}.bayesstack.com</strong> was not found or is currently inactive.
+        <p style={{ fontSize: "0.95rem", color: "#4b5563", lineHeight: 1.5, marginBottom: "0.75rem" }}>
+          The requested institution <strong>{tenantSlug}</strong> (<code>{currentHost}</code>) is not registered with BayesStack or is currently inactive.
         </p>
-        {error && <p className="auth-error-detail">{error}</p>}
+        <p style={{ fontSize: "0.85rem", color: "#6b7280", lineHeight: 1.4, marginBottom: "1.5rem" }}>
+          If you believe this is an error, please verify the subdomain in your browser URL or contact your institution administrator.
+        </p>
+        {error && <p className="auth-error-detail" style={{ marginBottom: "1.25rem" }}>{error}</p>}
 
         <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
           <Button variant="primary" onClick={() => { window.location.href = getPlatformHomeUrl(); }} style={{ width: "100%" }}>
@@ -49,8 +54,8 @@ export function TenantNotFoundState({ tenantSlug, error }: TenantNotFoundStatePr
           </Button>
         </div>
 
-        <div className="auth-state-footer">
-          Error Code: TENANT_NOT_FOUND • Host: {typeof window !== "undefined" ? window.location.host : ""}
+        <div className="auth-state-footer" style={{ marginTop: "1.5rem", fontSize: "0.75rem", color: "#9ca3af" }}>
+          HTTP 404 • Error Code: TENANT_NOT_FOUND • Host: {currentHost}
         </div>
       </div>
     </div>

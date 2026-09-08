@@ -77,15 +77,13 @@ When pulling new changes from `git`:
 | Tenant Name | Slug | Subdomain / Base URL |
 | :--- | :--- | :--- |
 | **Bayes Institute** | `bayes` | `bayes.bayesstack.com` / `bayes.localhost` |
-| **Ashoka University** | `ashoka` | `ashoka.bayesstack.com` / `ashoka.localhost` |
-| **COEP Technological University** | `coep` | `coep.bayesstack.com` / `coep.localhost` |
-| **VJTI Mumbai** | `vjti` | `vjti.bayesstack.com` / `vjti.localhost` |
 
 ---
 
 ## Endpoint Verification
 - `GET /health` — Returns status of API service, environment mode, and live PostgreSQL connection check.
-- `GET /api/tenant-config` — Resolves active tenant context based on `Host` header (`bayes.localhost`, `ashoka.localhost`).
+- `GET /api/tenant-config` — Resolves active tenant context based on `Host` header (`bayes.localhost`, `bayes.bayesstack.com`).
+
 
 ## Content Composition Engine
 

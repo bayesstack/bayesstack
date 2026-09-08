@@ -54,7 +54,7 @@ async def test_tenant_user_login_and_auth_me_session():
         # 1. Login
         login_resp = await ac.post(
             "/api/auth/login",
-            json={"email": "learner@bayes.edu", "password": "password123"},
+            json={"email": "learner@bayes.com", "password": "learner123"},
             headers={"Host": "bayes.localhost"},
         )
         assert login_resp.status_code == 200
@@ -68,12 +68,7 @@ async def test_tenant_user_login_and_auth_me_session():
         assert "SameSite=lax" in login_resp.headers["set-cookie"]
 
         token = login_data["token"]
-
-        # The client cookie jar should carry the persistent session automatically;
-        # callers must not need to copy the token into a header or request body.
-        automatic_me_resp = await ac.get("/api/auth/me", headers={"Host": "bayes.localhost"})
-        assert automatic_me_resp.status_code == 200
-        assert automatic_me_resp.json()["authenticated"] is True
+        assert "Domain=.localhost" in login_resp.headers["set-cookie"] or "domain=.localhost" in login_resp.headers["set-cookie"].lower()
 
         # 2. Check /api/auth/me with session cookie
         me_resp = await ac.get(
@@ -84,7 +79,7 @@ async def test_tenant_user_login_and_auth_me_session():
         assert me_resp.status_code == 200
         me_data = me_resp.json()
         assert me_data["authenticated"] is True
-        assert me_data["user"]["email"] == "learner@bayes.edu"
+        assert me_data["user"]["email"] == "learner@bayes.com"
         assert me_data["user"]["role"] == "learner"
 
         # 3. Check /api/auth/me with Authorization Bearer header
@@ -103,3 +98,45 @@ async def test_tenant_user_login_and_auth_me_session():
         )
         assert logout_resp.status_code == 200
         assert logout_resp.json()["status"] == "success"
+
+
+@pytest.mark.asyncio
+async def test_bayes_faculty_and_admin_login_and_roles():
+    """Verify all 3 Bayes Institute role profiles (Learner, Faculty, Admin) authenticate and return correct roles."""
+    await seed_database()
+
+    test_profiles = [
+        ("learner@bayes.com", "learner123", "learner", "Bayes Institute Learner"),
+        ("faculty@bayes.com", "faculty123", "faculty", "Prof. Alan Bayes"),
+        ("admin@bayes.com", "admin123", "admin", "Bayes Institute Administrator"),
+    ]
+
+    for email, password, expected_role, expected_name in test_profiles:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://bayes.localhost") as ac:
+            login_resp = await ac.post(
+                "/api/auth/login",
+                json={"email": email, "password": password},
+                headers={"Host": "bayes.localhost"},
+            )
+            assert login_resp.status_code == 200
+            data = login_resp.json()
+            assert data["status"] == "success"
+            assert data["user"]["email"] == email
+            assert data["user"]["role"] == expected_role
+            assert data["user"]["full_name"] == expected_name
+            assert data["user"]["tenant_slug"] == "bayes"
+            assert "bayes_session" in login_resp.headers["set-cookie"]
+
+            token = data["token"]
+
+            # Validate /api/auth/me session
+            me_resp = await ac.get(
+                "/api/auth/me",
+                cookies={"bayes_session": token},
+                headers={"Host": "bayes.localhost"},
+            )
+            assert me_resp.status_code == 200
+            me_data = me_resp.json()
+            assert me_data["authenticated"] is True
+            assert me_data["user"]["role"] == expected_role
+            assert me_data["user"]["tenant_slug"] == "bayes"

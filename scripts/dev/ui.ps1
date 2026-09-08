@@ -37,19 +37,19 @@ function Print-ServiceDashboard([string]$mode, [string[]]$services) {
       }
       "learner"  {
         if ($mode -eq "local") { Write-Host "  - Learner Portal:      http://localhost:3001" }
-        else { Write-Host "  - Learner Portal:      http://localhost:3001  (or http://ashoka.localhost)" }
+        else { Write-Host "  - Learner Portal:      http://localhost:3001  (or http://bayes.localhost/learner)" }
       }
       "faculty"  {
         if ($mode -eq "local") { Write-Host "  - Faculty Portal:      http://localhost:3002" }
-        else { Write-Host "  - Faculty Portal:      http://localhost:3002  (or http://coep.localhost)" }
+        else { Write-Host "  - Faculty Portal:      http://localhost:3002  (or http://bayes.localhost/faculty)" }
       }
       "admin"    {
         if ($mode -eq "local") { Write-Host "  - Admin Portal:        http://localhost:3003" }
-        else { Write-Host "  - Admin Portal:        http://localhost:3003  (or http://vjti.localhost)" }
+        else { Write-Host "  - Admin Portal:        http://localhost:3003  (or http://bayes.localhost/admin)" }
       }
       "auth"     {
         if ($mode -eq "local") { Write-Host "  - Auth Gateway:        http://localhost:3004" }
-        else { Write-Host "  - Auth Gateway:        http://localhost:3004  (or http://auth.localhost)" }
+        else { Write-Host "  - Auth Gateway:        http://localhost:3004  (or http://bayes.localhost)" }
       }
       "super"    {
         if ($mode -eq "local") {
@@ -58,7 +58,8 @@ function Print-ServiceDashboard([string]$mode, [string[]]$services) {
           Write-Host "  - SuperAdmin Studio:   http://localhost:3005  (or http://super.localhost)"
         }
       }
-      "api"      { Write-Host "  - FastAPI Backend:     http://localhost:8000  (API Docs: http://localhost:8000/docs)" }
+      "api"      { Write-Host "  - FastAPI Backend:     http://localhost:8000  (or http://api.localhost, Docs: /docs)" }
+
       "nginx"    { Write-Host "  - Nginx Router:        http://localhost       (Port 80 Subdomain Ingress)" }
       "postgres" { Write-Host "  - PostgreSQL Database: localhost:5432       (Database: bayesstack)" }
       "ui"       { Write-Host "  - Storybook UI:        http://localhost:6001" }

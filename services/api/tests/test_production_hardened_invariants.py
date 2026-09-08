@@ -44,31 +44,56 @@ async def test_compound_fk_blocks_cross_institution_course_offering():
         )).scalars().first()
         assert term is not None
 
-        # Fetch course belonging to tenant-ashoka
-        ashoka_course = (await session.execute(
-            select(InstitutionCourse).where(InstitutionCourse.tenant_id == "tenant-ashoka")
-        )).scalars().first()
-        assert ashoka_course is not None
+        # Create an isolated second tenant and course for FK testing
+        isolated_tenant = Tenant(
+            id="tenant-isolated-test",
+            slug="isolated-test",
+            name="Isolated Test Institute",
+            domain="isolated.bayesstack.com",
+            is_active=True,
+        )
+        session.add(isolated_tenant)
+        await session.flush()
 
-        # Fetch publication belonging to tenant-ashoka
-        ashoka_pub = (await session.execute(
-            select(CoursePublication).where(CoursePublication.tenant_id == "tenant-ashoka")
-        )).scalars().first()
-        assert ashoka_pub is not None
+        other_course = InstitutionCourse(
+            id="course-isolated-001",
+            tenant_id="tenant-isolated-test",
+            local_code="ISO-101",
+            local_title="Isolated Course",
+            content_status="published",
+        )
+        session.add(other_course)
+        await session.flush()
 
-        # Attempt to create CourseOffering in tenant-bayes pointing to tenant-ashoka's course
+        other_pub = CoursePublication(
+            id=uuid.uuid4(),
+            tenant_id="tenant-isolated-test",
+            institution_course_id="course-isolated-001",
+            publication_number=1,
+            source_revision=1,
+            published_by_user_id="user-bayes-faculty",
+            publication_status="active",
+            compiled_tree={"title": "Isolated"},
+            content_hash="f" * 64,
+        )
+
+        session.add(other_pub)
+        await session.flush()
+
+        # Attempt to create CourseOffering in tenant-bayes pointing to isolated tenant's course
         invalid_offering = CourseOffering(
             id=uuid.uuid4(),
             tenant_id="tenant-bayes",  # Cross-tenant mismatch!
             academic_term_id=term.id,
-            institution_course_id=ashoka_course.id,  # belongs to tenant-ashoka
-            course_publication_id=ashoka_pub.id,
+            institution_course_id=other_course.id,  # belongs to tenant-isolated-test
+            course_publication_id=other_pub.id,
             offering_status="scheduled",
         )
         session.add(invalid_offering)
         with pytest.raises(IntegrityError):
             await session.commit()
         await session.rollback()
+
 
 
 @pytest.mark.asyncio
@@ -185,22 +210,32 @@ async def test_decoupled_identity_multi_tenant_memberships_and_roles():
         )
         session.add(role_bayes)
 
-        # Membership 2: Continuing Education Learner at Ashoka Institution
-        m_ashoka = TenantMembership(
+        # Membership 2: Continuing Education Learner at Partner Institution
+        partner_tenant = Tenant(
+            id="tenant-partner-test",
+            slug="partner-test",
+            name="Partner Test Institute",
+            domain="partner.bayesstack.com",
+            is_active=True,
+        )
+        session.add(partner_tenant)
+        await session.flush()
+
+        m_partner = TenantMembership(
             id=uuid.uuid4(),
-            tenant_id="tenant-ashoka",
+            tenant_id="tenant-partner-test",
             user_id=global_user.id,
             is_active=True,
         )
-        session.add(m_ashoka)
+        session.add(m_partner)
         await session.flush()
 
-        role_ashoka = TenantRole(
-            tenant_id="tenant-ashoka",
+        role_partner = TenantRole(
+            tenant_id="tenant-partner-test",
             user_id=global_user.id,
             role="learner",
         )
-        session.add(role_ashoka)
+        session.add(role_partner)
         await session.commit()
 
         # Verify querying memberships and roles contextually
@@ -212,13 +247,14 @@ async def test_decoupled_identity_multi_tenant_memberships_and_roles():
         )).scalars().all()
         assert bayes_roles == ["faculty"]
 
-        ashoka_roles = (await session.execute(
+        partner_roles = (await session.execute(
             select(TenantRole.role).where(
                 TenantRole.user_id == global_user.id,
-                TenantRole.tenant_id == "tenant-ashoka",
+                TenantRole.tenant_id == "tenant-partner-test",
             )
         )).scalars().all()
-        assert ashoka_roles == ["learner"]
+        assert partner_roles == ["learner"]
+
 
 
 @pytest.mark.asyncio

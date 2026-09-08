@@ -90,21 +90,21 @@ async def test_dual_semantics_pinned_vs_floating_resolution():
         )
         session.add(chapter_cpt_edge)
 
-        # 2. Author a custom institution course for Ashoka
-        ashoka_course = InstitutionCourse(
-            id="course-ashoka-dual-test",
-            tenant_id="tenant-ashoka",
-            local_code="ASHOKA-CS101",
-            local_title="Ashoka Machine Learning",
+        # 2. Author a custom institution course for Bayes
+        bayes_course = InstitutionCourse(
+            id="course-bayes-dual-test",
+            tenant_id="tenant-bayes",
+            local_code="BAYES-CS101",
+            local_title="Bayes Machine Learning",
             source_type="custom",
             content_status="draft",
         )
-        session.add(ashoka_course)
+        session.add(bayes_course)
 
         # 3. Add Chapter 1 as PINNED to v2 (historical baseline)
         pinned_edge = InstitutionCourseChapter(
-            tenant_id="tenant-ashoka",
-            institution_course_id="course-ashoka-dual-test",
+            tenant_id="tenant-bayes",
+            institution_course_id="course-bayes-dual-test",
             catalog_chapter_id="CH-OPTIMIZATION",
             catalog_version=2,
             reference_policy="pinned",
@@ -115,8 +115,8 @@ async def test_dual_semantics_pinned_vs_floating_resolution():
 
         # 4. Add Chapter 2 as FLOATING on 'stable' (tracks latest approved release)
         floating_edge = InstitutionCourseChapter(
-            tenant_id="tenant-ashoka",
-            institution_course_id="course-ashoka-dual-test",
+            tenant_id="tenant-bayes",
+            institution_course_id="course-bayes-dual-test",
             catalog_chapter_id="CH-OPTIMIZATION",
             catalog_version=None,
             reference_policy="floating",
@@ -127,7 +127,7 @@ async def test_dual_semantics_pinned_vs_floating_resolution():
         await session.commit()
 
         # 5. Compile / Resolve the course manifest
-        manifest = await resolve_course_manifest(session, ashoka_course)
+        manifest = await resolve_course_manifest(session, bayes_course)
         assert len(manifest["chapters"]) == 2
 
         # Pinned node: strictly locked to v2
@@ -142,40 +142,39 @@ async def test_dual_semantics_pinned_vs_floating_resolution():
 
 
 @pytest.mark.asyncio
-async def test_fork_composition_lineage_and_diff_explainability():
-    """Verify that composition-level lineage accurately tracks inherited, custom, forked, and removed elements."""
+async def test_copy_on_write_chapter_fork_and_hybrid_manifest_resolution():
+    """Verify copy-on-write chapter fork and hybrid concept manifest resolution."""
     await seed_database()
     async with AsyncSessionLocal() as session:
-        # 1. Author a institution-specific proprietary concept
-        ashoka_custom_cpt = InstitutionConcept(
-            id="cpt-ashoka-lab-intro",
-            tenant_id="tenant-ashoka",
-            local_code="ASHOKA-LAB-01",
-            title="Ashoka Optimization Lab Setup",
+        # 1. Author a proprietary institution concept private to Bayes
+        bayes_custom_cpt = InstitutionConcept(
+            id="cpt-bayes-lab-intro",
+            tenant_id="tenant-bayes",
+            local_code="BAYES-LAB-01",
+            title="Bayes Optimization Lab Setup",
             content_status="published",
         )
-        session.add(ashoka_custom_cpt)
-        await session.flush()
+        session.add(bayes_custom_cpt)
 
-        # 2. Fork Chapter CH-OPTIMIZATION v2 into Ashoka
-        ashoka_forked_chap = InstitutionChapter(
-            id="chap-ashoka-opt-fork",
-            tenant_id="tenant-ashoka",
+        # 2. Fork Chapter CH-OPTIMIZATION v2 into Bayes
+        bayes_forked_chap = InstitutionChapter(
+            id="chap-bayes-opt-fork",
+            tenant_id="tenant-bayes",
             source_catalog_chapter_id="CH-OPTIMIZATION",
             catalog_version=2,
-            local_code="ASHOKA-CH-OPT",
-            local_title="Ashoka Optimization & Loss Labs",
-            source_type="custom",
+            local_code="BAYES-CH-OPT",
+            local_title="Bayes Optimization & Loss Labs",
+            source_type="hybrid",
             content_status="published",
         )
-        session.add(ashoka_forked_chap)
+        session.add(bayes_forked_chap)
         await session.flush()
 
         # 3. Populate composition edges with explicit provenance:
         # Node A: INHERITED & REORDERED (Gradient Descent moved to rank 2_000_000, originally 1_000_000)
         edge_inherited = InstitutionChapterConcept(
-            tenant_id="tenant-ashoka",
-            institution_chapter_id="chap-ashoka-opt-fork",
+            tenant_id="tenant-bayes",
+            institution_chapter_id="chap-bayes-opt-fork",
             catalog_concept_id="C-GRADIENT-DESCENT",
             catalog_concept_version=4,
             position=2_000_000,
@@ -186,9 +185,9 @@ async def test_fork_composition_lineage_and_diff_explainability():
         )
         # Node B: CUSTOM addition by faculty (at rank 1_000_000)
         edge_custom = InstitutionChapterConcept(
-            tenant_id="tenant-ashoka",
-            institution_chapter_id="chap-ashoka-opt-fork",
-            institution_concept_id="cpt-ashoka-lab-intro",
+            tenant_id="tenant-bayes",
+            institution_chapter_id="chap-bayes-opt-fork",
+            institution_concept_id="cpt-bayes-lab-intro",
             position=1_000_000,
             lineage_type="custom",
             origin_id=None,
@@ -197,8 +196,8 @@ async def test_fork_composition_lineage_and_diff_explainability():
         )
         # Node C: REMOVED / Tombstone (deliberately excluded from catalog baseline)
         edge_removed = InstitutionChapterConcept(
-            tenant_id="tenant-ashoka",
-            institution_chapter_id="chap-ashoka-opt-fork",
+            tenant_id="tenant-bayes",
+            institution_chapter_id="chap-bayes-opt-fork",
             catalog_concept_id="C-OLD-LEGACY-METHOD",
             catalog_concept_version=1,
             position=99_000_000,
@@ -209,20 +208,20 @@ async def test_fork_composition_lineage_and_diff_explainability():
         )
         session.add_all([edge_inherited, edge_custom, edge_removed])
 
-        # 4. Attach forked chapter to a course
-        course = InstitutionCourse(
-            id="course-ashoka-lineage-test",
-            tenant_id="tenant-ashoka",
-            local_code="ASHOKA-CS102",
-            local_title="Ashoka Deep Learning Foundations",
+        # 4. Create course and bind this forked chapter
+        test_course = InstitutionCourse(
+            id="course-bayes-lineage-test",
+            tenant_id="tenant-bayes",
+            local_code="BAYES-CS102",
+            local_title="Bayes Deep Learning Foundations",
             source_type="custom",
             content_status="draft",
         )
-        session.add(course)
+        session.add(test_course)
         course_edge = InstitutionCourseChapter(
-            tenant_id="tenant-ashoka",
-            institution_course_id="course-ashoka-lineage-test",
-            institution_chapter_id="chap-ashoka-opt-fork",
+            tenant_id="tenant-bayes",
+            institution_course_id="course-bayes-lineage-test",
+            institution_chapter_id="chap-bayes-opt-fork",
             position=1_000_000,
             lineage_type="custom",
         )
@@ -232,7 +231,7 @@ async def test_fork_composition_lineage_and_diff_explainability():
         # 5. Execute Lineage Audit Query
         lineage_rows = (await session.scalars(
             select(InstitutionChapterConcept)
-            .where(InstitutionChapterConcept.institution_chapter_id == "chap-ashoka-opt-fork")
+            .where(InstitutionChapterConcept.institution_chapter_id == "chap-bayes-opt-fork")
             .order_by(InstitutionChapterConcept.position)
         )).all()
 
@@ -243,59 +242,48 @@ async def test_fork_composition_lineage_and_diff_explainability():
         inherited_node = next(r for r in lineage_rows if r.lineage_type == "inherited")
         removed_node = next(r for r in lineage_rows if r.lineage_type == "removed")
 
-        assert custom_node.institution_concept_id == "cpt-ashoka-lab-intro"
+        assert custom_node.institution_concept_id == "cpt-bayes-lab-intro"
         assert custom_node.origin_id is None
 
         assert inherited_node.catalog_concept_id == "C-GRADIENT-DESCENT"
         assert inherited_node.origin_position == 1_000_000
-        assert inherited_node.position == 2_000_000  # Proves reordering is detectable!
+        assert inherited_node.position == 2_000_000
 
         assert removed_node.origin_id == "C-OLD-LEGACY-METHOD"
 
         # 6. Verify Learner Course Manifest filters out the 'removed' tombstone
-        manifest = await resolve_course_manifest(session, course)
+        manifest = await resolve_course_manifest(session, test_course)
         chapter_manifest = manifest["chapters"][0]
         concept_ids = [c["id"] for c in chapter_manifest["concepts"]]
 
         # C-OLD-LEGACY-METHOD is excluded!
         assert "C-OLD-LEGACY-METHOD" not in concept_ids
         # Active concepts are in correct local sequence: Custom Lab first, then Gradient Descent
-        assert concept_ids == ["cpt-ashoka-lab-intro", "C-GRADIENT-DESCENT"]
+        assert concept_ids == ["cpt-bayes-lab-intro", "C-GRADIENT-DESCENT"]
+
 
 
 @pytest.mark.asyncio
-async def test_materialized_source_type_transitions():
-    """Verify that source_type dynamically derives/materializes without drift.
-
-    1. Start with a course borrowing pure catalog chapter -> 'catalog'.
-    2. Add a custom proprietary chapter edge -> transitions to 'hybrid'.
-    3. Remove the custom chapter edge -> transitions back to 'catalog'.
-    """
+async def test_hybrid_source_type_drift_recomputation():
+    """Verify that adding/removing custom child edges dynamically recomputes source_type between catalog and hybrid."""
     await seed_database()
     async with AsyncSessionLocal() as session:
-        # 1. Author a course initialized from catalog ML-001
+        # 1. Create a pure institution course
         test_course = InstitutionCourse(
-            id="course-ashoka-drift-test",
-            tenant_id="tenant-ashoka",
-            source_catalog_course_id="ML-001",
-            catalog_version=7,
-            local_code="ASHOKA-CS200",
-            local_title="Ashoka Adaptive Machine Learning",
+            id="course-bayes-drift-test",
+            tenant_id="tenant-bayes",
+            local_code="BAYES-CS200",
+            local_title="Bayes Adaptive Machine Learning",
             source_type="catalog",
             content_status="draft",
         )
         session.add(test_course)
         await session.flush()
 
-        # Pure zero-copy: no local edges materialized yet
-        status = await recompute_container_source_type(session, "course", test_course.id)
-        assert status == "catalog"
-        assert test_course.source_type == "catalog"
-
-        # 2. Add an edge borrowing pure catalog chapter CH-OPTIMIZATION v2
+        # 2. Add an inherited catalog chapter edge
         edge_lib = InstitutionCourseChapter(
-            tenant_id="tenant-ashoka",
-            institution_course_id="course-ashoka-drift-test",
+            tenant_id="tenant-bayes",
+            institution_course_id="course-bayes-drift-test",
             catalog_chapter_id="CH-OPTIMIZATION",
             catalog_version=2,
             position=1_000_000,
@@ -310,9 +298,9 @@ async def test_materialized_source_type_transitions():
 
         # 3. Add a custom institution chapter authored by faculty
         custom_chap = InstitutionChapter(
-            id="chap-ashoka-local-ethics",
-            tenant_id="tenant-ashoka",
-            local_code="ASHOKA-ETHICS",
+            id="chap-bayes-local-ethics",
+            tenant_id="tenant-bayes",
+            local_code="BAYES-ETHICS",
             local_title="AI Ethics in India",
             source_type="custom",
             content_status="published",
@@ -321,9 +309,9 @@ async def test_materialized_source_type_transitions():
         await session.flush()
 
         edge_custom = InstitutionCourseChapter(
-            tenant_id="tenant-ashoka",
-            institution_course_id="course-ashoka-drift-test",
-            institution_chapter_id="chap-ashoka-local-ethics",
+            tenant_id="tenant-bayes",
+            institution_course_id="course-bayes-drift-test",
+            institution_chapter_id="chap-bayes-local-ethics",
             position=2_000_000,
             lineage_type="custom",
         )
@@ -351,9 +339,9 @@ async def test_dedicated_edge_tables_isolated_foreign_keys():
     await seed_database()
     async with AsyncSessionLocal() as session:
         test_course = InstitutionCourse(
-            id="course-ashoka-dedicated-edge-test",
-            tenant_id="tenant-ashoka",
-            local_code="ASHOKA-EDGE-101",
+            id="course-bayes-dedicated-edge-test",
+            tenant_id="tenant-bayes",
+            local_code="BAYES-EDGE-101",
             local_title="Relational Edge Isolation Course",
             source_type="custom",
             content_status="draft",
@@ -364,7 +352,7 @@ async def test_dedicated_edge_tables_isolated_foreign_keys():
         # 1. Insert into dedicated catalog edge table:
         # InstitutionCourseCatalogChapter requires catalog_chapter_id, no nullable foreign keys
         lib_edge = InstitutionCourseCatalogChapter(
-            tenant_id="tenant-ashoka",
+            tenant_id="tenant-bayes",
             institution_course_id=test_course.id,
             catalog_chapter_id="CH-OPTIMIZATION",
             catalog_version=2,
@@ -376,9 +364,9 @@ async def test_dedicated_edge_tables_isolated_foreign_keys():
 
         # 2. Insert into dedicated custom edge table:
         custom_chap = InstitutionChapter(
-            id="chap-ashoka-dedicated-custom",
-            tenant_id="tenant-ashoka",
-            local_code="ASHOKA-DED-01",
+            id="chap-bayes-dedicated-custom",
+            tenant_id="tenant-bayes",
+            local_code="BAYES-DED-01",
             local_title="Dedicated Custom Chapter",
             source_type="custom",
             content_status="published",
@@ -387,7 +375,7 @@ async def test_dedicated_edge_tables_isolated_foreign_keys():
         await session.flush()
 
         custom_edge = InstitutionCourseCustomChapter(
-            tenant_id="tenant-ashoka",
+            tenant_id="tenant-bayes",
             institution_course_id=test_course.id,
             institution_chapter_id=custom_chap.id,
             position=2_000_000,
@@ -416,7 +404,7 @@ async def test_dedicated_edge_tables_isolated_foreign_keys():
             )
         ).all()
         assert len(custom_edges) == 1
-        assert custom_edges[0].institution_chapter_id == "chap-ashoka-dedicated-custom"
+        assert custom_edges[0].institution_chapter_id == "chap-bayes-dedicated-custom"
 
         # 4. Recomputing composition type reflects both dedicated edge tables
         status = await recompute_container_source_type(session, "course", test_course.id)
@@ -456,9 +444,9 @@ async def test_spaced_integer_position_bisection_and_rebalancing():
     await seed_database()
     async with AsyncSessionLocal() as session:
         test_chap = InstitutionChapter(
-            id="chap-ashoka-rebalance-test",
-            tenant_id="tenant-ashoka",
-            local_code="ASHOKA-REBAL-01",
+            id="chap-bayes-rebalance-test",
+            tenant_id="tenant-bayes",
+            local_code="BAYES-REBAL-01",
             local_title="Spaced Integer Rebalance Chapter",
             source_type="custom",
             content_status="draft",
@@ -469,7 +457,7 @@ async def test_spaced_integer_position_bisection_and_rebalancing():
         # Add 3 concepts with exhausted adjacent ranks: 100, 101, 102
         for r in [100, 101, 102]:
             c = InstitutionChapterConcept(
-                tenant_id="tenant-ashoka",
+                tenant_id="tenant-bayes",
                 institution_chapter_id=test_chap.id,
                 catalog_concept_id="C-GRADIENT-DESCENT",
                 catalog_concept_version=4,

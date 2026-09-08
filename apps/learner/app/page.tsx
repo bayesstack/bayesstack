@@ -72,10 +72,10 @@ export default function LearnerPage() {
     if (typeof window !== "undefined") {
       const host = window.location.hostname;
       const isLocal = host.endsWith(".localhost") || host === "localhost";
-      const slug = tenantSlug || "bayes";
+      const currentSlug = tenantSlug || (isLocal && host.endsWith(".localhost") && host !== "localhost" ? host.replace(/\.localhost$/, "") : "bayes");
       window.location.href = isLocal
-        ? `http://${slug}.localhost:3004`
-        : `https://${slug}.bayesstack.com/login`;
+        ? `http://${currentSlug}.localhost:3004`
+        : `https://${currentSlug}.bayesstack.com/login`;
     }
   };
 

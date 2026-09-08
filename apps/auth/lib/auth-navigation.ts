@@ -1,3 +1,5 @@
+import { parseTenantFromHost } from "@bayesstack/tenant";
+
 export type AuthTab = "login" | "signup" | "sso" | "forgot";
 
 export interface AuthenticatedUser {
@@ -22,7 +24,8 @@ export function getPortalUrl(role: string, tenantSlug?: string | null): string {
   if (typeof window === "undefined") return "/";
 
   const { hostname, port } = window.location;
-  const tenant = tenantSlug || "bayes";
+  const parsedSlug = parseTenantFromHost(hostname);
+  const tenant = tenantSlug || parsedSlug || "bayes";
   const usesNginx = !port || port === "80";
 
   if (isLocalHost(hostname)) {
@@ -45,8 +48,11 @@ export function getPortalUrl(role: string, tenantSlug?: string | null): string {
 
   const hostnameParts = hostname.split(".");
   const baseDomain = hostnameParts.length > 2 ? hostnameParts.slice(-2).join(".") : hostname;
-  const portal = { learner: "learner", faculty: "faculty", admin: "admin", superadmin: "super" }[role];
-  return portal ? `https://${portal}.${baseDomain}` : `https://${tenant}.${baseDomain}`;
+  if (role === "superadmin") {
+    return `https://super.${baseDomain}`;
+  }
+  const path = { learner: "learner", faculty: "faculty", admin: "admin" }[role] || "learner";
+  return `https://${tenant}.${baseDomain}/${path}`;
 }
 
 export function getPlatformHomeUrl() {

@@ -51,7 +51,8 @@ def utc_now() -> datetime:
 # ============================================================================
 
 class InstitutionCurriculum(Base):
-    """Institutional degree roadmap (e.g. Ashoka 4-Year B.Tech Computer Science 2026)."""
+    """Institutional degree roadmap (e.g. Bayes 4-Year B.Tech Computer Science 2026)."""
+
 
     __tablename__ = "institution_curricula"
     __table_args__ = (

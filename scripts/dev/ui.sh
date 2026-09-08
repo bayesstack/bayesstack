@@ -69,12 +69,13 @@ print_service_dashboard() {
   for svc in "${active_list[@]}"; do
     case "$svc" in
       landing)  echo -e "  ${CLR_BOLD}- Landing Site:${CLR_RESET}        ${CLR_BLUE}http://localhost:3000${CLR_RESET}  ${CLR_DIM}(or http://bayesstack.localhost)${CLR_RESET}" ;;
-      learner)  echo -e "  ${CLR_BOLD}- Learner Portal:${CLR_RESET}      ${CLR_BLUE}http://localhost:3001${CLR_RESET}  ${CLR_DIM}(or http://ashoka.localhost)${CLR_RESET}" ;;
-      faculty)  echo -e "  ${CLR_BOLD}- Faculty Portal:${CLR_RESET}      ${CLR_BLUE}http://localhost:3002${CLR_RESET}  ${CLR_DIM}(or http://coep.localhost)${CLR_RESET}" ;;
-      admin)    echo -e "  ${CLR_BOLD}- Admin Portal:${CLR_RESET}        ${CLR_BLUE}http://localhost:3003${CLR_RESET}  ${CLR_DIM}(or http://vjti.localhost)${CLR_RESET}" ;;
-      auth)     echo -e "  ${CLR_BOLD}- Auth Gateway:${CLR_RESET}        ${CLR_BLUE}http://localhost:3004${CLR_RESET}  ${CLR_DIM}(or http://auth.localhost)${CLR_RESET}" ;;
+      learner)  echo -e "  ${CLR_BOLD}- Learner Portal:${CLR_RESET}      ${CLR_BLUE}http://localhost:3001${CLR_RESET}  ${CLR_DIM}(or http://bayes.localhost/learner)${CLR_RESET}" ;;
+      faculty)  echo -e "  ${CLR_BOLD}- Faculty Portal:${CLR_RESET}      ${CLR_BLUE}http://localhost:3002${CLR_RESET}  ${CLR_DIM}(or http://bayes.localhost/faculty)${CLR_RESET}" ;;
+      admin)    echo -e "  ${CLR_BOLD}- Admin Portal:${CLR_RESET}        ${CLR_BLUE}http://localhost:3003${CLR_RESET}  ${CLR_DIM}(or http://bayes.localhost/admin)${CLR_RESET}" ;;
+      auth)     echo -e "  ${CLR_BOLD}- Auth Gateway:${CLR_RESET}        ${CLR_BLUE}http://localhost:3004${CLR_RESET}  ${CLR_DIM}(or http://bayes.localhost)${CLR_RESET}" ;;
       super)    echo -e "  ${CLR_BOLD}- SuperAdmin Studio:${CLR_RESET}   ${CLR_BLUE}http://localhost:3005${CLR_RESET}  ${CLR_DIM}(or http://super.localhost)${CLR_RESET}" ;;
-      api)      echo -e "  ${CLR_BOLD}- FastAPI Backend:${CLR_RESET}     ${CLR_BLUE}http://localhost:8000${CLR_RESET}  ${CLR_DIM}(Docs: http://localhost:8000/docs)${CLR_RESET}" ;;
+      api)      echo -e "  ${CLR_BOLD}- FastAPI Backend:${CLR_RESET}     ${CLR_BLUE}http://localhost:8000${CLR_RESET}  ${CLR_DIM}(or http://api.localhost, Docs: /docs)${CLR_RESET}" ;;
+
       nginx)    echo -e "  ${CLR_BOLD}- Nginx Router:${CLR_RESET}        ${CLR_BLUE}http://localhost${CLR_RESET}       ${CLR_DIM}(Port 80 Subdomain Ingress)${CLR_RESET}" ;;
       postgres) echo -e "  ${CLR_BOLD}- PostgreSQL Database:${CLR_RESET} ${CLR_BLUE}localhost:5432${CLR_RESET}       ${CLR_DIM}(DB: bayesstack)${CLR_RESET}" ;;
       ui)       echo -e "  ${CLR_BOLD}- Storybook UI:${CLR_RESET}        ${CLR_BLUE}http://localhost:6001${CLR_RESET}" ;;

@@ -45,9 +45,10 @@ class Tenant(Base):
     
     Architecture Note:
     Universities borrow from the platform catalog with zero duplication.
-    The tenant record holds custom subdomains (e.g. 'ashoka.bayesstack.com')
-    or dedicated CNAMEs (e.g. 'learn.ashoka.edu.in'), alongside brand colors.
+    The tenant record holds custom subdomains (e.g. 'bayes.bayesstack.com')
+    or dedicated CNAMEs (e.g. 'learn.bayes.edu'), alongside brand colors.
     """
+
 
     __tablename__ = "tenants"
 

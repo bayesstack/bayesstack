@@ -1,0 +1,37 @@
+sequenceDiagram
+    autonumber
+    actor User as User (Learner / Faculty / Admin)
+    participant Browser as Client Browser (bayes.localhost)
+    participant Nginx as NGINX Gateway (:80)
+    participant AuthApp as Shared Auth App (:3004 / :3000)
+    participant Api as Central API (api.localhost :8000)
+    participant Portal as Destination Portal (:3001 / :3002 / :3003)
+
+    Note over User,Browser: 1. Tenant Portal Access & Discovery
+    User->>Browser: Navigate to http://bayes.localhost
+    Browser->>Nginx: GET / (Host: bayes.localhost)
+    Nginx->>AuthApp: Proxy to Shared Auth App
+    AuthApp->>Api: GET http://api.localhost:8000/api/tenant-config (Host: bayes.localhost)
+    Api-->>AuthApp: Return Bayes Institute Branding & Tenant Config
+    AuthApp-->>Browser: Render Bayes Institute Branded Sign-In Page
+
+    Note over User,Api: 2. Centralized Authentication
+    User->>Browser: Submit credentials (e.g. learner@bayes.com / learner123)
+    Browser->>Api: POST http://api.localhost:8000/api/auth/login
+    Api->>Api: Verify credentials & generate JWT token
+    Api-->>Browser: 200 OK + Set-Cookie bayes_session (Domain=.localhost, HttpOnly)
+
+    Note over Browser,Portal: 3. Dynamic Role-Based Redirection
+    Browser->>Browser: Parse role from response payload
+    alt role is learner
+        Browser->>Portal: Redirect to http://bayes.localhost/learner (Port 3001)
+    else role is faculty
+        Browser->>Portal: Redirect to http://bayes.localhost/faculty (Port 3002)
+    else role is admin
+        Browser->>Portal: Redirect to http://bayes.localhost/admin (Port 3003)
+    else role is superadmin
+        Browser->>Portal: Redirect to http://super.localhost (Port 3005)
+    end
+    Portal->>Api: GET http://api.localhost:8000/api/auth/me (Cookie: bayes_session)
+    Api-->>Portal: Return Authenticated Profile
+    Portal-->>User: Render Role-Specific Portal
