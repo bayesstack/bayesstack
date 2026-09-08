@@ -12,7 +12,7 @@ export default function NotFound() {
         <Text style={{ color: "#4a6360", marginBottom: "1.5rem" }}>
           The requested admin page or telemetry route does not exist.
         </Text>
-        <Button variant="primary" size="md" onClick={() => window.location.href = "/"}>Return to Dashboard</Button>
+        <Button variant="primary" size="md" onClick={() => window.location.href = "/admin"}>Return to Dashboard</Button>
       </Paper>
     </div>
   );

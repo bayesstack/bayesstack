@@ -39,8 +39,8 @@ export default function AdminPage() {
   }, []);
 
   const sampleUsers = [
-    { id: "USR-101", name: "Prof. Alan Bayes", email: "faculty@bayes.com", role: "Faculty Lead", status: "Active", courses: 4, telemetry: "99.8%" },
-    { id: "USR-102", name: "Bayes Institute Learner", email: "learner@bayes.com", role: "Graduate Student", status: "Active", courses: 6, telemetry: "97.4%" },
+    { id: "USR-101", name: "Prof. Alan Bayes", email: "faculty@bayes.edu", role: "Faculty Lead", status: "Active", courses: 4, telemetry: "99.8%" },
+    { id: "USR-102", name: "Bayes Institute Learner", email: "learner@bayes.edu", role: "Graduate Student", status: "Active", courses: 6, telemetry: "97.4%" },
     { id: "USR-103", name: "Sophia Chen", email: "sophia.chen@bayesstack.com", role: "System Admin", status: "Active", courses: 12, telemetry: "100%" },
     { id: "USR-104", name: "Devon Miller", email: "devon.miller@bayesstack.com", role: "Research Associate", status: "Offline", courses: 2, telemetry: "94.1%" },
     { id: "USR-105", name: "Claire Dupont", email: "claire.dupont@bayesstack.com", role: "Adjunct Faculty", status: "Active", courses: 3, telemetry: "98.9%" },
@@ -90,12 +90,13 @@ export default function AdminPage() {
     localStorage.removeItem("bayes_user");
 
     if (typeof window !== "undefined") {
-      const host = window.location.hostname;
-      const isLocal = host.endsWith(".localhost") || host === "localhost";
-      const currentSlug = tenantSlug || (isLocal && host.endsWith(".localhost") && host !== "localhost" ? host.replace(/\.localhost$/, "") : "bayes");
+      const { hostname, port } = window.location;
+      const isLocal = hostname.endsWith(".localhost") || hostname === "localhost";
+      const usesNginx = !port || port === "80";
+      const currentSlug = tenantSlug || (isLocal && hostname.endsWith(".localhost") && hostname !== "localhost" ? hostname.replace(/\.localhost$/, "") : "bayes");
       window.location.href = isLocal
-        ? `http://${currentSlug}.localhost:3004`
-        : `https://${currentSlug}.bayesstack.com/login`;
+        ? (usesNginx ? `http://${currentSlug}.localhost` : `http://${currentSlug}.localhost:3004`)
+        : `https://${currentSlug}.bayesstack.com`;
     }
   };
 
@@ -159,14 +160,14 @@ export default function AdminPage() {
         <Paper style={{ padding: "1.25rem 1.5rem", marginBottom: "1.75rem", background: "linear-gradient(135deg, #0d47a1 0%, #0b6763 100%)", color: "#ffffff", borderRadius: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             <Title as="h2" style={{ fontSize: "1.35rem", fontWeight: 800, color: "#ffffff", marginBottom: "0.25rem" }}>
-              Welcome back, {adminName}! 🏛️
+              Welcome Admin — {adminName}! 🏛️
             </Title>
             <Text style={{ color: "rgba(255, 255, 255, 0.85)", fontSize: "0.9rem" }}>
-              Institutional Governance & Access Telemetry Portal for {isTenant && tenant ? tenant.name : "Bayes Institute"}.
+              Welcome to {isTenant && tenant ? tenant.name : "Bayes Institute"}&apos;s Institutional Governance &amp; Access Telemetry Portal.
             </Text>
           </div>
           <Badge variant="solid" size="sm" style={{ background: "rgba(255, 255, 255, 0.2)", color: "#ffffff" }}>
-            Tenant Admin Role
+            Admin Portal
           </Badge>
         </Paper>
 

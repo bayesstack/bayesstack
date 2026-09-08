@@ -16,7 +16,7 @@ sequenceDiagram
     AuthApp-->>Browser: Render Bayes Institute Branded Sign-In Page
 
     Note over User,Api: 2. Centralized Authentication
-    User->>Browser: Submit credentials (e.g. learner@bayes.com / learner123)
+    User->>Browser: Submit credentials (e.g. learner@bayes.edu / password123)
     Browser->>Api: POST http://api.localhost:8000/api/auth/login
     Api->>Api: Verify credentials & generate JWT token
     Api-->>Browser: 200 OK + Set-Cookie bayes_session (Domain=.localhost, HttpOnly)
@@ -24,11 +24,11 @@ sequenceDiagram
     Note over Browser,Portal: 3. Dynamic Role-Based Redirection
     Browser->>Browser: Parse role from response payload
     alt role is learner
-        Browser->>Portal: Redirect to http://bayes.localhost/learner (Port 3001)
+        Browser->>Portal: Redirect to http://bayes.localhost/learner (Port 3001/learner)
     else role is faculty
-        Browser->>Portal: Redirect to http://bayes.localhost/faculty (Port 3002)
+        Browser->>Portal: Redirect to http://bayes.localhost/faculty (Port 3002/faculty)
     else role is admin
-        Browser->>Portal: Redirect to http://bayes.localhost/admin (Port 3003)
+        Browser->>Portal: Redirect to http://bayes.localhost/admin (Port 3003/admin)
     else role is superadmin
         Browser->>Portal: Redirect to http://super.localhost (Port 3005)
     end

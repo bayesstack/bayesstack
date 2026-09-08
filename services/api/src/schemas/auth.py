@@ -6,8 +6,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class LoginRequest(BaseModel):
     """Payload sent by client during login."""
-    email: str = Field(..., description="User account email address", examples=["user@stanford.edu"])
-    password: str = Field(..., description="Account secret password", examples=["SecretPass123!"])
+    email: str = Field(..., description="User account email address", examples=["learner@bayes.edu"])
+    password: str = Field(..., description="Account secret password", examples=["password123"])
 
 
 class LoginResponseUser(BaseModel):

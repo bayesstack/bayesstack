@@ -43,9 +43,9 @@ The database seed (`services/api/src/db/seed.py`) populates three distinct sampl
 
 | Role Profile | User ID | Email | Password | Full Name | Tenant | Post-Login Redirection |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Learner Profile** | `user-bayes-learner` | `learner@bayes.com` | `learner123` | Bayes Institute Learner | Bayes Institute (`bayes`) | `http://bayes.localhost/learner`<br/>(Port `3001` in standalone dev) |
-| **Faculty Profile** | `user-bayes-faculty` | `faculty@bayes.com` | `faculty123` | Prof. Alan Bayes | Bayes Institute (`bayes`) | `http://bayes.localhost/faculty`<br/>(Port `3002` in standalone dev) |
-| **Admin Profile** | `user-bayes-admin` | `admin@bayes.com` | `admin123` | Bayes Institute Administrator | Bayes Institute (`bayes`) | `http://bayes.localhost/admin`<br/>(Port `3003` in standalone dev) |
+| **Learner Profile** | `user-bayes-learner` | `learner@bayes.edu` | `password123` | Bayes Institute Learner | Bayes Institute (`bayes`) | `http://bayes.localhost/learner`<br/>(Port `3001/learner` in standalone dev) |
+| **Faculty Profile** | `user-bayes-faculty` | `faculty@bayes.edu` | `password123` | Prof. Alan Bayes | Bayes Institute (`bayes`) | `http://bayes.localhost/faculty`<br/>(Port `3002/faculty` in standalone dev) |
+| **Admin Profile** | `user-bayes-admin` | `admin@bayes.edu` | `password123` | Bayes Institute Administrator | Bayes Institute (`bayes`) | `http://bayes.localhost/admin`<br/>(Port `3003/admin` in standalone dev) |
 
 ### Platform SuperAdmin Profile (Platform Control Plane)
 
@@ -78,7 +78,7 @@ sequenceDiagram
     AuthApp-->>Browser: Render Bayes Institute Branded Sign-In Page
 
     Note over User,Api: 2. Centralized Authentication
-    User->>Browser: Submit credentials (e.g. learner@bayes.com / learner123)
+    User->>Browser: Submit credentials (e.g. learner@bayes.edu / password123)
     Browser->>Api: POST http://api.localhost:8000/api/auth/login
     Api->>Api: Verify credentials & generate JWT token
     Api-->>Browser: 200 OK + Set-Cookie bayes_session (Domain=.localhost, HttpOnly)
@@ -86,11 +86,11 @@ sequenceDiagram
     Note over Browser,Portal: 3. Dynamic Role-Based Redirection
     Browser->>Browser: Parse role from response payload
     alt role is learner
-        Browser->>Portal: Redirect to http://bayes.localhost/learner (Port 3001)
+        Browser->>Portal: Redirect to http://bayes.localhost/learner (Port 3001/learner)
     else role is faculty
-        Browser->>Portal: Redirect to http://bayes.localhost/faculty (Port 3002)
+        Browser->>Portal: Redirect to http://bayes.localhost/faculty (Port 3002/faculty)
     else role is admin
-        Browser->>Portal: Redirect to http://bayes.localhost/admin (Port 3003)
+        Browser->>Portal: Redirect to http://bayes.localhost/admin (Port 3003/admin)
     else role is superadmin
         Browser->>Portal: Redirect to http://super.localhost (Port 3005)
     end
@@ -105,9 +105,9 @@ sequenceDiagram
 3. **Authentication**: Form submission sends `POST /api/auth/login` directly to the central API with `{ email, password }`.
 4. **Session Cookie**: On success, the API sets an `HttpOnly`, `SameSite=lax` session cookie (`bayes_session`) valid across the domain (`.localhost` or `.bayesstack.com`).
 5. **Role-Based Redirection**:
-   - `learner` is redirected to `http://bayes.localhost/learner` (or port `3001`).
-   - `faculty` is redirected to `http://bayes.localhost/faculty` (or port `3002`).
-   - `admin` is redirected to `http://bayes.localhost/admin` (or port `3003`).
+   - `learner` is redirected to `http://bayes.localhost/learner` (or port `3001/learner`).
+   - `faculty` is redirected to `http://bayes.localhost/faculty` (or port `3002/faculty`).
+   - `admin` is redirected to `http://bayes.localhost/admin` (or port `3003/admin`).
    - `superadmin` is redirected to `http://super.localhost` (or port `3005`).
 6. **Session Check & Auto-Routing**: If a user with an active session returns to the auth page or accesses a portal directly, `/api/auth/me` detects the active cookie and authenticates them.
 
@@ -128,8 +128,8 @@ docker compose up api auth learner faculty admin nginx postgres
 ### Direct Port Access (without NGINX)
 
 - **Auth App**: [http://localhost:3004](http://localhost:3004) or [http://bayes.localhost:3004](http://bayes.localhost:3004)
-- **Learner App**: [http://localhost:3001](http://localhost:3001) or [http://bayes.localhost:3001](http://bayes.localhost:3001)
-- **Faculty App**: [http://localhost:3002](http://localhost:3002) or [http://bayes.localhost:3002](http://bayes.localhost:3002)
-- **Admin App**: [http://localhost:3003](http://localhost:3003) or [http://bayes.localhost:3003](http://bayes.localhost:3003)
+- **Learner App**: [http://localhost:3001/learner](http://localhost:3001/learner) or [http://bayes.localhost:3001/learner](http://bayes.localhost:3001/learner)
+- **Faculty App**: [http://localhost:3002/faculty](http://localhost:3002/faculty) or [http://bayes.localhost:3002/faculty](http://bayes.localhost:3002/faculty)
+- **Admin App**: [http://localhost:3003/admin](http://localhost:3003/admin) or [http://bayes.localhost:3003/admin](http://bayes.localhost:3003/admin)
 - **SuperAdmin App**: [http://localhost:3005](http://localhost:3005) or [http://super.localhost:3005](http://super.localhost:3005)
 - **FastAPI Backend**: [http://localhost:8000/docs](http://localhost:8000/docs)

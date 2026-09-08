@@ -44,7 +44,7 @@ export function AuthForms({
 }: AuthFormsProps) {
   const [rememberMe, setRememberMe] = useState(true);
 
-  const emailDomain = isTenant && tenant ? `${tenant.slug}.com` : "bayes.com";
+  const emailDomain = isTenant && tenant ? `${tenant.slug}.edu` : "bayes.edu";
 
   return (
     <div className="auth-form-body">

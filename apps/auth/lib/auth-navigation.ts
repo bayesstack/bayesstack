@@ -43,7 +43,7 @@ export function getPortalUrl(role: string, tenantSlug?: string | null): string {
     const path = { learner: "learner", faculty: "faculty", admin: "admin" }[role] || "learner";
     return usesNginx
       ? `http://${tenant}.localhost/${path}`
-      : `http://${tenant}.localhost:${localPort}`;
+      : `http://${tenant}.localhost:${localPort}/${path}`;
   }
 
   const hostnameParts = hostname.split(".");

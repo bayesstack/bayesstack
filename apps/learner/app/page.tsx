@@ -70,12 +70,13 @@ export default function LearnerPage() {
     localStorage.removeItem("bayes_user");
     
     if (typeof window !== "undefined") {
-      const host = window.location.hostname;
-      const isLocal = host.endsWith(".localhost") || host === "localhost";
-      const currentSlug = tenantSlug || (isLocal && host.endsWith(".localhost") && host !== "localhost" ? host.replace(/\.localhost$/, "") : "bayes");
+      const { hostname, port } = window.location;
+      const isLocal = hostname.endsWith(".localhost") || hostname === "localhost";
+      const usesNginx = !port || port === "80";
+      const currentSlug = tenantSlug || (isLocal && hostname.endsWith(".localhost") && hostname !== "localhost" ? hostname.replace(/\.localhost$/, "") : "bayes");
       window.location.href = isLocal
-        ? `http://${currentSlug}.localhost:3004`
-        : `https://${currentSlug}.bayesstack.com/login`;
+        ? (usesNginx ? `http://${currentSlug}.localhost` : `http://${currentSlug}.localhost:3004`)
+        : `https://${currentSlug}.bayesstack.com`;
     }
   };
 
@@ -134,14 +135,14 @@ export default function LearnerPage() {
         <Paper style={{ padding: "1.25rem 1.5rem", marginBottom: "1.75rem", background: "linear-gradient(135deg, #0b6763 0%, #084c49 100%)", color: "#ffffff", borderRadius: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             <Title as="h2" style={{ fontSize: "1.35rem", fontWeight: 800, color: "#ffffff", marginBottom: "0.25rem" }}>
-              Welcome back, {userName}! 🎓
+              Welcome Learner — {userName}! 🎓
             </Title>
             <Text style={{ color: "rgba(255, 255, 255, 0.85)", fontSize: "0.9rem" }}>
-              You are signed in to {isTenant && tenant ? tenant.name : "Bayes Institute"}'s official Learner Portal.
+              Welcome to {isTenant && tenant ? tenant.name : "Bayes Institute"}&apos;s official Learner Portal.
             </Text>
           </div>
           <Badge variant="solid" size="sm" style={{ background: "rgba(255, 255, 255, 0.2)", color: "#ffffff" }}>
-            Learner Role
+            Learner Portal
           </Badge>
         </Paper>
 

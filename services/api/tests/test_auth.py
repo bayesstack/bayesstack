@@ -54,7 +54,7 @@ async def test_tenant_user_login_and_auth_me_session():
         # 1. Login
         login_resp = await ac.post(
             "/api/auth/login",
-            json={"email": "learner@bayes.com", "password": "learner123"},
+            json={"email": "learner@bayes.edu", "password": "password123"},
             headers={"Host": "bayes.localhost"},
         )
         assert login_resp.status_code == 200
@@ -79,7 +79,7 @@ async def test_tenant_user_login_and_auth_me_session():
         assert me_resp.status_code == 200
         me_data = me_resp.json()
         assert me_data["authenticated"] is True
-        assert me_data["user"]["email"] == "learner@bayes.com"
+        assert me_data["user"]["email"] == "learner@bayes.edu"
         assert me_data["user"]["role"] == "learner"
 
         # 3. Check /api/auth/me with Authorization Bearer header
@@ -106,9 +106,9 @@ async def test_bayes_faculty_and_admin_login_and_roles():
     await seed_database()
 
     test_profiles = [
-        ("learner@bayes.com", "learner123", "learner", "Bayes Institute Learner"),
-        ("faculty@bayes.com", "faculty123", "faculty", "Prof. Alan Bayes"),
-        ("admin@bayes.com", "admin123", "admin", "Bayes Institute Administrator"),
+        ("learner@bayes.edu", "password123", "learner", "Bayes Institute Learner"),
+        ("faculty@bayes.edu", "password123", "faculty", "Prof. Alan Bayes"),
+        ("admin@bayes.edu", "password123", "admin", "Bayes Institute Administrator"),
     ]
 
     for email, password, expected_role, expected_name in test_profiles:
