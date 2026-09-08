@@ -1,6 +1,35 @@
 #!/usr/bin/env bash
 # Native local process execution runner
 
+warmup_local_frontends() {
+  local service port attempt
+  for service in "$@"; do
+    case "$service" in
+      landing) port=3000 ;;
+      learner) port=3001 ;;
+      faculty) port=3002 ;;
+      admin) port=3003 ;;
+      auth) port=3004 ;;
+      super) port=3005 ;;
+      *) continue ;;
+    esac
+
+    log_info "Warming up $service (initial Next.js compilation may take a moment)..."
+    for attempt in {1..60}; do
+      # The request itself causes Next.js to compile the initial route.
+      if curl --silent --show-error --fail --max-time 10 "http://127.0.0.1:${port}/" >/dev/null 2>&1; then
+        log_success "$service is compiled and ready on port $port."
+        break
+      fi
+      if [[ "$attempt" -eq 60 ]]; then
+        log_warn "$service did not finish warming up within 120 seconds; it may still compile on first use."
+      else
+        sleep 2
+      fi
+    done
+  done
+}
+
 run_local_mode() {
   local root_dir="$1"
   shift
@@ -146,6 +175,7 @@ run_local_mode() {
     esac
   done
 
+  warmup_local_frontends "${selected_services[@]}"
   print_service_dashboard "local" "${selected_services[@]}"
   wait
 }
