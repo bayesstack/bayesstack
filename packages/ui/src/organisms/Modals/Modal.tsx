@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect } from "react";
+import React, { forwardRef, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Icon } from "../../atoms/Icons";
 import { IconButton } from "../../atoms/Buttons/IconButton";
@@ -108,6 +108,12 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
     },
     ref
   ) => {
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+      setMounted(true);
+    }, []);
+
     // Listen for Escape key press to dismiss modal for keyboard accessibility compliance
     useEffect(() => {
       if (!opened || !closeOnEscape) return;
@@ -134,7 +140,7 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
       };
     }, [opened]);
 
-    if (!opened) return null;
+    if (!opened || !mounted) return null;
 
     const modalContent = (
       <div

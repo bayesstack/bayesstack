@@ -57,12 +57,24 @@ export function getPortalUrl(role: string, tenantSlug?: string | null): string {
 
 export function getPlatformHomeUrl() {
   if (typeof window === "undefined") return "/";
-  return isLocalHost(window.location.hostname) ? "http://localhost" : "https://bayesstack.com";
+  const { hostname, port } = window.location;
+  if (isLocalHost(hostname)) {
+    return !port || port === "80" ? "http://localhost" : "http://localhost:3000";
+  }
+  const hostnameParts = hostname.split(".");
+  const baseDomain = hostnameParts.length > 2 ? hostnameParts.slice(-2).join(".") : hostname;
+  return `https://${baseDomain}`;
 }
 
 export function getSuperAdminUrl() {
   if (typeof window === "undefined") return "/";
-  return isLocalHost(window.location.hostname)
-    ? "http://super.localhost:3005"
-    : "https://super.bayesstack.com";
+  const { hostname, port } = window.location;
+  const usesNginx = !port || port === "80";
+  if (isLocalHost(hostname)) {
+    return usesNginx ? "http://super.localhost" : "http://super.localhost:3005";
+  }
+  const hostnameParts = hostname.split(".");
+  const baseDomain = hostnameParts.length > 2 ? hostnameParts.slice(-2).join(".") : hostname;
+  return `https://super.${baseDomain}`;
 }
+

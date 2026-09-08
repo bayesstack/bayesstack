@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Icon } from "../../atoms/Icons";
 import { IconButton } from "../../atoms/Buttons/IconButton";
@@ -66,8 +66,13 @@ export function ModalZoom({
   classNames,
 }: ModalZoomProps) {
   const [scale, setScale] = useState(1);
+  const [mounted, setMounted] = useState(false);
 
-  if (!opened) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!opened || !mounted) return null;
 
   // Clamp zoom scale between 50% (0.5x) min and 300% (3x) max to avoid visual clipping/invisibility
   const handleZoomIn = () => setScale((s) => Math.min(s + 0.25, 3));

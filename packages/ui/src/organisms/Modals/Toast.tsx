@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Icon, type IconName } from "../../atoms/Icons";
 import { IconButton } from "../../atoms/Buttons/IconButton";
@@ -130,6 +130,11 @@ export function useToast() {
  */
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const hideToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((n) => n.id !== id));
@@ -158,8 +163,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ showToast, hideToast }}>
       {children}
-      {/* Portal toast container to fixed overlay target */}
-      {typeof document !== "undefined" &&
+      {/* Portal toast container to fixed overlay target only after mounting on client */}
+      {mounted &&
         createPortal(
           <div className="bs-toast-container">
             {toasts.map((t) => (
@@ -175,3 +180,4 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     </ToastContext.Provider>
   );
 }
+

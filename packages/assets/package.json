@@ -8,6 +8,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./colors": "./src/tokens/colors.ts",
+    "./company": "./src/tokens/company.ts",
     "./logo": "./src/components/BayesStackLogo.tsx",
     "./mark": "./src/components/BayesStackMark.tsx",
     "./palette.json": "./brand-palette.json"

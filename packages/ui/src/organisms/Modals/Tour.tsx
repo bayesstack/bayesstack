@@ -81,6 +81,11 @@ export function Tour({
 }: TourProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(initialStep);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const activeStep = steps[currentStepIndex];
 
@@ -97,7 +102,7 @@ export function Tour({
     }
   }, [opened, currentStepIndex, activeStep]);
 
-  if (!opened || !activeStep) return null;
+  if (!opened || !activeStep || !mounted) return null;
 
   const isFirstStep = currentStepIndex === 0;
   const isLastStep = currentStepIndex === steps.length - 1;

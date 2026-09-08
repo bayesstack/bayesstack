@@ -2,11 +2,14 @@
 
 import React from "react";
 import { TenantProvider } from "@bayesstack/tenant";
+import { ToastProvider } from "@bayesstack/ui";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <TenantProvider apiUrl={process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}>
-      {children}
+      <ToastProvider>
+        {children}
+      </ToastProvider>
     </TenantProvider>
   );
 }

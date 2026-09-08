@@ -1,6 +1,11 @@
+"use client";
+
+import React, { useState } from "react";
 import type { TenantInfo } from "@bayesstack/tenant";
 import { Button } from "@bayesstack/ui";
-import { getPlatformHomeUrl, getSuperAdminUrl } from "../../lib/auth-navigation";
+import { PRODUCT_NAME, COMPANY_CONFIG } from "@bayesstack/assets";
+import { LegalModal, type LegalDocType } from "../legal/LegalModal";
+import { getPlatformHomeUrl } from "../../lib/auth-navigation";
 
 interface LoadingStateProps {
   tenantSlug: string | null;
@@ -9,14 +14,37 @@ interface LoadingStateProps {
 
 export function AuthLoadingState({ tenantSlug, statusMessage }: LoadingStateProps) {
   return (
-    <div className="auth-container">
-      <div className="auth-card" style={{ textAlign: "center", padding: "3rem 2rem" }}>
-        <div style={{ fontSize: "1.25rem", fontWeight: 700, color: "#0b6763", marginBottom: "0.5rem" }}>
-          BayesStack Platform Gateway
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--auth-canvas)", padding: "2rem" }}>
+      <div style={{
+        width: "100%",
+        maxWidth: 400,
+        background: "var(--auth-surface)",
+        border: "1px solid var(--auth-border)",
+        borderRadius: 12,
+        padding: "2.5rem 2rem",
+        textAlign: "center",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "1rem",
+      }}>
+        <div style={{
+          width: 28,
+          height: 28,
+          border: "2px solid var(--auth-border)",
+          borderTopColor: "var(--auth-brand)",
+          borderRadius: "50%",
+          animation: "spin 0.8s linear infinite",
+        }} />
+
+        <div>
+          <h2 style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--auth-ink)", marginBottom: "0.25rem" }}>
+            Verifying Session
+          </h2>
+          <p style={{ color: "var(--auth-ink-muted)", fontSize: "0.85rem", lineHeight: 1.5 }}>
+            {statusMessage || `Resolving tenant context for ${tenantSlug ? `'${tenantSlug}'` : "request"}...`}
+          </p>
         </div>
-        <p style={{ color: "var(--bs-muted)", fontSize: "0.9rem" }}>
-          {statusMessage || `Verifying session and institutional tenant for ${tenantSlug ? `'${tenantSlug}'` : "request"}...`}
-        </p>
       </div>
     </div>
   );
@@ -25,39 +53,151 @@ export function AuthLoadingState({ tenantSlug, statusMessage }: LoadingStateProp
 interface TenantNotFoundStateProps {
   tenantSlug: string;
   error: string | null;
+  onOpenLegalModal?: (doc: LegalDocType) => void;
 }
 
-export function TenantNotFoundState({ tenantSlug, error }: TenantNotFoundStateProps) {
-  const currentHost = typeof window !== "undefined" ? window.location.host : `${tenantSlug}.localhost`;
+export function TenantNotFoundState({ tenantSlug, onOpenLegalModal }: TenantNotFoundStateProps) {
+  const [legalOpen, setLegalOpen] = useState(false);
+  const [legalDoc, setLegalDoc] = useState<LegalDocType>("terms");
+
+  const openLegal = (doc: LegalDocType) => {
+    if (onOpenLegalModal) {
+      onOpenLegalModal(doc);
+    } else {
+      setLegalDoc(doc);
+      setLegalOpen(true);
+    }
+  };
+
+  const handleReturnHome = () => {
+    window.location.href = getPlatformHomeUrl();
+  };
+
+  const handleContactPartnerships = () => {
+    window.location.href = `mailto:${COMPANY_CONFIG.supportEmail}?subject=Institutional%20Onboarding%20Inquiry%20(${encodeURIComponent(tenantSlug)})`;
+  };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card" style={{ textAlign: "center", borderTop: "4px solid #e53e3e" }}>
-        <div style={{ fontSize: "2.5rem", marginBottom: "0.5rem" }}>🏫 ⚠️</div>
-        <h1 style={{ fontSize: "1.4rem", fontWeight: 800, color: "#111827", marginBottom: "0.5rem" }}>
-          Institution &quot;{tenantSlug}&quot; Is Not With Us
-        </h1>
-        <p style={{ fontSize: "0.95rem", color: "#4b5563", lineHeight: 1.5, marginBottom: "0.75rem" }}>
-          The requested institution <strong>{tenantSlug}</strong> (<code>{currentHost}</code>) is not registered with BayesStack or is currently inactive.
-        </p>
-        <p style={{ fontSize: "0.85rem", color: "#6b7280", lineHeight: 1.4, marginBottom: "1.5rem" }}>
-          If you believe this is an error, please verify the subdomain in your browser URL or contact your institution administrator.
-        </p>
-        {error && <p className="auth-error-detail" style={{ marginBottom: "1.25rem" }}>{error}</p>}
-
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-          <Button variant="primary" onClick={() => { window.location.href = getPlatformHomeUrl(); }} style={{ width: "100%" }}>
-            Return to BayesStack Platform Home
-          </Button>
-          <Button variant="outline" onClick={() => { window.location.href = getSuperAdminUrl(); }} style={{ width: "100%" }}>
-            Platform SuperAdmin Portal
-          </Button>
+    <div className="auth-layout">
+      {/* Left Editorial & Brand Pane */}
+      <aside className="auth-left-pane" aria-label="BayesStack Platform Workspace">
+        <div className="auth-left-header">
+          <span className="auth-left-brand">
+            {PRODUCT_NAME}
+          </span>
         </div>
 
-        <div className="auth-state-footer" style={{ marginTop: "1.5rem", fontSize: "0.75rem", color: "#9ca3af" }}>
-          HTTP 404 • Error Code: TENANT_NOT_FOUND • Host: {currentHost}
+        <div className="auth-left-main">
+          <blockquote className="auth-left-quote">
+            &ldquo;Bridging the distance between institutional vision and active computational learning.&rdquo;
+          </blockquote>
+          <p className="auth-left-subquote">
+            {PRODUCT_NAME} provides isolated, domain-specific workspaces and AI studios for accredited higher-education universities and research institutions worldwide.
+          </p>
         </div>
-      </div>
+
+        <div className="auth-left-footer">
+          <span>{PRODUCT_NAME} Platform</span>
+          <span>Global Institutional Network</span>
+        </div>
+      </aside>
+
+      {/* Right Clean Action Pane */}
+      <main className="auth-right-pane">
+        <div className="auth-form-wrapper" style={{ gap: "1.5rem" }}>
+          {/* Header */}
+          <header className="auth-form-header">
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem" }}>
+              <span className="auth-pill-badge neutral">
+                <span className="auth-pill-dot" />
+                Workspace Directory
+              </span>
+            </div>
+            <h2>Institution Not Found</h2>
+            <p>
+              We couldn&apos;t locate an active campus workspace associated with <strong>&ldquo;{tenantSlug}&rdquo;</strong>.
+            </p>
+          </header>
+
+          {/* Sleek Enterprise Guidance Card */}
+          <div className="auth-guidance-card">
+            <div className="auth-guidance-item">
+              <div className="auth-guidance-bullet" />
+              <div>
+                <strong style={{ color: "var(--auth-ink)", display: "block", fontSize: "0.85rem", marginBottom: "0.15rem" }}>
+                  Students & Educators
+                </strong>
+                <span style={{ fontSize: "0.82rem", color: "var(--auth-ink-muted)", lineHeight: 1.45 }}>
+                  Verify that your browser address matches the exact institutional subdomain provided by your registrar or course syllabus.
+                </span>
+              </div>
+            </div>
+
+            <div className="auth-guidance-item">
+              <div className="auth-guidance-bullet" />
+              <div>
+                <strong style={{ color: "var(--auth-ink)", display: "block", fontSize: "0.85rem", marginBottom: "0.15rem" }}>
+                  Academic Administrators
+                </strong>
+                <span style={{ fontSize: "0.82rem", color: "var(--auth-ink-muted)", lineHeight: 1.45 }}>
+                  Interested in bringing {PRODUCT_NAME} to your campus? Request enterprise onboarding to provision dedicated compute clusters and studios.
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Primary Action Buttons */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem" }}>
+            <Button
+              variant="primary"
+              fullWidth
+              onClick={handleReturnHome}
+            >
+              Return to Platform Home
+            </Button>
+            
+            <Button
+              variant="outline"
+              fullWidth
+              onClick={handleContactPartnerships}
+            >
+              Request Campus Onboarding
+            </Button>
+          </div>
+
+
+          {/* Footer with Legal Links */}
+          <footer className="auth-right-footer">
+            <span>Protected by HttpOnly Session Cookies</span>
+            <div>
+              <button
+                type="button"
+                className="auth-legal-link"
+                onClick={() => openLegal("terms")}
+              >
+                Terms of Service
+              </button>
+              {" • "}
+              <button
+                type="button"
+                className="auth-legal-link"
+                onClick={() => openLegal("privacy")}
+              >
+                Privacy Policy (GDPR / FERPA)
+              </button>
+            </div>
+          </footer>
+        </div>
+      </main>
+
+      {/* Embedded Legal Modal if opened locally */}
+      {!onOpenLegalModal && (
+        <LegalModal
+          opened={legalOpen}
+          initialDoc={legalDoc}
+          onClose={() => setLegalOpen(false)}
+        />
+      )}
     </div>
   );
 }
@@ -68,20 +208,16 @@ interface AuthHeaderProps {
 }
 
 export function AuthHeader({ tenant, isTenant }: AuthHeaderProps) {
-  const tenantName = isTenant && tenant ? tenant.name : "Central Authentication Portal";
+  const institutionName = isTenant && tenant ? tenant.name : "Platform Sign In";
 
   return (
-    <div className="auth-header">
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
-        <span style={{ fontSize: "1.5rem", fontWeight: 800, color: "#0b6763", fontFamily: "var(--bs-font-main)" }}>
-          BayesStack
-        </span>
-        <span className="auth-tenant-badge">{isTenant && tenant ? tenant.slug : "Central"} Auth</span>
-      </div>
-      <h1 style={{ fontSize: "1.35rem", fontWeight: 800, color: "var(--bs-ink)", marginBottom: "0.25rem" }}>{tenantName}</h1>
-      <p style={{ fontSize: "0.875rem", color: "var(--bs-muted)" }}>
-        {isTenant && tenant ? `Log in to access your ${tenant.name} portal` : "Sign in with your institutional or platform credentials"}
+    <header className="auth-form-header">
+      <h2>{institutionName}</h2>
+      <p>
+        {isTenant && tenant
+          ? `Enter your credentials to access your ${tenant.name} workspace.`
+          : "Sign in with your institutional or platform credentials."}
       </p>
-    </div>
+    </header>
   );
 }

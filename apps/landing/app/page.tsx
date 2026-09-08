@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { BayesStackLogo } from "@bayesstack/assets";
+import { BayesStackLogo, COMPANY_NAME } from "@bayesstack/assets";
 import {
   Button,
   Badge,
@@ -377,7 +377,7 @@ export default function CourseStudio() {
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
             <BayesStackLogo variant="primary" style={{ height: "28px" }} />
             <Text size="sm" style={{ color: "#4a6360" }}>
-              © {new Date().getFullYear()} BayesStack Inc. All rights reserved.
+              © {new Date().getFullYear()} {COMPANY_NAME}. All rights reserved.
             </Text>
           </div>
 

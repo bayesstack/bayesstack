@@ -1,4 +1,5 @@
 export * from "./tokens/colors";
+export * from "./tokens/company";
 export * from "./components/BayesStackLogo";
 export * from "./components/BayesStackMark";
 

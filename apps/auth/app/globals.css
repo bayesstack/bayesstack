@@ -1,17 +1,22 @@
 @import "@bayesstack/ui/styles.css";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-  --bs-brand-teal: #0b6763;
-  --bs-brand-deep: #084c49;
-  --bs-brand-soft: #e4f2ef;
-  --bs-ink: #123333;
-  --bs-muted: #4a6360;
-  --bs-line: #d7e8e4;
-  --bs-surface: #ffffff;
-  --bs-canvas: #f1f8f6;
-  --bs-font-main: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
-  --bs-font-mono: 'JetBrains Mono', monospace;
+  --auth-brand: #0b6763;
+  --auth-brand-hover: #084c49;
+  --auth-brand-soft: #eef6f4;
+  --auth-canvas: #f8fafc;
+  --auth-surface: #ffffff;
+  --auth-border: #e2e8f0;
+  --auth-border-focus: #0b6763;
+  --auth-ink: #0f172a;
+  --auth-ink-muted: #64748b;
+  --auth-ink-light: #94a3b8;
+  --auth-dark-bg: #091a18;
+  --auth-dark-border: rgba(255, 255, 255, 0.08);
+  --auth-font-display: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  --auth-font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --auth-font-mono: 'JetBrains Mono', monospace;
 }
 
 * {
@@ -22,135 +27,345 @@
 
 html, body {
   min-height: 100vh;
-  background-color: var(--bs-canvas);
-  color: var(--bs-ink);
-  font-family: var(--bs-font-main);
-  overflow-x: hidden;
+  background-color: var(--auth-canvas);
+  color: var(--auth-ink);
+  font-family: var(--auth-font-body);
   -webkit-font-smoothing: antialiased;
 }
 
-.auth-container {
+/* ==========================================================================
+   Dual Pane Architecture
+   ========================================================================== */
+.auth-layout {
   min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  width: 100vw;
+}
+
+@media (max-width: 960px) {
+  .auth-layout {
+    grid-template-columns: 1fr;
+  }
+  .auth-left-pane {
+    display: none;
+  }
+  .auth-right-pane {
+    padding: 2rem 1.5rem;
+  }
+}
+
+/* ==========================================================================
+   Left Pane (Minimal & Tenant-Centric)
+   ========================================================================== */
+.auth-left-pane {
+  background-color: var(--auth-dark-bg);
+  color: #ffffff;
+  padding: 4rem 4.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid var(--auth-dark-border);
+  position: relative;
+}
+
+.auth-left-brand {
+  font-family: var(--auth-font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.auth-left-main {
+  margin: auto 0;
+  display: flex;
+  flex-direction: column;
+  max-width: 520px;
+}
+
+.auth-left-quote {
+  font-family: var(--auth-font-display);
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.auth-left-subquote {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #94a3b8;
+  margin-top: 1.75rem;
+}
+
+.auth-left-footer {
+  font-size: 0.82rem;
+  color: #64748b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--auth-dark-border);
+  padding-top: 1.5rem;
+}
+
+/* ==========================================================================
+   Right Pane (Clean, Classic Form - Rock Solid Static Anchoring)
+   ========================================================================== */
+.auth-right-pane {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 2rem 1.5rem;
+  padding: 3rem 2.5rem;
+  background-color: var(--auth-surface);
+  min-height: 100vh;
+  overflow-y: auto;
 }
 
-.auth-card {
+.auth-form-wrapper {
   width: 100%;
-  max-width: 440px;
-  background: var(--bs-surface);
-  border: 1px solid var(--bs-line);
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(11, 103, 99, 0.08);
-  padding: 2rem;
-}
-
-.auth-header {
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-.auth-tabs {
+  max-width: 400px;
   display: flex;
-  border-bottom: 1px solid var(--bs-line);
-  margin-bottom: 1.5rem;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
-.auth-tab {
-  flex: 1;
-  text-align: center;
-  padding: 0.75rem 0;
-  font-weight: 600;
+.auth-form-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-height: 56px;
+}
+
+.auth-form-header h2 {
+  font-family: var(--auth-font-display);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--auth-ink);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.auth-form-header p {
   font-size: 0.9rem;
-  color: var(--bs-muted);
+  color: var(--auth-ink-muted);
+  line-height: 1.4;
+}
+
+/* Classic Clean Stationary Navigation Tabs */
+.auth-nav-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--auth-border);
+  gap: 1.5rem;
+  height: 40px;
+  align-items: flex-end;
+}
+
+.auth-nav-tab {
+  background: none;
+  border: none;
+  padding-bottom: 0.65rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--auth-ink-muted);
   cursor: pointer;
   border-bottom: 2px solid transparent;
-  transition: all 0.2s ease;
-  background: transparent;
-  border-left: 0;
-  border-right: 0;
-  border-top: 0;
+  transition: all 0.15s ease;
   font-family: inherit;
 }
 
-.auth-tab.active {
-  color: var(--bs-brand-teal);
-  border-bottom-color: var(--bs-brand-teal);
+.auth-nav-tab:hover {
+  color: var(--auth-ink);
 }
 
-.auth-form {
+.auth-nav-tab.active {
+  color: var(--auth-brand);
+  border-bottom-color: var(--auth-brand);
+}
+
+/* Stable Form Body Height to prevent layout jumping */
+.auth-form-body {
+  min-height: 330px;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  justify-content: flex-start;
+}
+
+/* Clean Form Elements */
+.auth-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
 }
 
 .auth-field {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  color: var(--bs-ink);
+  gap: 0.35rem;
+}
+
+.auth-field-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.auth-field-label {
   font-size: 0.85rem;
   font-weight: 600;
+  color: var(--auth-ink);
 }
 
-.auth-tenant-badge {
-  border-radius: 999px;
-  background: var(--bs-brand-teal);
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.25rem 0.5rem;
-}
-
-.auth-status,
-.auth-error {
-  margin-top: 1rem;
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  font-size: 0.85rem;
+.auth-field-link {
+  font-size: 0.8rem;
+  color: var(--auth-brand);
+  text-decoration: none;
   font-weight: 500;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
-.auth-status {
+.auth-field-link:hover {
+  text-decoration: underline;
+}
+
+.auth-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--auth-ink-muted);
+}
+
+.auth-checkbox {
+  accent-color: var(--auth-brand);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* Divider */
+.auth-divider-line {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--auth-ink-light);
+  font-size: 0.78rem;
+  margin: 0.25rem 0;
+}
+
+.auth-divider-line::before,
+.auth-divider-line::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background-color: var(--auth-border);
+}
+
+/* Clean Alert Messages */
+.auth-feedback-box {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.auth-feedback-box.success {
+  background-color: #f0fdf4;
   border: 1px solid #bbf7d0;
-  background: var(--bs-brand-soft, #f0fdf4);
   color: #166534;
 }
 
-.auth-error,
-.auth-error-detail {
+.auth-feedback-box.error {
+  background-color: #fef2f2;
   border: 1px solid #fecaca;
-  background: #fef2f2;
   color: #991b1b;
 }
 
-.auth-error-detail {
-  margin: -0.75rem 0 1.5rem;
-  border-radius: 8px;
-  padding: 0.75rem;
-  font-size: 0.8rem;
-}
-
-.auth-description {
-  color: var(--bs-muted);
-  font-size: 0.85rem;
-  line-height: 1.4;
-}
-
-.auth-footer,
-.auth-state-footer {
-  margin-top: 1.5rem;
-  border-top: 1px solid var(--bs-line);
-  padding-top: 1rem;
-  color: var(--bs-muted);
-  font-size: 0.75rem;
+/* Clean Footer & Legal Links */
+.auth-right-footer {
+  font-size: 0.78rem;
+  color: var(--auth-ink-muted);
   text-align: center;
+  line-height: 1.6;
+  margin-top: 0.5rem;
 }
 
-.auth-state-footer {
-  margin-top: 1.5rem;
-  padding-top: 0.75rem;
+.auth-legal-link {
+  background: none;
+  border: none;
+  color: var(--auth-ink);
+  font-size: inherit;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  transition: color 0.15s ease;
 }
+
+.auth-legal-link:hover {
+  color: var(--auth-brand);
+}
+
+/* ==========================================================================
+   Modern Minimal Pill Badges & Guidance Cards
+   ========================================================================== */
+.auth-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.auth-pill-badge.error {
+  background-color: #fef2f2;
+  border: 1px solid #fee2e2;
+  color: #991b1b;
+}
+
+.auth-pill-badge.neutral {
+  background-color: var(--auth-brand-soft);
+  border: 1px solid rgba(11, 103, 99, 0.15);
+  color: var(--auth-brand);
+}
+
+.auth-pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.auth-guidance-card {
+  background-color: var(--auth-canvas);
+  border: 1px solid var(--auth-border);
+  border-radius: 8px;
+  padding: 1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.auth-guidance-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.auth-guidance-bullet {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--auth-brand);
+  margin-top: 0.4rem;
+  flex-shrink: 0;
+}
+

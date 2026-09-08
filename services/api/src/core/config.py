@@ -21,6 +21,70 @@ class Settings(BaseSettings):
     VERSION: str = "0.1.0"
     BAYESSTACK_ENV: str = Field(default="development", validation_alias="BAYESSTACK_ENV")
 
+    # Company & Brand Identity Settings
+    COMPANY_NAME: str = Field(
+        default="Ahsinam Technologies Private Limited",
+        validation_alias="COMPANY_NAME",
+        description="Registered legal company name",
+    )
+    COMPANY_LEGAL_NAME: str = Field(
+        default="Ahsinam Technologies Private Limited",
+        validation_alias="COMPANY_LEGAL_NAME",
+        description="Full legal corporate entity name",
+    )
+    COMPANY_TRADE_NAME: str = Field(
+        default="Ahsinam Technologies",
+        validation_alias="COMPANY_TRADE_NAME",
+        description="Company trade name",
+    )
+    COMPANY_CIN: str = Field(
+        default="U85500MH2024PTC424430",
+        validation_alias="COMPANY_CIN",
+        description="Corporate Identification Number (CIN)",
+    )
+    COMPANY_ROC: str = Field(
+        default="ROC Mumbai",
+        validation_alias="COMPANY_ROC",
+        description="Registrar of Companies",
+    )
+    COMPANY_INCORPORATION_DATE: str = Field(
+        default="April 29, 2024",
+        validation_alias="COMPANY_INCORPORATION_DATE",
+        description="Incorporation date",
+    )
+    COMPANY_JURISDICTION: str = Field(
+        default="India",
+        validation_alias="COMPANY_JURISDICTION",
+        description="Jurisdiction / Country",
+    )
+    COMPANY_REGISTERED_ADDRESS: str = Field(
+        default="B.K.-1588, ROOM NO-5, SECTION 27, NEAR SATRAMDAS HOSPITAL, Ulhasnagar-4, Thane District, Maharashtra, India, 421004",
+        validation_alias="COMPANY_REGISTERED_ADDRESS",
+        description="Official registered office address",
+    )
+    COMPANY_DPO_ADDRESS: str = Field(
+        default="Data Protection Office, Ahsinam Technologies Private Limited, B.K.-1588, ROOM NO-5, SECTION 27, NEAR SATRAMDAS HOSPITAL, Ulhasnagar-4, Thane District, Maharashtra, India, 421004",
+        validation_alias="COMPANY_DPO_ADDRESS",
+        description="Data Protection Office address",
+    )
+    PRODUCT_NAME: str = Field(
+        default="BayesStack",
+        validation_alias="PRODUCT_NAME",
+        description="Primary platform and product name",
+    )
+    SUPPORT_EMAIL: str = Field(
+        default="support@bayesstack.com",
+        validation_alias="SUPPORT_EMAIL",
+    )
+    PRIVACY_EMAIL: str = Field(
+        default="privacy@bayesstack.com",
+        validation_alias="PRIVACY_EMAIL",
+    )
+    SECURITY_EMAIL: str = Field(
+        default="security@bayesstack.com",
+        validation_alias="SECURITY_EMAIL",
+    )
+
     # Authentication session settings. The JWT and cookie use the same TTL
     # so returning users remain signed in until the session expires.
     SESSION_TTL_DAYS: int = Field(default=7, ge=1, le=30, validation_alias="SESSION_TTL_DAYS")
