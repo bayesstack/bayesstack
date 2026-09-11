@@ -90,6 +90,16 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
 
     const statusLabel = status ? STATUS_LABELS[status] : undefined;
 
+    const [imgError, setImgError] = React.useState(false);
+
+    const handleImgError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+      e.stopPropagation();
+      if ("nativeEvent" in e && e.nativeEvent && typeof (e.nativeEvent as any).stopImmediatePropagation === "function") {
+        (e.nativeEvent as any).stopImmediatePropagation();
+      }
+      setImgError(true);
+    };
+
     return (
       /* The outer wrapper establishes a non-overflowing positioning context.
          This allows the status dot to float outside the avatar boundary without 
@@ -107,8 +117,13 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
           style={style}
           {...props}
         >
-          {src ? (
-            <img src={src} alt={alt} className={["bs-avatar-img", classNames?.image].filter(Boolean).join(" ")} />
+          {src && !imgError ? (
+            <img
+              src={src}
+              alt={alt}
+              className={["bs-avatar-img", classNames?.image].filter(Boolean).join(" ")}
+              onError={handleImgError}
+            />
           ) : (
             <span className={classNames?.initials}>{getInitials(name)}</span>
           )}

@@ -9,7 +9,7 @@
   user-select: none;
   font-family: var(--bs-font-sans, "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
   line-height: 1.1;
-  transition: all 180ms ease;
+  transition: opacity 180ms ease, color 180ms ease;
   box-sizing: border-box;
 }
 

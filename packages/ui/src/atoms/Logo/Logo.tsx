@@ -125,7 +125,7 @@ export const Logo = React.forwardRef<HTMLDivElement, LogoProps>(
     },
     ref
   ) => {
-    const [imgErrorIndex, setImgErrorIndex] = useState(0);
+    const [imgLoadFailed, setImgLoadFailed] = useState(false);
 
     const getSizePixel = (s: LogoProps["size"]) => {
       switch (s) {
@@ -143,24 +143,15 @@ export const Logo = React.forwardRef<HTMLDivElement, LogoProps>(
     };
 
     const sizePx = getSizePixel(size);
-
-    // Cascading image resolution waterfall if logoSrc is used or custom mark isn't supplied
-    const fallbackSources = [
-      logoSrc,
-      "/assets/brand/logo-mark.svg",
-      "/brand/logo-mark.svg",
-      "/brand/logo-primary.png",
-      "/assets/brand/logo-primary.png",
-    ].filter(Boolean) as string[];
-
-    const currentSrc = fallbackSources[imgErrorIndex];
-    const isFailed = imgErrorIndex >= fallbackSources.length;
-
-    const handleImgError = () => {
-      setImgErrorIndex((prev) => prev + 1);
-    };
-
     const altText = typeof title === "string" ? title : "Logo";
+
+    const handleImgError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+      e.stopPropagation();
+      if ("nativeEvent" in e && e.nativeEvent && typeof (e.nativeEvent as any).stopImmediatePropagation === "function") {
+        (e.nativeEvent as any).stopImmediatePropagation();
+      }
+      setImgLoadFailed(true);
+    };
 
     return (
       <div
@@ -185,18 +176,23 @@ export const Logo = React.forwardRef<HTMLDivElement, LogoProps>(
         >
           {mark ? (
             typeof mark === "string" && (mark.startsWith("http") || mark.startsWith("/")) ? (
-              <img
-                src={mark}
-                alt={altText}
-                className={["bs-logo-img", classNames?.mark].filter(Boolean).join(" ")}
-                style={{ width: sizePx, height: sizePx, objectFit: "contain" }}
-              />
+              !imgLoadFailed ? (
+                <img
+                  src={mark}
+                  alt={altText}
+                  className={["bs-logo-img", classNames?.mark].filter(Boolean).join(" ")}
+                  style={{ width: sizePx, height: sizePx, objectFit: "contain" }}
+                  onError={handleImgError}
+                />
+              ) : (
+                <FallbackVectorMark size={sizePx} theme={theme} />
+              )
             ) : (
               mark
             )
-          ) : !isFailed && currentSrc ? (
+          ) : logoSrc && !imgLoadFailed ? (
             <img
-              src={currentSrc}
+              src={logoSrc}
               alt={altText}
               className={["bs-logo-img", classNames?.mark].filter(Boolean).join(" ")}
               style={{ width: sizePx, height: sizePx, objectFit: "contain" }}

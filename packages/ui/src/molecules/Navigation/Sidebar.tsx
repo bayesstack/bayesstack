@@ -476,11 +476,12 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
                               </span>
                             )}
 
-                            {!isCollapsed && hasSubItems && (
+                            {hasSubItems && (
                               <span
                                 className={[
                                   "bs-sidebar-item-caret",
                                   isSubOpen ? "bs-sidebar-item-caret--open" : "",
+                                  isCollapsed ? "bs-sidebar-item-caret--collapsed" : "",
                                   classNames?.caret,
                                 ]
                                   .filter(Boolean)
@@ -587,7 +588,16 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
                   name={isCollapsed ? "SidebarRight" : "SidebarLeft"}
                   size="md"
                 />
-                {!isCollapsed && <span className="bs-sidebar-collapse-text">Collapse sidebar</span>}
+                <span
+                  className={[
+                    "bs-sidebar-collapse-text",
+                    isCollapsed ? "bs-sidebar-collapse-text--collapsed" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  Collapse sidebar
+                </span>
               </button>
             )}
           </div>

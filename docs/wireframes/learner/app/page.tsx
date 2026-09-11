@@ -20,10 +20,13 @@ function TenantMark() {
 
 function LearnerBrand({ collapsed }: { collapsed: boolean }) {
   return (
-    <div className={`learner-brand-lockup ${collapsed ? "is-collapsed" : ""}`}>
+    <div
+      className={`learner-brand-lockup ${collapsed ? "is-collapsed" : ""}`}
+      title="Veermata Jijabai Technological Institute · Learner Studio"
+    >
       <Logo
         variant="full"
-        size="sm"
+        size="md"
         title="Veermata Jijabai Technological Institute"
         subtitle={<span>Learner Studio <span className="learner-brand-dot">/</span> <span className="learner-brand-platform">BayesStack</span></span>}
         mark={<TenantMark />}
@@ -61,13 +64,13 @@ export default function LearnerPage() {
     <div className="learner-shell">
       <Sidebar
         className="learner-sidebar"
-        items={[{ items: navigationItems }]}
+        items={navigationItems}
         activeId={activeId}
         onSelect={(id) => setActiveId(id)}
-        defaultCollapsed={false}
+        collapsed={collapsed}
         onCollapseChange={setCollapsed}
         collapsible
-        width={260}
+        width={280}
         collapsedWidth={70}
         header={<LearnerBrand collapsed={collapsed} />}
         footer={
