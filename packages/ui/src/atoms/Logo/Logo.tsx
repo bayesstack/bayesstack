@@ -12,12 +12,12 @@ export interface LogoSlots {
   subtitle?: string;
 }
 
-export interface LogoProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface LogoProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
   /**
    * Display variant
-   * - `full`: Official Logo Mark + Brand Title + Subtitle
-   * - `inline`: Official Logo Mark + Brand Title + Subtitle inline
-   * - `mark`: Official Logo Mark only
+   * - `full`: Logo Mark + Brand/Tenant Title + Subtitle
+   * - `inline`: Logo Mark + Brand/Tenant Title + Subtitle inline
+   * - `mark`: Logo Mark only
    * @default 'full'
    */
   variant?: "full" | "inline" | "mark";
@@ -35,21 +35,25 @@ export interface LogoProps extends React.HTMLAttributes<HTMLDivElement> {
   size?: "sm" | "md" | "lg" | "xl";
 
   /**
-   * Primary brand title string
+   * Primary brand/tenant title string or custom node
    * @default 'BayesStack'
    */
-  title?: string;
+  title?: React.ReactNode;
 
   /**
-   * Secondary tagline string (e.g. "Design Studio" or "Platform")
-   * @default 'Design Studio'
+   * Secondary tagline or studio descriptor (e.g. "Learner Studio · BayesStack")
    */
-  subtitle?: string;
+  subtitle?: React.ReactNode;
 
   /**
-   * Optional status badge (e.g. "v2.0" or "PRO")
+   * Optional status or tier badge (e.g. "ENTERPRISE", "v2.0")
    */
-  badge?: string;
+  badge?: React.ReactNode;
+
+  /**
+   * Optional custom logo mark node (e.g. custom SVG, monogram avatar, or element)
+   */
+  mark?: React.ReactNode;
 
   /**
    * Optional custom logo mark image URL override.
@@ -112,6 +116,7 @@ export const Logo = React.forwardRef<HTMLDivElement, LogoProps>(
       title = "BayesStack",
       subtitle,
       badge,
+      mark,
       logoSrc,
       className = "",
       classNames,
@@ -139,9 +144,7 @@ export const Logo = React.forwardRef<HTMLDivElement, LogoProps>(
 
     const sizePx = getSizePixel(size);
 
-    // Cascading image resolution waterfall.
-    // Iterates through custom props -> primary SVGs -> public root paths -> PNG fallbacks -> vector fallback.
-    // This prevents broken image icons regardless of framework routing or static asset hosting paths.
+    // Cascading image resolution waterfall if logoSrc is used or custom mark isn't supplied
     const fallbackSources = [
       logoSrc,
       "/assets/brand/logo-mark.svg",
@@ -156,6 +159,8 @@ export const Logo = React.forwardRef<HTMLDivElement, LogoProps>(
     const handleImgError = () => {
       setImgErrorIndex((prev) => prev + 1);
     };
+
+    const altText = typeof title === "string" ? title : "Logo";
 
     return (
       <div
@@ -173,12 +178,26 @@ export const Logo = React.forwardRef<HTMLDivElement, LogoProps>(
         style={style}
         {...props}
       >
-        {/* Official BayesStack Logo Mark */}
-        <div className={["bs-logo-mark-wrapper", classNames?.markWrapper].filter(Boolean).join(" ")} style={{ width: sizePx, height: sizePx }}>
-          {!isFailed && currentSrc ? (
+        {/* Logo Mark Slot */}
+        <div
+          className={["bs-logo-mark-wrapper", classNames?.markWrapper].filter(Boolean).join(" ")}
+          style={{ width: sizePx, height: sizePx }}
+        >
+          {mark ? (
+            typeof mark === "string" && (mark.startsWith("http") || mark.startsWith("/")) ? (
+              <img
+                src={mark}
+                alt={altText}
+                className={["bs-logo-img", classNames?.mark].filter(Boolean).join(" ")}
+                style={{ width: sizePx, height: sizePx, objectFit: "contain" }}
+              />
+            ) : (
+              mark
+            )
+          ) : !isFailed && currentSrc ? (
             <img
               src={currentSrc}
-              alt={title || "BayesStack Logo"}
+              alt={altText}
               className={["bs-logo-img", classNames?.mark].filter(Boolean).join(" ")}
               style={{ width: sizePx, height: sizePx, objectFit: "contain" }}
               onError={handleImgError}
@@ -188,22 +207,20 @@ export const Logo = React.forwardRef<HTMLDivElement, LogoProps>(
           )}
         </div>
 
-        {/* Text Brand Title & Subtitle */}
+        {/* Text Brand/Tenant Title & Subtitle */}
         {variant !== "mark" && (
           <div className={["bs-logo-text-group", classNames?.textGroup].filter(Boolean).join(" ")}>
             <div className={["bs-logo-title-row", classNames?.titleRow].filter(Boolean).join(" ")}>
               <span className={["bs-logo-title", classNames?.title].filter(Boolean).join(" ")}>{title}</span>
-              {badge && subtitle && (
+              {badge && (
                 <span className={["bs-logo-badge", classNames?.badge].filter(Boolean).join(" ")}>{badge}</span>
               )}
             </div>
-            {subtitle ? (
-              <span className={["bs-logo-subtitle", classNames?.subtitle].filter(Boolean).join(" ")}>{subtitle}</span>
-            ) : badge ? (
-              <div style={{ marginTop: "2px", display: "flex" }}>
-                <span className={["bs-logo-badge", classNames?.badge].filter(Boolean).join(" ")}>{badge}</span>
-              </div>
-            ) : null}
+            {subtitle && (
+              <span className={["bs-logo-subtitle", classNames?.subtitle].filter(Boolean).join(" ")}>
+                {subtitle}
+              </span>
+            )}
           </div>
         )}
       </div>

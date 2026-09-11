@@ -525,8 +525,20 @@ export const ICON_CATALOGUE: IconDefinition[] = [
   { name: "Plus", component: Add01Icon, category: "Actions & Controls", tags: ["plus", "add"] },
   { name: "Trash", component: Delete02Icon, category: "Actions & Controls", tags: ["trash", "delete"] },
   { name: "ChevronsRight", component: ChevronRightIcon, category: "Navigation & Map", tags: ["chevrons", "right"] },
-  { name: "ChevronsLeft", component: ChevronLeftIcon, category: "Navigation & Map", tags: ["chevrons", "left"] },
   { name: "Building", component: SchoolIcon, category: "Education & Learning", tags: ["building", "school"] },
+
+  // Direct Numbered & Semantic Aliases for Maximum Developer Ergonomics
+  { name: "Home01", component: Home01Icon, category: "Navigation & Map", tags: ["home"] },
+  { name: "Home02", component: Home02Icon, category: "Navigation & Map", tags: ["home"] },
+  { name: "BookOpen01", component: BookOpen01Icon, category: "Education & Learning", tags: ["book", "learn"] },
+  { name: "Book01", component: Book01Icon, category: "Education & Learning", tags: ["book"] },
+  { name: "Folder01", component: Folder01Icon, category: "Files & Folders", tags: ["folder", "projects"] },
+  { name: "Calendar01", component: Calendar01Icon, category: "Time & Schedule", tags: ["calendar"] },
+  { name: "Calendar02", component: Calendar02Icon, category: "Time & Schedule", tags: ["calendar"] },
+  { name: "HelpCircle01", component: HelpCircleIcon, category: "Status & Alerts", tags: ["help"] },
+  { name: "User01", component: UserIcon, category: "Users & Roles", tags: ["user", "profile"] },
+  { name: "UserGroup01", component: UserGroupIcon, category: "Users & Roles", tags: ["group", "community"] },
+  { name: "SlidersHorizontal", component: SlidersHorizontalIcon, category: "Settings & Tools", tags: ["sliders", "settings"] },
 ];
 
 // Pre-indexed key-value map created from ICON_CATALOGUE to enable O(1) runtime component lookup during rendering.

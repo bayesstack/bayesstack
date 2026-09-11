@@ -1,0 +1,32 @@
+@import "@bayesstack/ui/styles.css";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bs-brand-teal: #0b6763;
+  --bs-brand-deep: #084c49;
+  --bs-brand-soft: #e4f2ef;
+  --bs-ink: #123333;
+  --bs-muted: #4a6360;
+  --bs-line: #d7e8e4;
+  --bs-surface: #ffffff;
+  --bs-canvas: #f1f8f6;
+  --bs-font-main: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  --bs-font-mono: 'JetBrains Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  min-height: 100vh;
+  background-color: var(--bs-canvas);
+  color: var(--bs-ink);
+  font-family: var(--bs-font-main);
+  overflow: hidden;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
