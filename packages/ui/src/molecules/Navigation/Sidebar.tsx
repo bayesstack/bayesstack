@@ -2,6 +2,7 @@
 
 import React, { forwardRef, useState, useEffect } from "react";
 import { Icon, IconName } from "../../atoms/Icons";
+import { Tooltip } from "../Popovers";
 import "./Navigation.css";
 
 export interface SidebarItem {
@@ -112,6 +113,12 @@ export interface SidebarProps extends Omit<React.HTMLAttributes<HTMLElement>, "o
   collapsible?: boolean;
 
   /**
+   * Shows the shared Tooltip component for icon-only items while collapsed.
+   * @default false
+   */
+  collapsedTooltips?: boolean;
+
+  /**
    * Visual theme style variant:
    * - 'default': Crisp surface background with subtle borders and primary teal active states
    * - 'subtle': Soft background tint matching dashboard canvas surfaces
@@ -153,6 +160,24 @@ export interface SidebarProps extends Omit<React.HTMLAttributes<HTMLElement>, "o
   classNames?: SidebarClassNames;
 }
 
+function CollapsedSidebarTooltip({
+  enabled,
+  content,
+  children,
+}: {
+  enabled: boolean;
+  content: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  if (!enabled) return <>{children}</>;
+
+  return (
+    <Tooltip content={content} placement="right" className="bs-sidebar-collapsed-tooltip">
+      {children}
+    </Tooltip>
+  );
+}
+
 /**
  * Type guard utility to determine if input array consists of section groups or flat items.
  */
@@ -173,6 +198,7 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
       defaultCollapsed = false,
       onCollapseChange,
       collapsible = true,
+      collapsedTooltips = false,
       variant = "default",
       width = 256,
       collapsedWidth = 68,
@@ -315,6 +341,7 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
           "bs-sidebar",
           `bs-sidebar--${variant}`,
           isCollapsed ? "bs-sidebar--collapsed" : "bs-sidebar--expanded",
+          isCollapsed && collapsedTooltips ? "bs-sidebar--collapsed-tooltips" : "",
           className,
           classNames?.root,
         ]
@@ -375,6 +402,10 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
                     return (
                       <li key={item.id} className="bs-sidebar-item-wrapper">
                         {/* Main Item Button or Anchor */}
+                        <CollapsedSidebarTooltip
+                          enabled={isCollapsed && collapsedTooltips}
+                          content={item.label}
+                        >
                         {item.href && !hasSubItems ? (
                           <a
                             href={item.disabled ? undefined : item.href}
@@ -391,7 +422,7 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
                               .filter(Boolean)
                               .join(" ")}
                             onClick={(e) => handleSelectItem(item, e)}
-                            title={isCollapsed && typeof item.label === "string" ? item.label : undefined}
+                            title={isCollapsed && !collapsedTooltips && typeof item.label === "string" ? item.label : undefined}
                           >
                             <span className={["bs-sidebar-item-icon", classNames?.icon].filter(Boolean).join(" ")}>
                               {renderIcon(item.icon)}
@@ -444,7 +475,7 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
                               .filter(Boolean)
                               .join(" ")}
                             onClick={(e) => handleSelectItem(item, e)}
-                            title={isCollapsed && typeof item.label === "string" ? item.label : undefined}
+                            title={isCollapsed && !collapsedTooltips && typeof item.label === "string" ? item.label : undefined}
                           >
                             <span className={["bs-sidebar-item-icon", classNames?.icon].filter(Boolean).join(" ")}>
                               {renderIcon(item.icon)}
@@ -492,6 +523,7 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
                             )}
                           </button>
                         )}
+                        </CollapsedSidebarTooltip>
 
                         {/* Sub-menu tree list (rendered when expanded and sub-items exist) */}
                         {hasSubItems && isSubOpen && !isCollapsed && (
@@ -573,32 +605,37 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
             )}
 
             {collapsible && (
-              <button
-                type="button"
-                aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-                className={[
-                  "bs-sidebar-collapse-btn",
-                  classNames?.collapseButton,
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-                onClick={handleToggleCollapse}
+              <CollapsedSidebarTooltip
+                enabled={isCollapsed && collapsedTooltips}
+                content="Expand sidebar"
               >
-                <Icon
-                  name={isCollapsed ? "SidebarRight" : "SidebarLeft"}
-                  size="md"
-                />
-                <span
+                <button
+                  type="button"
+                  aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
                   className={[
-                    "bs-sidebar-collapse-text",
-                    isCollapsed ? "bs-sidebar-collapse-text--collapsed" : "",
+                    "bs-sidebar-collapse-btn",
+                    classNames?.collapseButton,
                   ]
                     .filter(Boolean)
                     .join(" ")}
+                  onClick={handleToggleCollapse}
                 >
-                  Collapse sidebar
-                </span>
-              </button>
+                  <Icon
+                    name={isCollapsed ? "SidebarRight" : "SidebarLeft"}
+                    size="md"
+                  />
+                  <span
+                    className={[
+                      "bs-sidebar-collapse-text",
+                      isCollapsed ? "bs-sidebar-collapse-text--collapsed" : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                  >
+                    Collapse sidebar
+                  </span>
+                </button>
+              </CollapsedSidebarTooltip>
             )}
           </div>
         )}

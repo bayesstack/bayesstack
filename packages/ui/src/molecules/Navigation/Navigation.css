@@ -540,6 +540,15 @@
   align-items: stretch;
 }
 
+.bs-sidebar--collapsed-tooltips .bs-sidebar-content {
+  overflow: visible;
+}
+
+.bs-sidebar-collapsed-tooltip {
+  display: flex;
+  width: 100%;
+}
+
 /* Section Groups */
 .bs-sidebar-group {
   display: flex;

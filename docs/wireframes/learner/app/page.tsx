@@ -1,21 +1,57 @@
 "use client";
 
-import React, { useState } from "react";
-import { Avatar, Icon, Logo, Sidebar, type SidebarItem } from "@bayesstack/ui";
+import React, { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { Avatar, Icon, Logo, Sidebar, Tooltip, type SidebarItem } from "@bayesstack/ui";
 
 const navigationItems: SidebarItem[] = [
-  { id: "home", label: "Home", icon: "Home" },
-  { id: "learn", label: "Learn", icon: "BookOpen", badge: <span className="learner-nav-badge learner-nav-badge--teal">3 active</span> },
-  { id: "assessments", label: "Assessments", icon: "Quiz", badge: <span className="learner-nav-badge learner-nav-badge--rose">1 due</span> },
-  { id: "projects", label: "Projects", icon: "Folder" },
-  { id: "community", label: "Community", icon: "UserGroup" },
-  { id: "calendar", label: "Calendar", icon: "Calendar" },
+  { id: "home", label: "Home", icon: "Home", href: "/" },
+  { id: "learn", label: "Learn", icon: "BookOpen", href: "/learn", badge: <span className="learner-nav-badge learner-nav-badge--teal">3 active</span> },
+  { id: "assessments", label: "Assessments", icon: "Quiz", href: "/assessments", badge: <span className="learner-nav-badge learner-nav-badge--rose">1 due</span> },
+  { id: "projects", label: "Projects", icon: "Folder", href: "/projects" },
+  { id: "community", label: "Community", icon: "UserGroup", href: "/community" },
+  { id: "calendar", label: "Calendar", icon: "Calendar", href: "/calendar" },
 ];
 
-const secondaryItems: SidebarItem[] = [{ id: "help", label: "Help & Docs", icon: "HelpCircle" }];
+const secondaryItems: SidebarItem[] = [{ id: "help", label: "Help & Docs", icon: "HelpCircle", href: "/help" }];
+const SIDEBAR_PREFERENCE_KEY = "bayesstack:learner-sidebar-preference";
+
+const routeToId: Record<string, string> = {
+  "/": "home",
+  "/learn": "learn",
+  "/assessments": "assessments",
+  "/projects": "projects",
+  "/community": "community",
+  "/calendar": "calendar",
+  "/help": "help",
+  "/profile": "profile",
+};
+
+type SidebarPreference = "expanded" | "collapsed";
 
 function TenantMark() {
   return <span className="learner-tenant-mark" aria-hidden="true"><span>A</span><i /></span>;
+}
+
+function CollapsedRailTooltip({
+  collapsed,
+  content,
+  children,
+}: {
+  collapsed: boolean;
+  content: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <Tooltip
+      content={content}
+      placement="right"
+      disabled={!collapsed}
+      className="learner-collapsed-tooltip"
+    >
+      {children}
+    </Tooltip>
+  );
 }
 
 function LearnerBrand({ collapsed }: { collapsed: boolean }) {
@@ -26,6 +62,7 @@ function LearnerBrand({ collapsed }: { collapsed: boolean }) {
     >
       <Logo
         variant="full"
+        theme="dark"
         size="md"
         title="Veermata Jijabai Technological Institute"
         subtitle={<span>Learner Studio <span className="learner-brand-dot">/</span> <span className="learner-brand-platform">BayesStack</span></span>}
@@ -35,12 +72,11 @@ function LearnerBrand({ collapsed }: { collapsed: boolean }) {
   );
 }
 
-function LearnerProfile({ active, collapsed, onSelect }: { active: boolean; collapsed: boolean; onSelect: () => void }) {
+function LearnerProfile({ active, collapsed }: { active: boolean; collapsed: boolean }) {
   return (
-    <button
-      type="button"
+    <a
+      href="/profile"
       className={`learner-profile ${active ? "is-active" : ""}`}
-      onClick={onSelect}
       title={collapsed ? "Sarah Connor · Profile" : undefined}
       aria-label="Open Sarah Connor profile"
     >
@@ -49,13 +85,36 @@ function LearnerProfile({ active, collapsed, onSelect }: { active: boolean; coll
         <span className="learner-profile-copy"><strong>Sarah Connor</strong><span>sarah@bayesstack.edu</span></span>
       </span>
       <Icon name="Sliders" size="sm" className="learner-profile-settings" />
-    </button>
+    </a>
   );
 }
 
 export default function LearnerPage() {
-  const [activeId, setActiveId] = useState("home");
-  const [collapsed, setCollapsed] = useState(false);
+  const pathname = usePathname();
+  const activeId = routeToId[pathname] || "home";
+  const [sidebarPreference, setSidebarPreference] = useState<SidebarPreference>("expanded");
+  const [hasLoadedPreference, setHasLoadedPreference] = useState(false);
+
+  useEffect(() => {
+    const savedPreference = window.localStorage.getItem(SIDEBAR_PREFERENCE_KEY);
+    if (savedPreference === "collapsed" || savedPreference === "expanded") {
+      setSidebarPreference(savedPreference);
+    }
+    setHasLoadedPreference(true);
+  }, []);
+
+  useEffect(() => {
+    if (hasLoadedPreference) {
+      window.localStorage.setItem(SIDEBAR_PREFERENCE_KEY, sidebarPreference);
+    }
+  }, [hasLoadedPreference, sidebarPreference]);
+
+  const collapsed = sidebarPreference === "collapsed";
+
+  const handleCollapseChange = (nextCollapsed: boolean) => {
+    setSidebarPreference(nextCollapsed ? "collapsed" : "expanded");
+  };
+
   const allItems = [...navigationItems, ...secondaryItems];
   const activeItem = allItems.find((item) => item.id === activeId);
   const activeLabel = activeId === "profile" ? "Profile" : (activeItem?.label || "Home");
@@ -66,28 +125,29 @@ export default function LearnerPage() {
         className="learner-sidebar"
         items={navigationItems}
         activeId={activeId}
-        onSelect={(id) => setActiveId(id)}
         collapsed={collapsed}
-        onCollapseChange={setCollapsed}
+        onCollapseChange={handleCollapseChange}
         collapsible
+        collapsedTooltips
         width={280}
         collapsedWidth={70}
         header={<LearnerBrand collapsed={collapsed} />}
         footer={
           <div className="learner-sidebar-footer">
             {secondaryItems.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={`learner-footer-link ${activeId === item.id ? "is-active" : ""}`}
-                onClick={() => setActiveId(item.id)}
-                title={collapsed ? String(item.label) : undefined}
-              >
-                <Icon name={item.icon as any} size="md" />
-                <span className="learner-footer-label">{item.label}</span>
-              </button>
+              <CollapsedRailTooltip key={item.id} collapsed={collapsed} content={item.label}>
+                <a
+                  href={item.href}
+                  className={`learner-footer-link ${activeId === item.id ? "is-active" : ""}`}
+                >
+                  <Icon name={item.icon as any} size="md" />
+                  <span className="learner-footer-label">{item.label}</span>
+                </a>
+              </CollapsedRailTooltip>
             ))}
-            <LearnerProfile active={activeId === "profile"} collapsed={collapsed} onSelect={() => setActiveId("profile")} />
+            <CollapsedRailTooltip collapsed={collapsed} content="Profile">
+              <LearnerProfile active={activeId === "profile"} collapsed={collapsed} />
+            </CollapsedRailTooltip>
           </div>
         }
       />
