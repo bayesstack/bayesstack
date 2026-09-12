@@ -304,6 +304,9 @@ importers:
 
   docs/wireframes/learner:
     dependencies:
+      '@bayesstack/studio-coding':
+        specifier: workspace:*
+        version: link:../../../studios/coding/frontend
       '@bayesstack/ui':
         specifier: workspace:*
         version: link:../../../packages/ui

@@ -123,6 +123,14 @@ export const Stepper = forwardRef<HTMLDivElement, StepperProps>(
                   .filter(Boolean)
                   .join(" ")}
                 onClick={() => onStepClick && onStepClick(idx)}
+                onKeyDown={(event) => {
+                  if (!onStepClick || (event.key !== "Enter" && event.key !== " ")) return;
+                  event.preventDefault();
+                  onStepClick(idx);
+                }}
+                role={onStepClick ? "button" : undefined}
+                tabIndex={onStepClick ? 0 : undefined}
+                aria-current={isActive ? "step" : undefined}
                 style={{ cursor: onStepClick ? "pointer" : "default" }}
               >
                 <div className={["bs-step-icon-circle", classNames?.icon].filter(Boolean).join(" ")}>

@@ -28,6 +28,11 @@ export interface SpotlightProps extends React.HTMLAttributes<HTMLDivElement> {
   onClose: () => void;
 
   /**
+   * Open callback used by the global keyboard shortcut in controlled usages
+   */
+  onOpen?: () => void;
+
+  /**
    * Spotlight command items list
    */
   actions: SpotlightActionItem[];
@@ -82,6 +87,7 @@ export interface SpotlightClassNames {
 export function Spotlight({
   open,
   onClose,
+  onOpen,
   actions = [],
   theme = "light",
   placeholder = "Type a command or search...",
@@ -103,17 +109,21 @@ export function Spotlight({
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         if (open) onClose();
-        else setQuery("");
+        else {
+          setQuery("");
+          onOpen?.();
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [open, shortcutListener, onClose]);
+  }, [open, shortcutListener, onClose, onOpen]);
 
   // Focus search input and lock background scrolling upon palette opening
   useEffect(() => {
     if (open) {
+      setQuery("");
       setTimeout(() => inputRef.current?.focus(), 50);
       setActiveIndex(0);
       document.body.style.overflow = "hidden";
@@ -219,12 +229,12 @@ export function Spotlight({
 
         {/* Action Results List */}
         <div className={["bs-spotlight-results-container", classNames?.results].filter(Boolean).join(" ")}>
-          {flatList.length === 0 ? (
+          {flatList.length === 0 && query.trim() ? (
             <div className="bs-spotlight-empty">
               <Icon name="Search" size={24} />
-              <span>No commands found matching "{query}"</span>
+              <span>No results found for "{query}"</span>
             </div>
-          ) : (
+          ) : flatList.length > 0 ? (
             Object.entries(groupedActions).map(([groupName, groupItems]) => (
               <div key={groupName} className={["bs-spotlight-group", classNames?.group].filter(Boolean).join(" ")}>
                 <div className={["bs-spotlight-group-header", classNames?.groupHeader].filter(Boolean).join(" ")}>{groupName}</div>
@@ -291,7 +301,7 @@ export function Spotlight({
                 </div>
               </div>
             ))
-          )}
+          ) : null}
         </div>
 
         {/* Footer Navigation Bar */}
