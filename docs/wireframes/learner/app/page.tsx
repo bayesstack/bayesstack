@@ -9,7 +9,7 @@ import { useLearnerShellState } from "./learner-shell-state";
 const navigationItems: SidebarItem[] = [
   { id: "home", label: "Home", icon: "Home", href: "/" },
   { id: "learning", label: "Learning", icon: "BookOpen", href: "/learning", badge: <span className="learner-nav-badge learner-nav-badge--teal">3 active</span> },
-  { id: "tasks", label: "Tasks", icon: "CheckCircle", href: "/tasks", badge: <span className="learner-nav-badge learner-nav-badge--rose">1 due</span> },
+  { id: "labs", label: "Labs", icon: "CheckCircle", href: "/labs", badge: <span className="learner-nav-badge learner-nav-badge--rose">1 due</span> },
   { id: "projects", label: "Projects", icon: "Folder", href: "/projects" },
   { id: "discussions", label: "Discussions", icon: "Comment", href: "/discussions" },
   { id: "calendar", label: "Calendar", icon: "Calendar", href: "/calendar" },
@@ -21,7 +21,8 @@ const secondaryItems: SidebarItem[] = [{ id: "help", label: "Help", icon: "HelpC
 const routeToId: Record<string, string> = {
   "/": "home",
   "/learning": "learning",
-  "/tasks": "tasks",
+  "/labs": "labs",
+  "/tasks": "labs",
   "/projects": "projects",
   "/discussions": "discussions",
   "/calendar": "calendar",
