@@ -50,9 +50,9 @@
   --learner-utility-height: 43px;
   --learner-utility-padding: 9px 11px;
   --learner-utility-font: 14px;
-  --learner-page-max-width: 1240px;
+  --learner-page-max-width: 1180px;
   --learner-page-padding-block: clamp(32px, 6vw, 76px);
-  --learner-page-padding-inline: clamp(24px, 6vw, 80px);
+  --learner-page-padding-inline: clamp(28px, 4vw, 50px);
   --learner-page-header-max-width: 900px;
   --learner-page-title-size: clamp(36px, 4vw, 54px);
   --learner-page-description-size: 16px;
@@ -100,9 +100,9 @@
     --learner-utility-height: 36px;
     --learner-utility-padding: 7px 9px;
     --learner-utility-font: 12.5px;
-    --learner-page-max-width: 1060px;
+    --learner-page-max-width: 1180px;
     --learner-page-padding-block: clamp(28px, 4vw, 52px);
-    --learner-page-padding-inline: clamp(24px, 4.2vw, 56px);
+    --learner-page-padding-inline: clamp(28px, 4vw, 50px);
     --learner-page-header-max-width: 790px;
     --learner-page-title-size: clamp(34px, 3.6vw, 46px);
     --learner-page-description-size: 14px;
@@ -681,7 +681,7 @@ html[data-learner-sidebar-preference="collapsed"] .learner-sidebar.bs-sidebar--e
   top: 0;
   z-index: 24;
   height: 56px;
-  padding: 0 clamp(24px, 3.6vw, 48px);
+  padding: 0;
   border-bottom: 1px solid var(--bs-line);
   background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(14px);
@@ -689,8 +689,10 @@ html[data-learner-sidebar-preference="collapsed"] .learner-sidebar.bs-sidebar--e
 }
 
 .learner-app-header-inner {
-  width: 100%;
+  width: min(100%, var(--learner-page-max-width));
   height: 100%;
+  margin: 0 auto;
+  padding: 0 var(--learner-page-padding-inline);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1065,10 +1067,10 @@ html[data-learner-sidebar-preference="collapsed"] .learner-sidebar.bs-sidebar--e
 .learner-route-workspace__actions strong { color: #222634; font-size: 14px; }
 
 .learner-home {
-  width: min(100%, 1200px);
+  width: min(100%, var(--learner-page-max-width));
   min-height: calc(100vh - 44px);
   margin: 0 auto;
-  padding: clamp(30px, 4vw, 48px) clamp(28px, 4vw, 48px) 56px;
+  padding: clamp(30px, 4vw, 48px) var(--learner-page-padding-inline) 56px;
 }
 
 .learner-home__header h1 {
@@ -1228,7 +1230,7 @@ html[data-learner-sidebar-preference="collapsed"] .learner-sidebar.bs-sidebar--e
   .learner-sidebar.bs-sidebar--collapsed { width: 0 !important; min-width: 0 !important; overflow: visible; border: 0; }
   .learner-sidebar.bs-sidebar--collapsed > * { visibility: hidden; }
   .learner-sidebar.bs-sidebar--collapsed .bs-sidebar-collapse-btn { position: fixed; top: 14px; left: 14px; visibility: visible; width: 42px; height: 42px; padding: 0; border: 1px solid #d9dfdd; background: #fff; box-shadow: 0 4px 16px rgba(24, 33, 31, 0.12); }
-  .learner-app-header-inner { padding-inline: 20px; }
+  .learner-app-header-inner { padding-inline: 24px; }
   .learner-app-location > a,
   .learner-app-location > .bs-icon,
   .learner-app-context { display: none; }
@@ -1284,10 +1286,10 @@ html[data-learner-sidebar-preference="collapsed"] .learner-sidebar.bs-sidebar--e
 
 /* Learning workspace: orient → continue → understand → practise. */
 .learning-workspace {
-  width: min(100%, 1180px);
+  width: min(100%, var(--learner-page-max-width));
   min-height: calc(100vh - 44px);
   margin: 0 auto;
-  padding: clamp(32px, 4vw, 50px) clamp(28px, 4vw, 50px) 68px;
+  padding: clamp(32px, 4vw, 50px) var(--learner-page-padding-inline) 68px;
   color: #233542;
 }
 
