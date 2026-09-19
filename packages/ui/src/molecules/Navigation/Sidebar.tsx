@@ -656,7 +656,7 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
                       .filter(Boolean)
                       .join(" ")}
                   >
-                    Collapse sidebar
+                    Collapse
                   </span>
                 </button>
               </CollapsedSidebarTooltip>

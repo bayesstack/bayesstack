@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Accordion, Badge, Drawer, Icon, ProgressRing, Stepper, Tabs } from "@bayesstack/ui";
+import { Accordion, Badge, Drawer, Icon, ProgressRing, SearchInput, Select, Stepper, Tabs } from "@bayesstack/ui";
 
 const coursePath = "/learning/machine-learning";
 const conceptPath = `${coursePath}/optimization/gradient-descent`;
@@ -37,7 +37,7 @@ function ProgressBar({ value, label }: { value: number; label?: string }) {
   return <span className="learning-progress"><i><b style={{ width: `${value}%` }} /></i>{label && <small>{label}</small>}</span>;
 }
 
-export function LearningOverview() {
+function LegacyLearningOverview() {
   return (
     <main className="learning-workspace learning-v2-overview">
       <header className="learning-v2-page-header">
@@ -89,6 +89,346 @@ export function LearningOverview() {
   );
 }
 
+const subjectAccents: Record<string, string> = {
+  CS: "indigo",
+  ML: "plum",
+  AI: "plum",
+  STAT: "sky",
+  MATH: "amber",
+  FIN: "green",
+  COMM: "coral",
+  DES: "green",
+};
+
+function courseAccent(code: string) {
+  return subjectAccents[code.trim().split(/\s+/)[0]] ?? "slate";
+}
+
+const previousTermCourses = [
+  { code: "CS 110", name: "Programming Foundations", faculty: "Dr. L. Kapoor", current: "Completed", next: "Course completed", grade: "A", progress: 100, status: "Completed", tone: "success" as const, href: "/learning" },
+  { code: "MATH 121", name: "Discrete Mathematics", faculty: "Prof. S. Bose", current: "Completed", next: "Course completed", grade: "A-", progress: 100, status: "Completed", tone: "success" as const, href: "/learning" },
+  { code: "CS 130", name: "Computer Systems", faculty: "Prof. J. Thomas", current: "Completed", next: "Course completed", grade: "B+", progress: 100, status: "Completed", tone: "success" as const, href: "/learning" },
+  { code: "STAT 101", name: "Foundations of Statistics", faculty: "Dr. P. Iyer", current: "Completed", next: "Course completed", grade: "A", progress: 100, status: "Completed", tone: "success" as const, href: "/learning" },
+  { code: "COMM 105", name: "Technical Communication", faculty: "Dr. M. Sen", current: "Completed", next: "Course completed", grade: "A-", progress: 100, status: "Completed", tone: "success" as const, href: "/learning" },
+  { code: "DES 115", name: "Designing with Data", faculty: "Prof. K. Mehta", current: "Completed", next: "Course completed", grade: "B+", progress: 100, status: "Completed", tone: "success" as const, href: "/learning" },
+].map((course) => ({ ...course, accent: courseAccent(course.code) }));
+
+const currentTermCourses = courses.map((course) => ({ ...course, accent: courseAccent(course.code), grade: undefined }));
+
+const termOptions = [
+  { value: "term-1", label: "Term 1 · Autumn 2025", description: "Completed · 18 December 2025", icon: "CheckCircle" as const },
+  { value: "term-2", label: "Term 2 · Spring 2026", description: "Current · Week 7 of 14", icon: "Calendar" as const },
+  { value: "term-3", label: "Term 3 · Autumn 2026", description: "Available after Term 2", icon: "Lock" as const, disabled: true },
+  { value: "term-4", label: "Term 4 · Spring 2027", description: "Available after Term 3", icon: "Lock" as const, disabled: true },
+];
+
+const personalCourses = [
+  { code: "FIN 210", name: "Financial Markets & Instruments", provider: "Bayes curated", current: "Fixed-income foundations", progress: 34, accent: "green" },
+  { code: "CS 245", name: "Python for Quantitative Research", provider: "Bayes curated", current: "Portfolio backtesting", progress: 68, accent: "indigo" },
+];
+
+const recommendedCourses = [
+  { id: "financial-engineering", code: "FIN 320", subject: "Finance", name: "Financial Engineering Foundations", reason: "Build the derivatives and pricing knowledge missing from your curriculum.", duration: "24 hours", level: "Intermediate", accent: "green" },
+  { id: "market-time-series", code: "STAT 330", subject: "Statistics", name: "Time Series for Financial Markets", reason: "Turn your statistics foundation into forecasting for market data.", duration: "18 hours", level: "Intermediate", accent: "sky" },
+  { id: "numerical-quant", code: "MATH 315", subject: "Mathematics", name: "Numerical Methods for Quant Finance", reason: "Apply numerical methods to pricing, simulation, and portfolio risk.", duration: "20 hours", level: "Advanced", accent: "amber" },
+];
+
+const libraryCourses = [
+  ...recommendedCourses,
+  { id: "risk-models", code: "FIN 305", subject: "Finance", name: "Risk Models and Portfolio Construction", reason: "Measure market risk and construct portfolios under practical constraints.", duration: "16 hours", level: "Intermediate", accent: "green" },
+  { id: "stochastic-processes", code: "STAT 350", subject: "Statistics", name: "Stochastic Processes in Practice", reason: "Model uncertain systems with Markov chains and continuous-time processes.", duration: "22 hours", level: "Advanced", accent: "sky" },
+  { id: "optimization", code: "MATH 340", subject: "Mathematics", name: "Convex Optimisation", reason: "Develop optimisation techniques used in allocation and machine learning.", duration: "19 hours", level: "Advanced", accent: "amber" },
+  { id: "data-pipelines", code: "CS 270", subject: "Computer Science", name: "Data Pipelines for Research", reason: "Build reliable pipelines for high-frequency and alternative datasets.", duration: "14 hours", level: "Intermediate", accent: "indigo" },
+  { id: "econometrics", code: "ECON 280", subject: "Economics", name: "Applied Econometrics", reason: "Estimate causal and predictive models using economic and market data.", duration: "21 hours", level: "Intermediate", accent: "coral" },
+];
+
+const librarySubjectOptions = [
+  { value: "all", label: "All subjects" },
+  { value: "Finance", label: "Finance" },
+  { value: "Statistics", label: "Statistics" },
+  { value: "Mathematics", label: "Mathematics" },
+  { value: "Computer Science", label: "Computer Science" },
+  { value: "Economics", label: "Economics" },
+];
+
+type CourseCardTone = "neutral" | "primary" | "success" | "warning" | "danger" | "info";
+
+type LearningCourseCardProps = {
+  code: string;
+  name: string;
+  context: string;
+  accent: string;
+  detailLabel?: string;
+  detailValue?: string;
+  detailNote?: string;
+  description?: string;
+  progress?: number;
+  meta?: string;
+  status?: string;
+  statusTone?: CourseCardTone;
+  tag?: string;
+  recommended?: boolean;
+  completed?: boolean;
+  attention?: boolean;
+  href?: string;
+  actionLabel: string;
+  actionDisabled?: boolean;
+  onAction?: () => void;
+};
+
+function LearningCourseCard({
+  code,
+  name,
+  context,
+  accent,
+  detailLabel,
+  detailValue,
+  detailNote,
+  description,
+  progress,
+  meta,
+  status,
+  statusTone = "neutral",
+  tag,
+  recommended = false,
+  completed = false,
+  attention = false,
+  href,
+  actionLabel,
+  actionDisabled = false,
+  onAction,
+}: LearningCourseCardProps) {
+  const className = `learning-course-card is-${accent} ${recommended ? "is-recommended" : ""} ${completed ? "is-complete" : ""} ${attention ? "has-attention" : ""}`;
+  const content = (
+    <>
+      <header className="learning-course-card-topline">
+        <span className="learning-course-card-code">{code}</span>
+        <span className="learning-course-card-tags">
+          {recommended && <span className="learning-course-card-recommendation"><Icon name="Sparkles" size="xs" />Recommended</span>}
+          {tag && !recommended && <span className="learning-course-card-tag">{tag}</span>}
+          {status && <Badge color={statusTone} variant="subtle" size="sm">{status}</Badge>}
+        </span>
+      </header>
+      <div className="learning-course-card-heading">
+        <h3>{name}</h3>
+        <p>{context}</p>
+      </div>
+      {description ? <p className="learning-course-card-description">{description}</p> : (
+        <div className={`learning-course-card-detail ${completed ? "is-outcome" : ""}`}>
+          <small>{detailLabel}</small>
+          <strong>{detailValue}</strong>
+          {detailNote && <span>{detailNote}</span>}
+        </div>
+      )}
+      <footer className="learning-course-card-footer">
+        {typeof progress === "number" ? <ProgressBar value={progress} label={`${progress}% complete`} /> : <span className="learning-course-card-meta">{meta}</span>}
+        {href ? (
+          <span className="learning-course-card-action">{actionLabel}<Icon name="ArrowRight" size="xs" /></span>
+        ) : (
+          <button type="button" className="learning-course-card-action" disabled={actionDisabled} onClick={onAction}>{actionLabel}<Icon name={actionDisabled ? "Check" : "ArrowRight"} size="xs" /></button>
+        )}
+      </footer>
+    </>
+  );
+
+  return href ? <Link href={href} className={className}>{content}</Link> : <article className={className}>{content}</article>;
+}
+
+function CareerGoalStrip() {
+  return (
+    <section className="learning-career-goal" aria-labelledby="learning-career-goal-title">
+      <span><Icon name="Target" size="md" /></span>
+      <div>
+        <small>Your career direction</small>
+        <strong id="learning-career-goal-title">Quantitative Engineer</strong>
+        <p>Your curriculum covers programming and statistics; personal recommendations prioritise finance, market modelling, and numerical methods.</p>
+      </div>
+      <Link href="/progress">View career plan <Icon name="ArrowRight" size="xs" /></Link>
+    </section>
+  );
+}
+
+export function LearningOverview() {
+  const [selectedTerm, setSelectedTerm] = useState("term-2");
+  const [learningView, setLearningView] = useState("curriculum");
+  const isCurrentTerm = selectedTerm === "term-2";
+  const displayedCourses = isCurrentTerm ? currentTermCourses : previousTermCourses;
+
+  return (
+    <main className="learning-workspace learning-hub learning-hub-v3">
+      <header className="learning-hub-navigation">
+        <Tabs
+          className="learning-hub-tabs"
+          variant="pill"
+          size="sm"
+          value={learningView}
+          onValueChange={setLearningView}
+          items={[
+            { value: "curriculum", label: "Curriculum", icon: "BookOpen", badge: displayedCourses.length },
+            { value: "personal", label: "Personal learning", icon: "Target", badge: personalCourses.length },
+            { value: "catalog", label: "Course library", icon: "Search" },
+          ]}
+        />
+        <Link href="/progress" className="learning-goal-chip"><span>Career goal</span><strong>Quantitative Engineer</strong><Icon name="ChevronRight" size="xs" /></Link>
+      </header>
+
+      {learningView === "curriculum" ? (
+        <>
+          <section className="learning-curriculum-context" aria-label="Current curriculum and term">
+            <div className="learning-curriculum-programme"><span><Icon name="BookOpen" size="sm" /></span><div><small>Degree curriculum</small><strong>BSc Computer Science</strong></div></div>
+            <Select
+              className="learning-term-picker"
+              label="Viewing term"
+              value={selectedTerm}
+              options={termOptions}
+              onValueChange={setSelectedTerm}
+              helperText={isCurrentTerm ? "Week 7 of 14 · ends 22 May" : "Completed 18 December 2025"}
+            />
+            <div className="learning-curriculum-summary">
+              <strong>{isCurrentTerm ? "52%" : "3.7"}</strong>
+              <span>{isCurrentTerm ? "term complete" : "term GPA"}</span>
+              <small>{isCurrentTerm ? "4 active courses" : "6 courses · 24 credits"}</small>
+            </div>
+          </section>
+
+          <section className="learning-curriculum-courses" aria-labelledby="term-courses-title">
+            <header className="learning-curriculum-heading">
+              <div><p className="learning-kicker">{isCurrentTerm ? "Spring 2026" : "Autumn 2025"}</p><h2 id="term-courses-title">{isCurrentTerm ? "Current courses" : "Completed courses"}</h2></div>
+              <span>{displayedCourses.length} courses</span>
+            </header>
+            <div className="learning-course-grid" role="list">
+              {displayedCourses.map((course) => (
+                <LearningCourseCard
+                  key={course.code}
+                  code={course.code}
+                  name={course.name}
+                  context={course.faculty}
+                  accent={course.accent}
+                  detailLabel={course.progress === 100 ? "Final grade" : "Current learning"}
+                  detailValue={course.progress === 100 ? course.grade : course.current}
+                  detailNote={course.progress === 100 ? "Course completed" : course.next}
+                  progress={course.progress}
+                  status={course.status}
+                  statusTone={course.tone}
+                  completed={course.progress === 100}
+                  attention={course.tone === "warning"}
+                  href={course.href}
+                  actionLabel={course.progress === 100 ? "Review course" : course.progress === 0 ? "Start course" : course.tone === "warning" ? "Catch up" : "Continue"}
+                />
+              ))}
+            </div>
+          </section>
+        </>
+      ) : learningView === "personal" ? (
+        <section className="learning-personal is-active-view" aria-label="Personal learning">
+          <CareerGoalStrip />
+
+          <div className="learning-personal-enrolled">
+            <div className="learning-personal-subheading"><div><p className="learning-kicker">Continue independently</p><h3>In progress</h3></div><span>{personalCourses.length} self-paced courses · outside university requirements</span></div>
+            <div className="learning-course-grid">
+              {personalCourses.map((course) => (
+                <LearningCourseCard
+                  key={course.code}
+                  code={course.code}
+                  name={course.name}
+                  context={`${course.provider} · Self-paced`}
+                  accent={course.accent}
+                  detailLabel="Current learning"
+                  detailValue={course.current}
+                  detailNote="Outside university requirements"
+                  progress={course.progress}
+                  tag="Personal"
+                  actionLabel="Continue"
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="learning-recommendations">
+            <div className="learning-recommendations-heading">
+              <div><p className="learning-kicker">Best next choices</p><h3>Recommended for your goal</h3></div>
+              <button type="button" onClick={() => setLearningView("catalog")}>Explore full library <Icon name="ArrowRight" size="xs" /></button>
+            </div>
+            <div className="learning-course-grid is-recommendations">
+              {recommendedCourses.map((course) => (
+                <LearningCourseCard
+                  key={course.id}
+                  code={course.code}
+                  name={course.name}
+                  context={course.subject}
+                  accent={course.accent}
+                  description={course.reason}
+                  meta={`${course.level} · ${course.duration}`}
+                  recommended
+                  actionLabel="View in library"
+                  onAction={() => setLearningView("catalog")}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : (
+        <CourseLibraryView />
+      )}
+    </main>
+  );
+}
+
+function CourseLibraryView() {
+  const [query, setQuery] = useState("");
+  const [subject, setSubject] = useState("all");
+  const [enrolledIds, setEnrolledIds] = useState<string[]>([]);
+  const normalizedQuery = query.trim().toLowerCase();
+  const visibleCourses = libraryCourses.filter((course) => {
+    const matchesSubject = subject === "all" || course.subject === subject;
+    const matchesQuery = !normalizedQuery || `${course.code} ${course.name} ${course.subject} ${course.reason}`.toLowerCase().includes(normalizedQuery);
+    return matchesSubject && matchesQuery;
+  });
+
+  const enroll = (courseId: string) => setEnrolledIds((current) => current.includes(courseId) ? current : [...current, courseId]);
+
+  return (
+    <section className="learning-library is-embedded" aria-label="Course library">
+      <header className="learning-library-embedded-header">
+        <div><p className="learning-kicker">Curated across disciplines</p><h2>Find your next course</h2><p>Search directly, or begin with courses matched to your career direction.</p></div>
+        <div className="learning-library-filters">
+          <SearchInput value={query} onValueChange={setQuery} onClear={() => setQuery("")} placeholder="Search courses, subjects, or skills" size="md" />
+          <Select value={subject} onValueChange={setSubject} options={librarySubjectOptions} aria-label="Filter courses by subject" />
+        </div>
+      </header>
+
+      <CareerGoalStrip />
+
+      <section className="learning-library-all" aria-labelledby="all-courses-title">
+        <div className="learning-library-all-heading"><div><p className="learning-kicker">Course library</p><h2 id="all-courses-title">Explore all courses</h2></div><span>{visibleCourses.length} of {libraryCourses.length} shown · recommendations highlighted</span></div>
+        {visibleCourses.length ? (
+          <div className="learning-course-grid">
+            {visibleCourses.map((course) => {
+              const enrolled = enrolledIds.includes(course.id);
+              const recommended = recommendedCourses.some((recommendedCourse) => recommendedCourse.id === course.id);
+              return (
+                <LearningCourseCard
+                  key={course.id}
+                  code={course.code}
+                  name={course.name}
+                  context={course.subject}
+                  accent={course.accent}
+                  description={course.reason}
+                  meta={`${course.level} · ${course.duration}`}
+                  recommended={recommended}
+                  actionLabel={enrolled ? "Added to personal learning" : "Enrol in course"}
+                  actionDisabled={enrolled}
+                  onAction={() => enroll(course.id)}
+                />
+              );
+            })}
+          </div>
+        ) : <div className="learning-library-empty"><Icon name="Search" size="lg" /><strong>No matching courses</strong><span>Try a different subject or search term.</span></div>}
+      </section>
+    </section>
+  );
+}
+
 function CurriculumContent() {
   const items = [
     { id: "foundations", title: "Foundations of supervised learning", subtitle: "4 concepts · completed", icon: "CheckCircle" as const, badge: <Badge color="success" variant="subtle" size="sm">Complete</Badge>, content: <div className="learning-v2-concept-stack"><span><Icon name="CheckCircle" size="xs" />Problem formulation <small>6 min · completed</small></span><span><Icon name="CheckCircle" size="xs" />Loss functions <small>12 min · completed</small></span><span><Icon name="CheckCircle" size="xs" />Training and validation <small>10 min · completed</small></span></div> },
@@ -98,7 +438,7 @@ function CurriculumContent() {
   return <Accordion className="learning-v2-curriculum" items={items} defaultValue="optimization" variant="flush" size="md" />;
 }
 
-export function CourseWorkspace() {
+function LegacyCourseWorkspace() {
   const [tab, setTab] = useState("overview");
   return (
     <main className="learning-workspace learning-v2-course-workspace">
@@ -115,6 +455,66 @@ export function CourseWorkspace() {
       </div>}
       {tab === "curriculum" && <section className="learning-v2-tab-panel" aria-labelledby="curriculum-title"><div className="learning-v2-section-heading"><div><p className="learning-kicker">Course → chapter → concept</p><h2 id="curriculum-title">Curriculum</h2></div><span>10 of 24 complete</span></div><CurriculumContent /></section>}
       {tab === "resources" && <section className="learning-v2-tab-panel" aria-labelledby="resources-title"><div className="learning-v2-section-heading"><div><p className="learning-kicker">Course material</p><h2 id="resources-title">Resources</h2></div><span>8 resources</span></div><div className="learning-v2-resource-list">{[["Course syllabus", "PDF · Updated Sep 2", "Document"], ["Optimization reference notes", "Chapter notes · 18 pages", "BookOpen"], ["Lecture 04 recording", "Video · 52 min", "Video"], ["Starter notebooks", "3 Python notebooks", "Notebook"]].map(([title, meta, icon]) => <a href={`#${title}`} key={title}><Icon name={icon as any} size="sm" /><span><strong>{title}</strong><small>{meta}</small></span><Icon name="ArrowRight" size="xs" /></a>)}</div></section>}
+    </main>
+  );
+}
+
+export function CourseWorkspace() {
+  const [detailsOpen, setDetailsOpen] = useState(false);
+
+  return (
+    <main className="learning-workspace learning-v2-course-workspace">
+      <header className="learning-v2-course-header">
+        <div>
+          <p className="learning-kicker">ML 401 · Spring 2026</p>
+          <h1>Machine Learning</h1>
+          <p>Prof. N. Rao · 4 credits · Department of Computer Science</p>
+        </div>
+        <div className="learning-v2-course-ring">
+          <ProgressRing value={42} size={74} thickness={6} label={<strong>42%</strong>} />
+          <span><strong>10 of 24 concepts</strong><small>On track · next milestone Thursday</small></span>
+        </div>
+      </header>
+
+      <section className="learning-v2-next learning-v2-course-next" aria-labelledby="next-concept-title">
+        <div>
+          <div className="learning-v2-focus-label"><span>Next required activity</span><Badge color="info" variant="subtle" size="sm">15 min</Badge></div>
+          <p>Chapter 2 · Optimization</p>
+          <h2 id="next-concept-title">Read a gradient descent notebook</h2>
+          <p>Trace the update rule and identify how the learning rate changes each step. Required before the applied lab.</p>
+          <div className="learning-facts"><span><Icon name="Notebook" size="xs" />Notebook review</span><span><Icon name="Calendar" size="xs" />Lab Thursday, 3:30 PM</span></div>
+        </div>
+        <Link href={conceptPath} className="learning-primary-action">Continue activity <Icon name="ArrowRight" size="sm" /></Link>
+      </section>
+
+      <section className="learning-v2-course-curriculum" aria-labelledby="curriculum-title">
+        <div className="learning-v2-section-heading">
+          <div><p className="learning-kicker">Course → chapter → concept</p><h2 id="curriculum-title">Curriculum</h2></div>
+          <div className="learning-v2-course-section-actions"><span>10 of 24 complete</span><button type="button" onClick={() => setDetailsOpen(true)}>Course details <Icon name="ArrowRight" size="xs" /></button></div>
+        </div>
+        <CurriculumContent />
+      </section>
+
+      <Drawer open={detailsOpen} onClose={() => setDetailsOpen(false)} size="sm" title="Machine Learning" subtitle="ML 401 · Spring 2026">
+        <div className="learning-v2-drawer-content learning-v2-course-drawer">
+          <section>
+            <p className="learning-kicker">Course progress</p>
+            <strong>10 of 24 concepts complete</strong>
+            <ProgressBar value={42} label="42% complete · On track" />
+          </section>
+          <section>
+            <p className="learning-kicker">Coming up</p>
+            <Link href="/labs"><span><Badge color="warning" variant="subtle" size="sm">Thu</Badge><strong>Applied practice lab</strong><small>Requires Gradient Descent · 3:30 PM</small></span><Icon name="ArrowRight" size="xs" /></Link>
+            <Link href="/calendar"><span><Badge color="neutral" variant="subtle" size="sm">Wed</Badge><strong>Office hours</strong><small>Prof. N. Rao · 2:00 PM</small></span><Icon name="ArrowRight" size="xs" /></Link>
+          </section>
+          <section>
+            <p className="learning-kicker">Course resources</p>
+            <Link href="#syllabus"><span><Icon name="Document" size="sm" /><strong>Course syllabus</strong><small>PDF · Updated Sep 2</small></span><Icon name="ArrowRight" size="xs" /></Link>
+            <Link href="#notes"><span><Icon name="BookOpen" size="sm" /><strong>Optimization reference notes</strong><small>18 pages · Faculty authored</small></span><Icon name="ArrowRight" size="xs" /></Link>
+            <Link href="#recording"><span><Icon name="Video" size="sm" /><strong>Lecture 04 recording</strong><small>52 minutes · Sep 8</small></span><Icon name="ArrowRight" size="xs" /></Link>
+          </section>
+        </div>
+      </Drawer>
     </main>
   );
 }
@@ -138,7 +538,7 @@ export function ConceptWorkspace() {
 
   return (
     <main className="learning-workspace learning-v2-concept-workspace">
-      <div className="learning-concept-top"><Crumbs current="Concept" course concept /><span><Icon name="Clock" size="xs" />42 min remaining</span></div>
+      <div className="learning-concept-top"><span><Icon name="Clock" size="xs" />42 min remaining</span></div>
       <div className="learning-v2-concept-toolbar"><div><button type="button" onClick={() => setUtilityPanel("notes")}><Icon name="Edit" size="xs" />Notes</button><button type="button" onClick={() => setUtilityPanel("resources")}><Icon name="BookOpen" size="xs" />Resources</button><button type="button" onClick={() => setUtilityPanel("discussion")}><Icon name="Comment" size="xs" />Discuss</button></div><span><Icon name="CheckCircle" size="xs" />Progress saves automatically</span></div>
       <div className="learning-v2-concept-grid">
         <aside className="learning-concept-outline" aria-label="Chapter concept navigator"><p>ML 401</p><strong>Chapter 2 · Optimization</strong><Link href={coursePath}><Icon name="CheckCircle" size="xs" />Loss landscapes</Link><a href="#concept-title" aria-current="page"><Icon name="PlayCircle" size="xs" />Gradient Descent</a><span><i>3</i>Learning rate schedules</span><span><i>4</i>Momentum</span><span><i>5</i>Mini-batch optimization</span></aside>

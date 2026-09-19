@@ -82,9 +82,35 @@ const routeTitles: Record<string, string> = {
   "/profile": "Profile",
 };
 
+type HeaderBreadcrumb = { label: string; href?: string };
+
+function getHeaderBreadcrumbs(pathname: string, routeTitle: string): HeaderBreadcrumb[] {
+  const crumbs: HeaderBreadcrumb[] = [{ label: "BayesStack", href: appRoute("/") }];
+
+  if (!pathname.startsWith("/learning")) {
+    return [...crumbs, { label: routeTitle }];
+  }
+
+  if (pathname === "/learning") {
+    return [...crumbs, { label: "Learning" }];
+  }
+
+  crumbs.push({ label: "Learning", href: appRoute("/learning") });
+  if (pathname === "/learning/machine-learning") {
+    return [...crumbs, { label: "Machine Learning" }];
+  }
+
+  crumbs.push({ label: "Machine Learning", href: appRoute("/learning/machine-learning") });
+  if (pathname.endsWith("/gradient-descent")) {
+    return [...crumbs, { label: "Gradient Descent" }];
+  }
+
+  return [...crumbs, { label: routeTitle }];
+}
+
 function LearnerBrand({ collapsed, onNavigate }: { collapsed: boolean; onNavigate: (event: React.MouseEvent<HTMLAnchorElement>, href: string) => void }) {
   return (
-    <a className="learner-brand" href={appRoute("/")} onClick={(event) => onNavigate(event, appRoute("/"))} aria-label="BayesStack learner home">
+    <a className="learner-brand" href={appRoute("/")} onClick={(event) => onNavigate(event, appRoute("/"))} aria-label={`${learnerIdentity.institutionName} learner home`}>
       <span className="learner-brand-mark" aria-hidden="true">
         <svg viewBox="0 0 32 32" fill="none">
           <path d="M7 9.5 16 5l9 4.5v12L16 27l-9-5.5v-12Z" />
@@ -95,7 +121,7 @@ function LearnerBrand({ collapsed, onNavigate }: { collapsed: boolean; onNavigat
         </svg>
       </span>
       <span className={collapsed ? "learner-brand-copy is-hidden" : "learner-brand-copy"}>
-        <strong>BayesStack</strong>
+        <strong>{learnerIdentity.institutionName}</strong>
         <small>Learner</small>
       </span>
     </a>
@@ -128,6 +154,7 @@ export function LearnerShell({ children }: { children: React.ReactNode }) {
   const collapsed = sidebarPreference === "collapsed";
   const activeId = pathname.startsWith("/learning") ? "learning" : routeToId[pathname] ?? "home";
   const routeTitle = pathname.endsWith("/practice") ? "Coding practice" : pathname.endsWith("/gradient-descent") ? "Gradient Descent" : pathname === "/learning/machine-learning" ? "Machine Learning" : routeTitles[pathname] ?? "Workspace";
+  const headerBreadcrumbs = getHeaderBreadcrumbs(pathname, routeTitle);
   const isStudio = pathname.endsWith("/practice");
   const [pendingPath, setPendingPath] = useState<string | null>(null);
   const [routeProgress, setRouteProgress] = useState(0);
@@ -301,11 +328,16 @@ export function LearnerShell({ children }: { children: React.ReactNode }) {
         )}
         <header className="learner-app-header">
           <div className="learner-app-header-inner">
-            <div className="learner-app-location">
-              <a href={appRoute("/")} onClick={(event) => handleRouteNavigation(event, appRoute("/"))}>BayesStack</a>
-              <Icon name="ChevronRight" size="xs" />
-              <strong>{routeTitle}</strong>
-            </div>
+            <nav className="learner-app-location" aria-label="Breadcrumb">
+              {headerBreadcrumbs.map((crumb, index) => (
+                <React.Fragment key={`${crumb.label}-${index}`}>
+                  {index > 0 && <Icon name="ChevronRight" size="xs" aria-hidden="true" />}
+                  {crumb.href ? (
+                    <a href={crumb.href} onClick={(event) => handleRouteNavigation(event, crumb.href!)}>{crumb.label}</a>
+                  ) : <strong aria-current="page">{crumb.label}</strong>}
+                </React.Fragment>
+              ))}
+            </nav>
             <div className="learner-app-actions" ref={topbarControlsRef}>
               <form className="learner-global-search" role="search" onSubmit={handleSearchSubmit}>
                 <Icon name="Search" size="sm" />
