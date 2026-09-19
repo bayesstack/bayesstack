@@ -50,7 +50,13 @@ const searchableRoutes = [
   { label: "Profile", detail: learnerIdentity.fullName, icon: "User", href: appRoute("/profile") },
 ];
 
-const prefetchRoutes = ["/learning", "/labs", "/projects", "/discussions", "/calendar", "/progress", "/help", "/profile"];
+const prefetchRoutes = [
+  "/learning",
+  "/learning/machine-learning",
+  "/learning/machine-learning/optimization/gradient-descent",
+  "/learning/machine-learning/optimization/gradient-descent/practice",
+  "/labs", "/projects", "/discussions", "/calendar", "/progress", "/help", "/profile",
+];
 
 const routeToId: Record<string, string> = {
   "/": "home",
@@ -120,8 +126,9 @@ export function LearnerShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { sidebarPreference, setSidebarPreference } = useLearnerShellState();
   const collapsed = sidebarPreference === "collapsed";
-  const activeId = routeToId[pathname] ?? "home";
-  const routeTitle = routeTitles[pathname] ?? "Workspace";
+  const activeId = pathname.startsWith("/learning") ? "learning" : routeToId[pathname] ?? "home";
+  const routeTitle = pathname.endsWith("/practice") ? "Coding practice" : pathname.endsWith("/gradient-descent") ? "Gradient Descent" : pathname === "/learning/machine-learning" ? "Machine Learning" : routeTitles[pathname] ?? "Workspace";
+  const isStudio = pathname.endsWith("/practice");
   const [pendingPath, setPendingPath] = useState<string | null>(null);
   const [routeProgress, setRouteProgress] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -264,7 +271,7 @@ export function LearnerShell({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className="learner-app-shell" aria-busy={Boolean(pendingPath)}>
+    <div className={`learner-app-shell ${isStudio ? "is-learning-studio" : ""}`} aria-busy={Boolean(pendingPath)}>
       <Sidebar
         className="learner-sidebar"
         variant="dark"
