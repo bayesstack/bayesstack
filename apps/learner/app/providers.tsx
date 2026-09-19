@@ -3,13 +3,14 @@
 import React from "react";
 import { ToastProvider, ModalsProvider } from "@bayesstack/ui";
 import { TenantProvider } from "@bayesstack/tenant";
+import { LearnerShellStateProvider } from "./components/learner-shell-state";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <TenantProvider>
       <ModalsProvider>
         <ToastProvider>
-          {children}
+          <LearnerShellStateProvider>{children}</LearnerShellStateProvider>
         </ToastProvider>
       </ModalsProvider>
     </TenantProvider>

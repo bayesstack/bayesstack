@@ -46,12 +46,20 @@ function Warmup-LocalFrontends([string[]]$services) {
     auth = 3004
     super = 3005
   }
+  $frontendPaths = @{
+    learner = "/learner"
+    faculty = "/faculty"
+    admin = "/admin"
+  }
 
   foreach ($service in $services) {
     if (-not $frontendPorts.ContainsKey($service)) { continue }
 
     $port = $frontendPorts[$service]
-    $url = "http://127.0.0.1:$port/"
+    # Portal apps use Next.js basePath values, so probing their server root
+    # would only generate a 404 and make the warmup loop retry unnecessarily.
+    $path = if ($frontendPaths.ContainsKey($service)) { $frontendPaths[$service] } else { "/" }
+    $url = "http://127.0.0.1:$port$path"
     Write-LogInfo "Warming up $service (initial Next.js compilation may take a moment)..."
     $ready = $false
 

@@ -1,0 +1,79 @@
+"use client";
+
+import React, { useState } from "react";
+import { Avatar, Badge, Button, Chip, Drawer, Icon, LoadingBar, Paper, ProgressRing, Tabs, Text, Title } from "@bayesstack/ui";
+
+type ProgressTab = "Overview" | "Skills" | "Career" | "Evidence";
+type Skill = { name: string; level: number; descriptor: string; evidence: number; area: string; last: string; progress: number };
+
+const skills: Skill[] = [
+  { name: "Machine Learning", level: 4, descriptor: "Advanced", evidence: 12, area: "Machine Learning", last: "Sep 12", progress: 88 },
+  { name: "Python", level: 4, descriptor: "Advanced", evidence: 9, area: "Technical", last: "Sep 12", progress: 86 },
+  { name: "Statistical Modelling", level: 3, descriptor: "Proficient", evidence: 8, area: "Mathematical", last: "Sep 09", progress: 72 },
+  { name: "Model Evaluation", level: 3, descriptor: "Proficient", evidence: 7, area: "Machine Learning", last: "Sep 12", progress: 70 },
+  { name: "Linear Algebra", level: 3, descriptor: "Proficient", evidence: 5, area: "Mathematical", last: "Aug 29", progress: 66 },
+  { name: "Deep Learning", level: 1, descriptor: "Foundation", evidence: 2, area: "Machine Learning", last: "Aug 24", progress: 28 },
+];
+
+const evidenceRows = [
+  { date: "Sep 12", title: "Customer Churn Prediction", type: "Project", capability: "Model evaluation / Experiment design", status: "Faculty verified", actor: "Prof. N. Rao", icon: "Folder" as const },
+  { date: "Sep 09", title: "Optimization Lab", type: "Lab", capability: "Gradient descent / Numerical optimization", status: "Execution verified", actor: "Notebook + checks", icon: "Notebook" as const },
+  { date: "Sep 03", title: "Probability Assessment", type: "Assessment", capability: "Bayesian inference", status: "Assessment verified", actor: "Marked assessment", icon: "ShieldCheck" as const },
+];
+
+export function ProgressExperience() {
+  const [tab, setTab] = useState<ProgressTab>("Overview");
+  const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
+
+  return <div className="progress-page progress-page-v2">
+    <header className="progress-v2-header"><div><Text as="p" size="xs" color="tertiary" strong className="learner-panel-eyebrow">Capability intelligence</Text><Title as="h1" weight="semibold">Your growth</Title><Text as="p" size="md" color="secondary">See how your work is becoming capability—and what will create the most meaningful growth next.</Text></div><Button variant="outline" size="md" leftIcon="Calendar" rightIcon="ChevronDown">Last 6 months</Button></header>
+    <Tabs className="progress-v2-tabs" value={tab} onValueChange={(value) => setTab(value as ProgressTab)} variant="pill" size="sm" items={[{ value: "Overview", label: "Overview" }, { value: "Skills", label: "Skills", badge: <span>14</span> }, { value: "Career", label: "Career path" }, { value: "Evidence", label: "Evidence", badge: <span>28</span> }]} />
+    {tab === "Overview" && <ProgressOverview onOpenSkills={() => setTab("Skills")} onOpenCareer={() => setTab("Career")} onOpenEvidence={() => setTab("Evidence")} onSelectSkill={setSelectedSkill} />}
+    {tab === "Skills" && <SkillsView onSelect={setSelectedSkill} />}
+    {tab === "Career" && <CareerView />}
+    {tab === "Evidence" && <EvidenceView />}
+    <SkillDrawer skill={selectedSkill} onClose={() => setSelectedSkill(null)} />
+  </div>;
+}
+
+function ProgressOverview({ onOpenSkills, onOpenCareer, onOpenEvidence, onSelectSkill }: { onOpenSkills: () => void; onOpenCareer: () => void; onOpenEvidence: () => void; onSelectSkill: (skill: Skill) => void }) {
+  return <>
+    <section className="progress-command-grid">
+      <Paper className="progress-growth-card" radius="xl" elevation="lg" bordered={false} padding={0}>
+        <div className="progress-growth-main"><div className="progress-growth-label"><Badge color="success" variant="outline" prefixIcon="ChartLine">Growing steadily</Badge><span>Spring 2026</span></div><Text as="p" size="sm">Evidence-backed capability</Text><Title as="h2" weight="semibold">12 skills demonstrated.<br /><span>Three levels gained this term.</span></Title><Text as="p" size="md">Your strongest momentum is in Machine Learning, Python, and Statistical Modelling.</Text><div className="progress-growth-metrics"><span><strong>28</strong><small>verified evidence items</small></span><span><strong>5</strong><small>skills at Level 3+</small></span><span><strong>+18%</strong><small>depth since March</small></span></div><Button size="md" rightIcon="ArrowRight" onClick={onOpenSkills}>Explore my skills</Button></div>
+        <div className="progress-growth-chart"><div className="progress-chart-grid" aria-label="Capability growth over six months">{[24,31,38,47,58,72,84].map((value, index) => <i key={value} style={{ height: `${value}%` }} className={index === 6 ? "is-current" : ""}><span>{index === 6 ? 'Now' : ''}</span></i>)}</div><span>Capability depth</span><small>Mar - Sep</small></div>
+      </Paper>
+      <Paper className="progress-career-card-v2" radius="xl" elevation="md" padding={24}><div className="learner-panel-heading"><div><Text as="p" size="xs" color="tertiary" strong className="learner-panel-eyebrow">Primary direction</Text><Title as="h2" weight="semibold">AI Engineer</Title></div><Badge color="primary" variant="subtle">Active path</Badge></div><div className="progress-career-ring"><ProgressRing value={64} size={116} thickness={9} color="#5b6de6" trackColor="#e7e9fb" label={<span><strong>64%</strong><small>ready</small></span>} /><div><strong>8 of 11</strong><span>core capabilities demonstrated</span><small><Icon name="ChartLine" size="xs" /> Readiness up 8%</small></div></div><div className="progress-career-breakdown"><span className="is-strong"><i />5 <small>strong</small></span><span className="is-growing"><i />3 <small>developing</small></span><span className="is-gap"><i />3 <small>not evidenced</small></span></div><Button variant="outline" size="sm" fullWidth rightIcon="ArrowRight" onClick={onOpenCareer}>Open career path</Button></Paper>
+    </section>
+
+    <Paper className="progress-next-move" radius="xl" elevation="md" padding={0}><div className="progress-next-icon"><Icon name="Target" size="lg" /></div><div><Text as="p" size="xs" color="tertiary" strong className="learner-panel-eyebrow">Highest-value next move</Text><Title as="h2" weight="semibold">Deepen Neural Networks</Title><Text as="p" size="sm" color="secondary">This is the largest current gap between your demonstrated work and the AI Engineer path.</Text><div className="progress-next-tags"><Chip size="sm" color="primary" variant="subtle">2 hours learning</Chip><Chip size="sm" color="warning" variant="subtle">1 graded lab</Chip><Chip size="sm" color="success" variant="subtle">2 capabilities</Chip></div></div><div className="progress-next-impact"><span><small>Improves</small><strong>Deep Learning</strong></span><span><small>Also supports</small><strong>Model Training</strong></span><Button size="md" rightIcon="ArrowRight">Start learning</Button></div></Paper>
+
+    <section className="progress-skills-v2"><div className="progress-v2-section-heading"><div><Text as="p" size="xs" color="tertiary" strong className="learner-panel-eyebrow">Capability portfolio</Text><Title as="h2" weight="semibold">Strength you can explain and prove</Title></div><Button variant="link" size="sm" rightIcon="ArrowRight" onClick={onOpenSkills}>View all skills</Button></div><div className="progress-skill-grid">{skills.slice(0,4).map((skill) => <Paper as="article" hoverable radius="xl" elevation="md" padding={20} className="progress-skill-tile" key={skill.name} onClick={() => onSelectSkill(skill)}><div><span className="progress-skill-icon"><Icon name={skill.name === 'Python' ? 'Code' : skill.area === 'Mathematical' ? 'ChartLine' : 'Brain'} size="sm" /></span><Badge color={skill.level >= 4 ? 'success' : 'primary'} variant="subtle" size="sm">Level {skill.level}</Badge></div><Title as="h3" weight="semibold">{skill.name}</Title><Text as="p" size="xs" color="tertiary">{skill.descriptor} / {skill.evidence} evidence items</Text><LoadingBar progress={skill.progress} height={6} /><span className="progress-skill-foot"><small>Last strengthened {skill.last}</small><Icon name="ArrowRight" size="xs" /></span></Paper>)}</div></section>
+
+    <section className="progress-evidence-v2"><div className="progress-v2-section-heading"><div><Text as="p" size="xs" color="tertiary" strong className="learner-panel-eyebrow">Recent evidence</Text><Title as="h2" weight="semibold">What changed—and why it counts</Title></div><Button variant="link" size="sm" rightIcon="ArrowRight" onClick={onOpenEvidence}>View evidence record</Button></div><EvidenceList /></section>
+  </>;
+}
+
+function SkillsView({ onSelect }: { onSelect: (skill: Skill) => void }) {
+  const [filter, setFilter] = useState("All");
+  const visible = filter === "All" ? skills : skills.filter((skill) => skill.area === filter);
+  return <div className="progress-subview"><div className="progress-summary-strip"><Paper radius="xl" elevation="md" padding={20}><Icon name="Layers" size="md" /><span><strong>14 skills</strong><small>across 5 capability areas</small></span></Paper><Paper radius="xl" elevation="md" padding={20}><Icon name="ChartLine" size="md" /><span><strong>5 at Level 3+</strong><small>credible depth, not coverage alone</small></span></Paper><Paper radius="xl" elevation="md" padding={20}><Icon name="ShieldCheck" size="md" /><span><strong>28 evidence items</strong><small>24 institution verified</small></span></Paper></div><Tabs value={filter} onValueChange={setFilter} variant="pill" size="sm" items={["All","Machine Learning","Technical","Mathematical"].map((value) => ({ value, label: value }))} /><Paper className="progress-skills-list-v2" radius="xl" elevation="md" padding={0}>{visible.map((skill) => <button key={skill.name} onClick={() => onSelect(skill)}><span className="progress-skill-icon"><Icon name={skill.area === 'Mathematical' ? 'ChartLine' : 'Brain'} size="sm" /></span><span><strong>{skill.name}</strong><small>{skill.area} / Last strengthened {skill.last}</small></span><span><LoadingBar progress={skill.progress} height={5} /><small>{skill.evidence} evidence items</small></span><Badge color={skill.level >= 4 ? 'success' : 'primary'} variant="subtle">Level {skill.level}</Badge><Icon name="ChevronRight" size="xs" /></button>)}</Paper></div>;
+}
+
+function CareerView() {
+  const capabilities = [["Mathematics",90,"Strong"],["Programming",85,"Strong"],["Machine Learning",82,"Strong"],["Deep Learning",42,"Developing"],["Software Engineering",48,"Developing"],["MLOps",15,"Limited evidence"]] as const;
+  return <div className="progress-subview"><Paper className="career-hero-v2" radius="xl" elevation="lg" padding={28}><div><Badge color="primary" variant="subtle" prefixIcon="Target">Primary target</Badge><Title as="h2" weight="semibold">AI Engineer</Title><Text as="p" size="md" color="secondary">A path built from demonstrated academic and project evidence—not self-rating or cohort ranking.</Text></div><ProgressRing value={64} size={132} thickness={10} color="#5b6de6" label={<strong>64%</strong>} /><Button variant="outline" rightIcon="ChevronDown">Change target</Button></Paper><Paper className="career-path-v2" radius="xl" elevation="md" padding={24}><Text as="p" size="xs" color="tertiary" strong className="learner-panel-eyebrow">Your path</Text><div>{[["Foundation","complete"],["Core ML","complete"],["Deep Learning","current"],["Production AI","pending"]].map(([label,state],index) => <span className={`is-${state}`} key={label}><i>{state === 'complete' ? <Icon name="CheckCircle" size="sm" /> : index + 1}</i><strong>{label}</strong><small>{state === 'current' ? 'Current focus' : state === 'complete' ? 'Demonstrated' : 'Upcoming'}</small></span>)}</div></Paper><div className="career-analysis-grid"><Paper radius="xl" elevation="md" padding={24} className="capability-map-v2"><div className="progress-v2-section-heading"><div><Text as="p" size="xs" color="tertiary" strong className="learner-panel-eyebrow">Capability analysis</Text><Title as="h2" weight="semibold">Current evidence vs. role expectation</Title></div><Badge color="neutral" variant="outline">Private</Badge></div>{capabilities.map(([name,value,state]) => <div className="capability-row-v2" key={name}><span><strong>{name}</strong><small>{state}</small></span><LoadingBar progress={value} height={7} /><b>{value}%</b></div>)}</Paper><Paper radius="xl" elevation="md" padding={24} className="career-gaps-v2"><Text as="p" size="xs" color="tertiary" strong className="learner-panel-eyebrow">Priority gaps</Text><Title as="h2" weight="semibold">Two moves unlock the next stage</Title><div><i>1</i><span><strong>Deep Learning</strong><small>Foundation evidence exists; applied evidence is missing.</small><Button variant="link" size="xs" rightIcon="ArrowRight">Neural Networks course</Button></span></div><div><i>2</i><span><strong>MLOps</strong><small>No verified deployment evidence yet.</small><Button variant="link" size="xs" rightIcon="ArrowRight">Model Deployment lab</Button></span></div></Paper></div></div>;
+}
+
+function EvidenceView() {
+  const [filter, setFilter] = useState("All");
+  return <div className="progress-subview"><div className="evidence-view-heading"><div><Badge color="success" variant="subtle" prefixIcon="ShieldCheck">Private by default</Badge><Title as="h2" weight="semibold">Your capability evidence</Title><Text as="p" size="md" color="secondary">A traceable record of what you did, what it demonstrates, and who or what verified it.</Text></div><Button variant="outline" leftIcon="File">Export portfolio</Button></div><Tabs value={filter} onValueChange={setFilter} variant="pill" size="sm" items={["All","Projects","Labs","Assessments","Verified"].map((value) => ({ value, label: value }))} /><section className="evidence-page-v2"><EvidenceList /></section></div>;
+}
+
+function EvidenceList() {
+  return <Paper className="evidence-list-v2" radius="xl" elevation="md" padding={0}>{evidenceRows.map((item) => <button key={item.title}><time>{item.date}</time><span className="evidence-item-icon"><Icon name={item.icon} size="sm" /></span><span><strong>{item.title}</strong><small>{item.type} / {item.capability}</small></span><span><Badge color="success" variant="subtle" size="sm" prefixIcon="CheckCircle">{item.status}</Badge><small>{item.actor}</small></span><Icon name="ChevronRight" size="xs" /></button>)}</Paper>;
+}
+
+function SkillDrawer({ skill, onClose }: { skill: Skill | null; onClose: () => void }) {
+  return <Drawer open={Boolean(skill)} onClose={onClose} title={skill?.name} subtitle="Evidence-backed skill detail" size="md" footer={<><Button variant="outline" onClick={onClose}>Close</Button><Button rightIcon="ArrowRight">Find next evidence</Button></>}>{skill && <div className="skill-drawer-v2"><div className="skill-level-hero"><ProgressRing value={skill.progress} size={112} thickness={8} color="#5b6de6" label={<strong>L{skill.level}</strong>} /><span><Badge color="success" variant="subtle">{skill.descriptor}</Badge><strong>{skill.evidence} evidence items</strong><small>Last strengthened {skill.last}</small></span></div><section><Text as="p" size="xs" color="tertiary" strong className="learner-panel-eyebrow">Demonstrated through</Text>{[["Learning","Supervised Learning / Optimization"],["Labs","Gradient Descent Lab / Classification Lab"],["Projects","Customer Churn Prediction"],["Assessments","ML Midterm"]].map(([source,evidence]) => <div key={source}><span className="progress-skill-icon"><Icon name={source === 'Labs' ? 'Notebook' : source === 'Projects' ? 'Folder' : 'BookOpen'} size="sm" /></span><span><strong>{source}</strong><small>{evidence}</small></span><Icon name="CheckCircle" size="sm" /></div>)}</section></div>}</Drawer>;
+}

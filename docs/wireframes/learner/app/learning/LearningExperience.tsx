@@ -223,7 +223,8 @@ function LearningOverview({ onViewChange }: Pick<LearningExperienceProps, "onVie
     <section className="learning-page" aria-labelledby="learning-page-title">
       <header className="learning-overview-header">
         <div>
-          <h1 id="learning-page-title">Learning</h1>
+          <p className="learner-panel-eyebrow">Curriculum in motion</p>
+          <h1 id="learning-page-title">Your learning journey.</h1>
           <p>M.Sc. Data Science <span>·</span> Semester 2 <span>·</span> Spring 2026</p>
         </div>
         <aside className="learning-term-summary" aria-label="Term progress: 52 percent, week 7 of 14, 4 active courses">
@@ -247,21 +248,20 @@ function LearningOverview({ onViewChange }: Pick<LearningExperienceProps, "onVie
 
       {tab === "current" && (
         <>
-          <Paper className="learning-continue-card learning-continue-card--refined" padding="26px 28px" elevation="none" radius="md">
-            <div className="learning-continue-main">
+          <div className="learning-command-v2">
+            <Paper className="learning-focus-v2" padding={0} elevation="lg" radius="xl" bordered={false}>
               <div>
-                <div className="learning-section-kicker">Continue learning</div>
-                <h2>Machine Learning</h2>
-                <p className="learning-continue-context">ML 401 <i /> Chapter 2 &middot; Optimization</p>
-                <h3>Gradient Descent</h3>
+                <div className="learning-focus-v2-label"><Badge color="success" variant="outline" prefixIcon="PlayCircle">Continue where you stopped</Badge><span>Last active today, 10:42</span></div>
+                <p>ML 401 / Machine Learning / Optimization</p>
+                <h2>Gradient Descent</h2>
+                <span>Build the intuition, derive the update rule, and test how learning rate changes convergence.</span>
+                <div className="learning-focus-v2-meta"><span><Icon name="Clock" size="sm" /> 18 min remaining</span><span><Icon name="Notebook" size="sm" /> Explanation, visual, practice</span><span><Icon name="ShieldCheck" size="sm" /> Lab prerequisite</span></div>
+                <Button variant="primary" size="md" rightIcon="ArrowRight" onClick={() => onViewChange("concept")}>Resume concept</Button>
               </div>
-            </div>
-            <div className="learning-continue-action">
-              <div><span>42% complete <i /> ~18 min remaining</span><Progress value={42} /></div>
-              <Button variant="primary" size="sm" rightIcon="ArrowRight" onClick={() => onViewChange("course")}>Continue</Button>
-              <small>Last activity today, 10:42</small>
-            </div>
-          </Paper>
+              <aside><ProgressRing value={68} size={140} thickness={10} color="#84ead0" trackColor="rgba(255,255,255,.14)" label={<span><strong>68%</strong><small>concept</small></span>} /><div><span className="is-complete"><Icon name="CheckCircle" size="xs" /> Intuition</span><span className="is-current"><i /> Learning rate</span><span><i /> Practice</span></div></aside>
+            </Paper>
+            <Paper className="learning-term-pulse-v2" padding={22} elevation="md" radius="xl"><div><span className="learning-term-pulse-icon"><Icon name="ChartLine" size="md" /></span><Badge color="success" variant="subtle">On pace</Badge></div><h2>52% of the term complete</h2><p>Your learning pace is 6% ahead of the course plan.</p><Progress value={52} /><div className="learning-term-pulse-stats"><span><strong>4</strong><small>active courses</small></span><span><strong>3</strong><small>concepts this week</small></span></div><Button variant="outline" size="sm" fullWidth rightIcon="ArrowRight">Review learning plan</Button></Paper>
+          </div>
           <Paper className="learning-continue-card learning-continue-card--legacy" padding="22px 24px" elevation="sm" radius="lg">
             <div className="learning-continue-main">
               <div className="learning-continue-icon"><Icon name="PlayCircle" size="lg" /></div>

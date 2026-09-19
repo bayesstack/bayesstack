@@ -2,9 +2,15 @@
 
 import React, { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Avatar, Icon, Logo, Sidebar, Spotlight, Tooltip, type SidebarItem } from "@bayesstack/ui";
+import { Avatar, Badge, Button, Icon, IconButton, Logo, Sidebar, Spotlight, Tooltip, type SidebarGroup, type SidebarItem } from "@bayesstack/ui";
 import { LearningExperience, type LearningActivityId, type LearningView } from "./learning/LearningExperience";
 import { useLearnerShellState } from "./learner-shell-state";
+import { LabProjectExperience, type LearnerWorkScreen } from "./LabProjectExperience";
+import { DiscussionExperience, type DiscussionView } from "./DiscussionExperience";
+import { CalendarExperience } from "./CalendarExperience";
+import { ProgressExperience } from "./ProgressExperience";
+import { HomeExperience } from "./HomeExperience";
+import { HelpExperience, ProfileExperience } from "./HelpProfileExperience";
 
 const navigationItems: SidebarItem[] = [
   { id: "home", label: "Home", icon: "Home", href: "/" },
@@ -22,7 +28,6 @@ const routeToId: Record<string, string> = {
   "/": "home",
   "/learning": "learning",
   "/labs": "labs",
-  "/tasks": "labs",
   "/projects": "projects",
   "/discussions": "discussions",
   "/calendar": "calendar",
@@ -115,11 +120,19 @@ export default function LearnerPage() {
   const [spotlightOpen, setSpotlightOpen] = useState(false);
   const [learningView, setLearningView] = useState<LearningView>("overview");
   const [learningActivity, setLearningActivity] = useState<LearningActivityId>("video-learning");
+  const [workScreen, setWorkScreen] = useState<LearnerWorkScreen>(activeId === "projects" ? "projects" : "labs");
+  const [discussionView, setDiscussionView] = useState<DiscussionView>("hub");
 
   useEffect(() => {
     if (activeId !== "learning") {
       setLearningView("overview");
     }
+  }, [activeId]);
+
+  useEffect(() => {
+    if (activeId === "labs") setWorkScreen("labs");
+    if (activeId === "projects") setWorkScreen("projects");
+    if (activeId !== "discussions") setDiscussionView("hub");
   }, [activeId]);
 
   const collapsed = sidebarPreference === "collapsed";
@@ -140,6 +153,12 @@ export default function LearnerPage() {
     onClick: (event: React.MouseEvent) => handleRouteNavigation(event as React.MouseEvent<HTMLAnchorElement>, item),
   }));
 
+  const routedNavigationGroups: SidebarGroup[] = [
+    { title: "Workspace", items: routedNavigationItems.filter((item) => ["home", "calendar"].includes(item.id)) },
+    { title: "Learn & apply", items: routedNavigationItems.filter((item) => ["learning", "labs", "projects"].includes(item.id)) },
+    { title: "Reflect & grow", items: routedNavigationItems.filter((item) => ["discussions", "progress"].includes(item.id)) },
+  ];
+
   const allItems = [...navigationItems, ...secondaryItems];
   const activeItem = allItems.find((item) => item.id === activeId);
   const activeLabel = activeId === "profile" ? "Profile" : (activeItem?.label || "Home");
@@ -148,17 +167,21 @@ export default function LearnerPage() {
     return <LearningExperience view={learningView} onViewChange={setLearningView} activityId={learningActivity} onActivityChange={setLearningActivity} />;
   }
 
+  if (workScreen === "lab-studio") {
+    return <LabProjectExperience screen={workScreen} onScreenChange={setWorkScreen} />;
+  }
+
   return (
     <div className="learner-shell">
       <Sidebar
         className="learner-sidebar"
-        items={routedNavigationItems}
+        items={routedNavigationGroups}
         activeId={activeId}
         collapsed={collapsed}
         onCollapseChange={handleCollapseChange}
         collapsible
         collapsedTooltips
-        width={280}
+        width={260}
         collapsedWidth={70}
         header={<LearnerBrand collapsed={collapsed} onSearch={() => setSpotlightOpen(true)} />}
         footer={
@@ -189,9 +212,42 @@ export default function LearnerPage() {
         actions={[]}
       />
 
+      <div className="learner-workspace">
+      <header className="learner-topbar">
+        <div className="learner-topbar-context">
+          <span className="learner-context-kicker">M.Sc. Data Science</span>
+          <span className="learner-context-separator">/</span>
+          <span className="learner-context-current">{activeLabel}</span>
+        </div>
+        <div className="learner-topbar-actions">
+          <span className="learner-sync-status"><span /> Learning record synced</span>
+          <Button variant="outline" size="sm" leftIcon="Calendar">Spring 2026 / Week 7</Button>
+          <Badge count={2} color="danger" size="sm" offset={[-2, -2]}>
+            <IconButton name="Comment" label="Open messages" variant="transparent" size="sm" />
+          </Badge>
+          <Badge count={3} color="danger" size="sm" offset={[-2, -2]}>
+            <IconButton name="Notification" label="Open notifications" variant="transparent" size="sm" />
+          </Badge>
+        </div>
+      </header>
+
       <main className="learner-main">
         {activeId === "learning" ? (
           <LearningExperience view={learningView} onViewChange={setLearningView} activityId={learningActivity} onActivityChange={setLearningActivity} />
+        ) : activeId === "labs" || activeId === "projects" ? (
+          <LabProjectExperience screen={workScreen} onScreenChange={setWorkScreen} />
+        ) : activeId === "discussions" ? (
+          <DiscussionExperience view={discussionView} onViewChange={setDiscussionView} />
+        ) : activeId === "calendar" ? (
+          <CalendarExperience />
+        ) : activeId === "progress" ? (
+          <ProgressExperience />
+        ) : activeId === "home" ? (
+          <HomeExperience onNavigate={(href) => router.push(href)} />
+        ) : activeId === "help" ? (
+          <HelpExperience />
+        ) : activeId === "profile" ? (
+          <ProfileExperience />
         ) : (
           <section className="learner-content" aria-labelledby="learner-page-title">
             <div className="learner-page-heading">
@@ -206,6 +262,7 @@ export default function LearnerPage() {
           </section>
         )}
       </main>
+      </div>
     </div>
   );
 }

@@ -549,6 +549,12 @@
   width: 100%;
 }
 
+/* In preserved-layout mode the wrapper remains mounted while expanded so the
+   sidebar keeps identical row geometry. Suppress the redundant tooltip only. */
+.bs-sidebar-collapsed-tooltip--inactive .bs-tooltip-bubble {
+  display: none;
+}
+
 /* Section Groups */
 .bs-sidebar-group {
   display: flex;
@@ -880,6 +886,42 @@
   background-color: var(--bs-color-bg-subtle, #F1F5F9);
   color: var(--bs-color-teal-primary, #0B6763);
   border-color: var(--bs-color-teal-primary, #0B6763);
+}
+
+.bs-sidebar-collapse-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+}
+
+.bs-sidebar-collapse-glyph {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+  transition: opacity 120ms ease, transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.bs-sidebar-collapse-glyph--collapsed {
+  opacity: 0;
+  transform: scale(0.84) rotate(-8deg);
+}
+
+.bs-sidebar--collapsed .bs-sidebar-collapse-glyph--expanded {
+  opacity: 0;
+  transform: scale(0.84) rotate(8deg);
+}
+
+.bs-sidebar--collapsed .bs-sidebar-collapse-glyph--collapsed {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
 }
 
 .bs-sidebar--dark .bs-sidebar-collapse-btn {

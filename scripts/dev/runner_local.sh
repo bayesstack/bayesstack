@@ -2,7 +2,7 @@
 # Native local process execution runner
 
 warmup_local_frontends() {
-  local service port attempt
+  local service port path attempt
   for service in "$@"; do
     case "$service" in
       landing) port=3000 ;;
@@ -14,10 +14,17 @@ warmup_local_frontends() {
       *) continue ;;
     esac
 
+    case "$service" in
+      learner) path=/learner ;;
+      faculty) path=/faculty ;;
+      admin) path=/admin ;;
+      *) path=/ ;;
+    esac
+
     log_info "Warming up $service (initial Next.js compilation may take a moment)..."
     for attempt in {1..60}; do
       # The request itself causes Next.js to compile the initial route.
-      if curl --silent --show-error --fail --max-time 10 "http://127.0.0.1:${port}/" >/dev/null 2>&1; then
+      if curl --silent --show-error --fail --max-time 10 "http://127.0.0.1:${port}${path}" >/dev/null 2>&1; then
         log_success "$service is compiled and ready on port $port."
         break
       fi
