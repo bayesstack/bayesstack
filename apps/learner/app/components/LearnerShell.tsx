@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Avatar, Icon, LoadingBar, Sidebar, Tooltip, type SidebarGroup, type SidebarItem } from "@bayesstack/ui";
+import { Avatar, Badge, Dropdown, Icon, LoadingBar, Sidebar, Tooltip, type DropdownMenuItem, type SidebarGroup, type SidebarItem } from "@bayesstack/ui";
 import { useLearnerShellState } from "./learner-shell-state";
 import { learnerIdentity } from "./learner-identity";
 
@@ -220,6 +220,49 @@ export function LearnerShell({ children }: { children: React.ReactNode }) {
     })),
   }));
 
+  const profileMenuItems: DropdownMenuItem[] = [
+    {
+      key: "profile",
+      label: "Your profile",
+      icon: "User",
+      onClick: () => navigateToHref(appRoute("/profile")),
+    },
+    {
+      key: "progress",
+      label: "Progress & capabilities",
+      icon: "ChartLine",
+      onClick: () => navigateToHref(appRoute("/progress")),
+    },
+    {
+      key: "calendar",
+      label: "Sessions & schedule",
+      icon: "Calendar",
+      onClick: () => navigateToHref(appRoute("/calendar")),
+    },
+    {
+      key: "help",
+      label: "Support & help",
+      icon: "HelpCircle",
+      onClick: () => navigateToHref(appRoute("/help")),
+    },
+  ];
+
+  const profileMenuHeader = (
+    <button
+      type="button"
+      className="learner-dropdown-profile-header"
+      onClick={() => navigateToHref(appRoute("/profile"))}
+      aria-label={`Open profile for ${learnerIdentity.fullName}`}
+    >
+      <Avatar name={learnerIdentity.fullName} size="sm" />
+      <div className="learner-dropdown-profile-meta">
+        <strong className="learner-dropdown-profile-name">{learnerIdentity.fullName}</strong>
+        <span className="learner-dropdown-profile-role">Learner · View Profile</span>
+      </div>
+      <Icon name="ChevronRight" size="xs" className="learner-dropdown-profile-chevron" />
+    </button>
+  );
+
   return (
     <div className="learner-app-shell" aria-busy={Boolean(pendingPath)}>
       <Sidebar
@@ -250,84 +293,95 @@ export function LearnerShell({ children }: { children: React.ReactNode }) {
           </div>
         )}
         <header className="learner-app-header">
-          <div className="learner-app-location">
-            <a href={appRoute("/")} onClick={(event) => handleRouteNavigation(event, appRoute("/"))}>BayesStack</a>
-            <Icon name="ChevronRight" size="xs" />
-            <strong>{routeTitle}</strong>
-          </div>
-          <div className="learner-app-actions" ref={topbarControlsRef}>
-            <form className="learner-global-search" role="search" onSubmit={handleSearchSubmit}>
-              <Icon name="Search" size="sm" />
-              <input
-                type="search"
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                onFocus={() => {
-                  setSearchOpen(true);
-                  setNotificationsOpen(false);
-                }}
-                placeholder="Search workspace"
-                aria-label="Search learner workspace"
-                aria-expanded={searchOpen}
-                aria-controls="learner-search-results"
-                autoComplete="off"
-              />
-              {searchOpen && (
-                <div className="learner-search-results" id="learner-search-results">
-                  <p>{normalizedSearch ? "Search results" : "Quick navigation"}</p>
-                  {searchResults.length > 0 ? searchResults.map((item) => (
-                    <a
-                      key={item.href}
-                      href={item.href}
-                      onClick={(event) => {
-                        setSearchQuery("");
-                        handleRouteNavigation(event, item.href);
-                      }}
-                    >
-                      <Icon name={item.icon} size="sm" />
-                      <span><strong>{item.label}</strong><small>{item.detail}</small></span>
-                    </a>
-                  )) : <span className="learner-search-empty">No workspace destination matches that search.</span>}
-                </div>
-              )}
-            </form>
-
-            <div className="learner-notifications">
-              <button
-                type="button"
-                className="learner-topbar-icon-button"
-                aria-label="Open notifications; 1 unread"
-                aria-expanded={notificationsOpen}
-                aria-controls="learner-notification-panel"
-                onClick={() => {
-                  setNotificationsOpen((open) => !open);
-                  setSearchOpen(false);
-                }}
-              >
-                <Icon name="Bell" size="sm" />
-                <span className="learner-notification-dot" aria-hidden="true" />
-              </button>
-              {notificationsOpen && (
-                <div className="learner-notification-panel" id="learner-notification-panel">
-                  <div><strong>Notifications</strong><span>1 unread</span></div>
-                  <a href={appRoute("/labs")} onClick={(event) => handleRouteNavigation(event, appRoute("/labs"))}>
-                    <span className="learner-notification-icon"><Icon name="CheckCircle" size="sm" /></span>
-                    <span><strong>Applied practice lab</strong><small>Due tomorrow at 3:30 PM</small></span>
-                  </a>
-                </div>
-              )}
+          <div className="learner-app-header-inner">
+            <div className="learner-app-location">
+              <a href={appRoute("/")} onClick={(event) => handleRouteNavigation(event, appRoute("/"))}>BayesStack</a>
+              <Icon name="ChevronRight" size="xs" />
+              <strong>{routeTitle}</strong>
             </div>
+            <div className="learner-app-actions" ref={topbarControlsRef}>
+              <form className="learner-global-search" role="search" onSubmit={handleSearchSubmit}>
+                <Icon name="Search" size="sm" />
+                <input
+                  type="search"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  onFocus={() => {
+                    setSearchOpen(true);
+                    setNotificationsOpen(false);
+                  }}
+                  placeholder="Search workspace..."
+                  aria-label="Search learner workspace"
+                  aria-expanded={searchOpen}
+                  aria-controls="learner-search-results"
+                  autoComplete="off"
+                />
+                {searchOpen && (
+                  <div className="learner-search-results" id="learner-search-results">
+                    <p>{normalizedSearch ? "Search results" : "Quick navigation"}</p>
+                    {searchResults.length > 0 ? searchResults.map((item) => (
+                      <a
+                        key={item.href}
+                        href={item.href}
+                        onClick={(event) => {
+                          setSearchQuery("");
+                          handleRouteNavigation(event, item.href);
+                        }}
+                      >
+                        <Icon name={item.icon} size="sm" />
+                        <span><strong>{item.label}</strong><small>{item.detail}</small></span>
+                      </a>
+                    )) : <span className="learner-search-empty">No workspace destination matches that search.</span>}
+                  </div>
+                )}
+              </form>
 
-            <a
-              className={`learner-topbar-profile ${activeId === "profile" ? "is-active" : ""}`}
-              href={appRoute("/profile")}
-              onClick={(event) => handleRouteNavigation(event, appRoute("/profile"))}
-              aria-label={`Open ${learnerIdentity.fullName}'s profile`}
-              aria-current={activeId === "profile" ? "page" : undefined}
-              title={learnerIdentity.fullName}
-            >
-              <Avatar name={learnerIdentity.fullName} size="xs" />
-            </a>
+              <div className="learner-notifications">
+                <Badge count={1} color="danger" variant="solid" size="sm" offset={[0, 4]}>
+                  <button
+                    type="button"
+                    className="learner-topbar-icon-button"
+                    aria-label="Open notifications; 1 unread"
+                    aria-expanded={notificationsOpen}
+                    aria-controls="learner-notification-panel"
+                    onClick={() => {
+                      setNotificationsOpen((open) => !open);
+                      setSearchOpen(false);
+                    }}
+                  >
+                    <Icon name="Bell" size="sm" />
+                  </button>
+                </Badge>
+                {notificationsOpen && (
+                  <div className="learner-notification-panel" id="learner-notification-panel">
+                    <div><strong>Notifications</strong><span>1 unread</span></div>
+                    <a href={appRoute("/labs")} onClick={(event) => handleRouteNavigation(event, appRoute("/labs"))}>
+                      <span className="learner-notification-icon"><Icon name="CheckCircle" size="sm" /></span>
+                      <span><strong>Applied practice lab</strong><small>Due tomorrow at 3:30 PM</small></span>
+                    </a>
+                  </div>
+                )}
+              </div>
+
+              <Dropdown
+                className="learner-profile-dropdown"
+                items={profileMenuItems}
+                placement="bottomRight"
+                trigger="click"
+                menuHeader={profileMenuHeader}
+                style={{ minWidth: 230 }}
+              >
+                <button
+                  type="button"
+                  className={`learner-topbar-profile ${activeId === "profile" ? "is-active" : ""}`}
+                  aria-label={`Open account menu for ${learnerIdentity.fullName}`}
+                  aria-current={activeId === "profile" ? "page" : undefined}
+                  title={learnerIdentity.fullName}
+                >
+                  <Avatar name={learnerIdentity.fullName} size="sm" />
+                </button>
+              </Dropdown>
+            </div>
           </div>
         </header>
         {children}
