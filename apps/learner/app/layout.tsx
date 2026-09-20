@@ -1,7 +1,7 @@
 import React from "react";
 import "./globals.css";
 import { Providers } from "./providers";
-import { LearnerShell } from "./components/LearnerShell";
+import { LearnerShell } from "./components/shell/LearnerShell";
 
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001"),

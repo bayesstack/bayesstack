@@ -1,8 +1,8 @@
 /* Shared UI foundations will live here as the first components are introduced. */
 :root {
-  --bs-ui-brand: #0b6763;
-  --bs-ui-brand-deep: #084c49;
-  --bs-ui-brand-soft: #e4f2ef;
+  --bs-ui-brand: #087a75;
+  --bs-ui-brand-deep: #075b58;
+  --bs-ui-brand-soft: #e7f5f2;
   --bs-ui-ink: #123333;
   --bs-ui-muted: #4A6360;
   --bs-ui-line: #d7e8e4;
@@ -10,6 +10,9 @@
   --bs-ui-canvas: #f1f8f6;
   --bs-ui-font-sans: "Outfit", "Inter", sans-serif;
   --bs-ui-font-mono: "JetBrains Mono", "DM Mono", monospace;
+  /* Alias tokens already referenced by component CSS as var() fallbacks */
+  --bs-color-teal-primary: var(--bs-ui-brand);
+  --bs-color-interactive: var(--bs-ui-brand);
 }
 
 /* ------------------------------------------
@@ -25,12 +28,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(11, 103, 99, 0.2);
+  background: rgba(8, 122, 117, 0.2);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(11, 103, 99, 0.4);
+  background: rgba(8, 122, 117, 0.4);
 }
 
 ::-webkit-scrollbar-corner {
@@ -40,5 +43,5 @@
 /* Firefox Support */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(11, 103, 99, 0.2) transparent;
+  scrollbar-color: rgba(8, 122, 117, 0.2) transparent;
 }

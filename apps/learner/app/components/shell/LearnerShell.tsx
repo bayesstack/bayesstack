@@ -3,8 +3,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Avatar, Badge, Dropdown, Icon, LoadingBar, Sidebar, Tooltip, type DropdownMenuItem, type SidebarGroup, type SidebarItem } from "@bayesstack/ui";
-import { useLearnerShellState } from "./learner-shell-state";
-import { learnerIdentity } from "./learner-identity";
+import { useLearnerShellState } from "./state";
+import { learnerIdentity } from "../learning/data";
 
 const APP_BASE_PATH = "/learner";
 const appRoute = (path: string) => path === "/" ? APP_BASE_PATH : `${APP_BASE_PATH}${path}`;
@@ -220,8 +220,6 @@ export function LearnerShell({ children }: { children: React.ReactNode }) {
   }, [pendingPath]);
 
   const navigateToHref = (href: string) => {
-    // Next applies `basePath` for client navigation. Anchors retain the public
-    // `/learner/...` URL so copy/open-in-new-tab still works as expected.
     const internalPath = href === APP_BASE_PATH ? "/" : href.replace(new RegExp(`^${APP_BASE_PATH}`), "");
     const destination = internalPath || "/";
     setSearchOpen(false);
@@ -255,30 +253,10 @@ export function LearnerShell({ children }: { children: React.ReactNode }) {
   }));
 
   const profileMenuItems: DropdownMenuItem[] = [
-    {
-      key: "profile",
-      label: "Your profile",
-      icon: "User",
-      onClick: () => navigateToHref(appRoute("/profile")),
-    },
-    {
-      key: "progress",
-      label: "Progress & capabilities",
-      icon: "ChartLine",
-      onClick: () => navigateToHref(appRoute("/progress")),
-    },
-    {
-      key: "calendar",
-      label: "Sessions & schedule",
-      icon: "Calendar",
-      onClick: () => navigateToHref(appRoute("/calendar")),
-    },
-    {
-      key: "help",
-      label: "Support & help",
-      icon: "HelpCircle",
-      onClick: () => navigateToHref(appRoute("/help")),
-    },
+    { key: "profile", label: "Your profile", icon: "User", onClick: () => navigateToHref(appRoute("/profile")) },
+    { key: "progress", label: "Progress & capabilities", icon: "ChartLine", onClick: () => navigateToHref(appRoute("/progress")) },
+    { key: "calendar", label: "Sessions & schedule", icon: "Calendar", onClick: () => navigateToHref(appRoute("/calendar")) },
+    { key: "help", label: "Support & help", icon: "HelpCircle", onClick: () => navigateToHref(appRoute("/help")) },
   ];
 
   const profileMenuHeader = (
@@ -345,10 +323,7 @@ export function LearnerShell({ children }: { children: React.ReactNode }) {
                   type="search"
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
-                  onFocus={() => {
-                    setSearchOpen(true);
-                    setNotificationsOpen(false);
-                  }}
+                  onFocus={() => { setSearchOpen(true); setNotificationsOpen(false); }}
                   placeholder="Search workspace..."
                   aria-label="Search learner workspace"
                   aria-expanded={searchOpen}
@@ -359,14 +334,7 @@ export function LearnerShell({ children }: { children: React.ReactNode }) {
                   <div className="learner-search-results" id="learner-search-results">
                     <p>{normalizedSearch ? "Search results" : "Quick navigation"}</p>
                     {searchResults.length > 0 ? searchResults.map((item) => (
-                      <a
-                        key={item.href}
-                        href={item.href}
-                        onClick={(event) => {
-                          setSearchQuery("");
-                          handleRouteNavigation(event, item.href);
-                        }}
-                      >
+                      <a key={item.href} href={item.href} onClick={(event) => { setSearchQuery(""); handleRouteNavigation(event, item.href); }}>
                         <Icon name={item.icon} size="sm" />
                         <span><strong>{item.label}</strong><small>{item.detail}</small></span>
                       </a>
@@ -383,10 +351,7 @@ export function LearnerShell({ children }: { children: React.ReactNode }) {
                     aria-label="Open notifications; 1 unread"
                     aria-expanded={notificationsOpen}
                     aria-controls="learner-notification-panel"
-                    onClick={() => {
-                      setNotificationsOpen((open) => !open);
-                      setSearchOpen(false);
-                    }}
+                    onClick={() => { setNotificationsOpen((open) => !open); setSearchOpen(false); }}
                   >
                     <Icon name="Bell" size="sm" />
                   </button>

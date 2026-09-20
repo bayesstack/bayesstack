@@ -1,0 +1,78 @@
+/* ─── Stub / placeholder pages ───────────────────────────────────────────── */
+
+.learner-page-canvas {
+  width: min(100%, var(--learner-page-max-width));
+  min-height: calc(100vh - 54px);
+  margin: 0 auto;
+  padding: 24px var(--learner-page-padding-inline) 52px;
+}
+
+.learner-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #dbe3e7;
+}
+
+.learner-eyebrow {
+  margin-bottom: 3px;
+  color: #778895;
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.learner-page-header h1 {
+  color: #263844;
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+
+.learner-page-description {
+  margin-top: var(--learner-page-description-margin);
+  max-width: var(--learner-page-description-width);
+  color: #667880;
+  font-size: var(--learner-page-description-size);
+  line-height: 1.6;
+}
+
+.learner-route-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 86px;
+  gap: 10px;
+  max-width: 650px;
+  margin-top: 22px;
+}
+
+.learner-route-workspace__lead,
+.learner-route-workspace__actions {
+  border: 1px solid var(--bs-line);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.learner-route-workspace__lead { display: flex; align-items: center; gap: 14px; min-height: 74px; padding: 16px 18px; }
+.learner-route-workspace__icon { display: grid; place-items: center; width: 28px; height: 28px; flex: 0 0 28px; color: var(--learner-brand); }
+.learner-route-workspace__eyebrow,
+.learner-route-workspace__actions span { color: #667085; font-size: 12px; font-weight: 600; }
+.learner-route-workspace h2 { margin-top: 3px; color: #2b3d49; font-size: 14px; letter-spacing: -0.01em; }
+.learner-route-workspace__lead > div:last-child > p:last-child { margin-top: 10px; color: #667085; font-size: 14px; line-height: 1.55; }
+.learner-route-workspace__actions { display: flex; align-items: center; justify-content: space-between; padding: 16px; color: #5965a8; cursor: pointer; }
+.learner-route-workspace__actions div { display: grid; gap: 6px; }
+.learner-route-workspace__actions strong { color: #222634; font-size: 14px; }
+
+@media (max-width: 720px) {
+  .learner-page-canvas { padding: 32px 24px 40px; }
+  .learner-page-header { align-items: flex-start; flex-direction: column; }
+  .learner-route-workspace { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 460px) {
+  .learner-route-workspace__lead { flex-direction: column; }
+}

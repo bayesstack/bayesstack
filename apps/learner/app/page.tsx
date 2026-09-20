@@ -2,7 +2,17 @@
 
 import Link from "next/link";
 import { Icon } from "@bayesstack/ui";
-import { learnerIdentity } from "./components/learner-identity";
+import { learnerIdentity } from "./components/learning/data";
+
+const courseProgress = 42;
+const weeklyCompleted = 3;
+const weeklyTotal = 4;
+
+function greeting(name: string | undefined): string {
+  const hour = new Date().getHours();
+  const salutation = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  return name ? `${salutation}, ${name}.` : `${salutation}.`;
+}
 
 export default function LearnerPage() {
   return (
@@ -10,7 +20,7 @@ export default function LearnerPage() {
       <header className="learner-home__header">
         <div>
           <p className="learner-eyebrow">Today</p>
-          <h1>Good afternoon, {learnerIdentity.fullName}.</h1>
+          <h1>{greeting(learnerIdentity.fullName)}</h1>
           <p>Continue your course, review what is due, and keep your current work moving.</p>
         </div>
       </header>
@@ -22,9 +32,9 @@ export default function LearnerPage() {
           <span>Evidence &amp; Decision Making &middot; Lesson 4 of 12 &middot; 18 min</span>
           <Link href="/learning">Continue <Icon name="ArrowRight" size="sm" /></Link>
         </div>
-        <div className="learner-continue-card__progress" aria-label="Course progress: 42 percent complete">
-          <div><span>Course progress</span><strong>42%</strong></div>
-          <div className="learner-continue-progress-track"><span /></div>
+        <div className="learner-continue-card__progress" aria-label={`Course progress: ${courseProgress} percent complete`}>
+          <div><span>Course progress</span><strong>{courseProgress}%</strong></div>
+          <div className="learner-continue-progress-track"><span style={{ width: `${courseProgress}%` }} /></div>
         </div>
       </section>
 
@@ -82,9 +92,9 @@ export default function LearnerPage() {
           <section className="learner-rail-section" aria-labelledby="weekly-progress-title">
             <div className="learner-section-heading">
               <div><p>Course pace</p><h2 id="weekly-progress-title">This week</h2></div>
-              <strong className="learner-progress-value">3 of 4</strong>
+              <strong className="learner-progress-value">{weeklyCompleted} of {weeklyTotal}</strong>
             </div>
-            <div className="learner-progress-bar"><span /></div>
+            <div className="learner-progress-bar"><span style={{ width: `${Math.round((weeklyCompleted / weeklyTotal) * 100)}%` }} /></div>
             <p>One remaining learning block keeps you on pace for this course.</p>
             <Link className="learner-text-link" href="/progress">View progress <Icon name="ArrowRight" size="xs" /></Link>
           </section>

@@ -1,0 +1,148 @@
+/* ─── Design tokens & global base resets ────────────────────────────────── */
+
+:root {
+  --bs-brand-teal: var(--bs-ui-brand);
+  --bs-brand-deep: var(--bs-ui-brand-deep);
+  --bs-brand-soft: var(--bs-ui-brand-soft);
+  --bs-ink: #132b3a;
+  --bs-muted: #667880;
+  --bs-line: #dce6ea;
+  --bs-surface: #ffffff;
+  --bs-canvas: #f6f9fa;
+  --learner-brand: var(--bs-ui-brand);
+  --learner-brand-hover: var(--bs-ui-brand-deep);
+  --learner-progress: var(--bs-ui-brand);
+  --font-display: 'Outfit', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --bs-font-main: var(--font-display);
+  --bs-font-mono: 'JetBrains Mono', 'DM Mono', monospace;
+
+  /* Comfortable desktop density: effective viewport width >= 1536px. */
+  --learner-sidebar-width: 248px;
+  --learner-sidebar-collapsed-width: 72px;
+  --learner-sidebar-header-height: 72px;
+  --learner-collapsed-header-height: 72px;
+  --learner-sidebar-header-padding: 16px;
+  --learner-brand-offset-x: 1px;
+  --learner-brand-offset-y: 4px;
+  --learner-collapsed-brand-offset-x: 2px;
+  --learner-brand-mark-size: 40px;
+  --learner-brand-mark-radius: 12px;
+  --learner-brand-title-font: 15px;
+  --learner-brand-meta-font: 10px;
+  --learner-nav-content-gap: 12px;
+  --learner-nav-content-padding: 10px 12px 12px;
+  --learner-nav-group-font: 10px;
+  --learner-nav-item-height: 43px;
+  --learner-nav-item-padding: 10px 11px;
+  --learner-nav-item-radius: 10px;
+  --learner-nav-item-font: 14px;
+  --learner-nav-icon-size: 20px;
+  --learner-collapse-button-height: 34px;
+  --learner-collapse-button-align: 6px;
+  --learner-collapsed-target-size: 44px;
+  --learner-collapsed-target-radius: 12px;
+  --learner-collapsed-content-gap: 14px;
+  --learner-collapsed-menu-gap: 6px;
+  --learner-collapsed-footer-gap: 6px;
+  --learner-collapsed-footer-padding: 10px 0 12px;
+  --learner-collapsed-active-inset: 11px;
+  --learner-sidebar-footer-padding: 12px;
+  --learner-utility-height: 43px;
+  --learner-utility-padding: 10px 11px;
+  --learner-utility-font: 14px;
+  --learner-page-max-width: 1180px;
+  --learner-page-padding-block: clamp(32px, 6vw, 76px);
+  --learner-page-padding-inline: clamp(28px, 4vw, 50px);
+  --learner-page-header-max-width: 900px;
+  --learner-page-title-size: clamp(36px, 4vw, 54px);
+  --learner-page-description-size: 16px;
+  --learner-page-description-width: 590px;
+  --learner-page-description-margin: 17px;
+  --learner-action-padding: 11px 14px;
+  --learner-action-font: 13px;
+
+  /* Z-index layers */
+  --z-overlay: 20;
+  --z-header: 24;
+  --z-progress: 30;
+  --z-dropdown: 50;
+  --z-modal: 200;
+  --z-tooltip: 1200;
+}
+
+/* Compact desktop density */
+@media (min-width: 721px) and (max-width: 1535px) {
+  :root {
+    --learner-sidebar-width: 208px;
+    --learner-sidebar-collapsed-width: 64px;
+    --learner-sidebar-header-height: 68px;
+    --learner-collapsed-header-height: 68px;
+    --learner-sidebar-header-padding: 12px 10px;
+    --learner-brand-offset-x: 5px;
+    --learner-brand-offset-y: 4px;
+    --learner-collapsed-brand-offset-x: 6px;
+    --learner-brand-mark-size: 36px;
+    --learner-brand-mark-radius: 10px;
+    --learner-brand-title-font: 13px;
+    --learner-brand-meta-font: 10px;
+    --learner-nav-content-gap: 10px;
+    --learner-nav-content-padding: 6px 10px 10px;
+    --learner-nav-group-font: 10px;
+    --learner-nav-item-height: 36px;
+    --learner-nav-item-padding: 7px 10px;
+    --learner-nav-item-radius: 10px;
+    --learner-nav-item-font: 12.5px;
+    --learner-nav-icon-size: 20px;
+    --learner-collapse-button-height: 30px;
+    --learner-collapse-button-align: 6px;
+    --learner-collapsed-target-size: 36px;
+    --learner-collapsed-target-radius: 10px;
+    --learner-collapsed-content-gap: 10px;
+    --learner-collapsed-menu-gap: 3px;
+    --learner-collapsed-footer-gap: 4px;
+    --learner-collapsed-footer-padding: 7px 0 10px;
+    --learner-collapsed-active-inset: 10px;
+    --learner-sidebar-footer-padding: 10px 10px;
+    --learner-utility-height: 36px;
+    --learner-utility-padding: 7px 10px;
+    --learner-utility-font: 12.5px;
+    --learner-page-max-width: 1180px;
+    --learner-page-padding-block: clamp(28px, 4vw, 52px);
+    --learner-page-padding-inline: clamp(28px, 4vw, 50px);
+    --learner-page-header-max-width: 790px;
+    --learner-page-title-size: clamp(34px, 3.6vw, 46px);
+    --learner-page-description-size: 14px;
+    --learner-page-description-width: 520px;
+    --learner-page-description-margin: 13px;
+    --learner-action-padding: 10px 12px;
+    --learner-action-font: 12px;
+  }
+}
+
+/* Global base resets */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  min-height: 100%;
+  background-color: var(--bs-canvas);
+  color: var(--bs-ink);
+  font-family: var(--bs-font-main);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+a {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}

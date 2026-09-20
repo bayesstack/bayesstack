@@ -1,0 +1,139 @@
+/* ─── Learning: shared course card primitives ────────────────────────────── */
+
+.learning-workspace {
+  width: min(100%, var(--learner-page-max-width));
+  min-height: calc(100vh - 44px);
+  margin: 0 auto;
+  padding: clamp(32px, 4vw, 50px) var(--learner-page-padding-inline) 68px;
+  color: #233542;
+}
+
+.learning-kicker {
+  color: #667989;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+}
+
+.learning-facts { display: flex; flex-wrap: wrap; gap: 13px; margin-top: 16px; color: #647882; font-family: var(--font-body); font-size: 11px; }
+.learning-facts span { display: inline-flex; align-items: center; gap: 5px; }
+
+.learning-crumbs { display: flex; align-items: center; gap: 7px; color: #778891; font-family: var(--font-body); font-size: 11px; }
+.learning-crumbs a { color: #657981; }
+.learning-crumbs a:hover { color: var(--learner-brand); }
+.learning-crumbs > span { color: #2e414b; font-weight: 600; }
+
+/* Visual styling delegated to .bs-button via shared Button component classes.
+   This class retains only the layout role it plays in specific flex contexts. */
+.learning-primary-action { flex: 0 0 auto; }
+
+.learning-progress { display: grid; min-width: 112px; gap: 5px; }
+.learning-progress > i { display: block; }
+.learning-progress small { color: #667989; font-family: var(--font-body); font-size: 10px; font-style: normal; white-space: nowrap; }
+
+/* Course card grid */
+.learning-course-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.learning-library-all .learning-course-grid { margin-top: 15px; }
+
+/* Career goal (kept for backward compat) */
+.learning-career-goal {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 17px;
+  margin-top: 16px;
+  padding: 16px 18px;
+  border: 1px solid #d9ddea;
+  border-radius: 10px;
+  background: #f7f7fb;
+}
+.learning-career-goal > span { display: grid; width: 40px; height: 40px; place-items: center; border-radius: 10px; background: #e8eaf5; color: #5965a8; }
+.learning-career-goal > div { display: grid; gap: 2px; }
+.learning-career-goal small { color: #58677a; font: 700 10px var(--font-body); letter-spacing: .045em; text-transform: uppercase; }
+.learning-career-goal strong { color: #273a47; font: 700 15px var(--font-display); }
+.learning-career-goal p { color: #536773; font: 11.5px/1.45 var(--font-body); }
+.learning-career-goal > a { display: inline-flex; align-items: center; gap: 5px; color: #3d5060; font: 700 11px var(--font-body); }
+.learning-career-goal > a:hover { color: #303b70; }
+
+/* ─── LearningCourseCard ──────────────────────────────────────────────────── */
+
+.learning-course-card {
+  --course-accent: #687786;
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto minmax(54px, 1fr) auto;
+  min-height: 205px;
+  padding: 17px 18px 15px;
+  overflow: hidden;
+  border: 1px solid #d7e0e5;
+  border-top: 3px solid var(--course-accent);
+  border-radius: 10px;
+  background: #fff;
+  color: inherit;
+  box-shadow: 0 3px 12px rgba(31, 45, 56, .035);
+  transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+.learning-course-card:hover { border-color: #c0ccd3; box-shadow: 0 10px 22px rgba(31, 45, 56, .07); transform: translateY(-1px); }
+.learning-course-card.is-indigo { --course-accent: #5965a8; }
+.learning-course-card.is-sky { --course-accent: #2f6f92; }
+.learning-course-card.is-amber { --course-accent: #8a5a15; }
+.learning-course-card.is-plum { --course-accent: #945f82; }
+.learning-course-card.is-coral { --course-accent: #9b514b; }
+.learning-course-card.is-green { --course-accent: #477c68; }
+.learning-course-card.is-recommended { border-color: #cfd3e6; border-top-color: var(--course-accent); background: linear-gradient(145deg, #fff 42%, #f7f7fc); box-shadow: 0 7px 20px rgba(64, 71, 115, .075); }
+.learning-course-card.has-attention { border-color: #e6cf8d; border-top-color: #c88b13; background: #fffdf7; }
+.learning-course-card.is-complete { background: #fbfcfc; }
+
+/* Personal variant — left border instead of top border */
+.learning-course-card.is-personal {
+  border-top: 1px solid #d7e0e5;
+  border-left: 3px solid var(--course-accent);
+}
+
+/* Enrolled state */
+.learning-course-card.is-enrolled { background: #f2faf8; border-color: #b2d9d3; }
+.learning-course-card.is-enrolled .learning-course-card-action { color: #3a7a6a; }
+.learning-course-card.is-enrolled .learning-course-card-action:disabled { color: #3a7a6a; cursor: default; }
+
+.learning-course-card-topline { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.learning-course-card-code { color: var(--course-accent); font: 800 10.5px var(--font-body); letter-spacing: .025em; text-transform: uppercase; }
+.learning-course-card-tags { display: inline-flex; align-items: center; justify-content: flex-end; gap: 7px; }
+.learning-course-card-tag,
+.learning-course-card-recommendation { display: inline-flex; align-items: center; gap: 4px; min-height: 23px; padding: 3px 10px; border-radius: 99px; background: #eef1f3; color: #4f626e; font: 750 10px var(--font-body); text-transform: uppercase; }
+.learning-course-card-recommendation { background: #ececf7; color: #4c578f; }
+.learning-course-card .bs-badge { min-height: 23px; padding-inline: 10px; font-size: 10px; }
+.learning-course-card-heading { margin-top: 12px; }
+.learning-course-card-heading h3 { color: #263946; font: 700 16px/1.2 var(--font-display); letter-spacing: -.018em; }
+.learning-course-card-heading p { margin-top: 3px; color: #566a76; font: 11.5px var(--font-body); }
+.learning-course-card-body { display: grid; align-content: start; gap: 12px; min-width: 0; margin-top: 13px; }
+.learning-course-card-description { margin: 0; color: #4f6471; font: 12px/1.5 var(--font-body); }
+.learning-course-card-detail { display: grid; align-content: start; gap: 3px; }
+.learning-course-card-detail small { color: #60737e; font: 10.5px var(--font-body); }
+.learning-course-card-detail strong { overflow: hidden; color: #2c404c; font: 700 13px var(--font-body); text-overflow: ellipsis; white-space: nowrap; }
+.learning-course-card-detail span { overflow: hidden; color: #596e7a; font: 11px var(--font-body); text-overflow: ellipsis; white-space: nowrap; }
+.learning-course-card-detail.is-outcome { grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto; align-items: end; column-gap: 12px; }
+.learning-course-card-detail.is-outcome small { grid-column: 1 / -1; color: #5d7180; font-size: 10px; font-weight: 600; letter-spacing: .035em; text-transform: uppercase; }
+.learning-course-card-detail.is-outcome strong { width: max-content; padding: 5px 8px; border: 1px solid #d7e4df; border-radius: 6px; background: #f3f8f6; color: #285e51; font: 700 16px/1 var(--font-body); letter-spacing: 0; }
+.learning-course-card-detail.is-outcome span { padding-bottom: 2px; color: #526b63; font-weight: 600; }
+.learning-course-card-footer { display: grid; grid-template-columns: minmax(120px, 1fr) auto; align-items: end; gap: 22px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #e7ecef; }
+.learning-course-card .learning-progress { min-width: 0; --progress-fill: var(--course-accent); }
+.learning-course-card .learning-progress small { color: #506570; font-size: 11px; }
+.learning-course-card-meta { color: #4f636f; font: 650 11px var(--font-body); }
+/* .learning-course-card-action button styling removed — using Button variant="link" size="xs" */
+.learning-course-card-action:hover:not(:disabled) { color: #303b70; }
+.learning-course-card-action:disabled { color: #5d7168; cursor: default; }
+
+@media (max-width: 800px) {
+  .learning-personal-course-grid,
+  .learning-library-course-grid,
+  .learning-course-grid { grid-template-columns: 1fr; }
+  .learning-career-goal { grid-template-columns: 42px 1fr; }
+  .learning-career-goal > a { grid-column: 2; justify-self: start; }
+}
+
+@media (max-width: 600px) {
+  .learning-course-card { min-height: 0; }
+  .learning-course-card-footer { grid-template-columns: 1fr; gap: 10px; }
+}

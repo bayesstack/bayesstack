@@ -1,4 +1,4 @@
-import { ConceptWorkspace } from "../../../../components/LearningWorkspace";
+import { ConceptWorkspace } from "../../../../components/learning/ConceptWorkspace";
 
 export default function GradientDescentConceptPage() {
   return <ConceptWorkspace />;

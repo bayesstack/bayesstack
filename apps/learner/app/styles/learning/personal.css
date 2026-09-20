@@ -1,0 +1,154 @@
+/* ─── Learning: personal learning tab ───────────────────────────────────── */
+
+.learning-personal.is-active-view { margin-top: 17px; padding-top: 0; border-top: 0; }
+
+.learning-personal {
+  margin-top: 48px;
+  padding-top: 30px;
+  border-top: 1px solid #cfd9df;
+}
+
+.learning-personal-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+}
+.learning-personal-header h2 { margin-top: 4px; color: #1f2c3a; font: 650 22px/1.1 var(--font-display); letter-spacing: -.03em; }
+.learning-personal-header p:last-child { max-width: 640px; margin-top: 6px; color: #6f808d; font: 10.5px/1.5 var(--font-body); }
+.learning-personal-header > a { display: inline-flex; align-items: center; gap: 5px; flex: 0 0 auto; color: #4d5f6d; font: 700 10px var(--font-body); }
+.learning-personal-header > a:hover { color: #303b70; }
+
+.learning-personal-enrolled { margin-top: 22px; }
+.learning-personal-subheading { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding-bottom: 10px; }
+.learning-personal-subheading h3 { margin-top: 2px; color: #344754; font: 650 14px var(--font-display); }
+.learning-personal-subheading > span { color: #586c78; font: 11px var(--font-body); }
+.learning-personal-course-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+
+.learning-personal-course,
+.learning-recommendation-card,
+.learning-library-priority-card,
+.learning-library-course { --course-accent: #687786; }
+.learning-personal-course.is-indigo, .learning-recommendation-card.is-indigo, .learning-library-priority-card.is-indigo, .learning-library-course.is-indigo { --course-accent: #5965a8; }
+.learning-personal-course.is-sky, .learning-recommendation-card.is-sky, .learning-library-priority-card.is-sky, .learning-library-course.is-sky { --course-accent: #4b86a7; }
+.learning-personal-course.is-amber, .learning-recommendation-card.is-amber, .learning-library-priority-card.is-amber, .learning-library-course.is-amber { --course-accent: #b77a2d; }
+.learning-personal-course.is-plum, .learning-recommendation-card.is-plum, .learning-library-priority-card.is-plum, .learning-library-course.is-plum { --course-accent: #945f82; }
+.learning-personal-course.is-coral, .learning-recommendation-card.is-coral, .learning-library-priority-card.is-coral, .learning-library-course.is-coral { --course-accent: #b96961; }
+.learning-personal-course.is-green, .learning-recommendation-card.is-green, .learning-library-priority-card.is-green, .learning-library-course.is-green { --course-accent: #477c68; }
+
+.learning-personal-course {
+  display: grid;
+  min-height: 148px;
+  padding: 16px 17px;
+  border: 1px solid #d9e1e6;
+  border-left: 3px solid var(--course-accent);
+  border-radius: 10px;
+  background: #fff;
+  transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+.learning-personal-course:hover { border-color: #c3ced5; box-shadow: 0 7px 18px rgba(28, 43, 55, .055); transform: translateY(-1px); }
+.learning-personal-course > div:first-child { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.learning-personal-course > div:first-child > span { color: var(--course-accent); font: 750 10px var(--font-body); letter-spacing: .04em; text-transform: uppercase; }
+.learning-personal-course h3 { margin-top: 10px; color: #273946; font: 650 14px var(--font-display); }
+.learning-personal-course > p { margin-top: 2px; color: #82909a; font: 10px var(--font-body); }
+.learning-personal-course > div:last-child { display: grid; grid-template-columns: minmax(0, 1fr) minmax(105px, 140px) auto; align-items: end; gap: 16px; margin-top: 15px; padding-top: 11px; border-top: 1px solid #edf0f2; }
+.learning-personal-course > div:last-child > span { display: grid; gap: 2px; }
+.learning-personal-course > div:last-child small { color: #89969f; font: 10px var(--font-body); }
+.learning-personal-course > div:last-child strong { color: #3b4d59; font: 650 10.5px var(--font-body); }
+.learning-personal-course .learning-progress { min-width: 0; --progress-fill: var(--course-accent); }
+.learning-personal-course > div:last-child > button { display: inline-flex; align-items: center; gap: 3px; padding: 0 0 1px; border: 0; background: transparent; color: #425560; font: 700 10px var(--font-body); cursor: pointer; }
+.learning-personal-course > div:last-child > button:hover { color: #303b70; }
+
+.learning-recommendations { margin-top: 26px; padding: 20px; border: 1px solid #dfe1eb; border-radius: 11px; background: #f7f7fb; }
+.learning-recommendations-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
+.learning-recommendations-heading h3 { margin-top: 3px; color: #283543; font: 650 17px var(--font-display); }
+.learning-recommendations-heading > span { color: #788492; font: 10px var(--font-body); }
+.learning-recommendations-heading > a, .learning-recommendations-heading > button { display: inline-flex; align-items: center; gap: 4px; padding: 0; border: 0; background: transparent; color: #47596a; font: 700 10px var(--font-body); cursor: pointer; }
+.learning-recommendations-heading > a:hover, .learning-recommendations-heading > button:hover { color: #303b70; }
+.learning-recommendation-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 15px; }
+.learning-recommendation-card { display: grid; min-height: 172px; padding: 15px; border: 1px solid #e1e3ea; border-top: 3px solid var(--course-accent); border-radius: 10px; background: #fff; color: inherit; font-family: inherit; text-align: left; cursor: pointer; }
+.learning-recommendation-card > div { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.learning-recommendation-card > div > span { color: var(--course-accent); font: 750 10px var(--font-body); }
+.learning-recommendation-card > div > small { color: #596478; font: 700 10px var(--font-body); text-transform: uppercase; }
+.learning-recommendation-card h3 { margin-top: 11px; color: #2d3e4a; font: 650 13px/1.2 var(--font-display); }
+.learning-recommendation-card > p { margin-top: 6px; color: #70818d; font: 10px/1.45 var(--font-body); }
+.learning-recommendation-card footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; padding-top: 10px; border-top: 1px solid #eceef2; }
+.learning-recommendation-card footer > span { color: #83909a; font: 10px var(--font-body); }
+.learning-recommendation-card footer > strong { display: inline-flex; align-items: center; gap: 3px; color: #3f5060; font: 700 10px var(--font-body); }
+.learning-recommendation-card:hover footer > strong { color: #303b70; }
+
+.learning-personal-goal { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; align-items: center; gap: 15px; padding: 15px 17px; border: 1px solid #dddfea; border-radius: 10px; background: #f7f7fb; }
+.learning-personal-goal > span { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 10px; background: #e9eaf4; color: #5965a8; }
+.learning-personal-goal > div { display: grid; gap: 2px; }
+.learning-personal-goal small { color: #737f93; font: 10px var(--font-body); text-transform: uppercase; }
+.learning-personal-goal strong { color: #2b3b48; font: 650 14px var(--font-display); }
+.learning-personal-goal p { color: #71808c; font: 10px var(--font-body); }
+.learning-personal-goal > a { display: inline-flex; align-items: center; gap: 4px; padding: 0; border: 0; background: transparent; color: #47596a; font: 700 10px var(--font-body); cursor: pointer; }
+.learning-personal-goal > a:hover { color: #303b70; }
+
+/* Redesign additions */
+.learning-personal-section { margin-top: 24px; }
+.learning-personal-section:first-child { margin-top: 10px; }
+.learning-personal-section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #dce5e6;
+  margin-bottom: 14px;
+}
+.learning-personal-section-header h3 { color: #263945; font: 650 16px var(--font-display); letter-spacing: -0.02em; }
+.learning-personal-section-header > span { color: #596c78; font: 11px var(--font-body); }
+/* .learning-personal-section-link removed — using Button variant="link" size="sm" */
+
+.learning-recommendations-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.learning-personal-empty {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  min-height: 220px;
+  margin-top: 10px;
+  padding: 40px 24px;
+  border: 1px dashed #c8d5dc;
+  border-radius: 12px;
+  text-align: center;
+}
+.learning-personal-empty > span { display: grid; width: 52px; height: 52px; place-items: center; border-radius: 14px; background: #e7f5f2; color: var(--learner-brand); margin-bottom: 4px; }
+.learning-personal-empty > strong { color: #273946; font: 650 16px var(--font-display); }
+.learning-personal-empty > p { max-width: 380px; color: #667880; font: 13px/1.55 var(--font-body); }
+
+.learning-personal.is-active-view .learning-career-goal { margin-top: 0; }
+
+@media (max-width: 800px) {
+  .learning-recommendation-grid, .learning-library-priority-grid { grid-template-columns: 1fr; }
+  .learning-recommendation-card { min-height: 0; }
+  .learning-personal-goal { grid-template-columns: 38px 1fr; }
+  .learning-personal-goal > a { grid-column: 2; justify-self: start; }
+}
+
+@media (max-width: 600px) {
+  .learning-personal-header, .learning-recommendations-heading { align-items: flex-start; flex-direction: column; }
+  .learning-personal-course > div:last-child { grid-template-columns: 1fr; }
+  .learning-recommendations { padding: 16px; }
+}
+
+/* Personal learning follows the compact Curriculum card and table language. */
+.learning-personal-section-actions { display: inline-flex; align-items: center; gap: 14px; }
+.learning-personal-section-actions > span { color: #596c78; font: 11px var(--font-body); }
+.learning-personal-course-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+@media (min-width: 1680px) {
+  .learning-personal-course-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@media (max-width: 600px) {
+  .learning-personal-section-header { align-items: flex-start; flex-direction: column; }
+  .learning-personal-section-actions { width: 100%; justify-content: space-between; }
+}
