@@ -1,78 +1,66 @@
 import type { CodingActivityDescriptor } from "@bayesstack/studio-coding";
 import type { VideoActivityDescriptor } from "@bayesstack/studio-video";
+import { machineLearningCourse, type ActivityContext } from "./courseContent";
 
-export const gradientDescentVideoActivity: VideoActivityDescriptor = {
-  id: "ml-401-gradient-descent-video",
-  activity_type: "video",
-  activity_version: "1",
-  title: "Following the negative gradient",
-  concept_id: "gradient-descent",
-  concept_title: "Gradient Descent",
-  is_required: true,
-  config: {
-    duration_seconds: 720,
-    aspect_ratio: "16:9",
-    poster_url: "/learner/learning/gradient-descent-poster.svg",
-    course_label: "ML 401 · Machine Learning",
-    chapter_label: "02 · Optimisation for learning",
-    learning_objective: "See how each update turns the slope of a loss function into a deliberate move toward a better model.",
-    segments: [
-      {
-        time: 0,
-        title: "Start with the loss landscape",
-        description: "Frame optimisation as a sequence of small, evidence-led choices.",
-      },
-      {
-        time: 133,
-        title: "Read the direction of steepest change",
-        description: "The gradient points uphill; the update must move the other way.",
-      },
-      {
-        time: 356,
-        title: "Choose the size of the step",
-        description: "Use the learning rate to trade off momentum and stability.",
-      },
-      {
-        time: 605,
-        title: "Test whether the model is settling",
-        description: "Watch the loss to validate that each iteration is helping.",
-      },
-    ],
-    transcript: [
-      { time: 0, time_formatted: "0:00", text: "Gradient descent improves a model through small, deliberate updates." },
-      { time: 133, time_formatted: "2:13", text: "The gradient points uphill, so the update moves in the opposite direction." },
-      { time: 356, time_formatted: "5:56", text: "The learning rate controls how much of the gradient is applied at each step." },
-      { time: 605, time_formatted: "10:05", text: "A useful optimiser balances steady progress with stable convergence." },
-    ],
-    key_takeaways: [
-      "Move parameters in the negative-gradient direction to reduce loss.",
-      "A learning rate that is too large can overshoot the minimum.",
-      "Training is an iterative process of measuring, updating, and validating.",
-    ],
-  },
-};
+/** Adapt the API-shaped mock contract to the independent video studio package. */
+export function createVideoActivity({ activity, concept, chapter, chapterIndex }: ActivityContext): VideoActivityDescriptor {
+  const contract = activity.studio.video;
+  if (!contract) throw new Error(`Video contract missing for activity ${activity.id}`);
 
-export const gradientDescentCodingActivity: CodingActivityDescriptor = {
-  id: "ml-401-gradient-descent-practice",
-  activity_type: "coding",
-  activity_version: "1",
-  title: "Implement a gradient descent step",
-  concept_id: "gradient-descent",
-  concept_title: "Gradient Descent",
-  is_required: true,
-  config: {
-    problem_id: "ml-401-gradient-descent-practice",
-    problem_title: "Implement a gradient descent step",
-    difficulty: "Medium",
-    description: "Complete the update function so that it moves a parameter in the negative-gradient direction.",
-    default_language: "python",
-    allowed_languages: ["python", "javascript"],
-    starter_code: {
-      python: "def gradient_step(theta, gradient, learning_rate):\n    # Return the next parameter value.\n    pass\n\nprint(gradient_step(0.8, 1.6, 0.1))\n",
-      javascript: "function gradientStep(theta, gradient, learningRate) {\n  // Return the next parameter value.\n}\n\nconsole.log(gradientStep(0.8, 1.6, 0.1));\n",
+  return {
+    id: `${machineLearningCourse.id}-${activity.id}`,
+    activity_type: activity.type,
+    activity_version: activity.studio.version,
+    title: activity.title,
+    concept_id: concept.id,
+    concept_title: concept.title,
+    is_required: activity.studio.required,
+    config: {
+      duration_seconds: contract.durationSeconds,
+      aspect_ratio: contract.aspectRatio,
+      poster_url: contract.posterUrl,
+      course_label: `${machineLearningCourse.code} · ${machineLearningCourse.name}`,
+      chapter_label: `${String(chapterIndex + 1).padStart(2, "0")} · ${chapter.title}`,
+      learning_objective: contract.learningObjective,
+      segments: contract.segments,
+      transcript: contract.transcript.map((item) => ({
+        time: item.time,
+        time_formatted: item.timeFormatted,
+        text: item.text,
+      })),
+      key_takeaways: contract.keyTakeaways,
     },
-    test_cases: [
-      { id: "update-rule", title: "One update", input: "0.8 1.6 0.1", expected: "0.64", is_sample: true },
-    ],
-  },
-};
+  };
+}
+
+/** Adapt the API-shaped mock contract to the independent coding studio package. */
+export function createCodingActivity({ activity, concept }: ActivityContext): CodingActivityDescriptor {
+  const contract = activity.studio.coding;
+  if (!contract) throw new Error(`Coding contract missing for activity ${activity.id}`);
+
+  return {
+    id: `${machineLearningCourse.id}-${activity.id}`,
+    activity_type: activity.type,
+    activity_version: activity.studio.version,
+    title: activity.title,
+    concept_id: concept.id,
+    concept_title: concept.title,
+    is_required: activity.studio.required,
+    config: {
+      problem_id: contract.problemId,
+      problem_title: activity.title,
+      difficulty: contract.difficulty,
+      description: contract.description,
+      default_language: contract.defaultLanguage,
+      allowed_languages: contract.allowedLanguages,
+      starter_code: contract.starterCode,
+      test_cases: contract.testCases.map((testCase) => ({
+        id: testCase.id,
+        title: testCase.title,
+        input: testCase.input,
+        expected: testCase.expected,
+        is_sample: testCase.isSample,
+      })),
+    },
+  };
+}

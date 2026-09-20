@@ -1,29 +1,37 @@
 // ─── Learner identity ─────────────────────────────────────────────────────
 import { masterCurriculumCourses } from "./masterCurriculum";
+import {
+  initialCompletedActivityIds,
+  machineLearningActivityContexts,
+  machineLearningCourse,
+} from "./courseContent";
 
-// Placeholder until the authenticated session is connected to the shell.
-// fullName is intentionally undefined so callers render a non-personalized
-// fallback rather than exposing fixture text to real users.
+// Mock authenticated-session projection. Replace this object with the session
+// API response without changing any learner UI component.
 export const learnerIdentity: {
   fullName: string | undefined;
   institutionName: string;
 } = {
-  fullName: undefined,
+  fullName: "Bayes Institute Learner",
   institutionName: "Bayes Institute",
 };
 
+export const learnerCareerGoal = {
+  id: "career-goal-quant-engineer",
+  title: "Quantitative Engineer",
+};
+
 // ─── Route paths ──────────────────────────────────────────────────────────
-export const coursePath = "/learning/machine-learning";
-export const videoStudioPath = `${coursePath}/studio/video`;
-export const codingStudioPath = `${coursePath}/studio/coding`;
+export const coursePath = `/learning/${machineLearningCourse.slug}`;
+export const videoStudioPath = `${coursePath}/studio/gradient-descent-lesson`;
+export const codingStudioPath = `${coursePath}/studio/gradient-descent-practice`;
 
 export function courseSlug(code: string) {
   return code.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
 export function courseHref(code: string) {
-  // ML 401 is the one course with a working course workspace today.
-  return code === "ML 401" ? coursePath : `/learning/${courseSlug(code)}`;
+  return code === machineLearningCourse.code ? coursePath : `/learning/${courseSlug(code)}`;
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────
@@ -82,16 +90,37 @@ export const weekSteps = [
   { title: "Probability quiz", description: "Fri · 10:00 AM", icon: "CheckCircle" as const },
 ];
 
+const initialCompletedSet = new Set(initialCompletedActivityIds);
+const initialCompletedConcepts = machineLearningCourse.chapters
+  .flatMap((chapter) => chapter.concepts)
+  .filter((concept) => concept.activities.every((activity) => initialCompletedSet.has(activity.id))).length;
+const initialCourseProgress = Math.round(
+  (initialCompletedConcepts / machineLearningCourse.chapters.flatMap((chapter) => chapter.concepts).length) * 100,
+);
+const initialNextActivity = machineLearningActivityContexts.find(({ activity }) => !initialCompletedSet.has(activity.id))
+  ?? machineLearningActivityContexts[machineLearningActivityContexts.length - 1];
+
 const courses = [
   // href = course overview page; continueHref = CTA target (see split-click pattern in curriculum row)
-  { code: "ML 401", name: "Machine Learning", faculty: "Prof. N. Rao", current: "Gradient Descent", next: "Video lesson · 12 min", progress: 42, status: "On track", tone: "success" as const, href: courseHref("ML 401"), continueHref: videoStudioPath },
+  {
+    code: machineLearningCourse.code,
+    name: machineLearningCourse.name,
+    faculty: machineLearningCourse.instructor.name,
+    current: initialNextActivity.concept.title,
+    next: `${initialNextActivity.activity.type === "video" ? "Video lesson" : "Coding exercise"} · ${initialNextActivity.activity.duration}`,
+    progress: initialCourseProgress,
+    status: machineLearningCourse.status.label,
+    tone: machineLearningCourse.status.tone,
+    href: courseHref(machineLearningCourse.code),
+    continueHref: videoStudioPath,
+  },
   { code: "STAT 312", name: "Probability & Statistics", faculty: "Dr. A. Menon", current: "Bayesian inference", next: "Quiz review · 20 min", progress: 61, status: "Ahead", tone: "info" as const, href: courseHref("STAT 312"), continueHref: courseHref("STAT 312") },
   { code: "CS 326", name: "Database Systems", faculty: "Prof. R. Shah", current: "Relational algebra", next: "Assignment due tomorrow", progress: 28, status: "Needs attention", tone: "warning" as const, href: courseHref("CS 326"), continueHref: courseHref("CS 326") },
   { code: "CS 341", name: "Operating Systems", faculty: "Dr. S. Iyer", current: "Process states", next: "Start concept · 22 min", progress: 0, status: "Not started", tone: "neutral" as const, href: courseHref("CS 341"), continueHref: courseHref("CS 341") },
 ];
 
 const courseDescriptions: Record<string, string> = {
-  "ML 401": "Build practical intuition for supervised learning, optimisation, and model evaluation.",
+  [machineLearningCourse.code]: machineLearningCourse.description,
   "STAT 312": "Use probability models and statistical inference to reason clearly under uncertainty.",
   "CS 326": "Design reliable data models, queries, and transactions for production systems.",
   "CS 341": "Understand processes, memory, and the systems primitives behind modern computing.",
@@ -124,10 +153,12 @@ export const currentTermCourses = courses.map((course) => ({
 
 export const termOptions = [
   { value: "term-1", label: "Term 1 · Autumn 2025", description: "Completed · 18 December 2025", icon: "CheckCircle" as const },
-  { value: "term-2", label: "Term 2 · Spring 2026", description: "Current · Week 7 of 14", icon: "Calendar" as const },
+  { value: "term-2", label: "Term 2 · Spring 2026", description: "Current · Week 7 of 14", icon: "Calendar" as const, current: true },
   { value: "term-3", label: "Term 3 · Autumn 2026", description: "Available after Term 2", icon: "Lock" as const, disabled: true },
   { value: "term-4", label: "Term 4 · Spring 2027", description: "Available after Term 3", icon: "Lock" as const, disabled: true },
 ];
+
+export const currentTermId = termOptions.find((term) => "current" in term && term.current)?.value ?? termOptions[0].value;
 
 // ─── Personal learning data ───────────────────────────────────────────────
 export const personalCourses = [
@@ -221,3 +252,59 @@ export const sortOptions = [
   { value: "shortest", label: "Shortest first" },
   { value: "longest", label: "Longest first" },
 ];
+
+export type CourseCatalogueDetails = {
+  code: string;
+  name: string;
+  description: string;
+  context: string;
+  level?: string;
+  duration?: string;
+  status?: string;
+  progress?: number;
+  completed?: boolean;
+};
+
+/** Resolve every course-card destination to safe catalogue metadata. */
+export function getCourseCatalogueDetails(slug: string): CourseCatalogueDetails | undefined {
+  const curriculumCourse = [...currentTermCourses, ...previousTermCourses]
+    .find((course) => courseSlug(course.code) === slug);
+  if (curriculumCourse) {
+    return {
+      code: curriculumCourse.code,
+      name: curriculumCourse.name,
+      description: curriculumCourse.description,
+      context: curriculumCourse.faculty,
+      status: curriculumCourse.status,
+      progress: curriculumCourse.progress,
+      completed: curriculumCourse.progress === 100,
+    };
+  }
+
+  const personalCourse = personalCourses.find((course) => courseSlug(course.code) === slug);
+  if (personalCourse) {
+    return {
+      code: personalCourse.code,
+      name: personalCourse.name,
+      description: personalCourse.description,
+      context: personalCourse.provider,
+      status: personalCourse.status,
+      progress: personalCourse.progress,
+    };
+  }
+
+  const libraryCourse = libraryCourses.find((course) => courseSlug(course.code) === slug || course.id === slug);
+  if (libraryCourse) {
+    return {
+      code: libraryCourse.code,
+      name: libraryCourse.name,
+      description: libraryCourse.reason,
+      context: libraryCourse.subject,
+      level: libraryCourse.level,
+      duration: libraryCourse.duration,
+      status: "Available",
+    };
+  }
+
+  return undefined;
+}

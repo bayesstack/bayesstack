@@ -87,12 +87,14 @@ When pulling new changes from `git`:
 
 ## Content Composition Engine
 
-Migrations `0003` through `0012` define and evolve the six-tier academic graph:
+Migrations `0003` through `0015` define and evolve the six-tier academic graph and learner runtime state:
 
 - Immutable, version-pinned catalog programs, courses, chapters, concepts, and activities.
 - Institution curricula/programs/course/chapter/concept wrappers with `catalog`, `custom`, or `hybrid` provenance.
 - Ordered composition edges that point directly to either a catalog release or a same-institution wrapper, avoiding cloned catalog trees.
 - Faculty program/course assignments, program/curriculum enrollment records, and immutable `course_publications` snapshots.
+- Server-owned coding judge records plus learner goals, personal course enrollment, activity resume state, dated offering events, and supplemental resources.
+- Offering-scoped labs/projects, learner workspace drafts, milestones, project teams/artifacts, contextual discussions, personal calendar blocks, capability evidence, preferences, and support requests.
 
 Catalog releases use database triggers to reject updates and deletes; publish a new version instead. A direct catalog course adoption has no institution child edges. Forking it creates a `hybrid` draft with explicit composition edges, which can then be reordered or supplemented with custom content.
 

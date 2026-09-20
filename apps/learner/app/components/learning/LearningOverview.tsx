@@ -19,6 +19,8 @@ import {
   durationOptions,
   sortOptions,
   courseHref,
+  learnerCareerGoal,
+  currentTermId,
 } from "./data";
 
 type CourseView = "table" | "cards";
@@ -620,7 +622,7 @@ function CourseLibraryView({
           <section>
             <div className="learning-library-filter-section-heading">
               <span>Recommendation</span>
-              <small>Tailored to Quantitative Engineer</small>
+              <small>Tailored to {learnerCareerGoal.title}</small>
             </div>
             <Button
               variant={recommendedOnly ? "secondary" : "outline"}
@@ -719,12 +721,12 @@ function CourseLibraryView({
 // ─── LearningOverview: thin coordinator ───────────────────────────────────
 
 export function LearningOverview() {
-  const [selectedTerm, setSelectedTerm] = useState("term-2");
+  const [selectedTerm, setSelectedTerm] = useState(currentTermId);
   const [learningView, setLearningView] = useState("curriculum");
   // One choice keeps every course collection in the learner's preferred format.
   const [courseView, setCourseView] = useState<CourseView>("cards");
   const [courseViewPreferenceLoaded, setCourseViewPreferenceLoaded] = useState(false);
-  const isCurrentTerm = selectedTerm === "term-2";
+  const isCurrentTerm = selectedTerm === currentTermId;
   const displayedCourses = isCurrentTerm ? currentTermCourses : previousTermCourses;
 
   useClientLayoutEffect(() => {
@@ -758,7 +760,7 @@ export function LearningOverview() {
         />
         <Link href="/progress" className="learning-goal-chip">
           <Icon name="Target" size="xs" />
-          <span>Quantitative Engineer</span>
+          <span>{learnerCareerGoal.title}</span>
           <Icon name="ArrowRight" size="xs" />
         </Link>
       </header>

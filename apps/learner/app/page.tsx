@@ -3,10 +3,7 @@
 import Link from "next/link";
 import { Icon } from "@bayesstack/ui";
 import { learnerIdentity } from "./components/learning/data";
-
-const courseProgress = 42;
-const weeklyCompleted = 3;
-const weeklyTotal = 4;
+import { homeDashboard } from "./components/workspace/data";
 
 function greeting(name: string | undefined): string {
   const hour = new Date().getHours();
@@ -19,22 +16,22 @@ export default function LearnerPage() {
     <main className="learner-home">
       <header className="learner-home__header">
         <div>
-          <p className="learner-eyebrow">Today</p>
+          <p className="learner-eyebrow">{homeDashboard.eyebrow}</p>
           <h1>{greeting(learnerIdentity.fullName)}</h1>
-          <p>Continue your course, review what is due, and keep your current work moving.</p>
+          <p>{homeDashboard.description}</p>
         </div>
       </header>
 
       <section className="learner-continue-card" aria-label="Continue your learning">
         <div className="learner-continue-card__copy">
           <p>Continue learning</p>
-          <h2>Reading evidence with confidence</h2>
-          <span>Evidence &amp; Decision Making &middot; Lesson 4 of 12 &middot; 18 min</span>
-          <Link href="/learning">Continue <Icon name="ArrowRight" size="sm" /></Link>
+          <h2>{homeDashboard.continueLearning.title}</h2>
+          <span>{homeDashboard.continueLearning.context}</span>
+          <Link href={homeDashboard.continueLearning.href}>Continue <Icon name="ArrowRight" size="sm" /></Link>
         </div>
-        <div className="learner-continue-card__progress" aria-label={`Course progress: ${courseProgress} percent complete`}>
-          <div><span>Course progress</span><strong>{courseProgress}%</strong></div>
-          <div className="learner-continue-progress-track"><span style={{ width: `${courseProgress}%` }} /></div>
+        <div className="learner-continue-card__progress" aria-label={`Course progress: ${homeDashboard.continueLearning.progress} percent complete`}>
+          <div><span>Course progress</span><strong>{homeDashboard.continueLearning.progress}%</strong></div>
+          <div className="learner-continue-progress-track"><span style={{ width: `${homeDashboard.continueLearning.progress}%` }} /></div>
         </div>
       </section>
 
@@ -46,28 +43,22 @@ export default function LearnerPage() {
               <Link href="/learning">View learning <Icon name="ArrowRight" size="xs" /></Link>
             </div>
             <div className="learner-action-list">
-              <Link className="learner-action-row" href="/labs">
-                <div><strong>Applied practice lab</strong><span>Evidence &amp; Decision Making &middot; 75 min</span></div>
-                <span className="learner-status learner-status--attention">Due tomorrow</span>
-              </Link>
-              <Link className="learner-action-row" href="/learning">
-                <div><strong>Review instructor feedback</strong><span>Regression assignment &middot; 3 comments</span></div>
-                <Icon name="ArrowRight" size="sm" />
-              </Link>
-              <Link className="learner-action-row" href="/discussions">
-                <div><strong>When is evidence strong enough to act on?</strong><span>Discussion &middot; 8 new replies</span></div>
-                <Icon name="ArrowRight" size="sm" />
-              </Link>
+              {homeDashboard.nextUp.map((item) => (
+                <Link key={item.id} className="learner-action-row" href={item.href}>
+                  <div><strong>{item.title}</strong><span>{item.detail}</span></div>
+                  {item.status ? <span className={`learner-status learner-status--${item.tone}`}>{item.status}</span> : <Icon name="ArrowRight" size="sm" />}
+                </Link>
+              ))}
             </div>
           </section>
 
           <section className="learner-home-section learner-project-section" aria-labelledby="current-project-title">
             <div className="learner-section-heading">
-              <div><p>Current project</p><h2 id="current-project-title">Decision map</h2></div>
-              <Link href="/projects">Open project <Icon name="ArrowRight" size="xs" /></Link>
+              <div><p>Current project</p><h2 id="current-project-title">{homeDashboard.currentProject.title}</h2></div>
+              <Link href={homeDashboard.currentProject.href}>Open project <Icon name="ArrowRight" size="xs" /></Link>
             </div>
-            <p>Capture the evidence behind a decision you need to make this week.</p>
-            <span>2 notes added &middot; Updated yesterday</span>
+            <p>{homeDashboard.currentProject.detail}</p>
+            <span>{homeDashboard.currentProject.meta}</span>
           </section>
         </div>
 
@@ -78,24 +69,22 @@ export default function LearnerPage() {
               <Link href="/calendar">Calendar</Link>
             </div>
             <div className="learner-schedule-list">
-              <div className="learner-schedule-row">
-                <time dateTime="2026-09-19"><strong>19</strong><span>Sep</span></time>
-                <div><strong>Applied practice lab</strong><span>Thursday &middot; 3:30 PM</span></div>
-              </div>
-              <div className="learner-schedule-row">
-                <time dateTime="2026-09-20"><strong>20</strong><span>Sep</span></time>
-                <div><strong>Project checkpoint</strong><span>Friday &middot; 11:00 AM</span></div>
-              </div>
+              {homeDashboard.schedule.map((item) => (
+                <div key={item.id} className="learner-schedule-row">
+                  <time dateTime={item.dateTime}><strong>{item.day}</strong><span>{item.month}</span></time>
+                  <div><strong>{item.title}</strong><span>{item.detail}</span></div>
+                </div>
+              ))}
             </div>
           </section>
 
           <section className="learner-rail-section" aria-labelledby="weekly-progress-title">
             <div className="learner-section-heading">
               <div><p>Course pace</p><h2 id="weekly-progress-title">This week</h2></div>
-              <strong className="learner-progress-value">{weeklyCompleted} of {weeklyTotal}</strong>
+              <strong className="learner-progress-value">{homeDashboard.weeklyCompleted} of {homeDashboard.weeklyTotal}</strong>
             </div>
-            <div className="learner-progress-bar"><span style={{ width: `${Math.round((weeklyCompleted / weeklyTotal) * 100)}%` }} /></div>
-            <p>One remaining learning block keeps you on pace for this course.</p>
+            <div className="learner-progress-bar"><span style={{ width: `${Math.round((homeDashboard.weeklyCompleted / homeDashboard.weeklyTotal) * 100)}%` }} /></div>
+            <p>{homeDashboard.paceMessage}</p>
             <Link className="learner-text-link" href="/progress">View progress <Icon name="ArrowRight" size="xs" /></Link>
           </section>
         </aside>

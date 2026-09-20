@@ -22,17 +22,21 @@ from typing import Any, Optional
 import uuid
 
 from sqlalchemy import (
+    BigInteger,
     Boolean,
+    CheckConstraint,
     Date,
     DateTime,
     Float,
     ForeignKey,
     ForeignKeyConstraint,
     Integer,
+    Index,
     JSON,
     String,
     Text,
     UniqueConstraint,
+    text,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
@@ -104,6 +108,9 @@ class CourseSection(Base):
     __table_args__ = (
         UniqueConstraint("course_offering_id", "section_code", name="uq_course_section_offering_code"),
         UniqueConstraint("tenant_id", "id", name="uq_course_section_tenant_id"),
+        UniqueConstraint(
+            "tenant_id", "course_offering_id", "id", name="uq_course_section_offering_consistent_tuple"
+        ),
         ForeignKeyConstraint(
             ["tenant_id", "course_offering_id"],
             ["course_offerings.tenant_id", "course_offerings.id"],
@@ -154,6 +161,7 @@ class Enrollment(Base):
     __table_args__ = (
         UniqueConstraint("course_section_id", "student_id", name="uq_section_enrollment_section_student"),
         UniqueConstraint("tenant_id", "id", name="uq_section_enrollment_tenant_id"),
+        UniqueConstraint("tenant_id", "id", "student_id", name="uq_enrollment_tenant_id_student"),
         ForeignKeyConstraint(
             ["tenant_id", "course_section_id"],
             ["course_sections.tenant_id", "course_sections.id"],
@@ -299,3 +307,251 @@ class StudentAcademicProfile(Base):
             "total_credits_earned": self.total_credits_earned,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
+
+
+# ============================================================================
+# Learner Experience State & Offering Attachments
+# ============================================================================
+
+class LearnerGoal(Base):
+    """Tenant-scoped learner goal used for recommendations and personal learning."""
+
+    __tablename__ = "learner_goals"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "id", name="uq_learner_goal_tenant_id"),
+        ForeignKeyConstraint(
+            ["tenant_id", "learner_id"],
+            ["tenant_memberships.tenant_id", "tenant_memberships.user_id"],
+            ondelete="CASCADE",
+        ),
+        Index(
+            "uq_learner_goal_primary",
+            "tenant_id",
+            "learner_id",
+            unique=True,
+            postgresql_where=text("is_primary"),
+            sqlite_where=text("is_primary = 1"),
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    learner_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    goal_type: Mapped[str] = mapped_column(String(32), default="career", nullable=False)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    status: Mapped[str] = mapped_column(String(32), default="active", nullable=False)
+    is_primary: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    target_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    metadata_: Mapped[dict[str, Any]] = mapped_column("metadata", JSON, default=dict, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False
+    )
+
+
+class PersonalCourseEnrollment(Base):
+    """A learner's self-directed enrollment in an immutable platform catalog course."""
+
+    __tablename__ = "personal_course_enrollments"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "id", name="uq_personal_course_enrollment_tenant_id"),
+        UniqueConstraint(
+            "tenant_id", "id", "learner_id", name="uq_personal_course_enrollment_tenant_id_learner"
+        ),
+        UniqueConstraint(
+            "tenant_id",
+            "learner_id",
+            "catalog_course_id",
+            "catalog_course_version",
+            name="uq_personal_course_enrollment_release",
+        ),
+        ForeignKeyConstraint(
+            ["tenant_id", "learner_id"],
+            ["tenant_memberships.tenant_id", "tenant_memberships.user_id"],
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["catalog_course_id", "catalog_course_version"],
+            ["catalog_courses.id", "catalog_courses.version"],
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["tenant_id", "goal_id"],
+            ["learner_goals.tenant_id", "learner_goals.id"],
+            ondelete="RESTRICT",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    learner_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    catalog_course_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    catalog_course_version: Mapped[int] = mapped_column(Integer, nullable=False)
+    goal_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True), nullable=True)
+    enrollment_status: Mapped[str] = mapped_column(String(32), default="active", nullable=False)
+    enrolled_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+    last_accessed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class LearnerActivityProgress(Base):
+    """Resume/completion state for any activity, separate from graded submissions.
+
+    Exactly one learning context is required: an academic section enrollment or
+    a self-directed personal course enrollment.
+    """
+
+    __tablename__ = "learner_activity_progress"
+    __table_args__ = (
+        CheckConstraint(
+            "(enrollment_id IS NOT NULL AND personal_course_enrollment_id IS NULL) OR "
+            "(enrollment_id IS NULL AND personal_course_enrollment_id IS NOT NULL)",
+            name="ck_activity_progress_exactly_one_context",
+        ),
+        CheckConstraint(
+            "progress_percent >= 0 AND progress_percent <= 100",
+            name="ck_activity_progress_percent_range",
+        ),
+        CheckConstraint(
+            "progress_seconds >= 0",
+            name="ck_activity_progress_seconds_nonnegative",
+        ),
+        ForeignKeyConstraint(
+            ["tenant_id", "enrollment_id", "learner_id"],
+            ["enrollments.tenant_id", "enrollments.id", "enrollments.student_id"],
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["tenant_id", "personal_course_enrollment_id", "learner_id"],
+            [
+                "personal_course_enrollments.tenant_id",
+                "personal_course_enrollments.id",
+                "personal_course_enrollments.learner_id",
+            ],
+            ondelete="CASCADE",
+        ),
+        Index(
+            "uq_activity_progress_academic_context",
+            "enrollment_id",
+            "source_type",
+            "activity_id",
+            "activity_version",
+            unique=True,
+            postgresql_where=text("enrollment_id IS NOT NULL"),
+            sqlite_where=text("enrollment_id IS NOT NULL"),
+        ),
+        Index(
+            "uq_activity_progress_personal_context",
+            "personal_course_enrollment_id",
+            "source_type",
+            "activity_id",
+            "activity_version",
+            unique=True,
+            postgresql_where=text("personal_course_enrollment_id IS NOT NULL"),
+            sqlite_where=text("personal_course_enrollment_id IS NOT NULL"),
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id: Mapped[str] = mapped_column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    learner_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    enrollment_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True), nullable=True)
+    personal_course_enrollment_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True), nullable=True)
+    source_type: Mapped[str] = mapped_column(String(32), default="catalog", nullable=False)
+    activity_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    activity_version: Mapped[str] = mapped_column(String(16), default="1.0.0", nullable=False)
+    activity_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    progress_status: Mapped[str] = mapped_column(String(32), default="not_started", nullable=False)
+    progress_percent: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    progress_seconds: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    resume_state: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
+    bookmarked_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    started_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_accessed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False
+    )
+
+
+class CourseScheduleEvent(Base):
+    """Dated class, lab, deadline, or office-hours event for a course offering."""
+
+    __tablename__ = "course_schedule_events"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "id", name="uq_course_schedule_event_tenant_id"),
+        CheckConstraint(
+            "ends_at IS NULL OR ends_at >= starts_at",
+            name="ck_course_schedule_event_valid_window",
+        ),
+        ForeignKeyConstraint(
+            ["tenant_id", "course_offering_id"],
+            ["course_offerings.tenant_id", "course_offerings.id"],
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["tenant_id", "course_offering_id", "course_section_id"],
+            ["course_sections.tenant_id", "course_sections.course_offering_id", "course_sections.id"],
+            ondelete="CASCADE",
+        ),
+        Index("ix_course_schedule_event_window", "tenant_id", "starts_at", "ends_at"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    course_offering_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    course_section_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True), nullable=True)
+    event_type: Mapped[str] = mapped_column(String(32), default="class", nullable=False)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    ends_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    all_day: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    location: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    meeting_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    metadata_: Mapped[dict[str, Any]] = mapped_column("metadata", JSON, default=dict, nullable=False)
+    created_by_user_id: Mapped[Optional[str]] = mapped_column(
+        String(64), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False
+    )
+
+
+class CourseOfferingResource(Base):
+    """Supplemental resource attached to one immutable term offering."""
+
+    __tablename__ = "course_offering_resources"
+    __table_args__ = (
+        UniqueConstraint(
+            "course_offering_id", "position", name="uq_course_offering_resource_position"
+        ),
+        CheckConstraint(
+            "expires_at IS NULL OR available_from IS NULL OR expires_at >= available_from",
+            name="ck_course_offering_resource_valid_window",
+        ),
+        CheckConstraint("position > 0", name="ck_course_offering_resource_positive_position"),
+        ForeignKeyConstraint(
+            ["tenant_id", "course_offering_id"],
+            ["course_offerings.tenant_id", "course_offerings.id"],
+            ondelete="CASCADE",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    course_offering_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    resource_type: Mapped[str] = mapped_column(String(32), default="link", nullable=False)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    resource_url: Mapped[str] = mapped_column(Text, nullable=False)
+    position: Mapped[int] = mapped_column(BigInteger, default=1_000_000, nullable=False)
+    metadata_: Mapped[dict[str, Any]] = mapped_column("metadata", JSON, default=dict, nullable=False)
+    available_from: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_by_user_id: Mapped[Optional[str]] = mapped_column(
+        String(64), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)

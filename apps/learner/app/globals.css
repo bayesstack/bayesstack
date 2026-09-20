@@ -15,6 +15,9 @@
 /* Stub / placeholder pages ──────────────────────────────────────────────── */
 @import "./styles/stub.css";
 
+/* Learner product workspaces: labs, projects, community, plan and evidence */
+@import "./styles/workspaces.css";
+
 /* Learning: shared course card primitives ───────────────────────────────── */
 @import "./styles/learning/shared.css";
 

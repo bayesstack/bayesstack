@@ -4,134 +4,46 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Button, Drawer, Icon } from "@bayesstack/ui";
 import { ProgressBar } from "./ui/Primitives";
-import { codingStudioPath, videoStudioPath } from "./data";
+import {
+  activityHref,
+  getChapterProgress,
+  getConceptProgress,
+  machineLearningActivityContexts,
+  machineLearningCourse,
+  type CourseChapter,
+  type CourseConcept,
+  type CourseWorkspaceRecord,
+} from "./courseContent";
+import { useCourseProgress } from "./courseProgress";
 
-type ConceptState = "complete" | "active" | "upcoming";
-type ChapterState = "complete" | "current" | "ahead";
-
-interface Concept {
-  id: string;
-  title: string;
-  state: ConceptState;
-  duration: string;
-  activities?: StudioActivity[];
-}
-
-type StudioActivityType = "video" | "coding";
-
-interface StudioActivity {
-  id: string;
-  title: string;
-  duration: string;
-  type: StudioActivityType;
-}
-
-interface Chapter {
-  id: string;
-  title: string;
-  description: string;
-  state: ChapterState;
-  progress: string;
-  concepts: Concept[];
-}
-
-const chapters: Chapter[] = [
-  {
-    id: "foundations",
-    title: "Foundations and linear models",
-    description: "Build reliable baselines by framing prediction tasks, preparing data, and interpreting simple models.",
-    state: "complete",
-    progress: "10 / 10",
-    concepts: [
-      { id: "problem-framing", title: "Problem framing", state: "complete", duration: "8 min" },
-      { id: "loss-functions", title: "Loss functions", state: "complete", duration: "12 min" },
-      {
-        id: "linear-regression",
-        title: "Linear regression",
-        state: "complete",
-        duration: "10 min",
-        activities: [
-          { id: "video", title: "Video lesson", duration: "14 min", type: "video" },
-          { id: "coding", title: "Model walkthrough", duration: "16 min", type: "coding" },
-          { id: "review", title: "Worked review", duration: "8 min", type: "video" },
-        ],
-      },
-      { id: "logistic-regression", title: "Logistic regression", state: "complete", duration: "11 min" },
-      { id: "decision-boundaries", title: "Decision boundaries", state: "complete", duration: "9 min" },
-      { id: "evaluation-metrics", title: "Evaluation metrics", state: "complete", duration: "14 min" },
-      { id: "feature-scaling", title: "Feature scaling", state: "complete", duration: "10 min" },
-      { id: "data-splits", title: "Data splits", state: "complete", duration: "9 min" },
-      { id: "feature-encoding", title: "Feature encoding", state: "complete", duration: "11 min" },
-      { id: "model-diagnostics", title: "Model diagnostics", state: "complete", duration: "12 min" },
-    ],
-  },
-  {
-    id: "optimisation",
-    title: "Optimisation for learning",
-    description: "See how models improve step by step, then make deliberate choices about stable and efficient training.",
-    state: "current",
-    progress: "0 / 6",
-    concepts: [
-      {
-        id: "gradient-descent",
-        title: "Gradient descent",
-        state: "active",
-        duration: "18 min",
-        activities: [
-          { id: "video", title: "Video lesson", duration: "12 min", type: "video" },
-          { id: "coding", title: "Coding exercise", duration: "18 min", type: "coding" },
-        ],
-      },
-      { id: "loss-landscapes", title: "Loss landscapes", state: "upcoming", duration: "8 min" },
-      { id: "gradient-checks", title: "Gradient checks", state: "upcoming", duration: "11 min" },
-      { id: "batch-optimisation", title: "Batch optimisation", state: "upcoming", duration: "13 min" },
-      { id: "lr-schedules", title: "Learning-rate schedules", state: "upcoming", duration: "11 min" },
-      { id: "momentum-adam", title: "Momentum and Adam", state: "upcoming", duration: "14 min" },
-    ],
-  },
-  {
-    id: "generalisation",
-    title: "Generalisation and model selection",
-    description: "Learn to validate choices and build models that remain dependable beyond the training data.",
-    state: "ahead",
-    progress: "0 / 8",
-    concepts: [
-      { id: "regularisation", title: "Regularisation", state: "upcoming", duration: "13 min" },
-      { id: "cross-validation", title: "Cross-validation", state: "upcoming", duration: "10 min" },
-      { id: "bias-variance", title: "Bias–variance tradeoff", state: "upcoming", duration: "12 min" },
-      { id: "model-selection", title: "Model selection", state: "upcoming", duration: "11 min" },
-      { id: "ensemble-methods", title: "Ensemble methods", state: "upcoming", duration: "15 min" },
-      { id: "feature-engineering", title: "Feature engineering", state: "upcoming", duration: "13 min" },
-      { id: "pipeline", title: "Pipeline and deployment", state: "upcoming", duration: "14 min" },
-      { id: "reproducibility", title: "Reproducibility", state: "upcoming", duration: "9 min" },
-    ],
-  },
-];
-
-const defaultActivities: StudioActivity[] = [
-  { id: "video", title: "Video lesson", duration: "12 min", type: "video" },
-  { id: "coding", title: "Coding exercise", duration: "18 min", type: "coding" },
-];
-
-function ActivityStepper({ concept }: { concept: Concept }) {
-  const activities = concept.activities ?? defaultActivities;
+function ActivityStepper({
+  concept,
+  completedActivityIds,
+}: {
+  concept: CourseConcept;
+  completedActivityIds: ReadonlySet<string>;
+}) {
+  const activities = concept.activities;
 
   return (
     <ol className={`learning-concept-activity-stepper is-${activities.length}-step`} aria-label={`${concept.title} studio activities`}>
       {activities.map((activity) => {
-        const href = activity.type === "video" ? videoStudioPath : codingStudioPath;
+        const href = activityHref(activity.id);
         const typeLabel = activity.type === "video" ? "Video" : "Coding";
         const iconName = activity.type === "video" ? "Video" : "Code";
+        const complete = completedActivityIds.has(activity.id);
 
         return (
           <li key={activity.id}>
             <Link href={href} aria-label={`${activity.title}, ${typeLabel}, ${activity.duration}`}>
-              <span className={`learning-concept-activity-marker is-${activity.type}`}><Icon name={iconName} size="sm" /></span>
+              <span className={`learning-concept-activity-marker is-${activity.type} ${complete ? "is-complete" : ""}`}>
+                <Icon name={complete ? "Check" : iconName} size="sm" />
+              </span>
               <span className="learning-concept-activity-copy">
                 <strong>{activity.title}</strong>
                 <small>{activity.duration}</small>
               </span>
-              <Icon name="ArrowRight" size="xs" />
+              {complete ? <small className="learning-concept-activity-status">Complete</small> : <Icon name="ArrowRight" size="xs" />}
             </Link>
           </li>
         );
@@ -145,16 +57,20 @@ function ConceptRow({
   position,
   expanded,
   onToggle,
+  completedActivityIds,
 }: {
-  concept: Concept;
+  concept: CourseConcept;
   position: number;
   expanded: boolean;
   onToggle: () => void;
+  completedActivityIds: ReadonlySet<string>;
 }) {
-  const className = concept.state === "active" ? "learning-chapter-concept-active" : `learning-chapter-concept-row is-${concept.state}`;
+  const progress = getConceptProgress(concept, completedActivityIds);
+  const state = progress.isComplete ? "complete" : concept.state;
+  const className = state === "active" ? "learning-chapter-concept-active" : `learning-chapter-concept-row is-${state}`;
 
   return (
-    <div className={`learning-concept-activity-group ${concept.state === "active" ? "is-active" : ""}`}>
+    <div className={`learning-concept-activity-group ${state === "active" ? "is-active" : ""}`}>
       <button
         type="button"
         className={`${className} ${expanded ? "is-expanded" : ""}`}
@@ -164,10 +80,14 @@ function ConceptRow({
       >
         <i>{position}</i>
         <strong>{concept.title}</strong>
-        <small>{concept.state === "complete" ? concept.duration : concept.duration}</small>
+        <small>{progress.completed}/{progress.total} · {concept.duration}</small>
         <Icon name="ChevronDown" size="xs" />
       </button>
-      {expanded && <div id={`${concept.id}-activities`}><ActivityStepper concept={concept} /></div>}
+      {expanded && (
+        <div id={`${concept.id}-activities`}>
+          <ActivityStepper concept={concept} completedActivityIds={completedActivityIds} />
+        </div>
+      )}
     </div>
   );
 }
@@ -179,16 +99,20 @@ function ChapterBlock({
   onToggle,
   expandedConceptId,
   onToggleConcept,
+  completedActivityIds,
 }: {
-  chapter: Chapter;
+  chapter: CourseChapter;
   number: number;
   expanded: boolean;
   onToggle: () => void;
   expandedConceptId: string | null;
   onToggleConcept: (conceptId: string) => void;
+  completedActivityIds: ReadonlySet<string>;
 }) {
+  const progress = getChapterProgress(chapter, completedActivityIds);
+  const state = progress.completed === progress.total ? "complete" : chapter.state;
   return (
-    <section className={`learning-chapter-block is-${chapter.state}`}>
+    <section className={`learning-chapter-block is-${state}`}>
       <button
         type="button"
         className="learning-chapter-block-header"
@@ -200,7 +124,7 @@ function ChapterBlock({
         <span className="learning-chapter-block-title">
           <strong>{chapter.title}</strong>
         </span>
-        <span className={`learning-chapter-chip is-${chapter.state}`}>{chapter.progress}</span>
+        <span className={`learning-chapter-chip is-${state}`}>{progress.completed} / {progress.total}</span>
         <Icon name="ChevronDown" size="sm" />
       </button>
 
@@ -215,6 +139,7 @@ function ChapterBlock({
               position={index + 1}
               expanded={expandedConceptId === concept.id}
               onToggle={() => onToggleConcept(concept.id)}
+              completedActivityIds={completedActivityIds}
             />
           ))}
         </div>
@@ -223,47 +148,61 @@ function ChapterBlock({
   );
 }
 
-function CourseDetailsDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
+function CourseDetailsDrawer({
+  open,
+  onClose,
+  completedConcepts,
+  totalConcepts,
+  course,
+}: {
+  open: boolean;
+  onClose: () => void;
+  completedConcepts: number;
+  totalConcepts: number;
+  course: CourseWorkspaceRecord;
+}) {
+  const progressPercent = Math.round((completedConcepts / totalConcepts) * 100);
   return (
     <Drawer
       open={open}
       onClose={onClose}
       size="md"
       title="Course details"
-      subtitle="Machine Learning · ML 401"
+      subtitle={`${course.name} · ${course.code}`}
       className="learning-course-details-drawer"
     >
       <div className="learning-course-details-content">
         <section className="learning-course-details-summary">
-          <span className="learning-course-details-code">ML 401</span>
-          <h2>Machine Learning</h2>
-          <p>Build practical intuition for supervised learning, optimisation, and model evaluation.</p>
+          <span className="learning-course-details-code">{course.code}</span>
+          <h2>{course.name}</h2>
+          <p>{course.description}</p>
         </section>
 
         <section className="learning-course-details-section">
           <h3>At a glance</h3>
           <dl className="learning-course-details-list">
-            <div><dt>Instructor</dt><dd>Prof. N. Rao</dd></div>
-            <div><dt>Term</dt><dd>Spring 2026</dd></div>
-            <div><dt>Credits</dt><dd>4 credits</dd></div>
-            <div><dt>Department</dt><dd>Computer Science</dd></div>
+            <div><dt>Instructor</dt><dd>{course.instructor.name}</dd></div>
+            <div><dt>Term</dt><dd>{course.termLabel}</dd></div>
+            <div><dt>Credits</dt><dd>{course.credits} credits</dd></div>
+            <div><dt>Department</dt><dd>{course.department}</dd></div>
           </dl>
         </section>
 
         <section className="learning-course-details-section">
           <div className="learning-course-details-section-heading">
             <h3>Learning progress</h3>
-            <strong>42%</strong>
+            <strong>{progressPercent}%</strong>
           </div>
-          <ProgressBar value={42} />
-          <p>10 of 24 concepts completed. You are on track for this week.</p>
+          <ProgressBar value={progressPercent} />
+          <p>{completedConcepts} of {totalConcepts} concepts completed. You are {course.status.label.toLowerCase()} for this week.</p>
         </section>
 
         <section className="learning-course-details-section">
           <h3>Course resources</h3>
           <div className="learning-course-details-links">
-            <a href="#syllabus">Syllabus <Icon name="ArrowRight" size="xs" /></a>
-            <a href="#notes">Course notes <Icon name="ArrowRight" size="xs" /></a>
+            {course.detailLinks.map((link) => (
+              <a key={link.id} href={link.href}>{link.title} <Icon name="ArrowRight" size="xs" /></a>
+            ))}
           </div>
         </section>
       </div>
@@ -272,9 +211,14 @@ function CourseDetailsDrawer({ open, onClose }: { open: boolean; onClose: () => 
 }
 
 export function CourseWorkspace() {
+  const course = machineLearningCourse;
+  const progress = useCourseProgress();
+  const nextActivity = machineLearningActivityContexts.find(({ activity }) => !progress.completedActivityIds.has(activity.id))
+    ?? machineLearningActivityContexts[machineLearningActivityContexts.length - 1];
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [expandedChapters, setExpandedChapters] = useState<string[]>(["optimisation"]);
-  const [expandedConceptId, setExpandedConceptId] = useState<string | null>("gradient-descent");
+  const [expandedChapters, setExpandedChapters] = useState<string[]>([nextActivity.chapter.id]);
+  const [expandedConceptId, setExpandedConceptId] = useState<string | null>(nextActivity.concept.id);
+  const courseProgressPercent = Math.round((progress.completedConcepts / progress.totalConcepts) * 100);
 
   const toggleChapter = (chapterId: string) => {
     setExpandedChapters((current) => (
@@ -292,11 +236,11 @@ export function CourseWorkspace() {
     <main className="learning-workspace learning-course-page">
       <header className="learning-course-page-header">
         <div className="learning-course-page-identity">
-          <span className="learning-course-page-code">ML 401</span>
-          <h1>Machine Learning</h1>
+          <span className="learning-course-page-code">{course.code}</span>
+          <h1>{course.name}</h1>
         </div>
         <div className="learning-course-page-meta">
-          <span>Prof. N. Rao · Computer Science · 4 credits · Spring 2026</span>
+          <span>{course.instructor.name} · {course.department} · {course.credits} credits · {course.termLabel}</span>
           <Button variant="link" size="sm" leftIcon="InfoCircle" onClick={() => setDetailsOpen(true)}>
             More details
           </Button>
@@ -305,16 +249,16 @@ export function CourseWorkspace() {
 
       <article className="learning-course-activity-card" aria-labelledby="current-activity-title">
         <div className="learning-course-activity-eyebrow">
-          <span><Icon name="PlayCircle" size="xs" /> Next activity · Chapter 2: Optimisation</span>
-          <span className="learning-course-activity-duration">18 min</span>
+          <span><Icon name="PlayCircle" size="xs" /> Next activity · Chapter {nextActivity.chapterIndex + 1}: {nextActivity.chapter.title}</span>
+          <span className="learning-course-activity-duration">{nextActivity.activity.duration}</span>
         </div>
-        <h2 id="current-activity-title">Gradient descent</h2>
-        <p>Trace the update rule in an annotated notebook and identify how the learning rate changes each step.</p>
+        <h2 id="current-activity-title">{nextActivity.activity.title}</h2>
+        <p>Continue {nextActivity.concept.title.toLowerCase()} in the {nextActivity.activity.type === "video" ? "guided lesson" : "hands-on coding studio"}. Your place is saved automatically.</p>
         <div className="learning-course-activity-footer">
-          <Link href={videoStudioPath} className="bs-button bs-button--variant-primary bs-button--size-md learning-course-resume-action">
+          <Link href={activityHref(nextActivity.activity.id)} className="bs-button bs-button--variant-primary bs-button--size-md learning-course-resume-action">
             Resume activity <Icon name="ArrowRight" size="sm" />
           </Link>
-          <span className="learning-course-activity-obligation"><Icon name="Calendar" size="xs" /> Applied lab · Thursday, 3:30 PM</span>
+          <span className="learning-course-activity-obligation"><Icon name="Calendar" size="xs" /> {course.nextObligation}</span>
         </div>
       </article>
 
@@ -323,7 +267,7 @@ export function CourseWorkspace() {
           <div className="learning-course-section-heading">
             <h2 id="learning-path-heading">Learning path</h2>
           </div>
-          {chapters.map((chapter, index) => (
+          {course.chapters.map((chapter, index) => (
             <ChapterBlock
               key={chapter.id}
               chapter={chapter}
@@ -332,6 +276,7 @@ export function CourseWorkspace() {
               onToggle={() => toggleChapter(chapter.id)}
               expandedConceptId={expandedConceptId}
               onToggleConcept={toggleConcept}
+              completedActivityIds={progress.completedActivityIds}
             />
           ))}
         </section>
@@ -340,42 +285,52 @@ export function CourseWorkspace() {
           <section className="learning-course-context-section learning-course-schedule-section">
             <div className="learning-course-context-heading">
               <p className="learning-course-context-label">Schedule</p>
-              <Link href="/calendar" aria-label="View calendar"><Icon name="Calendar" size="xs" /></Link>
+              <Link href={course.schedule[0]?.href ?? "/calendar"} aria-label="View calendar"><Icon name="Calendar" size="xs" /></Link>
             </div>
-            <Link href="/calendar" className="learning-course-schedule-event">
-              <time dateTime="2026-09-24"><span>Thu</span><strong>24</strong></time>
-              <span>
-                <strong>Applied practice lab</strong>
-                <small>3:30 PM · Bring the gradient descent notebook</small>
-              </span>
-              <Icon name="ArrowRight" size="xs" />
-            </Link>
-            <Link href="/calendar" className="learning-course-schedule-note">
-              <Icon name="Calendar" size="xs" />
-              <span><strong>Office hours</strong><small>Wednesday · 2:00 PM · Prof. N. Rao</small></span>
-            </Link>
+            {course.schedule.map((scheduleItem) => scheduleItem.featured ? (
+              <Link key={scheduleItem.id} href={scheduleItem.href} className="learning-course-schedule-event">
+                <time dateTime={scheduleItem.dateTime}><span>{scheduleItem.dayLabel}</span><strong>{scheduleItem.dayNumber}</strong></time>
+                <span><strong>{scheduleItem.title}</strong><small>{scheduleItem.detail}</small></span>
+                <Icon name="ArrowRight" size="xs" />
+              </Link>
+            ) : (
+              <Link key={scheduleItem.id} href={scheduleItem.href} className="learning-course-schedule-note">
+                <Icon name={scheduleItem.icon} size="xs" />
+                <span><strong>{scheduleItem.title}</strong><small>{scheduleItem.detail}</small></span>
+              </Link>
+            ))}
           </section>
 
           <section className="learning-course-context-section">
             <p className="learning-course-context-label">Resources</p>
             <div className="learning-course-resource-list">
-              <a href="#syllabus"><Icon name="File" size="sm" /><span>Course syllabus<small>PDF · Updated Sep 2</small></span><Icon name="ArrowRight" size="xs" /></a>
-              <a href="#notes"><Icon name="BookOpen" size="sm" /><span>Optimisation reference<small>18 pages · Faculty authored</small></span><Icon name="ArrowRight" size="xs" /></a>
-              <a href="#recording"><Icon name="Video" size="sm" /><span>Lecture 04 recording<small>52 min · Sep 8</small></span><Icon name="ArrowRight" size="xs" /></a>
+              {course.resources.map((resource) => (
+                <a key={resource.id} href={resource.href}>
+                  <Icon name={resource.icon} size="sm" />
+                  <span>{resource.title}<small>{resource.detail}</small></span>
+                  <Icon name="ArrowRight" size="xs" />
+                </a>
+              ))}
             </div>
           </section>
 
           <section className="learning-course-context-section">
             <div className="learning-course-context-heading">
               <p className="learning-course-context-label">Progress</p>
-              <strong className="learning-course-pace-value">42%</strong>
+              <strong className="learning-course-pace-value">{courseProgressPercent}%</strong>
             </div>
-            <div className="learning-course-pace"><strong>On track</strong><small>Week 7 of 14 · 6% ahead of schedule</small><ProgressBar value={42} /></div>
+            <div className="learning-course-pace"><strong>{course.status.label}</strong><small>{progress.completedConcepts} of {progress.totalConcepts} concepts · {course.weekLabel} · {course.paceDetail}</small><ProgressBar value={courseProgressPercent} /></div>
           </section>
         </aside>
       </div>
 
-      <CourseDetailsDrawer open={detailsOpen} onClose={() => setDetailsOpen(false)} />
+      <CourseDetailsDrawer
+        open={detailsOpen}
+        onClose={() => setDetailsOpen(false)}
+        completedConcepts={progress.completedConcepts}
+        totalConcepts={progress.totalConcepts}
+        course={course}
+      />
     </main>
   );
 }

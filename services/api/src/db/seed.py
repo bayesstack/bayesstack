@@ -17,16 +17,34 @@ from sqlalchemy import select
 from core.database import AsyncSessionLocal, engine, Base, ensure_legacy_postgres_schema
 from db.models import (
     AcademicTerm,
+    AssignmentMilestone,
     AssessmentSubmission,
+    CapabilityEvidence,
     CourseGrade,
     CourseOffering,
+    CourseOfferingResource,
     CoursePublication,
+    CourseScheduleEvent,
     CourseSection,
+    DiscussionPost,
+    DiscussionReaction,
+    DiscussionThread,
+    LearnerAssignmentState,
+    LearnerActivityProgress,
+    LearnerCalendarBlock,
+    LearnerGoal,
+    LearnerPreference,
+    LearningAssignment,
     LearningProgress,
     Enrollment,
+    PersonalCourseEnrollment,
+    ProjectArtifact,
+    ProjectTeam,
+    ProjectTeamMember,
     SectionStaff,
     StudentAcademicProfile,
     StudioAsset,
+    SupportRequest,
     Tenant,
     TenantMembership,
     TenantRole,
@@ -177,6 +195,149 @@ async def seed_content_catalog(session):
         CatalogProgram.id == "AI-ML-FOUNDATIONS",
         CatalogProgram.version == 1,
     )
+
+    # Learner-library fixtures mirror the current variable-backed UI. These
+    # are catalog definitions, not learner state; enrollment and progress are
+    # seeded later in their tenant-scoped operational tables.
+    learner_library_courses = [
+        ("FIN-210", "FIN 210", "Financial Markets & Instruments", "intermediate", 3, "Build a practical view of financial products, market structure, and the forces that move prices.", "finance", 18),
+        ("CS-245", "CS 245", "Python for Quantitative Research", "intermediate", 3, "Use Python to collect, test, and communicate evidence from financial and research data.", "computer-science", 20),
+        ("FIN-320", "FIN 320", "Financial Engineering Foundations", "intermediate", 4, "Build derivatives and pricing knowledge for quantitative finance.", "finance", 24),
+        ("STAT-330", "STAT 330", "Time Series for Financial Markets", "intermediate", 4, "Apply forecasting methods to financial market data.", "statistics", 18),
+        ("MATH-315", "MATH 315", "Numerical Methods for Quant Finance", "advanced", 4, "Apply numerical methods to pricing, simulation, and portfolio risk.", "mathematics", 20),
+        ("FIN-305", "FIN 305", "Risk Models and Portfolio Construction", "intermediate", 4, "Measure market risk and construct portfolios under practical constraints.", "finance", 16),
+        ("STAT-350", "STAT 350", "Stochastic Processes in Practice", "advanced", 4, "Model uncertain systems with Markov chains and continuous-time processes.", "statistics", 22),
+        ("MATH-340", "MATH 340", "Convex Optimisation", "advanced", 4, "Develop optimisation techniques used in allocation and machine learning.", "mathematics", 19),
+        ("CS-270", "CS 270", "Data Pipelines for Research", "intermediate", 3, "Build reliable pipelines for high-frequency and alternative datasets.", "computer-science", 14),
+        ("ECON-280", "ECON 280", "Applied Econometrics", "intermediate", 4, "Estimate causal and predictive models using economic and market data.", "economics", 21),
+    ]
+    for course_id, code, title, difficulty, credits, description, subject, hours in learner_library_courses:
+        await _add_if_missing(
+            session,
+            CatalogCourse,
+            {
+                "id": course_id,
+                "version": 1,
+                "code": code,
+                "title": title,
+                "slug": course_id.lower(),
+                "description": description,
+                "difficulty": difficulty,
+                "credits": credits,
+                "content_status": "published",
+                "release_channel": "stable",
+                "content": {
+                    "subject": subject,
+                    "estimated_hours": hours,
+                    "provider": "Bayes curated",
+                },
+            },
+            CatalogCourse.id == course_id,
+            CatalogCourse.version == 1,
+        )
+    await session.flush()
+
+    personal_course_content = (
+        {
+            "course_id": "FIN-210",
+            "chapter_id": "CH-FIN-210-FIXED-INCOME",
+            "chapter_title": "Fixed-income foundations",
+            "concept_id": "C-FIN-210-YIELD-CURVES",
+            "concept_title": "Yield curves and duration",
+            "activity_id": "FIN-210-YIELD-CURVES",
+            "activity_type": "video",
+            "activity_title": "Yield curves and duration",
+            "estimated_minutes": 18,
+        },
+        {
+            "course_id": "CS-245",
+            "chapter_id": "CH-CS-245-BACKTESTING",
+            "chapter_title": "Portfolio backtesting",
+            "concept_id": "C-CS-245-TRANSACTION-COSTS",
+            "concept_title": "Transaction-cost modelling",
+            "activity_id": "CS-245-TRANSACTION-COSTS",
+            "activity_type": "coding",
+            "activity_title": "Model transaction costs",
+            "estimated_minutes": 24,
+        },
+    )
+    for item in personal_course_content:
+        await _add_if_missing(
+            session,
+            CatalogChapter,
+            {
+                "id": item["chapter_id"],
+                "version": 1,
+                "code": item["chapter_id"],
+                "title": item["chapter_title"],
+                "slug": item["chapter_id"].lower(),
+                "estimated_minutes": item["estimated_minutes"],
+                "content_status": "published",
+            },
+            CatalogChapter.id == item["chapter_id"],
+            CatalogChapter.version == 1,
+        )
+        await _add_if_missing(
+            session,
+            CatalogConcept,
+            {
+                "id": item["concept_id"],
+                "version": 1,
+                "code": item["concept_id"],
+                "title": item["concept_title"],
+                "slug": item["concept_id"].lower(),
+                "topic_category": "finance" if item["course_id"].startswith("FIN") else "programming",
+                "estimated_minutes": item["estimated_minutes"],
+                "content_status": "published",
+            },
+            CatalogConcept.id == item["concept_id"],
+            CatalogConcept.version == 1,
+        )
+        await session.flush()
+        await _add_if_missing(
+            session,
+            CatalogCourseChapter,
+            {
+                "course_id": item["course_id"],
+                "course_version": 1,
+                "chapter_id": item["chapter_id"],
+                "chapter_version": 1,
+                "position": 1_000_000,
+            },
+            CatalogCourseChapter.course_id == item["course_id"],
+            CatalogCourseChapter.course_version == 1,
+            CatalogCourseChapter.position == 1_000_000,
+        )
+        await _add_if_missing(
+            session,
+            CatalogChapterConcept,
+            {
+                "chapter_id": item["chapter_id"],
+                "chapter_version": 1,
+                "concept_id": item["concept_id"],
+                "concept_version": 1,
+                "position": 1_000_000,
+            },
+            CatalogChapterConcept.chapter_id == item["chapter_id"],
+            CatalogChapterConcept.chapter_version == 1,
+            CatalogChapterConcept.position == 1_000_000,
+        )
+        await _add_if_missing(
+            session,
+            CatalogActivity,
+            {
+                "id": item["activity_id"],
+                "concept_id": item["concept_id"],
+                "concept_version": 1,
+                "activity_type": item["activity_type"],
+                "activity_version": "1.0.0",
+                "position": 1_000_000,
+                "is_required": True,
+                "title": item["activity_title"],
+                "config_summary": {"estimated_minutes": item["estimated_minutes"]},
+            },
+            CatalogActivity.id == item["activity_id"],
+        )
     await session.flush()
 
     await _add_if_missing(
@@ -782,6 +943,448 @@ async def seed_academic_operations(session):
             },
             StudentAcademicProfile.tenant_id == "tenant-bayes",
             StudentAcademicProfile.student_id == "user-bayes-learner",
+        )
+
+        # Learner-facing, mutable state. UI status badges are intentionally not
+        # stored; they are derived from these timestamps and progress records.
+        learner_goal = await _add_if_missing(
+            session,
+            LearnerGoal,
+            {
+                "tenant_id": "tenant-bayes",
+                "learner_id": "user-bayes-learner",
+                "goal_type": "career",
+                "title": "Quantitative Engineer",
+                "description": "Build the mathematics, finance, and research engineering skills required for quantitative roles.",
+                "status": "active",
+                "is_primary": True,
+                "metadata_": {"recommended_subjects": ["finance", "statistics", "mathematics", "computer-science"]},
+            },
+            LearnerGoal.tenant_id == "tenant-bayes",
+            LearnerGoal.learner_id == "user-bayes-learner",
+            LearnerGoal.is_primary.is_(True),
+        )
+
+        personal_enrollments = {}
+        for course_id in ("FIN-210", "CS-245"):
+            personal_enrollments[course_id] = await _add_if_missing(
+                session,
+                PersonalCourseEnrollment,
+                {
+                    "tenant_id": "tenant-bayes",
+                    "learner_id": "user-bayes-learner",
+                    "catalog_course_id": course_id,
+                    "catalog_course_version": 1,
+                    "goal_id": learner_goal.id,
+                    "enrollment_status": "active",
+                    "last_accessed_at": datetime(2026, 9, 21, 8, 0, 0, tzinfo=timezone.utc),
+                },
+                PersonalCourseEnrollment.tenant_id == "tenant-bayes",
+                PersonalCourseEnrollment.learner_id == "user-bayes-learner",
+                PersonalCourseEnrollment.catalog_course_id == course_id,
+                PersonalCourseEnrollment.catalog_course_version == 1,
+            )
+
+        await _add_if_missing(
+            session,
+            LearnerActivityProgress,
+            {
+                "tenant_id": "tenant-bayes",
+                "learner_id": "user-bayes-learner",
+                "enrollment_id": enrollment.id,
+                "source_type": "catalog",
+                "activity_id": "SI-GRADIENT-DESCENT-VIDEO-V1",
+                "activity_version": "v1",
+                "activity_type": "video",
+                "progress_status": "completed",
+                "progress_percent": 100.0,
+                "progress_seconds": 720,
+                "resume_state": {"playback_seconds": 720, "playback_rate": 1.0},
+                "started_at": datetime(2026, 9, 21, 7, 45, 0, tzinfo=timezone.utc),
+                "completed_at": datetime(2026, 9, 21, 8, 0, 0, tzinfo=timezone.utc),
+                "last_accessed_at": datetime(2026, 9, 21, 8, 0, 0, tzinfo=timezone.utc),
+            },
+            LearnerActivityProgress.enrollment_id == enrollment.id,
+            LearnerActivityProgress.source_type == "catalog",
+            LearnerActivityProgress.activity_id == "SI-GRADIENT-DESCENT-VIDEO-V1",
+            LearnerActivityProgress.activity_version == "v1",
+        )
+
+        for course_id, activity_id, activity_type, percent, seconds in (
+            ("FIN-210", "FIN-210-YIELD-CURVES", "video", 34.0, 367),
+            ("CS-245", "CS-245-TRANSACTION-COSTS", "coding", 68.0, 979),
+        ):
+            personal = personal_enrollments[course_id]
+            await _add_if_missing(
+                session,
+                LearnerActivityProgress,
+                {
+                    "tenant_id": "tenant-bayes",
+                    "learner_id": "user-bayes-learner",
+                    "personal_course_enrollment_id": personal.id,
+                    "source_type": "catalog",
+                    "activity_id": activity_id,
+                    "activity_version": "1.0.0",
+                    "activity_type": activity_type,
+                    "progress_status": "in_progress",
+                    "progress_percent": percent,
+                    "progress_seconds": seconds,
+                    "resume_state": {"checkpoint": "current_activity"},
+                    "started_at": datetime(2026, 9, 20, 10, 0, 0, tzinfo=timezone.utc),
+                    "last_accessed_at": datetime(2026, 9, 21, 8, 0, 0, tzinfo=timezone.utc),
+                },
+                LearnerActivityProgress.personal_course_enrollment_id == personal.id,
+                LearnerActivityProgress.source_type == "catalog",
+                LearnerActivityProgress.activity_id == activity_id,
+                LearnerActivityProgress.activity_version == "1.0.0",
+            )
+
+        for event in (
+            {
+                "event_type": "lab",
+                "title": "Applied practice lab",
+                "description": "Bring the gradient descent notebook.",
+                "starts_at": datetime(2026, 9, 24, 10, 0, 0, tzinfo=timezone.utc),
+                "ends_at": datetime(2026, 9, 24, 11, 30, 0, tzinfo=timezone.utc),
+                "location": "Turing Hall 101",
+            },
+            {
+                "event_type": "office_hours",
+                "title": "Office hours",
+                "description": "Open questions with the course instructor.",
+                "starts_at": datetime(2026, 9, 23, 8, 30, 0, tzinfo=timezone.utc),
+                "ends_at": datetime(2026, 9, 23, 9, 30, 0, tzinfo=timezone.utc),
+                "location": "Faculty Commons",
+            },
+        ):
+            await _add_if_missing(
+                session,
+                CourseScheduleEvent,
+                {
+                    "tenant_id": "tenant-bayes",
+                    "course_offering_id": offering.id,
+                    "course_section_id": sec_a.id,
+                    "created_by_user_id": "user-bayes-faculty",
+                    **event,
+                },
+                CourseScheduleEvent.tenant_id == "tenant-bayes",
+                CourseScheduleEvent.course_offering_id == offering.id,
+                CourseScheduleEvent.course_section_id == sec_a.id,
+                CourseScheduleEvent.title == event["title"],
+                CourseScheduleEvent.starts_at == event["starts_at"],
+            )
+
+        for position, resource in enumerate(
+            (
+                ("document", "Course syllabus", "PDF · Updated Sep 2", "https://cdn.bayesstack.com/demo/ml-401/syllabus.pdf"),
+                ("reading", "Optimisation reference", "18 pages · Faculty authored", "https://cdn.bayesstack.com/demo/ml-401/optimisation-reference.pdf"),
+                ("recording", "Lecture 04 recording", "52 min · Sep 8", "https://cdn.bayesstack.com/demo/ml-401/lecture-04"),
+            ),
+            start=1,
+        ):
+            resource_type, title, description, resource_url = resource
+            await _add_if_missing(
+                session,
+                CourseOfferingResource,
+                {
+                    "tenant_id": "tenant-bayes",
+                    "course_offering_id": offering.id,
+                    "resource_type": resource_type,
+                    "title": title,
+                    "description": description,
+                    "resource_url": resource_url,
+                    "position": position * 1_000_000,
+                    "created_by_user_id": "user-bayes-faculty",
+                },
+                CourseOfferingResource.course_offering_id == offering.id,
+                CourseOfferingResource.position == position * 1_000_000,
+            )
+
+        # Learner workspace MVP. These are operational overlays on the exact
+        # publication above; they do not duplicate catalog content.
+        lab_assignment = await _add_if_missing(
+            session,
+            LearningAssignment,
+            {
+                "tenant_id": "tenant-bayes",
+                "course_offering_id": offering.id,
+                "course_section_id": sec_a.id,
+                "code": "ML401-LAB-GD",
+                "assignment_type": "lab",
+                "title": "Optimise a model with gradient descent",
+                "summary": "Implement the update rule, diagnose instability, and explain the convergence trace.",
+                "source_type": "catalog",
+                "source_activity_id": "ACT-KNAPSACK-CODE-V1",
+                "source_activity_version": "1.0.0",
+                "studio_type": "coding",
+                "position": 1_000_000,
+                "estimated_minutes": 75,
+                "opens_at": datetime(2026, 9, 18, 3, 30, 0, tzinfo=timezone.utc),
+                "due_at": datetime(2026, 9, 24, 10, 0, 0, tzinfo=timezone.utc),
+                "instructions": {
+                    "steps": ["Frame the objective", "Implement the update", "Diagnose stability"],
+                    "preflight": ["tests", "explanation", "artifact"],
+                },
+                "rubric": {"implementation": 40, "analysis": 35, "communication": 25},
+                "capability_outcomes": ["problem_solving", "technical_execution", "communication"],
+                "created_by_user_id": "user-bayes-faculty",
+            },
+            LearningAssignment.course_offering_id == offering.id,
+            LearningAssignment.code == "ML401-LAB-GD",
+        )
+        project_assignment = await _add_if_missing(
+            session,
+            LearningAssignment,
+            {
+                "tenant_id": "tenant-bayes",
+                "course_offering_id": offering.id,
+                "course_section_id": sec_a.id,
+                "code": "ML401-PROJ-DECISION-MAP",
+                "assignment_type": "project",
+                "title": "Model decision map",
+                "summary": "Compare candidate models and defend a recommendation under real delivery constraints.",
+                "studio_type": "project",
+                "position": 2_000_000,
+                "estimated_minutes": 480,
+                "opens_at": datetime(2026, 9, 7, 3, 30, 0, tzinfo=timezone.utc),
+                "due_at": datetime(2026, 10, 2, 12, 30, 0, tzinfo=timezone.utc),
+                "instructions": {"brief": "Produce an evidence-backed decision memo and reproducible model comparison."},
+                "rubric": {"evidence": 35, "reasoning": 35, "reproducibility": 20, "communication": 10},
+                "capability_outcomes": ["problem_solving", "evidence_reasoning", "collaboration"],
+                "created_by_user_id": "user-bayes-faculty",
+            },
+            LearningAssignment.course_offering_id == offering.id,
+            LearningAssignment.code == "ML401-PROJ-DECISION-MAP",
+        )
+
+        for position, title, due_at in (
+            (1_000_000, "Frame the decision", datetime(2026, 9, 12, 12, 30, tzinfo=timezone.utc)),
+            (2_000_000, "Build the comparison", datetime(2026, 9, 20, 12, 30, tzinfo=timezone.utc)),
+            (3_000_000, "Review the evidence", datetime(2026, 9, 27, 12, 30, tzinfo=timezone.utc)),
+            (4_000_000, "Submit the recommendation", datetime(2026, 10, 2, 12, 30, tzinfo=timezone.utc)),
+        ):
+            await _add_if_missing(
+                session,
+                AssignmentMilestone,
+                {
+                    "tenant_id": "tenant-bayes",
+                    "assignment_id": project_assignment.id,
+                    "title": title,
+                    "position": position,
+                    "due_at": due_at,
+                    "completion_rules": {"requires_evidence": position >= 2_000_000},
+                },
+                AssignmentMilestone.assignment_id == project_assignment.id,
+                AssignmentMilestone.position == position,
+            )
+
+        for assignment, status, progress, attempts, milestone_state in (
+            (lab_assignment, "in_progress", 58.0, 2, {"frame": True, "implement": True, "stability": False}),
+            (project_assignment, "in_progress", 64.0, 1, {"frame": True, "comparison": True, "review": False}),
+        ):
+            await _add_if_missing(
+                session,
+                LearnerAssignmentState,
+                {
+                    "tenant_id": "tenant-bayes",
+                    "assignment_id": assignment.id,
+                    "enrollment_id": enrollment.id,
+                    "learner_id": "user-bayes-learner",
+                    "status": status,
+                    "progress_percent": progress,
+                    "attempt_count": attempts,
+                    "milestone_state": milestone_state,
+                    "workspace_state": {"last_panel": "instructions", "autosaved": True},
+                    "preflight_results": {"state": "not_run"},
+                    "started_at": datetime(2026, 9, 19, 8, 0, tzinfo=timezone.utc),
+                    "last_accessed_at": datetime(2026, 9, 21, 9, 15, tzinfo=timezone.utc),
+                },
+                LearnerAssignmentState.assignment_id == assignment.id,
+                LearnerAssignmentState.enrollment_id == enrollment.id,
+            )
+
+        team = await _add_if_missing(
+            session,
+            ProjectTeam,
+            {
+                "tenant_id": "tenant-bayes",
+                "assignment_id": project_assignment.id,
+                "name": "Decision Systems Team A",
+            },
+            ProjectTeam.assignment_id == project_assignment.id,
+            ProjectTeam.name == "Decision Systems Team A",
+        )
+        for user_id, role in (("user-bayes-learner", "lead"), ("user-bayes-faculty", "mentor")):
+            await _add_if_missing(
+                session,
+                ProjectTeamMember,
+                {"tenant_id": "tenant-bayes", "project_team_id": team.id, "user_id": user_id, "role": role},
+                ProjectTeamMember.project_team_id == team.id,
+                ProjectTeamMember.user_id == user_id,
+            )
+        for artifact_type, title, storage_key in (
+            ("document", "Decision framing note", "demo/ml401/decision-map/framing.md"),
+            ("notebook", "Model comparison notebook", "demo/ml401/decision-map/comparison.ipynb"),
+        ):
+            await _add_if_missing(
+                session,
+                ProjectArtifact,
+                {
+                    "tenant_id": "tenant-bayes",
+                    "assignment_id": project_assignment.id,
+                    "project_team_id": team.id,
+                    "created_by_user_id": "user-bayes-learner",
+                    "artifact_type": artifact_type,
+                    "title": title,
+                    "storage_key": storage_key,
+                    "metadata_": {"visibility": "team", "review_state": "draft"},
+                },
+                ProjectArtifact.assignment_id == project_assignment.id,
+                ProjectArtifact.storage_key == storage_key,
+                ProjectArtifact.version == 1,
+            )
+
+        thread = await _add_if_missing(
+            session,
+            DiscussionThread,
+            {
+                "tenant_id": "tenant-bayes",
+                "course_offering_id": offering.id,
+                "course_section_id": sec_a.id,
+                "created_by_user_id": "user-bayes-learner",
+                "title": "Why does the loss diverge at the larger learning rate?",
+                "anchor_type": "lab_step",
+                "anchor_id": f"{lab_assignment.id}:stability",
+                "anchor_label": "Gradient descent lab · Diagnose training stability",
+                "tags": ["gradient descent", "learning rate", "diagnostics"],
+            },
+            DiscussionThread.course_offering_id == offering.id,
+            DiscussionThread.anchor_id == f"{lab_assignment.id}:stability",
+            DiscussionThread.title == "Why does the loss diverge at the larger learning rate?",
+        )
+        question_post = await _add_if_missing(
+            session,
+            DiscussionPost,
+            {
+                "tenant_id": "tenant-bayes",
+                "thread_id": thread.id,
+                "author_user_id": "user-bayes-learner",
+                "body": "The trace oscillates before diverging. Is this purely the step size, or should I also inspect feature scaling?",
+                "created_at": datetime(2026, 9, 21, 7, 30, tzinfo=timezone.utc),
+            },
+            DiscussionPost.thread_id == thread.id,
+            DiscussionPost.author_user_id == "user-bayes-learner",
+        )
+        answer_post = await _add_if_missing(
+            session,
+            DiscussionPost,
+            {
+                "tenant_id": "tenant-bayes",
+                "thread_id": thread.id,
+                "author_user_id": "user-bayes-faculty",
+                "body": "Inspect both. First normalize the features, then compare the same three rates so the step-size effect is isolated.",
+                "created_at": datetime(2026, 9, 21, 8, 10, tzinfo=timezone.utc),
+            },
+            DiscussionPost.thread_id == thread.id,
+            DiscussionPost.author_user_id == "user-bayes-faculty",
+        )
+        if thread.accepted_post_id is None:
+            thread.accepted_post_id = answer_post.id
+            thread.status = "resolved"
+        await _add_if_missing(
+            session,
+            DiscussionReaction,
+            {
+                "tenant_id": "tenant-bayes",
+                "post_id": answer_post.id,
+                "actor_user_id": "user-bayes-learner",
+                "reaction_type": "helpful",
+            },
+            DiscussionReaction.post_id == answer_post.id,
+            DiscussionReaction.actor_user_id == "user-bayes-learner",
+            DiscussionReaction.reaction_type == "helpful",
+        )
+
+        await _add_if_missing(
+            session,
+            LearnerCalendarBlock,
+            {
+                "tenant_id": "tenant-bayes",
+                "learner_id": "user-bayes-learner",
+                "title": "Gradient descent lab focus block",
+                "starts_at": datetime(2026, 9, 23, 11, 30, tzinfo=timezone.utc),
+                "ends_at": datetime(2026, 9, 23, 12, 30, tzinfo=timezone.utc),
+                "source_type": "assignment",
+                "source_id": str(lab_assignment.id),
+                "reminder_minutes": 15,
+                "notes": "Finish stability analysis and run pre-flight.",
+            },
+            LearnerCalendarBlock.tenant_id == "tenant-bayes",
+            LearnerCalendarBlock.learner_id == "user-bayes-learner",
+            LearnerCalendarBlock.starts_at == datetime(2026, 9, 23, 11, 30, tzinfo=timezone.utc),
+        )
+
+        for dimension, score, summary in (
+            ("problem_solving", 82.0, "Diagnosed the unstable optimisation trace using controlled comparisons."),
+            ("technical_execution", 79.0, "Implemented the update rule and passed the required invariant checks."),
+            ("communication", 74.0, "Explained convergence using evidence from the submitted trace."),
+        ):
+            await _add_if_missing(
+                session,
+                CapabilityEvidence,
+                {
+                    "tenant_id": "tenant-bayes",
+                    "learner_id": "user-bayes-learner",
+                    "enrollment_id": enrollment.id,
+                    "assignment_id": lab_assignment.id,
+                    "source_type": "assignment",
+                    "source_id": str(lab_assignment.id),
+                    "dimension": dimension,
+                    "score": score,
+                    "evidence_summary": summary,
+                    "verifier_user_id": "user-bayes-faculty",
+                    "verified_at": datetime(2026, 9, 21, 8, 30, tzinfo=timezone.utc),
+                    "metadata_": {"visibility": "private", "weight": 1.0},
+                },
+                CapabilityEvidence.tenant_id == "tenant-bayes",
+                CapabilityEvidence.learner_id == "user-bayes-learner",
+                CapabilityEvidence.source_type == "assignment",
+                CapabilityEvidence.source_id == str(lab_assignment.id),
+                CapabilityEvidence.dimension == dimension,
+            )
+
+        await _add_if_missing(
+            session,
+            LearnerPreference,
+            {
+                "tenant_id": "tenant-bayes",
+                "learner_id": "user-bayes-learner",
+                "timezone": "Asia/Kolkata",
+                "language": "en",
+                "accessibility": {"reduced_motion": False, "high_contrast": False, "keyboard_hints": True},
+                "notifications": {"deadlines": True, "discussion_replies": True, "weekly_digest": True},
+            },
+            LearnerPreference.tenant_id == "tenant-bayes",
+            LearnerPreference.learner_id == "user-bayes-learner",
+        )
+        await _add_if_missing(
+            session,
+            SupportRequest,
+            {
+                "tenant_id": "tenant-bayes",
+                "learner_id": "user-bayes-learner",
+                "category": "learning_workflow",
+                "status": "resolved",
+                "subject": "Finding faculty feedback after a lab",
+                "message": "Where can I reopen feedback without leaving the lab flow?",
+                "context": {"route": "/labs", "assignment_id": str(lab_assignment.id)},
+                "assigned_to_user_id": "user-bayes-admin",
+                "resolution": "Feedback is retained on the selected lab card and in the evidence ledger.",
+                "resolved_at": datetime(2026, 9, 20, 10, 0, tzinfo=timezone.utc),
+            },
+            SupportRequest.tenant_id == "tenant-bayes",
+            SupportRequest.learner_id == "user-bayes-learner",
+            SupportRequest.subject == "Finding faculty feedback after a lab",
         )
 
 

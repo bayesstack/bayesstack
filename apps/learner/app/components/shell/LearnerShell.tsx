@@ -6,6 +6,7 @@ import { Avatar, Badge, Dropdown, Icon, LoadingBar, Sidebar, Tooltip, type Dropd
 import { useLearnerShellState } from "./state";
 import { ROUTE_PROGRESS_START_EVENT } from "./route-progress";
 import { learnerIdentity } from "../learning/data";
+import { learnerNotifications } from "../workspace/data";
 
 const APP_BASE_PATH = "/learner";
 const appRoute = (path: string) => path === "/" ? APP_BASE_PATH : `${APP_BASE_PATH}${path}`;
@@ -147,12 +148,13 @@ export function LearnerShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { sidebarPreference, setSidebarPreference } = useLearnerShellState();
-  const collapsed = sidebarPreference === "collapsed";
+  const [isCompactViewport, setIsCompactViewport] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const collapsed = isCompactViewport ? !mobileMenuOpen : sidebarPreference === "collapsed";
   const activeId = pathname.startsWith("/learning") ? "learning" : routeToId[pathname] ?? "home";
-  const isVideoStudio = pathname === "/learning/machine-learning/studio/video";
-  const isCodingStudio = pathname === "/learning/machine-learning/studio/coding";
-  const isStudio = isVideoStudio || isCodingStudio;
-  const routeTitle = isVideoStudio ? "Video studio" : isCodingStudio ? "Coding studio" : pathname === "/learning/machine-learning" ? "Machine Learning" : routeTitles[pathname] ?? "Workspace";
+  const isStudio = pathname.startsWith("/learning/machine-learning/studio/");
+  const routeTitle = isStudio ? "Learning studio" : pathname === "/learning/machine-learning" ? "Machine Learning" : routeTitles[pathname] ?? "Workspace";
+  const unreadNotifications = learnerNotifications.filter((item) => item.unread);
   const headerBreadcrumbs = getHeaderBreadcrumbs(pathname, routeTitle);
   const [pendingPath, setPendingPath] = useState<string | null>(null);
   const [routeProgress, setRouteProgress] = useState(0);
@@ -177,6 +179,17 @@ export function LearnerShell({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   useEffect(() => {
+    const media = window.matchMedia("(max-width: 720px)");
+    const syncViewport = () => {
+      setIsCompactViewport(media.matches);
+      if (!media.matches) setMobileMenuOpen(false);
+    };
+    syncViewport();
+    media.addEventListener("change", syncViewport);
+    return () => media.removeEventListener("change", syncViewport);
+  }, []);
+
+  useEffect(() => {
     const closeTopbarPanels = (event: MouseEvent) => {
       if (!topbarControlsRef.current?.contains(event.target as Node)) {
         setSearchOpen(false);
@@ -187,6 +200,7 @@ export function LearnerShell({ children }: { children: React.ReactNode }) {
       if (event.key === "Escape") {
         setSearchOpen(false);
         setNotificationsOpen(false);
+        setMobileMenuOpen(false);
       }
     };
     document.addEventListener("mousedown", closeTopbarPanels);
@@ -237,6 +251,7 @@ export function LearnerShell({ children }: { children: React.ReactNode }) {
     const destination = internalPath || "/";
     setSearchOpen(false);
     setNotificationsOpen(false);
+    setMobileMenuOpen(false);
     if (destination === pathname) return;
     beginRouteProgress(destination);
     router.push(destination);
@@ -299,13 +314,19 @@ export function LearnerShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className={`learner-app-shell ${isStudio ? "is-learning-studio" : ""}`} aria-busy={Boolean(pendingPath)}>
+      {isCompactViewport && mobileMenuOpen && (
+        <button className="learner-mobile-sidebar-backdrop" type="button" aria-label="Close navigation" onClick={() => setMobileMenuOpen(false)} />
+      )}
       <Sidebar
         className="learner-sidebar"
         variant="dark"
         items={routedNavigationGroups}
         activeId={activeId}
         collapsed={collapsed}
-        onCollapseChange={(nextCollapsed) => setSidebarPreference(nextCollapsed ? "collapsed" : "expanded")}
+        onCollapseChange={(nextCollapsed) => {
+          if (isCompactViewport) setMobileMenuOpen(!nextCollapsed);
+          else setSidebarPreference(nextCollapsed ? "collapsed" : "expanded");
+        }}
         collapsible
         collapsedTooltips
         preserveCollapsedLayout
@@ -366,11 +387,11 @@ export function LearnerShell({ children }: { children: React.ReactNode }) {
               </form>
 
               <div className="learner-notifications">
-                <Badge count={1} color="danger" variant="solid" size="sm" offset={[0, 4]}>
+                <Badge count={unreadNotifications.length} color="danger" variant="solid" size="sm" offset={[0, 4]}>
                   <button
                     type="button"
                     className="learner-topbar-icon-button"
-                    aria-label="Open notifications; 1 unread"
+                    aria-label={`Open notifications; ${unreadNotifications.length} unread`}
                     aria-expanded={notificationsOpen}
                     aria-controls="learner-notification-panel"
                     onClick={() => { setNotificationsOpen((open) => !open); setSearchOpen(false); }}
@@ -380,11 +401,14 @@ export function LearnerShell({ children }: { children: React.ReactNode }) {
                 </Badge>
                 {notificationsOpen && (
                   <div className="learner-notification-panel" id="learner-notification-panel">
-                    <div><strong>Notifications</strong><span>1 unread</span></div>
-                    <a href={appRoute("/labs")} onClick={(event) => handleRouteNavigation(event, appRoute("/labs"))}>
-                      <span className="learner-notification-icon"><Icon name="CheckCircle" size="sm" /></span>
-                      <span><strong>Applied practice lab</strong><small>Due tomorrow at 3:30 PM</small></span>
-                    </a>
+                    <div><strong>Notifications</strong><span>{unreadNotifications.length} unread</span></div>
+                    {learnerNotifications.map((item) => {
+                      const href = appRoute(item.href);
+                      return <a key={item.id} href={href} onClick={(event) => handleRouteNavigation(event, href)}>
+                        <span className="learner-notification-icon"><Icon name={item.icon} size="sm" /></span>
+                        <span><strong>{item.title}</strong><small>{item.detail}</small></span>
+                      </a>;
+                    })}
                   </div>
                 )}
               </div>

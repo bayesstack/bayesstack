@@ -34,7 +34,7 @@ export function LeftPane({
     {
       value: "editorial",
       label: "Editorial",
-      icon: "Lightbulb",
+      icon: "Idea",
     },
     {
       value: "notes",

@@ -1,6 +1,6 @@
 # BayesStack Data Model & System Architecture Deep Dive
 
-This document provides a definitive, engineering-grade explanation of the entire database data model across **all 43 database tables** in BayesStack. It explains why each table exists, how they relate, the design decisions that shaped them, and how data mutates under real-world educational and institutional scenarios.
+This document provides a definitive, engineering-grade explanation of the entire database data model across **all 65 database tables** in BayesStack (excluding the four compatibility composition views). It explains why each table exists, how they relate, the design decisions that shaped them, and how data mutates under real-world educational and institutional scenarios.
 
 ---
 
@@ -11,7 +11,7 @@ Modern higher-education learning platforms face a fundamental architectural tens
 2. **The High-Concurrency Delivery Model** requires high read throughput and low latency. When 50,000 students log in to complete labs, watch videos, or take exams, recursive tree queries with 11-way joins over deeply nested parent-child tables will bottleneck the database, exhaust connection pools, and thrash memory.
 3. **The Academic Operations Model** requires strict temporal, legal, and multi-tenant boundaries. An accredited university does not enroll students in an abstract "course definition"; students enroll in a specific **Term Offering** within an isolated **Cohort Section**, instructed by a specific faculty member, with immutable syllabus guarantees (no mid-term syllabus shifts) and official gradebook transcripting.
 
-To solve this without compromise, BayesStack divides its relational schema into **six functional domains**:
+To solve this without compromise, BayesStack divides its relational schema into **seven functional domains**:
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -40,9 +40,11 @@ To solve this without compromise, BayesStack divides its relational schema into 
                        │             │ (CQRS Compiler Snapshots)
                        ▼             ▼
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                  4. Delivery & Optimization                                      │
+│                         4. Delivery, Studio Execution & Optimization                            │
 │  - course_publications (Pre-compiled, immutable JSON DAG release artifacts for learner SPA)     │
 │  - studio_assets (Content-Addressed Storage CAS offloading heavy lab/test payloads to S3/CDN)    │
+│  - coding_problems / coding_test_cases (Server-owned executable assessment contracts)            │
+│  - coding_submissions / coding_submission_case_results (Durable judging lifecycle)               │
 └──────────────────────────────────────────────┬───────────────────────────────────────────────────┘
                                                │ (Offering Binds to Consistent Publication Tuple)
                                                ▼
@@ -57,6 +59,9 @@ To solve this without compromise, BayesStack divides its relational schema into 
 │  - learning_progress (Concept mastery with explicit source_type namespace)                       │
 │  - assessment_submissions (Activity attempts, code execution logs, autograder scores)            │
 │  - course_grades (Final letter grades, official GPA transcript points)                           │
+│  - learner_goals / personal_course_enrollments (Self-directed learning context)                  │
+│  - learner_activity_progress (Activity completion, resume state, and bookmarks)                  │
+│  - course_schedule_events / course_offering_resources (Offering dates and supplements)           │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
                                                │
                                                ▼
@@ -209,7 +214,7 @@ This architectural pattern guarantees $O(1)$ point lookup complexity and single-
 
 ---
 
-## 3. Exhaustive Table Catalog (All 43 Tables Grouped by Domain)
+## 3. Exhaustive Table Catalog (All 65 Tables Grouped by Domain)
 
 ### Domain 1: Multi-Tenant Boundary & Identity (4 Tables)
 
@@ -288,7 +293,7 @@ All institutional tables carry `UNIQUE(tenant_id, id)` and enforce compound tena
 
 ---
 
-### Domain 4: High-Performance Delivery & CAS (2 Tables)
+### Domain 4: High-Performance Delivery, Studio Execution & CAS (6 Tables)
 
 #### 29. `studio_assets`
 - **Why it exists**: Content-Addressed Storage (CAS) for heavy test suites, datasets, and starter code.
@@ -303,15 +308,33 @@ All institutional tables carry `UNIQUE(tenant_id, id)` and enforce compound tena
   - `CREATE UNIQUE INDEX uq_active_course_publication ON course_publications (tenant_id, institution_course_id) WHERE publication_status = 'active'`
   - `FOREIGN KEY (tenant_id, institution_course_id) REFERENCES institution_courses (tenant_id, id) ON DELETE CASCADE`
 
+#### 31. `coding_problems`
+- **Why it exists**: Stores the server-owned execution policy for Coding Studio problems without exposing hidden tests to browsers.
+- **Key Columns**: `activity_id`, `allowed_languages`, time/memory/output limits, comparison mode, and active state.
+
+#### 32. `coding_test_cases`
+- **Why it exists**: Stores ordered sample and hidden test cases for a coding problem.
+- **Foreign Keys**: `problem_id -> coding_problems(id) ON DELETE CASCADE`.
+- **Constraints**: `UNIQUE (problem_id, position)`.
+
+#### 33. `coding_submissions`
+- **Why it exists**: Durable asynchronous code-execution request and verdict record.
+- **Key Columns**: `problem_id`, `tenant_id`, `actor_id`, source code, language/runtime, lifecycle state, verdict, time, and memory.
+
+#### 34. `coding_submission_case_results`
+- **Why it exists**: Per-test-case evidence for a coding submission, with sample/hidden visibility controls.
+- **Foreign Keys**: `submission_id -> coding_submissions(id) ON DELETE CASCADE`, `case_id -> coding_test_cases(id) ON DELETE RESTRICT`.
+- **Constraints**: `UNIQUE (submission_id, case_id)`.
+
 ---
 
-### Domain 5: Academic Operations & Extended Enrollment (9 Tables)
+### Domain 5: Academic Operations, Learner State & Extended Enrollment (14 Tables)
 
-#### 31. `academic_terms`
+#### 35. `academic_terms`
 - **Why it exists**: Academic time-box (e.g. Fall 2026 Semester).
 - **Constraints**: `UNIQUE (tenant_id, id)`, `UNIQUE (tenant_id, code)`.
 
-#### 32. `course_offerings`
+#### 36. `course_offerings`
 - **Why it exists**: Scheduled course offering in a term.
 - **Consistent Publication Binding**:
   - `FOREIGN KEY (tenant_id, academic_term_id) REFERENCES academic_terms(tenant_id, id)`
@@ -319,16 +342,16 @@ All institutional tables carry `UNIQUE(tenant_id, id)` and enforce compound tena
   - `FOREIGN KEY (tenant_id, institution_course_id, course_publication_id) REFERENCES course_publications(tenant_id, institution_course_id, id) ON DELETE RESTRICT`
 - **Key Columns**: `offering_status VARCHAR(32)` (`'scheduled'`, `'enrollment_open'`, `'active'`, `'grading'`, `'concluded'`), `syllabus_override JSON`.
 
-#### 33. `course_sections`
+#### 37. `course_sections`
 - **Why it exists**: Instructional cohort group (Section A Morning, Section B Afternoon).
 - **Foreign Keys**: `FOREIGN KEY (tenant_id, course_offering_id) REFERENCES course_offerings(tenant_id, id) ON DELETE CASCADE`.
 
-#### 34. `section_staff`
+#### 38. `section_staff`
 - **Why it exists**: Assigns faculty and TAs to cohort sections.
 - **Foreign Keys**: `FOREIGN KEY (tenant_id, course_section_id) REFERENCES course_sections(tenant_id, id) ON DELETE CASCADE`.
 - **Key Columns**: `role VARCHAR(32)` (`'primary_instructor'`, `'co_instructor'`, `'teaching_assistant'`, `'grader'`).
 
-#### 35. `enrollments`
+#### 39. `enrollments`
 - **Why it exists**: Student roster seat in a section.
 - **Foreign Keys**: `FOREIGN KEY (tenant_id, course_section_id) REFERENCES course_sections(tenant_id, id) ON DELETE CASCADE`.
 - **Extended Registration Tracking**:
@@ -336,7 +359,7 @@ All institutional tables carry `UNIQUE(tenant_id, id)` and enforce compound tena
   - `attempt_number INT DEFAULT 1`
   - `enrollment_status VARCHAR(32)` (`'enrolled'`, `'waitlisted'`, `'dropped'`, `'withdrawn'`, `'completed'`)
 
-#### 36. `student_academic_profiles`
+#### 40. `student_academic_profiles`
 - **Why it exists**: Models overall student academic status, standing, and institutional identity.
 - **Primary Key**: `id UUID`.
 - **Key Columns**:
@@ -349,7 +372,7 @@ All institutional tables carry `UNIQUE(tenant_id, id)` and enforce compound tena
   - `degree_curriculum_id VARCHAR(64)`
 - **Constraints**: `UNIQUE (tenant_id, student_id)`, `UNIQUE (tenant_id, id)`.
 
-#### 37. `learning_progress`
+#### 41. `learning_progress`
 - **Why it exists**: Concept-level learning mastery with explicit source namespace.
 - **Key Columns**:
   - `source_type VARCHAR(32) DEFAULT 'catalog'` (`'catalog'` | `'institution'`)
@@ -359,7 +382,7 @@ All institutional tables carry `UNIQUE(tenant_id, id)` and enforce compound tena
 - **Foreign Keys**: `FOREIGN KEY (tenant_id, enrollment_id) REFERENCES enrollments(tenant_id, id) ON DELETE CASCADE`.
 - **Constraints**: `UNIQUE (enrollment_id, source_type, concept_id, concept_version)`.
 
-#### 38. `assessment_submissions`
+#### 42. `assessment_submissions`
 - **Why it exists**: Student homework attempts and automated coding lab evaluations.
 - **Key Columns**:
   - `enrollment_id UUID`
@@ -371,34 +394,127 @@ All institutional tables carry `UNIQUE(tenant_id, id)` and enforce compound tena
 - **Foreign Keys**: `FOREIGN KEY (tenant_id, enrollment_id) REFERENCES enrollments(tenant_id, id) ON DELETE CASCADE`.
 - **Constraints**: `UNIQUE (enrollment_id, activity_id, attempt_number)`.
 
-#### 39. `course_grades`
+#### 43. `course_grades`
 - **Why it exists**: Official finalized letter grades and transcript GPA points.
 - **Foreign Keys**: `FOREIGN KEY (tenant_id, enrollment_id) REFERENCES enrollments(tenant_id, id) ON DELETE CASCADE`.
 - **Constraints**: `UNIQUE (enrollment_id)`.
+
+#### 44. `learner_goals`
+- **Why it exists**: Stores learner-owned career or skill goals used by personal learning and recommendation features.
+- **Foreign Keys**: `(tenant_id, learner_id) -> tenant_memberships(tenant_id, user_id) ON DELETE CASCADE`.
+- **Constraints**: At most one primary goal per learner and tenant through a partial unique index.
+
+#### 45. `personal_course_enrollments`
+- **Why it exists**: Represents self-directed enrollment in a specific immutable catalog course release, separate from registrar-managed section enrollment.
+- **Foreign Keys**: Compound learner-membership FK, `(catalog_course_id, catalog_course_version) -> catalog_courses(id, version)`, and tenant-consistent optional goal FK.
+- **Constraints**: `UNIQUE (tenant_id, learner_id, catalog_course_id, catalog_course_version)`.
+
+#### 46. `learner_activity_progress`
+- **Why it exists**: Stores mutable, non-assessment activity state such as completion, video playback position, coding draft checkpoint, and bookmark time.
+- **Context Invariant**: Exactly one of `enrollment_id` or `personal_course_enrollment_id` must be present.
+- **Ownership Invariant**: Compound foreign keys include `learner_id`, preventing activity state from being attached to another learner's academic or personal enrollment.
+- **Constraints**: Progress is between 0 and 100, elapsed seconds are nonnegative, and an activity release has one progress row per learning context.
+
+#### 47. `course_schedule_events`
+- **Why it exists**: Stores dated labs, deadlines, exams, office hours, and other events for an offering, optionally narrowed to one section.
+- **Consistency Invariant**: `(tenant_id, course_offering_id, course_section_id)` must identify a section belonging to that exact offering.
+- **Note**: Recurring weekly meeting patterns remain in `course_sections.schedule_info`; this table is for dated occurrences and exceptions.
+
+#### 48. `course_offering_resources`
+- **Why it exists**: Stores term-specific supplemental links, recordings, readings, and files without mutating the immutable published course tree.
+- **Foreign Keys**: `(tenant_id, course_offering_id) -> course_offerings(tenant_id, id) ON DELETE CASCADE`.
+- **Ordering**: Spaced `BIGINT position`, unique within an offering.
+
+> **Derived learner status**: UI labels such as `On track`, `Ahead`, and `Needs attention` are not persisted. They are projections computed from term/event dates, required activity progress, and the learner's last access. Persisting those labels would create stale duplicated state.
 
 ---
 
 ### Domain 6: Institutional Governance & Matriculation (4 Tables)
 
-#### 40. `course_faculty`
+#### 49. `course_faculty`
 - **Why it exists**: Authorizes faculty to edit and oversee an institutional catalog course.
 - **Foreign Keys**: `FOREIGN KEY (tenant_id, institution_course_id) REFERENCES institution_courses(tenant_id, id) ON DELETE CASCADE`.
 - **Constraints**: `UNIQUE (faculty_id, institution_course_id)`.
 
-#### 41. `program_faculty`
+#### 50. `program_faculty`
 - **Why it exists**: Authorizes department chairs to manage semester tracks.
 - **Foreign Keys**: `FOREIGN KEY (tenant_id, institution_program_id) REFERENCES institution_programs(tenant_id, id) ON DELETE CASCADE`.
 - **Constraints**: `UNIQUE (faculty_id, institution_program_id)`.
 
-#### 42. `curriculum_enrollments`
+#### 51. `curriculum_enrollments`
 - **Why it exists**: Matriculates a student into an entire 4-year degree roadmap.
 - **Foreign Keys**: `FOREIGN KEY (tenant_id, institution_curriculum_id) REFERENCES institution_curricula(tenant_id, id) ON DELETE CASCADE`.
 - **Constraints**: `UNIQUE (student_id, institution_curriculum_id)`.
 
-#### 43. `program_enrollments`
+#### 52. `program_enrollments`
 - **Why it exists**: Matriculates a student into a semester track.
 - **Foreign Keys**: `FOREIGN KEY (tenant_id, institution_program_id) REFERENCES institution_programs(tenant_id, id) ON DELETE CASCADE`.
 - **Constraints**: `UNIQUE (student_id, institution_program_id)`.
+
+---
+
+### Domain 7: Learner Workspace, Collaboration & Evidence (13 Tables)
+
+These tables are the mutable operational layer behind Labs, Projects, Discussions, Calendar, Progress, Profile, and Support. They reference an offering or enrollment and never copy the immutable course tree.
+
+#### 53. `learning_assignments`
+- **Why it exists**: Configures a lab, project, or assessment for one term offering and optional section.
+- **Boundary**: It may reference a published activity release, but owns only term-specific instructions, rubric, due dates, and capability outcomes.
+- **Constraints**: Unique assignment code per offering, positive spaced position/duration/max score, and a valid open/due window.
+
+#### 54. `assignment_milestones`
+- **Why it exists**: Stores ordered project checkpoints or lab-manual steps.
+- **Constraints**: Unique positive position within an assignment; completion rules remain configuration, while learner completion lives in `learner_assignment_states`.
+
+#### 55. `learner_assignment_states`
+- **Why it exists**: Stores a learner's draft, progress, milestone completion, studio resume state, and pre-flight results.
+- **Boundary**: It is not a grade or attempt ledger. Durable hand-ins continue to use `assessment_submissions`, which can be referenced as the latest submission.
+- **Ownership Invariant**: `(tenant_id, enrollment_id, learner_id)` must match the actual enrolled student.
+
+#### 56. `project_teams`
+- **Why it exists**: Creates one collaboration group for a project assignment.
+- **Constraints**: Team name is unique within the assignment.
+
+#### 57. `project_team_members`
+- **Why it exists**: Adds learner, lead, reviewer, or mentor membership to a project team.
+- **Ownership Invariant**: Every member must be an active tenant identity through the compound membership FK.
+
+#### 58. `project_artifacts`
+- **Why it exists**: Preserves the versioned evidence and deliverables behind a project result.
+- **Key Columns**: `artifact_type`, `storage_key`, `version`, review metadata, and optional team ownership.
+- **Constraints**: Unique `(assignment_id, storage_key, version)`.
+
+#### 59. `discussion_threads`
+- **Why it exists**: Stores course Q&A anchored to a concept, activity, lab step, lecture moment, or code context.
+- **Key Columns**: `anchor_type`, `anchor_id`, `anchor_label`, `tags`, `status`, and optional `accepted_post_id`.
+- **Consistency Invariant**: The optional section must belong to the referenced offering.
+
+#### 60. `discussion_posts`
+- **Why it exists**: Stores threaded replies while preserving author identity and edit history.
+- **Foreign Keys**: Tenant-consistent FKs to thread and author membership, plus an optional parent post.
+
+#### 61. `discussion_reactions`
+- **Why it exists**: Normalizes helpful and future reaction signals instead of embedding counters in posts.
+- **Constraints**: One reaction type per actor and post.
+
+#### 62. `learner_calendar_blocks`
+- **Why it exists**: Stores learner-created focus time separately from faculty-owned `course_schedule_events`.
+- **Constraints**: End time cannot precede start time; optional `source_type/source_id` can deep-link to work.
+
+#### 63. `capability_evidence`
+- **Why it exists**: Powers the private progress ledger with verified, multidimensional evidence rather than a single simplistic mastery score.
+- **Key Columns**: Evidence source, dimension, score, verifier, verification time, and summary.
+- **Ownership Invariant**: Evidence is tied to the learner's exact academic enrollment.
+
+#### 64. `learner_preferences`
+- **Why it exists**: Stores timezone, locale, accessibility, and academic-notification settings once for every learner workspace.
+- **Constraints**: Exactly one row per learner and tenant.
+
+#### 65. `support_requests`
+- **Why it exists**: Stores learner support requests with privacy-safe route and workspace context, assignment, status, and resolution.
+- **Boundary**: Code, grades, and private artifact contents are never copied into the context JSON.
+
+> **Read-model rule**: Counts, labels, urgency, pace, `On track`/`Ahead`/`Needs attention`, and recommended next actions are API projections over these tables plus schedule/progress records. They are not duplicated as independently editable rows.
 
 ---
 
@@ -585,13 +701,22 @@ VALUES
 | **Scheduling an offering** | `academic_terms`, `course_offerings` | Database enforces `FOREIGN KEY (tenant_id, institution_course_id, course_publication_id)` consistent tuple. |
 | **Managing cohort sections & registration**| `course_sections`, `section_staff`, `enrollments` | Enforces cohort isolation. Tracks `registration_type` (`'credit'`, `'audit'`, `'pass_fail'`) and `attempt_number`. |
 | **Tracking mastery, submissions, grades** | `learning_progress`, `assessment_submissions`, `course_grades` | Tied strictly to `enrollment_id`. Concept progress and submissions include explicit `source_type` / `activity_type` namespace. |
+| **Tracking activity completion and resume state** | `learner_activity_progress` | Exactly one academic or personal enrollment context; ownership is enforced in the compound FK. |
+| **Managing personal learning** | `learner_goals`, `personal_course_enrollments` | Personal enrollment pins an immutable catalog release and remains separate from official section enrollment. |
+| **Showing dated schedule and offering resources** | `course_schedule_events`, `course_offering_resources` | Events may be offering-wide or section-specific; resources supplement rather than mutate a publication. |
+| **Running labs and projects** | `learning_assignments`, `assignment_milestones`, `learner_assignment_states`, `assessment_submissions` | Assignment configuration belongs to an offering; learner drafts are mutable; submitted attempts remain an auditable ledger. |
+| **Managing project collaboration and deliverables** | `project_teams`, `project_team_members`, `project_artifacts` | Team members are tenant identities; artifacts are versioned and never overwritten in place. |
+| **Using contextual course Q&A** | `discussion_threads`, `discussion_posts`, `discussion_reactions` | Every thread keeps an explicit course and learning-context anchor. |
+| **Adding personal focus time** | `learner_calendar_blocks` | Personal blocks remain separate from institution-owned schedule events and can deep-link to work. |
+| **Showing capability progress and evidence** | `capability_evidence`, `assessment_submissions`, `project_artifacts` | Evidence is private, source-addressable, multidimensional, and enrollment-owned. |
+| **Saving profile preferences and support** | `learner_preferences`, `support_requests` | Preferences have one learner-owned row; support context excludes sensitive work and grade content. |
 | **Managing student matriculation & standings**| `student_academic_profiles`, `curriculum_enrollments`, `program_enrollments` | Independent of semester term offerings. Tracks matriculation number, standing (`'good_standing'`), and cumulative GPA. |
 
 ---
 
 ## 6. Summary
 
-The upgraded 43-table data model establishes a production-grade relational foundation:
+The upgraded 65-table data model establishes a production-grade relational foundation:
 1. **Relational Invariants**: Compound foreign keys and consistent tuples make cross-tenant corruption and invalid publication bindings impossible.
 2. **Flexible Identity**: Global identities decouple human users from institutional memberships and contextual authorization roles.
 3. **Deterministic Content Lineage**: Detached snapshot semantics guarantee that active courses never suffer silent upstream drift.
