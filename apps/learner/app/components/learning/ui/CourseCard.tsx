@@ -2,8 +2,10 @@
 
 import React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Badge, Button, Icon, Paragraph } from "@bayesstack/ui";
 import { type LearningCourseCardProps } from "../data";
+import { startRouteProgress } from "../../shell/route-progress";
 import { ProgressBar } from "./Primitives";
 
 export function LearningCourseCard({
@@ -30,6 +32,8 @@ export function LearningCourseCard({
   actionDisabled = false,
   onAction,
 }: LearningCourseCardProps) {
+  const router = useRouter();
+  const hasSeparateAction = Boolean(href && onAction);
   const className = [
     "learning-course-card",
     `is-${accent}`,
@@ -71,14 +75,43 @@ export function LearningCourseCard({
       </div>
       <footer className="learning-course-card-footer">
         {typeof progress === "number" ? <ProgressBar value={progress} label={`${progress}% complete`} /> : <span className="learning-course-card-meta">{meta}</span>}
-        {href ? (
+        {href && !hasSeparateAction ? (
           <span className="learning-course-card-action">{actionLabel}<Icon name="ArrowRight" size="xs" /></span>
         ) : (
-          <Button variant="outline" size="xs" rightIcon={actionDisabled ? "Check" : "ArrowRight"} className="learning-course-card-action" disabled={actionDisabled} onClick={onAction}>{actionLabel}</Button>
+          <Button
+            variant="outline"
+            size="xs"
+            rightIcon={actionDisabled ? "Check" : "ArrowRight"}
+            className="learning-course-card-action"
+            disabled={actionDisabled}
+            onClick={(event) => {
+              event.stopPropagation();
+              onAction?.();
+            }}
+          >
+            {actionLabel}
+          </Button>
         )}
       </footer>
     </>
   );
 
-  return href ? <Link href={href} className={className}>{content}</Link> : <article className={className}>{content}</article>;
+  if (href && !hasSeparateAction) return <Link href={href} className={className}>{content}</Link>;
+
+  if (href) {
+    return (
+      <article
+        className={className}
+        role="link"
+        tabIndex={0}
+        onClick={() => { startRouteProgress(href); router.push(href); }}
+        onKeyDown={(event) => { if (event.key === "Enter") { startRouteProgress(href); router.push(href); } }}
+        aria-label={`${name} course details`}
+      >
+        {content}
+      </article>
+    );
+  }
+
+  return <article className={className}>{content}</article>;
 }

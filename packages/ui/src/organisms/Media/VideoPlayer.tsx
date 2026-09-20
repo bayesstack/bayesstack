@@ -57,6 +57,19 @@ export interface VideoPlayerProps extends React.HTMLAttributes<HTMLDivElement> {
    * Slot class names object for granular component targeted overrides
    */
   classNames?: VideoPlayerClassNames;
+
+  /**
+   * A timestamp requested by an enclosing learning experience. This makes it
+   * possible for a transcript or lesson guide to seek the player without
+   * reaching into the video element.
+   */
+  seekTo?: number;
+
+  /** Reports playback position to enclosing learning experiences. */
+  onPlaybackTimeChange?: (currentTime: number, duration: number) => void;
+
+  /** Called when native playback reaches the end of the media. */
+  onPlaybackEnded?: () => void;
 }
 
 export interface VideoPlayerClassNames {
@@ -85,6 +98,9 @@ export function VideoPlayer({
   aspectRatio = "16:9",
   className = "",
   classNames,
+  seekTo,
+  onPlaybackTimeChange,
+  onPlaybackEnded,
   style,
   ...props
 }: VideoPlayerProps) {
@@ -100,7 +116,7 @@ export function VideoPlayer({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
-  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Synchronize playback state
   const togglePlay = () => {
@@ -114,15 +130,28 @@ export function VideoPlayer({
 
   const handleTimeUpdate = () => {
     if (videoRef.current) {
-      setCurrentTime(videoRef.current.currentTime);
+      const nextTime = videoRef.current.currentTime;
+      setCurrentTime(nextTime);
+      onPlaybackTimeChange?.(nextTime, videoRef.current.duration || duration);
     }
   };
 
   const handleLoadedMetadata = () => {
     if (videoRef.current) {
-      setDuration(videoRef.current.duration);
+      const nextDuration = videoRef.current.duration;
+      setDuration(nextDuration);
+      onPlaybackTimeChange?.(videoRef.current.currentTime, nextDuration);
     }
   };
+
+  useEffect(() => {
+    if (!videoRef.current || typeof seekTo !== "number" || !Number.isFinite(seekTo)) return;
+    const maximum = Number.isFinite(videoRef.current.duration) ? videoRef.current.duration : seekTo;
+    const nextTime = Math.min(Math.max(0, seekTo), maximum);
+    videoRef.current.currentTime = nextTime;
+    setCurrentTime(nextTime);
+    onPlaybackTimeChange?.(nextTime, videoRef.current.duration || duration);
+  }, [seekTo, duration, onPlaybackTimeChange]);
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const time = parseFloat(e.target.value);
@@ -241,7 +270,7 @@ export function VideoPlayer({
   const [hoverPos, setHoverPos] = useState(0);
   const [seekRipple, setSeekRipple] = useState<{ type: "rewind" | "forward"; id: number } | null>(null);
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
-  const rippleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const rippleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const toggleSubtitlesQuick = () => {
     setSubtitles((prev) => (prev === "Off" ? "English [CC]" : "Off"));
@@ -373,6 +402,10 @@ export function VideoPlayer({
         muted={initialMuted}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
+        onEnded={() => {
+          setIsPlaying(false);
+          onPlaybackEnded?.();
+        }}
         onTimeUpdate={handleTimeUpdate}
         onProgress={handleProgress}
         onLoadedMetadata={handleLoadedMetadata}

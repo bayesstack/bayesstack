@@ -124,7 +124,8 @@
 }
 .learning-library-table-head { min-height: 34px; padding: 0 16px; border-bottom: 1px solid #e4eaed; background: #f8fafb; color: #4e6070; font: 700 10px var(--font-body); letter-spacing: .06em; text-transform: uppercase; }
 .learning-library-table-head > :first-child { grid-column: 1 / 3; }
-.learning-library-course { min-height: 96px; padding: 11px 16px; border: 0; border-top: 1px solid #e7ecee; border-radius: 0; background: #fff; box-shadow: none; }
+.learning-library-course { min-height: 96px; padding: 11px 16px; border: 0; border-top: 1px solid #e7ecee; border-radius: 0; background: #fff; box-shadow: none; cursor: pointer; }
+.learning-library-course:focus-visible { outline: 2px solid var(--learner-brand); outline-offset: -2px; }
 .learning-library-course:first-of-type { border-top: 0; }
 .learning-library-course:hover { border-color: #e7ecee; background: #f7fafb; box-shadow: inset 3px 0 color-mix(in srgb, var(--course-accent) 55%, transparent); transform: none; }
 .learning-library-course.is-sky { --course-accent: #2f6f92; }

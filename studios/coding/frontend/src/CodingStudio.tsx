@@ -12,7 +12,6 @@ import { EditorPanel, getInitialEditorSettings, type EditorSettings } from "./co
 import { ConsolePanel } from "./components/console/ConsolePanel";
 import { ShortcutsModal } from "./components/modals/ShortcutsModal";
 import { StudioSettingsDrawer } from "./components/modals/StudioSettingsDrawer";
-import "./styles/codingStudio.css";
 
 const STREAK_KEY = "bs_cs_user_streak";
 

@@ -1,4 +1,6 @@
 @import "@bayesstack/ui/styles.css";
+@import "@bayesstack/studio-coding/styles.css";
+@import "@bayesstack/studio-video/styles.css";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
 
 /* Design system tokens & global base resets ─────────────────────────────── */
@@ -29,7 +31,5 @@
 @import "./styles/learning/course-workspace.css";
 
 /* Learning: concept workspace ───────────────────────────────────────────── */
-@import "./styles/learning/concept-workspace.css";
-
 /* Learning: practice studio ─────────────────────────────────────────────── */
-@import "./styles/learning/practice-studio.css";
+@import "./styles/learning/studio-runtime.css";

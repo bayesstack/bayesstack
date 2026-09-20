@@ -129,7 +129,7 @@ if [[ ${#RAW_SERVICE_ARGS[@]} -eq 0 ]]; then
     echo ""
     echo -e "${CLR_BOLD}Lightweight Workflows:${CLR_RESET}"
     echo -e "  2) super-flow    (postgres, api, super, nginx)"
-    echo -e "  3) learner-flow  (postgres, api, auth, learner, nginx)"
+    echo -e "  3) learner-flow  (postgres, api, coding-judge, auth, learner, nginx)"
     echo -e "  4) faculty-flow  (postgres, api, auth, faculty, nginx)"
     echo -e "  5) admin-flow    (postgres, api, auth, admin, nginx)"
     echo -e "${CLR_DIM}------------------------------------------${CLR_RESET}"

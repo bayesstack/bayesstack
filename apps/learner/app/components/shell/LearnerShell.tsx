@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Avatar, Badge, Dropdown, Icon, LoadingBar, Sidebar, Tooltip, type DropdownMenuItem, type SidebarGroup, type SidebarItem } from "@bayesstack/ui";
 import { useLearnerShellState } from "./state";
+import { ROUTE_PROGRESS_START_EVENT } from "./route-progress";
 import { learnerIdentity } from "../learning/data";
 
 const APP_BASE_PATH = "/learner";
@@ -53,8 +54,8 @@ const searchableRoutes = [
 const prefetchRoutes = [
   "/learning",
   "/learning/machine-learning",
-  "/learning/machine-learning/optimization/gradient-descent",
-  "/learning/machine-learning/optimization/gradient-descent/practice",
+  "/learning/machine-learning/studio/video",
+  "/learning/machine-learning/studio/coding",
   "/labs", "/projects", "/discussions", "/calendar", "/progress", "/help", "/profile",
 ];
 
@@ -100,12 +101,7 @@ function getHeaderBreadcrumbs(pathname: string, routeTitle: string): HeaderBread
     return [...crumbs, { label: "Machine Learning" }];
   }
 
-  crumbs.push({ label: "Machine Learning", href: appRoute("/learning/machine-learning") });
-  if (pathname.endsWith("/gradient-descent")) {
-    return [...crumbs, { label: "Gradient Descent" }];
-  }
-
-  return [...crumbs, { label: routeTitle }];
+  return [...crumbs, { label: "Machine Learning", href: appRoute("/learning/machine-learning") }, { label: routeTitle }];
 }
 
 function LearnerBrand({ collapsed, onNavigate }: { collapsed: boolean; onNavigate: (event: React.MouseEvent<HTMLAnchorElement>, href: string) => void }) {
@@ -153,9 +149,11 @@ export function LearnerShell({ children }: { children: React.ReactNode }) {
   const { sidebarPreference, setSidebarPreference } = useLearnerShellState();
   const collapsed = sidebarPreference === "collapsed";
   const activeId = pathname.startsWith("/learning") ? "learning" : routeToId[pathname] ?? "home";
-  const routeTitle = pathname.endsWith("/practice") ? "Coding practice" : pathname.endsWith("/gradient-descent") ? "Gradient Descent" : pathname === "/learning/machine-learning" ? "Machine Learning" : routeTitles[pathname] ?? "Workspace";
+  const isVideoStudio = pathname === "/learning/machine-learning/studio/video";
+  const isCodingStudio = pathname === "/learning/machine-learning/studio/coding";
+  const isStudio = isVideoStudio || isCodingStudio;
+  const routeTitle = isVideoStudio ? "Video studio" : isCodingStudio ? "Coding studio" : pathname === "/learning/machine-learning" ? "Machine Learning" : routeTitles[pathname] ?? "Workspace";
   const headerBreadcrumbs = getHeaderBreadcrumbs(pathname, routeTitle);
-  const isStudio = pathname.endsWith("/practice");
   const [pendingPath, setPendingPath] = useState<string | null>(null);
   const [routeProgress, setRouteProgress] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -167,6 +165,12 @@ export function LearnerShell({ children }: { children: React.ReactNode }) {
   const searchResults = searchableRoutes.filter((item) =>
     `${item.label} ${item.detail}`.toLowerCase().includes(normalizedSearch),
   ).slice(0, 6);
+
+  const beginRouteProgress = (destination: string) => {
+    if (destination === pathname) return;
+    setPendingPath(destination);
+    setRouteProgress(12);
+  };
 
   useEffect(() => {
     prefetchRoutes.forEach((route) => router.prefetch(route));
@@ -219,15 +223,33 @@ export function LearnerShell({ children }: { children: React.ReactNode }) {
     };
   }, [pendingPath]);
 
+  useEffect(() => {
+    const handleRouteProgress = (event: Event) => {
+      const destination = (event as CustomEvent<{ destination?: string }>).detail?.destination;
+      if (destination) beginRouteProgress(destination);
+    };
+    window.addEventListener(ROUTE_PROGRESS_START_EVENT, handleRouteProgress);
+    return () => window.removeEventListener(ROUTE_PROGRESS_START_EVENT, handleRouteProgress);
+  }, [pathname]);
+
   const navigateToHref = (href: string) => {
     const internalPath = href === APP_BASE_PATH ? "/" : href.replace(new RegExp(`^${APP_BASE_PATH}`), "");
     const destination = internalPath || "/";
     setSearchOpen(false);
     setNotificationsOpen(false);
     if (destination === pathname) return;
-    setPendingPath(destination);
-    setRouteProgress(12);
+    beginRouteProgress(destination);
     router.push(destination);
+  };
+
+  const handleCanvasNavigationIntent = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const target = event.target instanceof Element ? event.target : null;
+    const link = target?.closest<HTMLAnchorElement>("a[href]");
+    if (!link || link.target || link.hasAttribute("download")) return;
+    const destination = new URL(link.href, window.location.href);
+    if (destination.origin !== window.location.origin || destination.pathname === pathname) return;
+    beginRouteProgress(destination.pathname);
   };
 
   const handleRouteNavigation = (event: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -298,7 +320,7 @@ export function LearnerShell({ children }: { children: React.ReactNode }) {
           </div>
         }
       />
-      <div className="learner-canvas">
+      <div className="learner-canvas" onClickCapture={handleCanvasNavigationIntent}>
         {pendingPath && (
           <div className="learner-route-progress" role="status" aria-label="Loading your next workspace">
             <LoadingBar progress={routeProgress} height={3} />

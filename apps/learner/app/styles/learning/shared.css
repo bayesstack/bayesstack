@@ -76,6 +76,8 @@
   transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
 }
 .learning-course-card:hover { border-color: #c0ccd3; box-shadow: 0 10px 22px rgba(31, 45, 56, .07); transform: translateY(-1px); }
+.learning-course-card[role="link"] { cursor: pointer; }
+.learning-course-card:focus-visible { outline: 2px solid var(--learner-brand); outline-offset: 3px; }
 .learning-course-card.is-indigo { --course-accent: #5965a8; }
 .learning-course-card.is-sky { --course-accent: #2f6f92; }
 .learning-course-card.is-amber { --course-accent: #8a5a15; }

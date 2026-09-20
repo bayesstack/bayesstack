@@ -14,8 +14,17 @@ export const learnerIdentity: {
 
 // ─── Route paths ──────────────────────────────────────────────────────────
 export const coursePath = "/learning/machine-learning";
-export const conceptPath = `${coursePath}/optimization/gradient-descent`;
-export const practicePath = `${conceptPath}/practice`;
+export const videoStudioPath = `${coursePath}/studio/video`;
+export const codingStudioPath = `${coursePath}/studio/coding`;
+
+export function courseSlug(code: string) {
+  return code.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+export function courseHref(code: string) {
+  // ML 401 is the one course with a working course workspace today.
+  return code === "ML 401" ? coursePath : `/learning/${courseSlug(code)}`;
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────
 export type CourseCardTone = "neutral" | "primary" | "success" | "warning" | "danger" | "info";
@@ -75,10 +84,10 @@ export const weekSteps = [
 
 const courses = [
   // href = course overview page; continueHref = CTA target (see split-click pattern in curriculum row)
-  { code: "ML 401", name: "Machine Learning", faculty: "Prof. N. Rao", current: "Gradient Descent", next: "Notebook review · 15 min", progress: 42, status: "On track", tone: "success" as const, href: coursePath, continueHref: conceptPath },
-  { code: "STAT 312", name: "Probability & Statistics", faculty: "Dr. A. Menon", current: "Bayesian inference", next: "Quiz review · 20 min", progress: 61, status: "Ahead", tone: "info" as const, href: "/learning", continueHref: "/learning" },
-  { code: "CS 326", name: "Database Systems", faculty: "Prof. R. Shah", current: "Relational algebra", next: "Assignment due tomorrow", progress: 28, status: "Needs attention", tone: "warning" as const, href: "/projects", continueHref: "/projects" },
-  { code: "CS 341", name: "Operating Systems", faculty: "Dr. S. Iyer", current: "Process states", next: "Start concept · 22 min", progress: 0, status: "Not started", tone: "neutral" as const, href: "/learning", continueHref: "/learning" },
+  { code: "ML 401", name: "Machine Learning", faculty: "Prof. N. Rao", current: "Gradient Descent", next: "Video lesson · 12 min", progress: 42, status: "On track", tone: "success" as const, href: courseHref("ML 401"), continueHref: videoStudioPath },
+  { code: "STAT 312", name: "Probability & Statistics", faculty: "Dr. A. Menon", current: "Bayesian inference", next: "Quiz review · 20 min", progress: 61, status: "Ahead", tone: "info" as const, href: courseHref("STAT 312"), continueHref: courseHref("STAT 312") },
+  { code: "CS 326", name: "Database Systems", faculty: "Prof. R. Shah", current: "Relational algebra", next: "Assignment due tomorrow", progress: 28, status: "Needs attention", tone: "warning" as const, href: courseHref("CS 326"), continueHref: courseHref("CS 326") },
+  { code: "CS 341", name: "Operating Systems", faculty: "Dr. S. Iyer", current: "Process states", next: "Start concept · 22 min", progress: 0, status: "Not started", tone: "neutral" as const, href: courseHref("CS 341"), continueHref: courseHref("CS 341") },
 ];
 
 const courseDescriptions: Record<string, string> = {
@@ -98,12 +107,12 @@ const completedCourseDescriptions: Record<string, string> = {
 };
 
 export const previousTermCourses = [
-  { code: "CS 110", name: "Programming Foundations", faculty: "Dr. L. Kapoor", current: "Final grade", next: "", grade: "A", progress: 100, status: "Completed", tone: "success" as const, href: "/learning", continueHref: "/learning" },
-  { code: "MATH 121", name: "Discrete Mathematics", faculty: "Prof. S. Bose", current: "Final grade", next: "", grade: "A-", progress: 100, status: "Completed", tone: "success" as const, href: "/learning", continueHref: "/learning" },
-  { code: "CS 130", name: "Computer Systems", faculty: "Prof. J. Thomas", current: "Final grade", next: "", grade: "B+", progress: 100, status: "Completed", tone: "success" as const, href: "/learning", continueHref: "/learning" },
-  { code: "STAT 101", name: "Foundations of Statistics", faculty: "Dr. P. Iyer", current: "Final grade", next: "", grade: "A", progress: 100, status: "Completed", tone: "success" as const, href: "/learning", continueHref: "/learning" },
-  { code: "COMM 105", name: "Technical Communication", faculty: "Dr. M. Sen", current: "Final grade", next: "", grade: "A-", progress: 100, status: "Completed", tone: "success" as const, href: "/learning", continueHref: "/learning" },
-  { code: "DES 115", name: "Designing with Data", faculty: "Prof. K. Mehta", current: "Final grade", next: "", grade: "B+", progress: 100, status: "Completed", tone: "success" as const, href: "/learning", continueHref: "/learning" },
+  { code: "CS 110", name: "Programming Foundations", faculty: "Dr. L. Kapoor", current: "Final grade", next: "", grade: "A", progress: 100, status: "Completed", tone: "success" as const, href: courseHref("CS 110"), continueHref: courseHref("CS 110") },
+  { code: "MATH 121", name: "Discrete Mathematics", faculty: "Prof. S. Bose", current: "Final grade", next: "", grade: "A-", progress: 100, status: "Completed", tone: "success" as const, href: courseHref("MATH 121"), continueHref: courseHref("MATH 121") },
+  { code: "CS 130", name: "Computer Systems", faculty: "Prof. J. Thomas", current: "Final grade", next: "", grade: "B+", progress: 100, status: "Completed", tone: "success" as const, href: courseHref("CS 130"), continueHref: courseHref("CS 130") },
+  { code: "STAT 101", name: "Foundations of Statistics", faculty: "Dr. P. Iyer", current: "Final grade", next: "", grade: "A", progress: 100, status: "Completed", tone: "success" as const, href: courseHref("STAT 101"), continueHref: courseHref("STAT 101") },
+  { code: "COMM 105", name: "Technical Communication", faculty: "Dr. M. Sen", current: "Final grade", next: "", grade: "A-", progress: 100, status: "Completed", tone: "success" as const, href: courseHref("COMM 105"), continueHref: courseHref("COMM 105") },
+  { code: "DES 115", name: "Designing with Data", faculty: "Prof. K. Mehta", current: "Final grade", next: "", grade: "B+", progress: 100, status: "Completed", tone: "success" as const, href: courseHref("DES 115"), continueHref: courseHref("DES 115") },
 ].map((course) => ({ ...course, description: completedCourseDescriptions[course.code], accent: courseAccent(course.code) }));
 
 export const currentTermCourses = courses.map((course) => ({
@@ -133,6 +142,7 @@ export const personalCourses = [
     status: "On track",
     tone: "success" as const,
     accent: "green",
+    href: courseHref("FIN 210"),
   },
   {
     code: "CS 245",
@@ -145,6 +155,7 @@ export const personalCourses = [
     status: "On track",
     tone: "success" as const,
     accent: "indigo",
+    href: courseHref("CS 245"),
   },
 ];
 

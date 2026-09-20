@@ -202,7 +202,7 @@ const SubMenuItemRenderer: React.FC<{
   onItemClick: (item: DropdownMenuItem) => void;
 }> = ({ item, defaultTruncate, selectable, isSelected, isFocused, onItemClick }) => {
   const [subMenuOpen, setSubMenuOpen] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const shouldTruncate = item.truncate !== undefined ? item.truncate : defaultTruncate;
 
@@ -366,7 +366,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
   const isOpen = typeof controlledOpen === "boolean" ? controlledOpen : internalOpen;
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Filter down to interactive items so keyboard navigation (ArrowUp/Down) skips headers, dividers, and disabled slots
   const selectableItems = (items || []).filter(

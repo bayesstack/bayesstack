@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@bayesstack/assets": "workspace:*",
+    "@bayesstack/studio-coding": "workspace:*",
+    "@bayesstack/studio-video": "workspace:*",
     "@bayesstack/tenant": "workspace:*",
     "@bayesstack/ui": "workspace:*",
     "next": "catalog:",

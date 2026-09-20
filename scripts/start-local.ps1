@@ -81,7 +81,7 @@ if ($RawArgs.Count -eq 0) {
   Write-Host ""
   Write-Host "Lightweight Workflows:"
   Write-Host "  2) super-flow    (postgres, api, super, nginx)"
-  Write-Host "  3) learner-flow  (postgres, api, auth, learner, nginx)"
+  Write-Host "  3) learner-flow  (postgres, api, coding-judge, auth, learner, nginx)"
   Write-Host "  4) faculty-flow  (postgres, api, auth, faculty, nginx)"
   Write-Host "  5) admin-flow    (postgres, api, auth, admin, nginx)"
   Write-Host "------------------------------------------"

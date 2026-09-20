@@ -1,0 +1,43 @@
+.learner-app-shell.is-learning-studio { display: block; }
+.learner-app-shell.is-learning-studio .learner-sidebar,
+.learner-app-shell.is-learning-studio .learner-app-header { display: none; }
+.learner-app-shell.is-learning-studio .learner-canvas { min-width: 0; min-height: 100dvh; }
+
+.learning-activity-studio {
+  min-height: 100dvh;
+  padding: clamp(20px, 3vw, 40px);
+  background: #f4f7f8;
+}
+
+.learning-activity-studio--video {
+  background:
+    radial-gradient(circle at 78% 0%, rgba(143, 71, 125, 0.07), transparent 26rem),
+    #f4f7f8;
+}
+
+.learning-video-studio-shell { max-width: 1440px; margin: 0 auto; }
+
+.learning-video-studio-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px;
+  margin: 0 0 14px;
+  color: #52657a;
+  font-size: 13px;
+  font-weight: 680;
+  text-decoration: none;
+}
+
+.learning-video-studio-back:hover,
+.learning-video-studio-back:focus-visible {
+  color: #71365f;
+  outline: none;
+}
+
+.learning-activity-studio--coding {
+  padding: 0;
+  background: #f1f8f6;
+}
+
+.learning-activity-studio--coding .bs-coding-studio { min-height: 100dvh; border: 0; border-radius: 0; }

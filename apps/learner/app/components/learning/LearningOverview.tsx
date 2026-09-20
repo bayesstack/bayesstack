@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Badge, Button, Drawer, Icon, Pager, SearchInput, Select, Tabs } from "@bayesstack/ui";
 import { LearningCourseCard } from "./ui/CourseCard";
 import { ProgressBar } from "./ui/Primitives";
+import { startRouteProgress } from "../shell/route-progress";
 import {
   currentTermCourses,
   previousTermCourses,
@@ -17,6 +18,7 @@ import {
   levelOptions,
   durationOptions,
   sortOptions,
+  courseHref,
 } from "./data";
 
 type CourseView = "table" | "cards";
@@ -161,6 +163,10 @@ function CurriculumView({
   setCourseView: (view: CourseView) => void;
 }) {
   const router = useRouter();
+  const navigateToCourse = (href: string) => {
+    startRouteProgress(href);
+    router.push(href);
+  };
   const cardPageSize = useCardPageSize();
   const pageSize = courseView === "cards" ? cardPageSize : 10;
   const pagination = useCoursePagination(displayedCourses, pageSize, `${selectedTerm}-${courseView}`);
@@ -207,8 +213,8 @@ function CurriculumView({
                 course.progress === 100 && "is-complete",
               ].filter(Boolean).join(" ")}
               role="listitem"
-              onClick={() => router.push(course.href)}
-              onKeyDown={(e) => { if (e.key === "Enter") router.push(course.href); }}
+              onClick={() => navigateToCourse(course.href)}
+              onKeyDown={(e) => { if (e.key === "Enter") navigateToCourse(course.href); }}
               tabIndex={0}
               aria-label={`${course.name} — view course details`}
             >
@@ -245,7 +251,7 @@ function CurriculumView({
                 rightIcon="ArrowRight"
                 className="learning-curriculum-action"
                 aria-label={`${ctaLabel(course)} ${course.name}`}
-                onClick={(e: React.MouseEvent) => { e.stopPropagation(); router.push(course.continueHref); }}
+                onClick={(e: React.MouseEvent) => { e.stopPropagation(); navigateToCourse(course.continueHref); }}
               >
                 {ctaLabel(course)}
               </Button>
@@ -271,7 +277,7 @@ function CurriculumView({
                   statusTone={course.tone}
                   attention={course.tone === "warning"}
                   completed={course.progress === 100}
-                  href={course.continueHref}
+                  href={course.href}
                   variant="curriculum"
                   actionLabel={ctaLabel(course)}
                 />
@@ -295,6 +301,12 @@ function CurriculumView({
 // ─── Personal Learning View ───────────────────────────────────────────────
 
 function PersonalCourseTable({ courses }: { courses: typeof personalCourses }) {
+  const router = useRouter();
+  const navigateToCourse = (href: string) => {
+    startRouteProgress(href);
+    router.push(href);
+  };
+
   return (
     <div className="learning-curriculum-list learning-personal-course-table" role="list" aria-label="Personal courses">
       <div className="learning-curriculum-table-head" aria-hidden="true">
@@ -305,7 +317,15 @@ function PersonalCourseTable({ courses }: { courses: typeof personalCourses }) {
         <span />
       </div>
       {courses.map((course) => (
-        <div key={course.code} className={`learning-curriculum-course is-${course.accent}`} role="listitem">
+        <div
+          key={course.code}
+          className={`learning-curriculum-course is-${course.accent}`}
+          role="listitem"
+          onClick={() => navigateToCourse(course.href)}
+          onKeyDown={(event) => { if (event.key === "Enter") navigateToCourse(course.href); }}
+          tabIndex={0}
+          aria-label={`${course.name} — view course details`}
+        >
           <div className="learning-curriculum-code">{course.code}</div>
           <div className="learning-curriculum-identity">
             <strong>{course.name}</strong>
@@ -321,7 +341,13 @@ function PersonalCourseTable({ courses }: { courses: typeof personalCourses }) {
             <span className="learning-curriculum-progress-value">{course.progress}%</span>
           </div>
           <Badge color={course.tone} variant="subtle" size="sm">{course.status}</Badge>
-          <Button variant="outline" size="xs" rightIcon="ArrowRight" className="learning-curriculum-action">
+          <Button
+            variant="outline"
+            size="xs"
+            rightIcon="ArrowRight"
+            className="learning-curriculum-action"
+            onClick={(event: React.MouseEvent) => { event.stopPropagation(); navigateToCourse(course.href); }}
+          >
             Continue
           </Button>
         </div>
@@ -379,6 +405,7 @@ function PersonalView({
                     status={course.status}
                     statusTone={course.tone}
                     variant="curriculum"
+                    href={course.href}
                     actionLabel="Continue"
                   />
                 </div>
@@ -411,6 +438,12 @@ function LibraryCourseTable({
   enrolledIds: string[];
   onEnroll: (courseId: string) => void;
 }) {
+  const router = useRouter();
+  const navigateToCourse = (href: string) => {
+    startRouteProgress(href);
+    router.push(href);
+  };
+
   return (
     <div className="learning-library-course-table" role="list" aria-label="Course catalogue">
       <div className="learning-library-table-head" aria-hidden="true">
@@ -424,7 +457,15 @@ function LibraryCourseTable({
         const enrolled = enrolledIds.includes(course.id);
         const isRecommended = recommendedCourses.some((recommended) => recommended.id === course.id);
         return (
-          <article key={course.id} className={`learning-library-course is-${course.accent}`} role="listitem">
+          <article
+            key={course.id}
+            className={`learning-library-course is-${course.accent}`}
+            role="listitem"
+            onClick={() => navigateToCourse(courseHref(course.code))}
+            onKeyDown={(event) => { if (event.key === "Enter") navigateToCourse(courseHref(course.code)); }}
+            tabIndex={0}
+            aria-label={`${course.name} — view course details`}
+          >
             <div className="learning-library-course-code">{course.code}</div>
             <div className="learning-library-course-identity">
               <strong>{course.name}</strong>
@@ -446,7 +487,7 @@ function LibraryCourseTable({
               rightIcon={enrolled ? "Check" : "ArrowRight"}
               className="learning-library-course-action"
               disabled={enrolled}
-              onClick={() => onEnroll(course.id)}
+              onClick={(event: React.MouseEvent) => { event.stopPropagation(); onEnroll(course.id); }}
             >
               {enrolled ? "Enrolled" : "Enrol"}
             </Button>
@@ -641,6 +682,7 @@ function CourseLibraryView({
                   recommended={isRecommended}
                   enrolled={enrolled}
                   variant="curriculum"
+                  href={courseHref(course.code)}
                   actionLabel={enrolled ? "Enrolled" : "Enrol in course"}
                   actionDisabled={enrolled}
                   onAction={() => enroll(course.id)}
@@ -717,7 +759,7 @@ export function LearningOverview() {
         <Link href="/progress" className="learning-goal-chip">
           <Icon name="Target" size="xs" />
           <span>Quantitative Engineer</span>
-          <Icon name="ArrowUpRight" size="xs" />
+          <Icon name="ArrowRight" size="xs" />
         </Link>
       </header>
 

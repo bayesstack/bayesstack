@@ -177,6 +177,12 @@ importers:
       '@bayesstack/assets':
         specifier: workspace:*
         version: link:../../packages/assets
+      '@bayesstack/studio-coding':
+        specifier: workspace:*
+        version: link:../../studios/coding/frontend
+      '@bayesstack/studio-video':
+        specifier: workspace:*
+        version: link:../../studios/video/frontend
       '@bayesstack/tenant':
         specifier: workspace:*
         version: link:../../packages/tenant

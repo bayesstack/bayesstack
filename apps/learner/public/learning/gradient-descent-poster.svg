@@ -1,0 +1,76 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title description">
+  <title id="title">Following the negative gradient</title>
+  <desc id="description">An abstract learning illustration of a parameter moving down a loss landscape.</desc>
+  <defs>
+    <linearGradient id="surface" x1="144" y1="38" x2="1482" y2="856" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#132536"/>
+      <stop offset="0.55" stop-color="#1E3143"/>
+      <stop offset="1" stop-color="#13202E"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientTransform="translate(1192 265) rotate(132) scale(664 760)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B75C9C" stop-opacity="0.36"/>
+      <stop offset="1" stop-color="#B75C9C" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="curve" x1="385" y1="286" x2="1290" y2="698" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E0A4CA"/>
+      <stop offset="0.46" stop-color="#BD5D9F"/>
+      <stop offset="1" stop-color="#7A345F"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="1133" y1="154" x2="1432" y2="674" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.15"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.035"/>
+    </linearGradient>
+    <filter id="blur" x="-60" y="-60" width="1720" height="1020" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="28"/>
+    </filter>
+    <filter id="shadow" x="-40" y="-40" width="1680" height="980" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="20" stdDeviation="22" flood-color="#06111D" flood-opacity="0.4"/>
+    </filter>
+    <pattern id="grid" width="58" height="58" patternUnits="userSpaceOnUse">
+      <path d="M58 0H0V58" stroke="#D9E7F0" stroke-opacity="0.06" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="900" fill="url(#surface)"/>
+  <rect width="1600" height="900" fill="url(#grid)"/>
+  <rect width="1600" height="900" fill="url(#glow)"/>
+  <ellipse cx="1300" cy="776" rx="390" ry="108" fill="#8F477D" fill-opacity="0.16" filter="url(#blur)"/>
+  <g opacity="0.4">
+    <path d="M-32 745C176 523 348 421 570 494C820 576 922 769 1154 713C1341 667 1454 510 1640 441" stroke="#95B4C9" stroke-opacity="0.21" stroke-width="2"/>
+    <path d="M-28 673C162 475 380 394 577 463C803 543 930 694 1142 646C1338 601 1435 463 1622 394" stroke="#95B4C9" stroke-opacity="0.18" stroke-width="2"/>
+    <path d="M-32 821C196 601 361 501 559 565C766 633 897 845 1167 785C1362 742 1474 580 1650 525" stroke="#95B4C9" stroke-opacity="0.12" stroke-width="2"/>
+  </g>
+  <g filter="url(#shadow)">
+    <path d="M264 256C430 243 518 302 620 409C718 512 780 670 962 674C1115 678 1264 564 1364 338" stroke="url(#curve)" stroke-width="12" stroke-linecap="round"/>
+    <path d="M264 256C430 243 518 302 620 409C718 512 780 670 962 674C1115 678 1264 564 1364 338" stroke="#F6D9E9" stroke-opacity="0.65" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="411" cy="278" r="15" fill="#E0A4CA" stroke="#FFF2F8" stroke-width="5"/>
+    <circle cx="619" cy="408" r="15" fill="#D77CB7" stroke="#FFF2F8" stroke-width="5"/>
+    <circle cx="800" cy="603" r="15" fill="#C45D9D" stroke="#FFF2F8" stroke-width="5"/>
+    <circle cx="962" cy="674" r="20" fill="#FFFFFF" stroke="#9D497F" stroke-width="8"/>
+    <path d="M937 696L964 723L994 690" stroke="#F2B7D8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <g transform="translate(150 156)">
+    <rect width="258" height="38" rx="19" fill="#E7B0D0" fill-opacity="0.13" stroke="#E7B0D0" stroke-opacity="0.36"/>
+    <circle cx="24" cy="19" r="6" fill="#E9A9CF"/>
+    <text x="42" y="24" fill="#F2D5E5" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="1.7">ML 401 · VIDEO LESSON</text>
+    <text x="0" y="132" fill="#FFFFFF" font-family="Outfit, Inter, Arial, sans-serif" font-size="67" font-weight="700" letter-spacing="-2.3">Following the</text>
+    <text x="0" y="208" fill="#F0BDD9" font-family="Outfit, Inter, Arial, sans-serif" font-size="67" font-weight="700" letter-spacing="-2.3">negative gradient</text>
+    <text x="1" y="258" fill="#C8D6E1" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="500">Move with purpose: read the slope, choose a step,</text>
+    <text x="1" y="289" fill="#C8D6E1" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="500">and watch a model find its way downhill.</text>
+  </g>
+  <g transform="translate(1094 164)">
+    <rect width="328" height="346" rx="22" fill="url(#panel)" stroke="#FFFFFF" stroke-opacity="0.18"/>
+    <text x="34" y="58" fill="#E9C9DA" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.6">THE UPDATE RULE</text>
+    <text x="34" y="137" fill="#FFFFFF" font-family="Georgia, serif" font-size="45">θ</text>
+    <text x="79" y="132" fill="#ADBED0" font-family="Inter, Arial, sans-serif" font-size="26">←</text>
+    <text x="126" y="137" fill="#FFFFFF" font-family="Georgia, serif" font-size="45">θ − η∇L(θ)</text>
+    <path d="M34 176H294" stroke="#FFFFFF" stroke-opacity="0.16"/>
+    <text x="34" y="222" fill="#B8C8D6" font-family="Inter, Arial, sans-serif" font-size="15">parameter</text>
+    <text x="145" y="222" fill="#B8C8D6" font-family="Inter, Arial, sans-serif" font-size="15">learning rate × gradient</text>
+    <rect x="34" y="262" width="176" height="42" rx="10" fill="#EEB6D7" fill-opacity="0.12"/>
+    <text x="50" y="289" fill="#F1C2DC" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="700">12 min · 4 moments</text>
+  </g>
+  <g transform="translate(150 742)">
+    <path d="M0 0H510" stroke="#FFFFFF" stroke-opacity="0.2"/>
+    <text x="0" y="42" fill="#AFC0CF" font-family="Inter, Arial, sans-serif" font-size="15" letter-spacing="1.3">OPTIMISATION FOR LEARNING</text>
+  </g>
+</svg>

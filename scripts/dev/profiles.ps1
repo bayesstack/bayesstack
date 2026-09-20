@@ -4,7 +4,9 @@ function Expand-Profile([string]$target) {
   switch ($target.ToLower()) {
     "core"         { return "postgres", "api", "coding-judge", "auth", "super", "learner", "faculty", "admin", "landing", "nginx" }
     "minimal"      { return "postgres", "api", "coding-judge", "auth", "super", "learner", "faculty", "admin", "landing", "nginx" }
-    "learner-flow" { return "postgres", "api", "auth", "learner", "nginx" }
+    # Video is mounted directly by the Learner frontend. The coding activity
+    # additionally needs the private judge for Run/Submit actions.
+    "learner-flow" { return "postgres", "api", "coding-judge", "auth", "learner", "nginx" }
     "faculty-flow" { return "postgres", "api", "auth", "faculty", "nginx" }
     "admin-flow"   { return "postgres", "api", "auth", "admin", "nginx" }
     "super-flow"   { return "postgres", "api", "coding-judge", "super", "nginx" }

@@ -1,21 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
-import {
-  Badge,
-  Button,
-  Icon,
-  Tabs,
-  Alert,
-  VideoPlayer,
-  type TabItem,
-} from "@bayesstack/ui";
+import React, { useMemo, useState } from "react";
+import { Badge, Button, Icon, Tabs, VideoPlayer, type TabItem } from "@bayesstack/ui";
 
 export interface VideoTranscriptItem {
   time: number;
   time_formatted?: string;
   speaker?: string;
   text: string;
+}
+
+export interface VideoLessonSegment {
+  time: number;
+  title: string;
+  description: string;
 }
 
 export interface VideoActivityConfig {
@@ -26,6 +24,10 @@ export interface VideoActivityConfig {
   playback_policy?: string;
   transcript?: VideoTranscriptItem[];
   key_takeaways?: string[];
+  segments?: VideoLessonSegment[];
+  course_label?: string;
+  chapter_label?: string;
+  learning_objective?: string;
   [key: string]: unknown;
 }
 
@@ -49,6 +51,12 @@ export interface VideoStudioProps {
   style?: React.CSSProperties;
 }
 
+const formatTime = (seconds: number) => {
+  const minutes = Math.floor(seconds / 60);
+  const remainder = Math.floor(seconds % 60);
+  return `${minutes}:${remainder < 10 ? "0" : ""}${remainder}`;
+};
+
 export function VideoStudio({
   activity,
   onComplete,
@@ -57,26 +65,35 @@ export function VideoStudio({
   style = {},
 }: VideoStudioProps) {
   const config = activity.config || {};
-  const videoUrl =
-    config.video_url ||
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
-  const posterUrl = config.poster_url;
-  const transcript: VideoTranscriptItem[] = config.transcript || [];
-  const takeaways: string[] = config.key_takeaways || [];
+  const videoUrl = config.video_url || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
   const totalDuration = config.duration_seconds || 720;
+  const transcript = config.transcript || [];
+  const takeaways = config.key_takeaways || [];
+  const segments = useMemo<VideoLessonSegment[]>(() => {
+    if (config.segments?.length) return config.segments;
+    return transcript.map((item, index) => ({
+      time: item.time,
+      title: item.speaker || `Key moment ${index + 1}`,
+      description: item.text,
+    }));
+  }, [config.segments, transcript]);
 
-  const [activeTab, setActiveTab] = useState<string>("transcript");
-  const [completed, setCompleted] = useState<boolean>(false);
-  const [activeTimestamp, setActiveTimestamp] = useState<number>(0);
+  const [activeTab, setActiveTab] = useState("guide");
+  const [completed, setCompleted] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
+  const [notes, setNotes] = useState("");
+  const [playerTime, setPlayerTime] = useState(0);
+  const [playerDuration, setPlayerDuration] = useState(totalDuration);
+  const [seekTo, setSeekTo] = useState<number | undefined>();
 
-  // Format time (mm:ss)
-  const formatTime = (secs: number) => {
-    const m = Math.floor(secs / 60);
-    const s = Math.floor(secs % 60);
-    return `${m}:${s < 10 ? "0" : ""}${s}`;
-  };
+  const duration = playerDuration || totalDuration;
+  const watchedPercent = Math.min(100, Math.round((playerTime / duration) * 100));
+  const activeSegmentIndex = segments.reduce((activeIndex, segment, index) => (
+    segment.time <= playerTime ? index : activeIndex
+  ), 0);
 
-  const handleMarkComplete = () => {
+  const completeLesson = () => {
+    if (completed) return;
     setCompleted(true);
     onComplete?.();
     onEvent?.("activity.completed", {
@@ -85,356 +102,160 @@ export function VideoStudio({
     });
   };
 
-  const handleSeekTime = (time: number) => {
-    setActiveTimestamp(time);
-    onEvent?.("activity.seek", { time, activity_id: activity.id });
+  const seekToSegment = (time: number) => {
+    setSeekTo(time);
+    onEvent?.("activity.seek", { activity_id: activity.id, time });
   };
 
   const tabItems: TabItem[] = [
-    {
-      value: "transcript",
-      label: "Synchronized Transcript",
-      icon: "BookOpen",
-      badge: <Badge color="primary" variant="subtle" size="sm">{transcript.length}</Badge>,
-    },
-    {
-      value: "takeaways",
-      label: "Core Takeaways",
-      icon: "Brain",
-      badge: <Badge color="neutral" variant="subtle" size="sm">{takeaways.length}</Badge>,
-    },
-    {
-      value: "overview",
-      label: "Lesson Specifications",
-      icon: "Settings",
-    },
+    { value: "guide", label: "Lesson guide", icon: "LayoutList" },
+    { value: "notes", label: "Notes", icon: "Notebook" },
   ];
 
   return (
-    <div
-      className={className}
-      style={{
-        display: "grid",
-        gridTemplateColumns: "minmax(0, 1fr) 400px",
-        gap: "1.5rem",
-        width: "100%",
-        fontFamily: "var(--bs-ui-font-sans, 'Outfit', 'Inter', sans-serif)",
-        ...style,
-      }}
-    >
-      {/* Left Column: OTT Video Player & Status Card */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        {/* Video Player Card */}
-        <div
-          style={{
-            background: "var(--bs-ui-surface, #ffffff)",
-            borderRadius: "14px",
-            border: "1px solid var(--bs-ui-line, #d7e8e4)",
-            overflow: "hidden",
-            boxShadow: "0 4px 20px rgba(11, 103, 99, 0.05)",
-          }}
-        >
-          <VideoPlayer
-            src={videoUrl}
-            poster={posterUrl}
-            title={activity.title || "Video Lecture"}
-            subtitle={activity.concept_title ? `Concept: ${activity.concept_title}` : undefined}
-            aspectRatio={config.aspect_ratio || "16:9"}
-          />
-        </div>
-
-        {/* Video Telemetry & Completion Action Bar */}
-        <div
-          style={{
-            background: "var(--bs-ui-surface, #ffffff)",
-            border: "1px solid var(--bs-ui-line, #d7e8e4)",
-            borderRadius: "12px",
-            padding: "1rem 1.25rem",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            boxShadow: "0 2px 10px rgba(11, 103, 99, 0.03)",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <Badge color="neutral" variant="subtle" size="sm">
-              Duration: {formatTime(totalDuration)}
-            </Badge>
-            {activity.is_required && (
-              <Badge color="primary" variant="subtle" size="sm">
-                Required Activity
-              </Badge>
-            )}
-            {completed && (
-              <Badge color="success" variant="subtle" size="sm">
-                Completed ✓
-              </Badge>
-            )}
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            {!completed ? (
-              <Button
-                variant="primary"
-                size="sm"
-                leftIcon={<Icon name="Check" size={15} />}
-                onClick={handleMarkComplete}
-              >
-                Mark as Completed
-              </Button>
-            ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                leftIcon={<Icon name="Refresh" size={15} />}
-                onClick={() => setCompleted(false)}
-              >
-                Rewatch
-              </Button>
-            )}
+    <section className={["bs-video-studio", className].filter(Boolean).join(" ")} style={style}>
+      <header className="bs-video-studio__session-bar">
+        <div className="bs-video-studio__context">
+          <div className="bs-video-studio__eyebrow">
+            <Icon name="BookOpen" size={16} />
+            <span>{config.course_label || activity.concept_title || "Course lesson"}</span>
+            {config.chapter_label && <><span className="bs-video-studio__separator">/</span><span>{config.chapter_label}</span></>}
           </div>
         </div>
-      </div>
 
-      {/* Right Column: Interactive Sidebar (Transcript, Takeaways, Overview) */}
-      <div
-        style={{
-          background: "var(--bs-ui-surface, #ffffff)",
-          border: "1px solid var(--bs-ui-line, #d7e8e4)",
-          borderRadius: "14px",
-          boxShadow: "0 4px 20px rgba(11, 103, 99, 0.05)",
-          display: "flex",
-          flexDirection: "column",
-          height: "640px",
-          overflow: "hidden",
-        }}
-      >
-        {/* Navigation Tabs from @bayesstack/ui */}
-        <div
-          style={{
-            padding: "0.75rem 1rem 0",
-            borderBottom: "1px solid var(--bs-ui-line, #d7e8e4)",
-            background: "#ffffff",
-          }}
-        >
-          <Tabs
-            items={tabItems}
-            value={activeTab}
-            onValueChange={setActiveTab}
-            variant="line"
-            size="md"
-          />
-        </div>
-
-        {/* Tab 1: Synchronized Interactive Transcript */}
-        {activeTab === "transcript" && (
-          <div
-            style={{
-              flex: 1,
-              overflowY: "auto",
-              padding: "1rem",
-              display: "flex",
-              flexDirection: "column",
-              gap: "8px",
-              background: "var(--bs-ui-canvas, #f1f8f6)",
-            }}
-          >
-            {transcript.length === 0 && (
-              <div
-                style={{
-                  color: "var(--bs-ui-muted, #4a6360)",
-                  textAlign: "center",
-                  padding: "2rem 1rem",
-                  fontSize: "0.85rem",
-                }}
-              >
-                No timestamped transcript available for this lecture.
-              </div>
-            )}
-
-            {transcript.map((item, idx) => {
-              const isCurrent = activeTimestamp === item.time;
-              return (
-                <div
-                  key={idx}
-                  onClick={() => handleSeekTime(item.time)}
-                  style={{
-                    background: isCurrent ? "#ffffff" : "#ffffff",
-                    border: `1px solid ${isCurrent ? "var(--bs-ui-brand, #0b6763)" : "var(--bs-ui-line, #d7e8e4)"}`,
-                    borderRadius: "8px",
-                    padding: "10px 12px",
-                    cursor: "pointer",
-                    boxShadow: isCurrent
-                      ? "0 0 0 2px rgba(11, 103, 99, 0.15)"
-                      : "0 1px 3px rgba(0, 0, 0, 0.02)",
-                    transition: "all 0.15s ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isCurrent) e.currentTarget.style.borderColor = "#b2d6d0";
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isCurrent) e.currentTarget.style.borderColor = "var(--bs-ui-line, #d7e8e4)";
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                      <Badge color="primary" variant="subtle" size="sm">
-                        {item.time_formatted || formatTime(item.time)}
-                      </Badge>
-                      {item.speaker && (
-                        <span
-                          style={{
-                            fontSize: "0.75rem",
-                            color: "var(--bs-ui-muted, #4a6360)",
-                            fontWeight: 600,
-                          }}
-                        >
-                          {item.speaker}
-                        </span>
-                      )}
-                    </div>
-                    <span
-                      style={{
-                        fontSize: "0.72rem",
-                        color: "var(--bs-ui-brand, #0b6763)",
-                        fontWeight: 600,
-                      }}
-                    >
-                      Jump ↗
-                    </span>
-                  </div>
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: "0.85rem",
-                      color: "var(--bs-ui-ink, #123333)",
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {item.text}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Tab 2: Core Pedagogical Takeaways */}
-        {activeTab === "takeaways" && (
-          <div
-            style={{
-              flex: 1,
-              overflowY: "auto",
-              padding: "1.25rem",
-              display: "flex",
-              flexDirection: "column",
-              gap: "10px",
-              background: "var(--bs-ui-canvas, #f1f8f6)",
-            }}
-          >
-            {takeaways.length === 0 ? (
-              <div
-                style={{
-                  color: "var(--bs-ui-muted, #4a6360)",
-                  textAlign: "center",
-                  padding: "2rem 1rem",
-                  fontSize: "0.85rem",
-                }}
-              >
-                No pedagogical takeaways configured.
-              </div>
-            ) : (
-              takeaways.map((takeaway, idx) => (
-                <Alert
-                  key={idx}
-                  severity="info"
-                  variant="accent"
-                  title={`Key Takeaway ${idx + 1}`}
-                >
-                  {takeaway}
-                </Alert>
-              ))
-            )}
-          </div>
-        )}
-
-        {/* Tab 3: Lesson Specifications */}
-        {activeTab === "overview" && (
-          <div
-            style={{
-              flex: 1,
-              overflowY: "auto",
-              padding: "1.25rem",
-              background: "var(--bs-ui-canvas, #f1f8f6)",
-            }}
-          >
-            <div
-              style={{
-                background: "#ffffff",
-                border: "1px solid var(--bs-ui-line, #d7e8e4)",
-                borderRadius: "10px",
-                padding: "1.25rem",
-                boxShadow: "0 1px 4px rgba(0, 0, 0, 0.03)",
-              }}
-            >
-              <h4
-                style={{
-                  margin: "0 0 10px",
-                  fontSize: "0.95rem",
-                  color: "var(--bs-ui-ink, #123333)",
-                  fontWeight: 700,
-                }}
-              >
-                Activity Metadata
-              </h4>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "110px 1fr",
-                  gap: "8px",
-                  fontSize: "0.82rem",
-                }}
-              >
-                <span style={{ color: "var(--bs-ui-muted, #4a6360)" }}>Activity ID:</span>
-                <span
-                  style={{
-                    color: "var(--bs-ui-brand, #0b6763)",
-                    fontFamily: "var(--bs-ui-font-mono, monospace)",
-                    fontWeight: 600,
-                  }}
-                >
-                  {activity.id}
-                </span>
-
-                <span style={{ color: "var(--bs-ui-muted, #4a6360)" }}>Modality:</span>
-                <span style={{ color: "var(--bs-ui-ink, #123333)", textTransform: "capitalize" }}>
-                  {activity.activity_type} Studio
-                </span>
-
-                <span style={{ color: "var(--bs-ui-muted, #4a6360)" }}>Release:</span>
-                <span style={{ color: "var(--bs-ui-ink, #123333)" }}>{activity.activity_version}</span>
-
-                <span style={{ color: "var(--bs-ui-muted, #4a6360)" }}>Requirement:</span>
-                <span
-                  style={{
-                    color: activity.is_required ? "#15803d" : "var(--bs-ui-muted, #4a6360)",
-                    fontWeight: 600,
-                  }}
-                >
-                  {activity.is_required ? "Mandatory for Completion" : "Optional"}
-                </span>
-              </div>
+        <div className="bs-video-studio__session-actions">
+          <div className="bs-video-studio__watch-status" aria-label={`${watchedPercent}% watched`}>
+            <div className="bs-video-studio__watch-copy">
+              <span>{formatTime(playerTime)} watched</span>
+              <strong>{formatTime(duration)}</strong>
+            </div>
+            <div className="bs-video-studio__watch-track" aria-hidden="true">
+              <span style={{ width: `${watchedPercent}%` }} />
             </div>
           </div>
-        )}
+          <button
+            type="button"
+            className={["bs-video-studio__bookmark", bookmarked ? "is-active" : ""].filter(Boolean).join(" ")}
+            onClick={() => setBookmarked((value) => !value)}
+            aria-pressed={bookmarked}
+          >
+            <Icon name="Bookmark" size={18} />
+            <span>{bookmarked ? "Saved" : "Save"}</span>
+          </button>
+        </div>
+      </header>
+
+      <div className="bs-video-studio__layout">
+        <main className="bs-video-studio__main">
+          <div className="bs-video-studio__player-frame">
+            <VideoPlayer
+              src={videoUrl}
+              poster={config.poster_url}
+              aspectRatio={config.aspect_ratio || "16:9"}
+              className="bs-video-studio__player"
+              seekTo={seekTo}
+              onPlaybackTimeChange={(time, nextDuration) => {
+                setPlayerTime(time);
+                if (Number.isFinite(nextDuration) && nextDuration > 0) setPlayerDuration(nextDuration);
+              }}
+              onPlaybackEnded={completeLesson}
+            />
+          </div>
+
+          <section className="bs-video-studio__reflection" aria-labelledby="video-focus-heading">
+            <div className="bs-video-studio__reflection-copy">
+              <div className="bs-video-studio__section-kicker">
+                <Icon name="Idea" size={16} />
+                <span>Focus for this lesson</span>
+              </div>
+              <h2 id="video-focus-heading">{activity.concept_title || "Build the intuition"}</h2>
+              <p>{config.learning_objective || "Pause at the moments that change how you think about the problem, then capture the idea in your own words."}</p>
+            </div>
+            <div className="bs-video-studio__completion">
+              {completed ? (
+                <span className="bs-video-studio__complete-state"><Icon name="CheckCircle" size={18} /> Complete</span>
+              ) : (
+                <Button variant="outline" size="sm" leftIcon={<Icon name="Check" size={16} />} onClick={completeLesson}>
+                  Finish lesson
+                </Button>
+              )}
+            </div>
+          </section>
+
+          {takeaways.length > 0 && (
+            <section className="bs-video-studio__takeaway-strip" aria-label="Key ideas">
+              {takeaways.map((takeaway, index) => (
+                <div className="bs-video-studio__takeaway" key={takeaway}>
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <p>{takeaway}</p>
+                </div>
+              ))}
+            </section>
+          )}
+        </main>
+
+        <aside className="bs-video-studio__panel" aria-label="Lesson companion">
+          <Tabs items={tabItems} value={activeTab} onValueChange={setActiveTab} variant="line" size="md" />
+
+          {activeTab === "guide" && (
+            <div className="bs-video-studio__panel-content bs-video-studio__guide">
+              <div className="bs-video-studio__panel-heading">
+                <div>
+                  <h2>Follow the idea</h2>
+                  <p>Jump to a moment or let the guide follow playback.</p>
+                </div>
+                <Badge color="neutral" variant="subtle" size="sm">{segments.length} moments</Badge>
+              </div>
+
+              <div className="bs-video-studio__segments">
+                {segments.map((segment, index) => {
+                  const active = index === activeSegmentIndex;
+                  return (
+                    <button
+                      type="button"
+                      className={["bs-video-studio__segment", active ? "is-active" : ""].filter(Boolean).join(" ")}
+                      key={`${segment.time}-${segment.title}`}
+                      onClick={() => seekToSegment(segment.time)}
+                    >
+                      <span className="bs-video-studio__segment-time">{formatTime(segment.time)}</span>
+                      <span className="bs-video-studio__segment-copy">
+                        <strong>{segment.title}</strong>
+                        <span>{segment.description}</span>
+                      </span>
+                      <Icon name="ArrowRight" size={16} />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {activeTab === "notes" && (
+            <div className="bs-video-studio__panel-content bs-video-studio__notes">
+              <div className="bs-video-studio__panel-heading">
+                <div>
+                  <h2>Make it yours</h2>
+                  <p>Capture an observation before moving on.</p>
+                </div>
+              </div>
+              <label htmlFor={`${activity.id}-notes`} className="bs-video-studio__notes-label">Your note</label>
+              <textarea
+                id={`${activity.id}-notes`}
+                value={notes}
+                onChange={(event) => setNotes(event.target.value)}
+                placeholder="What changes when the learning rate is too large?"
+              />
+              <p className="bs-video-studio__notes-hint">Notes stay with this learning session.</p>
+              {takeaways.length > 0 && (
+                <div className="bs-video-studio__notes-prompt">
+                  <Icon name="Idea" size={17} />
+                  <p>{takeaways[0]}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </aside>
       </div>
-    </div>
+    </section>
   );
 }

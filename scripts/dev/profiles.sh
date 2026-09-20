@@ -5,7 +5,9 @@ expand_profile() {
   local target="$1"
   case "$target" in
     core|minimal) echo "postgres api coding-judge auth super learner faculty admin landing nginx" ;;
-    learner-flow) echo "postgres api auth learner nginx" ;;
+    # Video is mounted directly by the Learner frontend. The coding activity
+    # additionally needs the private judge for Run/Submit actions.
+    learner-flow) echo "postgres api coding-judge auth learner nginx" ;;
     faculty-flow) echo "postgres api auth faculty nginx" ;;
     admin-flow)   echo "postgres api auth admin nginx" ;;
     super-flow)   echo "postgres api coding-judge super nginx" ;;
